@@ -6,58 +6,63 @@
  "module": [
   {
    "id": "wellen-training",
-   "titel": "Wellen-Training",
-   "untertitel": "Vorbereitung Klassenarbeit Wellen",
+   "titel": "Wellen",
+   "untertitel": "Training für die Klassenarbeit",
    "datei": "wellen-training.html",
    "klassen": [
     "21"
    ],
    "freigegeben": true,
-   "farbe": "#3C7A4E"
+   "farbe": "#2F7F86",
+   "icon": "welle"
   },
   {
    "id": "schwingkreis-labor",
    "titel": "Schwingkreis-Labor",
-   "untertitel": "Elektromagnetische Schwingungen",
+   "untertitel": "Experimente zu elektromagnetischen Schwingungen",
    "datei": "schwingkreis-labor.html",
    "klassen": [
     "21"
    ],
    "freigegeben": true,
-   "farbe": "#1F3A5F"
+   "farbe": "#1F3A5F",
+   "icon": "schwingkreis"
   },
   {
    "id": "schwingkreis-ordnung",
-   "titel": "Schwingkreis – bring Ordnung rein!",
-   "untertitel": "Ablauf des Schwingkreises sortieren",
+   "titel": "Schwingkreis-Ablauf",
+   "untertitel": "Kärtchen in die richtige Reihenfolge bringen",
    "datei": "schwingkreis-ordnung.html",
    "klassen": [
     "21"
    ],
    "freigegeben": true,
-   "farbe": "#3C7A4E"
+   "farbe": "#3C7A4E",
+   "icon": "ordnung"
   },
   {
    "id": "lernpfad-dipol",
-   "titel": "Lernpfad Hertz'scher Dipol",
-   "untertitel": "Vom Schwingkreis zur Antenne",
+   "titel": "Hertz'scher Dipol",
+   "untertitel": "Lernpfad: vom Schwingkreis zur Antenne",
    "datei": "lernpfad-dipol.html",
    "klassen": [
     "21"
    ],
    "freigegeben": true,
-   "farbe": "#1F3A5F"
+   "farbe": "#6B4E9B",
+   "icon": "dipol"
   },
   {
    "id": "abi-trainer-schwingkreis",
-   "titel": "Abi-Trainer Schwingkreis",
-   "untertitel": "Abituraufgaben mit Hilfen",
+   "titel": "Abi-Trainer",
+   "untertitel": "Abituraufgaben zum Schwingkreis",
    "datei": "abi-trainer-schwingkreis.html",
    "klassen": [
     "21"
    ],
    "freigegeben": true,
-   "farbe": "#3C7A4E"
+   "farbe": "#B8741A",
+   "icon": "abi"
   }
  ]
 }
