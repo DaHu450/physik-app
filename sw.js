@@ -1,7 +1,7 @@
 /* Offline-Speicher der App.
    module.json kommt immer frisch aus dem Netz (sonst aus dem Speicher),
    alles andere aus dem Speicher und wird im Hintergrund aktualisiert. */
-const CACHE = 'klassenapp-v4';
+const CACHE = 'klassenapp-v5';
 const GRUND = ['./', 'index.html', 'gemeinsam.js', 'bridge.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'module/module.json'];
 
 self.addEventListener('install', (e) => {
@@ -18,6 +18,12 @@ self.addEventListener('fetch', (e) => {
   if (!eigen && !fonts) return;
   if (eigen && url.pathname.endsWith('/module.json')) {
     e.respondWith(fetch(e.request).then((r) => { const k = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, k)); return r; })
+      .catch(() => caches.match(e.request, { ignoreSearch: true })));
+    return;
+  }
+  if (eigen && (e.request.mode === 'navigate' || /\.(html|js)$/.test(url.pathname) || url.pathname.endsWith('/'))) {
+    // Seiten und Skripte: erst Netz (immer aktuell), ohne Netz aus dem Speicher
+    e.respondWith(fetch(e.request).then((r) => { if (r.ok) { const k = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, k)); } return r; })
       .catch(() => caches.match(e.request, { ignoreSearch: true })));
     return;
   }
