@@ -1,7 +1,7 @@
 /* Offline-Speicher der App.
    module.json kommt immer frisch aus dem Netz (sonst aus dem Speicher),
    alles andere aus dem Speicher und wird im Hintergrund aktualisiert. */
-const CACHE = 'klassenapp-v2';
+const CACHE = 'klassenapp-v3';
 const GRUND = ['./', 'index.html', 'gemeinsam.js', 'bridge.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'module/module.json'];
 
 self.addEventListener('install', (e) => {

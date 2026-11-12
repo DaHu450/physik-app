@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Schwingkreis – bring Ordnung rein!</title>
+<style>
+:root{--bg:#fdf6e0;--surface:#fffdf6;--ink:#1e2b22;--muted:#6b634d;--line:#efdfb0;--ui:#2f9e5b;--uideep:#1f7743;--sun:#ffd54a;--sundeep:#d9a90d;--warm:#f2873a;--ok:#23904a;--okbg:#e0f5e4;--bad:#d3343b;--badbg:#fde7e8;--e:#e2434b;--b:#1d6ae5}
+@media (prefers-color-scheme:dark){:root{--bg:#10201a;--surface:#182b23;--ink:#eaf3ec;--muted:#a8bdb0;--line:#2c4438;--ui:#33a462;--uideep:#237a47;--okbg:#173a25;--badbg:#3d1d22;--ok:#4fcf73;--bad:#ff6b70}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Lexend,system-ui,sans-serif}
+header{background:var(--surface);border-bottom:3px solid var(--sun);padding:12px 18px}
+header small{color:var(--ui);font-weight:600;letter-spacing:.05em}
+h1{font-family:"Baloo 2",system-ui;font-size:1.7rem;margin:0;color:var(--uideep);line-height:1.1}
+main{max-width:980px;margin:0 auto;padding:16px}
+.intro{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:14px}
+.intro b{color:var(--uideep)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.col{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px}
+.col h2{font-family:"Baloo 2";font-size:1.15rem;margin:0 0 8px}
+.card{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px;cursor:pointer;transition:transform .1s,border-color .1s}
+.card:hover{border-color:var(--ui)}
+.card:active{transform:scale(.98)}
+.num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--ui);color:#fff;font-weight:700;font-family:"Baloo 2"}
+.card.right{border-color:var(--ok);background:var(--okbg)}
+.card.right .num{background:var(--ok)}
+.card.wrong{border-color:var(--bad);background:var(--badbg)}
+.card.wrong .num{background:var(--bad)}
+.card.hinted{border-color:var(--sundeep)}
+.empty{color:var(--muted);font-size:.9rem;padding:20px 8px;text-align:center;border:2px dashed var(--line);border-radius:12px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+button.btn{font:inherit;font-weight:600;border:0;border-radius:14px;padding:11px 18px;cursor:pointer;color:#fff;background:var(--ui);box-shadow:0 4px 0 var(--uideep)}
+button.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--uideep)}
+button.btn.sec{background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:none}
+button.btn.sun{background:var(--sun);color:#3b2a00;box-shadow:0 4px 0 var(--sundeep)}
+button:disabled{opacity:.45;cursor:default}
+#msg{font-weight:600;min-height:1.5em}
+.energy{display:flex;gap:6px;align-items:center;font-size:.75rem;color:var(--muted);margin-top:4px}
+.energy i{display:inline-block;height:8px;border-radius:4px}
+.done{background:var(--okbg);border:2px solid var(--ok);border-radius:16px;padding:14px 18px;margin-top:14px}
+.done h2{font-family:"Baloo 2";margin:0 0 4px;color:var(--ok)}
+.q{background:var(--surface);border:2px solid var(--sun);border-radius:12px;padding:10px 14px;margin-top:10px}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
+</style>
+</head>
+<body>
+<header><small>PHYSIK · TG2 · WIEDERHOLUNG</small><h1>Schwingkreis – bring Ordnung rein!</h1></header>
+<main>
+<div class="intro">
+  <p style="margin:0 0 6px">Jemand hat die Beschreibung des Schwingkreises durcheinandergewürfelt. Tipp die Kärtchen links in der <b>richtigen Reihenfolge</b> an, dann landen sie rechts. Falsch eingeordnet? Tipp rechts drauf, dann geht das Kärtchen zurück.</p>
+  <p style="margin:0">Wenn alle 10 rechts liegen: <b>Prüfen</b>. Grün sitzt, rot noch nicht.</p>
+</div>
+<div class="grid">
+  <section class="col"><h2>Durcheinander</h2><div id="pool"></div></section>
+  <section class="col"><h2>Deine Reihenfolge</h2><div id="seq"></div></section>
+</div>
+<div class="bar">
+  <button class="btn" id="check" disabled>Prüfen</button>
+  <button class="btn sun" id="hint">Tipp</button>
+  <button class="btn sec" id="reset">Neu mischen</button>
+  <span id="msg"></span>
+</div>
+<div id="done" class="done" hidden>
+  <h2>Geschafft!</h2>
+  <p style="margin:0 0 6px">Die Energie pendelt zwischen dem <b style="color:var(--e)">elektrischen Feld</b> des Kondensators und dem <b style="color:var(--b)">magnetischen Feld</b> der Spule hin und her.</p>
+  <div class="q"><b>Kurz nachdenken, gleich geht's weiter:</b> Was müsstest du am Schwingkreis ändern, damit sein Feld nicht mehr im Kondensator und in der Spule bleibt, sondern in den Raum hinausgeht?</div>
+</div>
+</main>
+<footer>Grundlage: AB „Ablauf Schwingkreis“</footer>
+<script src="../bridge.js"></script>
+<script>
+const STEPS=[
+ {t:'Anfangs wird nur an den Kondensator C eine Gleichspannung U angelegt.',e:0,b:0},
+ {t:'Dadurch lädt sich der Kondensator auf die angelegte Spannung auf. Die gesamte Energie steckt jetzt im elektrischen Feld des Kondensators.',e:1,b:0},
+ {t:'Dann wird der Schalter umgelegt, sodass sich der Kondensator über die Spule entladen kann. Das elektrische Feld des Kondensators nimmt ab, das magnetische Feld der Spule nimmt zu. Die Selbstinduktion der Spule bremst den Anstieg des Stroms.',e:.7,b:.3},
+ {t:'Deshalb ist auch das Magnetfeld anfangs klein und nimmt mit der Zeit zu.',e:.5,b:.5},
+ {t:'Wenn der Kondensator ganz entladen ist, sind Stromstärke und Magnetfeld der Spule maximal. Die gesamte Energie steckt jetzt im Magnetfeld. Eigentlich müsste der Strom jetzt aufhören …',e:0,b:1},
+ {t:'… aber die Selbstinduktion der Spule wirkt der Abnahme des Stroms entgegen und treibt den Strom weiter, zurück in den Kondensator.',e:.2,b:.8},
+ {t:'Der Strom fließt jetzt andersherum als beim Aufladen an der Spannungsquelle. Deshalb ist auch die Kondensatorspannung jetzt umgepolt.',e:.4,b:.6},
+ {t:'Die Spule treibt den abnehmenden Strom weiter, ihr Magnetfeld wird dabei abgebaut, bis der Kondensator wieder ganz geladen ist.',e:.8,b:.2},
+ {t:'Am Ende steckt die gesamte Energie wieder im elektrischen Feld des Kondensators. Das Magnetfeld der Spule ist vollständig abgebaut.',e:1,b:0},
+ {t:'Jetzt treibt wieder der Kondensator den Strom, und alles beginnt von vorne: Der Kondensator entlädt sich und wird wieder umgekehrt aufgeladen.',e:.7,b:.3}
+];
+let pool=[],seq=[],checked=false,hints=0,tries=0,solved=false,best=0;
+const $=s=>document.querySelector(s);
+const appChanged=()=>{if(window.AppBridge)AppBridge.changed()};
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;}
+function reset(init){do{pool=shuffle(STEPS.map((_,i)=>i));}while(pool.every((v,i)=>v===i));seq=[];checked=false;hints=0;$('#done').hidden=true;msg('');render();if(!init)appChanged();}
+function msg(t,c){const m=$('#msg');m.textContent=t;m.style.color=c||'var(--ink)';}
+function card(i,num,cls){const b=document.createElement('button');b.className='card '+(cls||'');b.innerHTML=(num?`<span class="num">${num}</span>`:'')+`<span>${STEPS[i].t}</span>`;return b;}
+function energy(i){const s=STEPS[i];return `<div class="energy">Energie: <i style="width:${Math.max(4,s.e*60)}px;background:var(--e)"></i> E-Feld <i style="width:${Math.max(4,s.b*60)}px;background:var(--b)"></i> B-Feld</div>`;}
+function render(){
+  const P=$('#pool'),S=$('#seq');P.innerHTML='';S.innerHTML='';
+  if(!pool.length)P.innerHTML='<div class="empty">Alle Kärtchen sind eingeordnet.</div>';
+  pool.forEach(i=>{const b=card(i);b.onclick=()=>{pool=pool.filter(x=>x!==i);seq.push(i);checked=false;msg('');render();appChanged();};P.append(b);});
+  if(!seq.length)S.innerHTML='<div class="empty">Tipp links das erste Kärtchen an.</div>';
+  seq.forEach((i,k)=>{let cls='';if(checked)cls=i===k?'right':'wrong';const b=card(i,k+1,cls);
+    if(checked&&i===k)b.querySelector('span:last-child').insertAdjacentHTML('beforeend',energy(i));
+    b.onclick=()=>{if(checked&&i===k)return;seq=seq.filter(x=>x!==i);pool.push(i);checked=false;msg('');render();appChanged();};S.append(b);});
+  $('#check').disabled=seq.length!==STEPS.length;
+}
+$('#check').onclick=()=>{checked=true;tries++;const r=seq.filter((v,k)=>v===k).length;best=Math.max(best,r);render();
+  if(r===STEPS.length){solved=true;msg('Alles richtig! 🎉','var(--ok)');$('#done').hidden=false;$('#done').scrollIntoView({behavior:'smooth'});}
+  else msg(`${r} von ${STEPS.length} sitzen. Tipp die roten an und versuch's nochmal.`,'var(--bad)');
+  appChanged();};
+$('#hint').onclick=()=>{let k=seq.findIndex((v,i)=>v!==i);if(k<0)k=seq.length;if(k>=STEPS.length){msg('Da gibt es nichts mehr zu helfen 😉');return;}
+  // Kärtchen an Position k richtig setzen
+  const want=k;seq=seq.slice(0,k);pool=STEPS.map((_,i)=>i).filter(i=>!seq.includes(i));pool=pool.filter(x=>x!==want);seq.push(want);
+  pool=shuffle(pool);checked=false;hints++;render();appChanged();
+  const el=$('#seq').children[k];if(el){el.classList.add('hinted');}msg(`Tipp: Kärtchen ${k+1} sitzt jetzt. Die Kärtchen dahinter liegen wieder links.`,'var(--sundeep)');};
+$('#reset').onclick=()=>reset();
+reset(true);
+
+/* ===== Anbindung an die Klassen-App ===== */
+if(window.AppBridge)AppBridge.register({
+  getState(){
+    return{punkte:best,stationen:['Reihenfolge'],erledigt:solved?['Reihenfolge']:[],
+      details:{'Reihenfolge':(solved?'Richtig geordnet':'Noch nicht richtig geordnet')+' · bester Versuch '+best+' von '+STEPS.length+' · '+tries+'× geprüft · '+hints+' Tipp(s) in dieser Runde'},
+      daten:{pool,seq,hints,tries,solved,best}};
+  },
+  setState(s){const d=s&&s.daten;if(!d)return;
+    pool=d.pool||pool;seq=d.seq||seq;hints=d.hints||0;tries=d.tries||0;solved=!!d.solved;best=d.best||0;checked=false;
+    $('#done').hidden=!solved;render();}
+});
+</script>
+</body>
+</html>

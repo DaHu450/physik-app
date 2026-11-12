@@ -1,26 +1,63 @@
 {
-  "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen.",
-  "klassen": {
-    "21": "TG2.1"
+ "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen.",
+ "klassen": {
+  "21": "TG2.1"
+ },
+ "module": [
+  {
+   "id": "wellen-training",
+   "titel": "Wellen-Training",
+   "untertitel": "Vorbereitung Klassenarbeit Wellen",
+   "datei": "wellen-training.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#3C7A4E"
   },
-  "module": [
-    {
-      "id": "schwingkreis-labor",
-      "titel": "Schwingkreis-Labor",
-      "untertitel": "Elektromagnetische Schwingungen",
-      "datei": "schwingkreis-labor.html",
-      "klassen": ["21"],
-      "freigegeben": true,
-      "farbe": "#1F3A5F"
-    },
-    {
-      "id": "wellen-training",
-      "titel": "Wellen-Training",
-      "untertitel": "Vorbereitung Klassenarbeit Wellen",
-      "datei": "wellen-training.html",
-      "klassen": ["21"],
-      "freigegeben": true,
-      "farbe": "#3C7A4E"
-    }
-  ]
+  {
+   "id": "schwingkreis-labor",
+   "titel": "Schwingkreis-Labor",
+   "untertitel": "Elektromagnetische Schwingungen",
+   "datei": "schwingkreis-labor.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#1F3A5F"
+  },
+  {
+   "id": "schwingkreis-ordnung",
+   "titel": "Schwingkreis – bring Ordnung rein!",
+   "untertitel": "Ablauf des Schwingkreises sortieren",
+   "datei": "schwingkreis-ordnung.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#3C7A4E"
+  },
+  {
+   "id": "lernpfad-dipol",
+   "titel": "Lernpfad Hertz'scher Dipol",
+   "untertitel": "Vom Schwingkreis zur Antenne",
+   "datei": "lernpfad-dipol.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#1F3A5F"
+  },
+  {
+   "id": "abi-trainer-schwingkreis",
+   "titel": "Abi-Trainer Schwingkreis",
+   "untertitel": "Abituraufgaben mit Hilfen",
+   "datei": "abi-trainer-schwingkreis.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#3C7A4E"
+  }
+ ]
 }
