@@ -1,0 +1,461 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<script src="../bridge.js"></script>
+</head><body>
+<title>Wellen-Training TG2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: Kopf mit Punktestand, Stationen-Tabs, je Station Simulation links + Aufgabe/Selbstkontrolle rechts (stapelt auf schmalen Geräten) */
+:root{
+  --bg:#F3F6F9; --panel:#FFFFFF; --ink:#16263A; --muted:#5B6B7D; --line:#D5DEE7;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E3F0E6; --navySoft:#E4EAF2;
+  --sum:#C2571A; --bad:#B3261E; --badSoft:#FBE7E5;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1722; --panel:#172231; --ink:#E6EDF5; --muted:#9AAABB; --line:#2A3A4E;
+  --navy:#8FB1DC; --green:#6FBF86; --greenSoft:#1C3326; --navySoft:#1C2A3D;
+  --sum:#F0955A; --bad:#F2918A; --badSoft:#3A1F1E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1722; --panel:#172231; --ink:#E6EDF5; --muted:#9AAABB; --line:#2A3A4E;
+  --navy:#8FB1DC; --green:#6FBF86; --greenSoft:#1C3326; --navySoft:#1C2A3D;
+  --sum:#F0955A; --bad:#F2918A; --badSoft:#3A1F1E; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4vw,40px);line-height:1.05;margin:0;color:var(--navy);text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.score{font-family:var(--f-mono);background:var(--panel);border:2px solid var(--green);color:var(--green);border-radius:999px;padding:6px 16px;font-size:16px;white-space:nowrap}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+nav button{font:700 16px var(--f-body);border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 16px;border-radius:10px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button .n{font-family:var(--f-mono);opacity:.7;margin-right:6px}
+section.st{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){section.st{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0 0 6px;color:var(--navy)}
+h3{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px}
+p{margin:0 0 10px}
+canvas{width:100%;display:block;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.c-wide{aspect-ratio:16/8}
+.c-map{aspect-ratio:4/3}
+.ctrl{display:grid;gap:10px;margin-top:12px}
+.ctrl label{display:grid;grid-template-columns:120px 1fr 72px;align-items:center;gap:10px;font-size:15px}
+.ctrl output{font-family:var(--f-mono);text-align:right}
+input[type=range]{width:100%;accent-color:var(--green);height:28px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:18px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.chips{display:flex;flex-direction:column;gap:8px}
+.chal{text-align:left;font:16px var(--f-body);border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 12px;border-radius:10px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.chal.on{border-color:var(--navy);background:var(--navySoft)}
+.chal.done{border-color:var(--green)}
+.chal .tick{font-family:var(--f-mono);color:var(--green);min-width:1.2em}
+.feedback{border-radius:10px;padding:10px 14px;margin-top:10px;font-size:15.5px}
+.feedback.ok{background:var(--greenSoft);border:2px solid var(--green)}
+.feedback.no{background:var(--badSoft);border:2px solid var(--bad)}
+.feedback.info{background:var(--navySoft);border:2px solid var(--line)}
+.given{background:var(--navySoft);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.given b{font-family:var(--f-mono);font-weight:500}
+.field{display:grid;grid-template-columns:minmax(0,1fr) 120px 22px;gap:8px;align-items:center;margin-bottom:8px}
+.field input{font:500 17px var(--f-mono);padding:8px 10px;border:2px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);width:100%}
+.field input.ok{border-color:var(--green);background:var(--greenSoft)}
+.field input.no{border-color:var(--bad);background:var(--badSoft)}
+.field .mk{font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{font:700 16px var(--f-body);padding:10px 16px;border-radius:10px;border:2px solid var(--navy);background:var(--navy);color:var(--bg);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--navy)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:15px var(--f-body);padding:8px 12px;border-radius:8px;border:2px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.seg button.on{border-color:var(--navy);background:var(--navySoft);font-weight:700}
+.seg button.ok{border-color:var(--green);background:var(--greenSoft)}
+.seg button.no{border-color:var(--bad);background:var(--badSoft)}
+.badge{display:inline-block;font-family:var(--f-mono);font-size:14px;padding:3px 10px;border-radius:999px;background:var(--greenSoft);color:var(--green);border:1px solid var(--green)}
+.formula{font-family:var(--f-mono);font-size:15px}
+.q{font-size:19px;font-weight:700;margin:6px 0 12px;text-wrap:pretty}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;font:16.5px var(--f-body);padding:12px 14px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.opts button.ok{border-color:var(--green);background:var(--greenSoft)}
+.opts button.no{border-color:var(--bad);background:var(--badSoft)}
+.progress{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0 4px}
+.progress>div{height:100%;background:var(--green);transition:width .3s}
+.small{font-size:14px;color:var(--muted)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+details summary{cursor:pointer;color:var(--navy);font-weight:700}
+@media (max-width:480px){.ctrl label{grid-template-columns:90px 1fr 60px}.field{grid-template-columns:minmax(0,1fr) 100px 18px}}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Wellen-Training</h1>
+    <p class="sub">Vorbereitung Klassenarbeit · TG Jgst. 2 · BPE 10.2 · c<sub>Schall</sub> = 340 m/s</p>
+  </div>
+  <div class="score" id="score">0 Punkte</div>
+</header>
+
+<nav role="tablist">
+  <button role="tab" data-t="s1" aria-selected="true"><span class="n">1</span>Überlagerung</button>
+  <button role="tab" data-t="s2" aria-selected="false"><span class="n">2</span>Stehende Welle</button>
+  <button role="tab" data-t="s3" aria-selected="false"><span class="n">3</span>Gangunterschied</button>
+  <button role="tab" data-t="s4" aria-selected="false"><span class="n">4</span>Schnellrunde</button>
+</nav>
+
+<!-- STATION 1 -->
+<section class="st" id="s1">
+  <div class="panel">
+    <h2>Zwei Wellen, ein Ort</h2>
+    <canvas id="c1" class="c-wide"></canvas>
+    <div class="legend"><span><i style="background:var(--navy)"></i>Welle 1 (A₁ = 1)</span><span><i style="background:var(--green)"></i>Welle 2</span><span><i style="background:var(--sum)"></i>Summe s₁ + s₂</span></div>
+    <div class="ctrl">
+      <label for="a2">Amplitude A₂<input type="range" id="a2" min="0" max="1.5" step="0.05" value="1"><output id="a2o">1,00</output></label>
+      <label for="phi">Phasen&shy;verschiebung<input type="range" id="phi" min="0" max="360" step="5" value="60"><output id="phio">60°</output></label>
+    </div>
+    <p class="small" style="margin-top:10px">Verschiebung als Weg: <span class="formula" id="phil">λ/6</span> · resultierende Amplitude: <span class="formula" id="ares">–</span></p>
+  </div>
+  <div class="panel">
+    <h2>Challenges</h2>
+    <p>Wähle eine Challenge und stell die Regler so ein, dass sie erfüllt ist. Die Seite meldet sich, sobald es passt.</p>
+    <div class="chips" id="chals"></div>
+    <div id="f1" class="feedback info">Tipp: Erst überlegen, dann schieben. Wie groß muss die Phasenverschiebung in Grad bzw. in λ sein?</div>
+  </div>
+</section>
+
+<!-- STATION 2 -->
+<section class="st" id="s2" hidden>
+  <div class="panel">
+    <h2>Seil im Resonanztest</h2>
+    <canvas id="c2" class="c-wide"></canvas>
+    <div class="ctrl">
+      <label for="fr">Frequenz f<input type="range" id="fr" min="1" max="400" step="1" value="40"><output id="fro">40 Hz</output></label>
+    </div>
+    <p style="margin-top:10px"><span id="res2" class="small">Schieb die Frequenz. Nur bei Eigenfrequenzen entsteht eine kräftige stehende Welle.</span></p>
+  </div>
+  <div class="panel">
+    <h2>Aufgabe</h2>
+    <div class="given" id="g2"></div>
+    <div class="field"><span>Wellenlänge λ₁ der Grundschwingung in m</span><input id="i2l" inputmode="decimal"><span class="mk" id="m2l"></span></div>
+    <div class="field"><span>Grundfrequenz f₁ in Hz</span><input id="i2a" inputmode="decimal"><span class="mk" id="m2a"></span></div>
+    <div class="field"><span>Nächsthöhere Eigenfrequenz in Hz</span><input id="i2b" inputmode="decimal"><span class="mk" id="m2b"></span></div>
+    <div class="field"><span>Knoten bei dieser Frequenz (Enden mitzählen)</span><input id="i2k" inputmode="numeric"><span class="mk" id="m2k"></span></div>
+    <div class="row"><button class="btn" id="chk2">Prüfen</button><button class="btn ghost" id="new2">Neue Aufgabe</button></div>
+    <div id="f2"></div>
+    <details style="margin-top:12px"><summary>Formeln</summary>
+      <p class="formula" style="margin-top:8px">gleiche Enden: L = n·λ/2 → fₙ = n·c/(2L)<br>fest–lose: L = (2n−1)·λ/4 → fₙ = (2n−1)·c/(4L)<br>Knotenabstand = λ/2</p>
+    </details>
+  </div>
+</section>
+
+<!-- STATION 3 -->
+<section class="st" id="s3" hidden>
+  <div class="panel">
+    <h2>Laut oder leise in P?</h2>
+    <canvas id="c3" class="c-map"></canvas>
+    <p class="small" id="cap3" style="margin-top:8px">Skizze nicht maßstäblich. Nach dem Prüfen erscheint das Interferenzmuster: hell = laut, dunkel = leise.</p>
+  </div>
+  <div class="panel">
+    <h2>Aufgabe</h2>
+    <div class="given" id="g3"></div>
+    <div class="field"><span>Wellenlänge λ in m</span><input id="i3l" inputmode="decimal"><span class="mk" id="m3l"></span></div>
+    <div class="field"><span>Weg s₂ von L₂ nach P in m</span><input id="i3s" inputmode="decimal"><span class="mk" id="m3s"></span></div>
+    <div class="field"><span>Gangunterschied Δs in m</span><input id="i3d" inputmode="decimal"><span class="mk" id="m3d"></span></div>
+    <div class="field"><span>Δs / λ</span><input id="i3r" inputmode="decimal"><span class="mk" id="m3r"></span></div>
+    <p style="margin:6px 0">In P herrscht …</p>
+    <div class="seg" id="dec3"><button data-v="max">Maximum (laut)</button><button data-v="min">Minimum (leise)</button><button data-v="none">weder noch</button></div>
+    <div class="row"><button class="btn" id="chk3">Prüfen</button><button class="btn ghost" id="new3">Neue Aufgabe</button></div>
+    <div id="f3"></div>
+  </div>
+</section>
+
+<!-- STATION 4 -->
+<section class="st" id="s4" hidden>
+  <div class="panel">
+    <h2>Schnellrunde: 10 Fragen</h2>
+    <div class="progress"><div id="pb"></div></div>
+    <p class="small" id="qn"></p>
+    <div class="q" id="qq"></div>
+    <div class="opts" id="qo"></div>
+    <div id="qf"></div>
+    <div class="row"><button class="btn" id="qnext" hidden>Weiter</button></div>
+  </div>
+  <div class="panel">
+    <h2>So läuft's</h2>
+    <p>Gemischte Fragen aus allen Themen der Klassenarbeit: Kenngrößen, Überlagerung und Reflexion, stehende Wellen, Gangunterschied, Huygens.</p>
+    <p>Nach jeder Antwort siehst du sofort, ob sie stimmt, und eine kurze Begründung. Lies die Begründung auch, wenn du richtig lagst.</p>
+    <h3>Deine Runde</h3>
+    <p class="formula" id="qsum">0 von 0 richtig</p>
+    <button class="btn ghost" id="qrestart">Neue Runde mischen</button>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const tok=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt=(x,d=2)=>Number(x).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=s=>{const v=parseFloat(String(s).replace(',','.').replace(/\s/g,''));return isNaN(v)?null:v};
+const close=(v,t,rel=0.02)=>v!==null&&Math.abs(v-t)<=Math.max(Math.abs(t)*rel,1e-6);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const appChanged=()=>{if(window.AppBridge)AppBridge.changed()};
+let score=0; const awarded=new Set();
+let s2tries=0,s2ok=0,s3tries=0,s3ok=0,quizRuns=[];
+function award(key,p){if(awarded.has(key))return;awarded.add(key);score+=p;$('#score').textContent=score+' Punkte';appChanged();}
+function fit(c){const d=devicePixelRatio||1,r=c.getBoundingClientRect();const W=Math.round(r.width*d),H=Math.round(r.height*d);if(c.width!==W||c.height!==H){c.width=W;c.height=H}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w:r.width,h:r.height}}
+
+/* Tabs */
+let active='s1';
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  active=b.dataset.t;
+  document.querySelectorAll('nav button').forEach(o=>o.setAttribute('aria-selected',o===b));
+  document.querySelectorAll('section.st').forEach(s=>s.hidden=s.id!==active);
+  if(active==='s3')draw3();
+});
+
+/* ---------- STATION 1 ---------- */
+const chals=[
+ {t:'Mach die Welle doppelt so hoch wie Welle 1.',ok:(A2,p,R)=>Math.abs(R-2)<0.03,ex:'A₂ = 1 und Δφ = 0° (bzw. Wegdifferenz 0 oder λ): Berg trifft Berg → konstruktive Interferenz, A = A₁ + A₂.'},
+ {t:'Noise-Cancelling: Bring die Summe auf null.',ok:(A2,p,R)=>R<0.03,ex:'A₂ = A₁ und Δφ = 180° (Wegdifferenz λ/2): Berg trifft Tal → vollständige destruktive Interferenz. Genau so arbeitet ANC.'},
+ {t:'A₂ = 0,5: Mach es so leise wie möglich.',ok:(A2,p,R)=>Math.abs(A2-0.5)<0.01&&Math.abs(p-180)<1,ex:'Mit Δφ = 180° bleibt A = 1 − 0,5 = 0,5 übrig. Bei ungleichen Amplituden gibt es keine vollständige Auslöschung.'},
+ {t:'A₂ = 1, aber die Summe soll trotzdem nur Amplitude 1 haben.',ok:(A2,p,R)=>Math.abs(A2-1)<0.01&&Math.abs(R-1)<0.04,ex:'Klappt bei Δφ = 120° (oder 240°): Zwei gleich große Wellen können zusammen genauso hoch sein wie eine. Interferenz ist mehr als nur „ganz an“ oder „ganz aus“.'},
+];
+let cur=-1;const done1=new Set();
+const cbox=$('#chals');
+chals.forEach((c,i)=>{const b=document.createElement('button');b.className='chal';b.innerHTML=`<span class="tick" id="tk${i}">○</span><span>${c.t}</span>`;b.onclick=()=>{cur=i;[...cbox.children].forEach((o,j)=>o.classList.toggle('on',j===i));$('#f1').className='feedback info';$('#f1').textContent='Challenge läuft …';check1()};cbox.appendChild(b)});
+function vals1(){const A2=+$('#a2').value,p=+$('#phi').value;const R=Math.sqrt(1+A2*A2+2*A2*Math.cos(p*Math.PI/180));return{A2,p,R}}
+const frac=p=>{const map={0:'0',30:'λ/12',45:'λ/8',60:'λ/6',90:'λ/4',120:'λ/3',135:'3λ/8',150:'5λ/12',180:'λ/2',210:'7λ/12',225:'5λ/8',240:'2λ/3',270:'3λ/4',300:'5λ/6',315:'7λ/8',330:'11λ/12',360:'λ'};return map[p]||fmt(p/360,3)+'·λ'};
+function markChal(i){$('#tk'+i).textContent='✓';cbox.children[i].classList.add('done');done1.add(i)}
+function check1(){const{A2,p,R}=vals1();$('#a2o').textContent=fmt(A2);$('#phio').textContent=p+'°';$('#phil').textContent=frac(p);$('#ares').textContent=fmt(R);
+  if(cur<0)return;const c=chals[cur];
+  if(c.ok(A2,p,R)){$('#f1').className='feedback ok';$('#f1').innerHTML='<b>Geschafft!</b> '+c.ex;markChal(cur);award('c1-'+cur,2);}
+  else{$('#f1').className='feedback info';$('#f1').textContent='Noch nicht. Resultierende Amplitude gerade: '+fmt(R);}
+}
+$('#a2').oninput=check1;$('#phi').oninput=check1;check1();
+let t=0;
+function draw1(){const c=$('#c1');const{x,w,h}=fit(c);x.clearRect(0,0,w,h);const{A2,p}=vals1();const mid=h/2,sc=h/6.2,k=2*Math.PI/(w/2),ph=p*Math.PI/180;
+  x.strokeStyle=tok('--line');x.lineWidth=1;x.beginPath();x.moveTo(0,mid);x.lineTo(w,mid);x.stroke();
+  const line=(f,col,lw)=>{x.strokeStyle=col;x.lineWidth=lw;x.beginPath();for(let i=0;i<=w;i+=2){const y=mid-f(i)*sc;i?x.lineTo(i,y):x.moveTo(i,y)}x.stroke()};
+  const s1=i=>Math.sin(k*i-t),s2=i=>A2*Math.sin(k*i-t+ph);
+  line(s1,tok('--navy'),2);line(s2,tok('--green'),2);line(i=>s1(i)+s2(i),tok('--sum'),4);
+}
+
+/* ---------- STATION 2 ---------- */
+const ENDS={ff:'fest – fest',ll:'lose – lose',fl:'fest – lose'};
+let P2={};
+function new2(){const types=['ff','ll','fl'];const type=types[Math.floor(Math.random()*3)];
+  const L=[0.5,0.6,0.75,0.8,1.0,1.2][Math.floor(Math.random()*6)];
+  const c=[60,80,90,120,150,180,200][Math.floor(Math.random()*7)];
+  const fn=n=>type==='fl'?(2*n-1)*c/(4*L):n*c/(2*L);
+  P2={type,L,c,fn,f1:fn(1),f2:fn(2),l1:type==='fl'?4*L:2*L,knots:type==='ff'?3:type==='ll'?2:2};
+  /* Knoten bei 2. Eigenfrequenz: ff n=2 → 3 Knoten (inkl. Enden); ll n=2 → 2 Knoten; fl 3c/4L → 2 Knoten (Ende fest + 1 innen) */
+  $('#g2').innerHTML=`Seil der Länge <b>L = ${fmt(L)} m</b>, Wellengeschwindigkeit <b>c = ${c} m/s</b>, Enden: <b>${ENDS[type]}</b>.`;
+  ['l','a','b','k'].forEach(s=>{$('#i2'+s).value='';$('#i2'+s).className='';$('#m2'+s).textContent=''});
+  $('#f2').innerHTML='';const fmax=Math.ceil(P2.fn(4)*1.1/10)*10;$('#fr').max=fmax;$('#fr').value=Math.round(P2.f1*0.6);upd2();
+}
+function mark(id,ok){$('#i'+id).className=ok?'ok':'no';$('#m'+id).textContent=ok?'✓':'✗';$('#m'+id).style.color=ok?tok('--green'):tok('--bad')}
+$('#chk2').onclick=()=>{const r=[close(num($('#i2l').value),P2.l1),close(num($('#i2a').value),P2.f1),close(num($('#i2b').value),P2.f2),num($('#i2k').value)===P2.knots];
+  mark('2l',r[0]);mark('2a',r[1]);mark('2b',r[2]);mark('2k',r[3]);const n=r.filter(Boolean).length;
+  const sol=`Lösung: λ₁ = ${fmt(P2.l1)} m, f₁ = ${fmt(P2.f1,1)} Hz, nächste Eigenfrequenz ${fmt(P2.f2,1)} Hz, ${P2.knots} Knoten.`;
+  const why=P2.type==='fl'?'Bei fest–lose passt eine Viertelwelle aufs Seil (L = λ/4). Nur ungerade Vielfache: f₁, 3f₁, 5f₁ …':P2.type==='ll'?'Bei lose–lose sind an beiden Enden Bäuche, dazwischen passt eine halbe Welle (L = λ/2). Eigenfrequenzen f₁, 2f₁, 3f₁ …':'Bei fest–fest sind an beiden Enden Knoten (L = λ/2). Eigenfrequenzen f₁, 2f₁, 3f₁ …';
+  $('#f2').innerHTML=`<div class="feedback ${n===4?'ok':'no'}"><b>${n} von 4 richtig.</b> ${n===4?'Jetzt mit dem Schieberegler bestätigen!':'Prüf deine Rechnung, dann noch mal.'}<details style="margin-top:6px"><summary>Lösung anzeigen</summary><p style="margin-top:6px">${sol}<br>${why}</p></details></div>`;
+  s2tries++;const key='s2-'+P2.type+P2.L+P2.c;if(n===4&&!awarded.has(key))s2ok++;
+  if(n===4)award(key,3);else appChanged()};
+$('#new2').onclick=new2;
+function upd2(){const f=+$('#fr').value;$('#fro').textContent=f+' Hz'}
+$('#fr').oninput=upd2;
+function draw2(){if(!P2.c)return;const c=$('#c2');const{x,w,h}=fit(c);x.clearRect(0,0,w,h);const f=+$('#fr').value;
+  let best=1,bd=1e9;for(let n=1;n<=8;n++){const d=Math.abs(f-P2.fn(n));if(d<bd){bd=d;best=n}}
+  const width=Math.max(P2.f1*0.03,1.2);const a=Math.exp(-((bd/width)**2));
+  const x0=50,x1=w-50,mid=h/2,amp=h*0.32;const k=2*Math.PI*f/P2.c;
+  const shape=X=>P2.type==='ll'?Math.cos(k*X):Math.sin(k*X);
+  const resn=a>0.85;
+  $('#res2').innerHTML=resn?`<span class="badge">Resonanz · ${best}. Eigenfrequenz ≈ ${fmt(P2.fn(best),1)} Hz</span>`:'Schieb die Frequenz. Nur bei Eigenfrequenzen entsteht eine kräftige stehende Welle.';
+  const A=amp*(0.06+0.94*a);
+  // Enden
+  const drawEnd=(X,fixed)=>{if(fixed){x.fillStyle=tok('--muted');x.fillRect(X-(X<w/2?14:0),mid-amp-10,14,2*amp+20)}else{x.strokeStyle=tok('--muted');x.lineWidth=3;x.beginPath();x.moveTo(X,mid-amp-10);x.lineTo(X,mid+amp+10);x.stroke()}};
+  const leftFixed=P2.type!=='ll',rightFixed=P2.type==='ff';
+  drawEnd(x0,leftFixed);drawEnd(x1,rightFixed);
+  // Hüllkurve
+  x.strokeStyle=tok('--line');x.lineWidth=1.5;x.setLineDash([5,5]);
+  [1,-1].forEach(sg=>{x.beginPath();for(let i=0;i<=120;i++){const X=i/120*P2.L,px=x0+(x1-x0)*i/120,py=mid-sg*A*shape(X);i?x.lineTo(px,py):x.moveTo(px,py)}x.stroke()});x.setLineDash([]);
+  // Seil
+  const cs=Math.cos(t*1.6);x.strokeStyle=tok('--green');x.lineWidth=4;x.beginPath();
+  for(let i=0;i<=200;i++){const X=i/200*P2.L,px=x0+(x1-x0)*i/200;let y=A*shape(X)*cs;if(!resn)y+=amp*0.04*Math.sin(9*i/200*Math.PI*2-t*3)*(1-a);i?x.lineTo(px,mid-y):x.moveTo(px,mid-y)}x.stroke();
+  // lose Enden: Ring
+  const ring=(X,i)=>{const y=A*shape(i?P2.L:0)*cs;x.strokeStyle=tok('--navy');x.lineWidth=3;x.beginPath();x.arc(X,mid-y,7,0,7);x.stroke()};
+  if(!leftFixed)ring(x0,0);if(!rightFixed)ring(x1,1);
+  if(resn){x.fillStyle=tok('--sum');for(let i=0;i<=400;i++){const X=i/400*P2.L;const v=shape(X),v2=shape((i+1)/400*P2.L);if(Math.abs(v)<0.02||v*v2<0){const px=x0+(x1-x0)*i/400;x.beginPath();x.arc(px,mid,5,0,7);x.fill();i+=6}}}
+  x.fillStyle=tok('--muted');x.font='13px '+tok('--f-mono');x.fillText('L = '+fmt(P2.L)+' m',w/2-35,h-10);
+}
+
+/* ---------- STATION 3 ---------- */
+const triples=[[4,3],[3,4],[8,6],[6,8],[12,5],[2.4,1.8],[1.2,1.6],[1.6,1.2],[2,1.5],[1.5,2],[2.4,3.2],[3.2,2.4]];
+let P3=null,dec=null,shown3=false;
+function new3(){for(let tries=0;tries<200;tries++){const[a,d]=triples[Math.floor(Math.random()*triples.length)];const s2=Math.hypot(a,d),ds=s2-a;
+  const typ=['max','max','min','min','none'][Math.floor(Math.random()*5)];let lam;
+  if(typ==='max')lam=ds/(1+Math.floor(Math.random()*3));else if(typ==='min')lam=ds/(0.5+Math.floor(Math.random()*3));else lam=ds/(1.25+Math.floor(Math.random()*2)*0.5);
+  const f=Math.round(340/lam);if(f<60||f>2500)continue;const L=340/f,r=ds/L;
+  let cls='none';if(Math.abs(r-Math.round(r))<0.04)cls='max';else if(Math.abs(r-Math.floor(r)-0.5)<0.04)cls='min';
+  P3={a,d,s2,ds,f,lam:L,r,cls};break}
+  $('#g3').innerHTML=`Zwei Lautsprecher L₁ und L₂ schwingen gleichphasig mit <b>f = ${P3.f} Hz</b>. Abstand <b>d = ${fmt(P3.d,1)} m</b>. Der Punkt P liegt <b>a = ${fmt(P3.a,1)} m</b> direkt vor L₁ (siehe Skizze).`;
+  ['l','s','d','r'].forEach(s=>{$('#i3'+s).value='';$('#i3'+s).className='';$('#m3'+s).textContent=''});
+  dec=null;document.querySelectorAll('#dec3 button').forEach(b=>b.className='');$('#f3').innerHTML='';shown3=false;draw3();}
+document.querySelectorAll('#dec3 button').forEach(b=>b.onclick=()=>{dec=b.dataset.v;document.querySelectorAll('#dec3 button').forEach(o=>o.className=o===b?'on':'')});
+$('#chk3').onclick=()=>{const r=[close(num($('#i3l').value),P3.lam),close(num($('#i3s').value),P3.s2),close(num($('#i3d').value),P3.ds,0.03),close(num($('#i3r').value),P3.r,0.04),dec===P3.cls];
+  mark('3l',r[0]);mark('3s',r[1]);mark('3d',r[2]);mark('3r',r[3]);
+  document.querySelectorAll('#dec3 button').forEach(b=>{if(b.dataset.v===dec)b.className=r[4]?'ok':'no'});
+  const n=r.filter(Boolean).length;const word={max:'Maximum',min:'Minimum',none:'weder Maximum noch Minimum'}[P3.cls];
+  const reason=P3.cls==='max'?`Δs ist ein ganzzahliges Vielfaches von λ (k = ${Math.round(P3.r)}).`:P3.cls==='min'?`Δs ist ein ungerades Vielfaches von λ/2.`:'Δs/λ ist weder ganzzahlig noch „halb“: teilweise Auslöschung.';
+  $('#f3').innerHTML=`<div class="feedback ${n===5?'ok':'no'}"><b>${n} von 5 richtig.</b> Schau dir das Muster links an: Liegt P auf einem hellen oder dunklen Streifen?<details style="margin-top:6px"><summary>Lösung anzeigen</summary><p class="formula" style="margin-top:6px">λ = c/f = 340/${P3.f} = ${fmt(P3.lam,3)} m<br>s₂ = √(a² + d²) = ${fmt(P3.s2)} m<br>Δs = s₂ − s₁ = ${fmt(P3.ds)} m<br>Δs/λ = ${fmt(P3.r)} → ${word}</p><p>${reason}</p></details></div>`;
+  shown3=true;draw3();s3tries++;const key='s3-'+P3.a+P3.d+P3.f;if(n===5&&!awarded.has(key))s3ok++;
+  if(n===5)award(key,3);else appChanged()};
+$('#new3').onclick=new3;
+function draw3(){if(!P3||active!=='s3')return;const c=$('#c3');const{x,w,h}=fit(c);x.clearRect(0,0,w,h);
+  const sc=Math.min((w-60)/(P3.a*1.35),(h-60)/(P3.d*1.7));
+  const ox=40,oy=h/2+P3.d*sc/2; // L1 bei (0,0) unten, L2 bei (0,d) oben
+  const W2P=(X,Y)=>[ox+X*sc,oy-Y*sc];
+  if(shown3){const rw=Math.ceil(w/3),rh=Math.ceil(h/3);const img=x.createImageData(rw,rh);
+    const hex=s=>{s=s.replace('#','');return[parseInt(s.slice(0,2),16),parseInt(s.slice(2,4),16),parseInt(s.slice(4,6),16)]};
+    const bg=hex(tok('--bg')),gr=hex(tok('--green'));
+    for(let j=0;j<rh;j++)for(let i=0;i<rw;i++){const X=(i*3-ox)/sc,Y=(oy-j*3)/sc;const r1=Math.hypot(X,Y),r2=Math.hypot(X,Y-P3.d);let I=Math.cos(Math.PI*(r2-r1)/P3.lam)**2;if(X<0)I*=0.25;
+      const o=(j*rw+i)*4;for(let q=0;q<3;q++)img.data[o+q]=bg[q]+(gr[q]-bg[q])*I*0.85;img.data[o+3]=255}
+    const off=document.createElement('canvas');off.width=rw;off.height=rh;off.getContext('2d').putImageData(img,0,0);x.imageSmoothingEnabled=true;x.drawImage(off,0,0,w,h);}
+  const [l1x,l1y]=W2P(0,0),[l2x,l2y]=W2P(0,P3.d),[px,py]=W2P(P3.a,0);
+  x.lineWidth=2.5;x.strokeStyle=tok('--navy');x.beginPath();x.moveTo(l1x,l1y);x.lineTo(px,py);x.stroke();
+  x.strokeStyle=tok('--sum');x.beginPath();x.moveTo(l2x,l2y);x.lineTo(px,py);x.stroke();
+  x.setLineDash([4,4]);x.strokeStyle=tok('--muted');x.lineWidth=1.5;x.beginPath();x.moveTo(l1x-18,l1y);x.lineTo(l2x-18,l2y);x.stroke();x.setLineDash([]);
+  const spk=(X,Y,lab)=>{x.fillStyle=tok('--navy');x.fillRect(X-10,Y-12,14,24);x.beginPath();x.moveTo(X+4,Y-6);x.lineTo(X+14,Y-14);x.lineTo(X+14,Y+14);x.lineTo(X+4,Y+6);x.fill();x.fillStyle=tok('--ink');x.font='bold 14px '+tok('--f-body');x.fillText(lab,X-30,Y+5)};
+  spk(l1x,l1y,'L₁');spk(l2x,l2y,'L₂');
+  x.fillStyle=tok('--sum');x.beginPath();x.arc(px,py,7,0,7);x.fill();x.fillStyle=tok('--ink');x.font='bold 15px '+tok('--f-body');x.fillText('P',px+10,py-8);
+  x.font='13px '+tok('--f-mono');x.fillStyle=tok('--ink');
+  x.fillText('a = '+fmt(P3.a,1)+' m',(l1x+px)/2-30,l1y+22);
+  x.save();x.translate(l1x-26,(l1y+l2y)/2+30);x.rotate(-Math.PI/2);x.fillText('d = '+fmt(P3.d,1)+' m',0,0);x.restore();
+  x.fillStyle=tok('--sum');x.fillText('s₂ = ?',(l2x+px)/2+6,(l2y+py)/2-6);
+}
+
+/* ---------- STATION 4 ---------- */
+function rnd(a){return a[Math.floor(Math.random()*a.length)]}
+const g=(x,d=2)=>Number(x).toLocaleString('de-DE',{maximumFractionDigits:d});
+const coin=(p=.5)=>Math.random()<p;
+const TPL=[
+/* Kenngrößen */
+()=>{const m=rnd([['Luft',340],['Luft',340],['Wasser',1480]]);const f=rnd(m[1]===340?[85,170,200,340,425,500,680,850,1000]:[370,740,1480,2960]);const l=m[1]/f;
+ return{q:`Schall in ${m[0]} (c = ${m[1]} m/s) hat f = ${f} Hz. Wie groß ist λ?`,o:[g(l,3)+' m',g(l*2,3)+' m',g(l/2,3)+' m',g(f/m[1],4)+' m'],e:`λ = c/f = ${m[1]} m/s ÷ ${f} Hz = ${g(l,3)} m.`}},
+()=>{const l=rnd([0.2,0.4,0.5,0.85,1.7,2,3.4]);const f=340/l;
+ return{q:`Eine Schallwelle in Luft hat λ = ${g(l)} m. Welche Frequenz hat sie? (c = 340 m/s)`,o:[g(f,0)+' Hz',g(340*l,0)+' Hz',g(f/2,0)+' Hz',g(f*2,0)+' Hz'],e:`f = c/λ = 340 m/s ÷ ${g(l)} m = ${g(f,0)} Hz.`}},
+()=>{const l=rnd([0.4,0.5,0.8,1.2,1.5,2]),f=rnd([2,3,4,5,8,10]);const c=l*f;
+ return{q:`Auf einem Seil läuft eine Welle mit λ = ${g(l)} m und f = ${f} Hz. Wie schnell ist sie?`,o:[g(c)+' m/s',g(l/f,3)+' m/s',g(f/l)+' m/s',g(c/2)+' m/s'],e:`c = λ·f = ${g(l)} m · ${f} Hz = ${g(c)} m/s.`}},
+()=>{const T=rnd([0.5,2,2.5,4,5,8,10,20]);const f=1000/T;
+ return{q:`Eine Schwingung hat die Periodendauer T = ${g(T)} ms. Wie groß ist die Frequenz?`,o:[g(f,1)+' Hz',g(T,1)+' Hz',g(f/1000,4)+' Hz',g(f*10,1)+' Hz'],e:`f = 1/T = 1 ÷ (${g(T)}·10⁻³ s) = ${g(f,1)} Hz.`}},
+()=>{const n=rnd([3,4,5,6]),l=rnd([0.5,0.8,1.2,1.5,2]);const x=(n-1)*l;
+ return{q:`Zwischen dem 1. und dem ${n}. Wellenberg einer Wasserwelle liegen ${g(x)} m. Wie groß ist λ?`,o:[g(l,3)+' m',g(x/n,3)+' m',g(x,3)+' m',g(x/(n+1),3)+' m'],e:`Vom 1. bis zum ${n}. Berg sind es ${n-1} Wellenlängen: λ = ${g(x)} m ÷ ${n-1} = ${g(l,3)} m.`}},
+()=>{const l=rnd([2,3,4,5]),n=rnd([6,8,10,12]),t=rnd([10,12,15,20]);const f=n/t,c=l*f;
+ return{q:`Ein Boot wird in ${t} s genau ${n}-mal von einem Wellenberg angehoben. Die Berge sind ${l} m voneinander entfernt. Wie schnell laufen die Wellen?`,o:[g(c)+' m/s',g(l*t/n)+' m/s',g(n/t)+' m/s',g(l*n)+' m/s'],e:`f = ${n} ÷ ${t} s = ${g(f,3)} Hz, c = λ·f = ${l} m · ${g(f,3)} Hz = ${g(c)} m/s.`}},
+()=>{const d=rnd([17,34,51,68,85,170]);const t=2*d/340;
+ return{q:`Du stehst ${d} m vor einer Felswand und klatschst. Nach welcher Zeit hörst du das Echo? (c = 340 m/s)`,o:[g(t)+' s',g(d/340,3)+' s',g(4*d/340)+' s',g(340/d)+' s'],e:`Der Schall läuft hin und zurück: t = 2d/c = 2·${d} m ÷ 340 m/s = ${g(t)} s.`}},
+()=>{const L=coin();const lon=['Schall in Luft','Ultraschall im Wasser','eine Verdichtungswelle in einer gestauchten Schraubenfeder'],tra=['eine Welle auf einem gespannten Seil','Licht','die Welle auf einer gezupften Gitarrensaite'];
+ const right=rnd(L?lon:tra);const wrong=(L?tra:lon).slice().sort(()=>Math.random()-.5);
+ return{q:`Welche dieser Wellen ist eine ${L?'Longitudinalwelle':'Transversalwelle'}?`,o:[right,...wrong],e:L?'Longitudinal: Die Teilchen schwingen in Ausbreitungsrichtung (Verdichtungen und Verdünnungen).':'Transversal: Die Auslenkung steht senkrecht zur Ausbreitungsrichtung.'}},
+()=>({q:'Eine Seilwelle läuft von links nach rechts. Was machen die einzelnen Seilstücke?',o:['Sie schwingen auf und ab und bleiben im Mittel an ihrem Ort.','Sie wandern mit der Welle nach rechts.','Sie schwingen nach links und rechts.','Sie bleiben in Ruhe, nur die Form wandert.'],e:'Eine Welle transportiert Energie, aber keine Materie. Jedes Seilstück schwingt nur um seine Ruhelage.'}),
+/* Reflexion */
+()=>{const fest=coin(),berg=coin();const In=berg?'Wellenberg':'Wellental',Out=fest?(berg?'Wellental':'Wellenberg'):In,Oth=Out==='Wellenberg'?'Wellental':'Wellenberg';
+ return{q:`Ein ${In} läuft auf ein ${fest?'festes':'loses'} Seilende zu. Was läuft nach der Reflexion zurück?`,o:['ein '+Out,'ein '+Oth,'nichts, die Welle wird am Ende verschluckt','ein '+In+' mit doppelter Amplitude'],e:fest?'Festes Ende: Phasensprung um λ/2. Aus Berg wird Tal und aus Tal wird Berg.':'Loses Ende: kein Phasensprung. Berg bleibt Berg, Tal bleibt Tal.'}},
+()=>{const fest=coin(),A=rnd([2,3,4,5]);
+ return{q:`Ein Berg (Höhe ${A} cm) wird an einem ${fest?'festen':'losen'} Seilende reflektiert. Wie weit wird das Seilende dabei höchstens ausgelenkt?`,o:[fest?'0 cm':2*A+' cm',fest?2*A+' cm':'0 cm',A+' cm',g(A/2,1)+' cm'],e:fest?'Das feste Ende kann sich nicht bewegen. Hinlaufender und reflektierter Puls heben sich dort immer auf.':`Am losen Ende überlagern sich hinlaufender und reflektierter Berg gleichphasig: Das Ende schwingt bis 2·${A} cm = ${2*A} cm aus.`}},
+()=>{const fest=coin();
+ return{q:`Wie groß ist der Phasensprung bei der Reflexion am ${fest?'festen':'losen'} Ende?`,o:fest?['λ/2 (180°)','0 (kein Phasensprung)','λ/4 (90°)','3λ/4 (270°)']:['0 (kein Phasensprung)','λ/2 (180°)','λ/4 (90°)','3λ/4 (270°)'],e:fest?'Festes Ende: Die Auslenkung kehrt sich um, das entspricht einem Phasensprung von λ/2.':'Loses Ende: Das Ende schwingt frei mit, die Welle kommt ohne Phasensprung zurück.'}},
+()=>{const lose=coin();
+ return{q:`Ein Seil ist am Ende ${lose?'an einem leichten Ring befestigt, der reibungsfrei an einer Stange gleitet':'fest an einer Wand verknotet'}. Was ist das für ein Ende, und was bildet sich dort bei einer stehenden Welle?`,o:lose?['loses Ende, Schwingungsbauch','loses Ende, Schwingungsknoten','festes Ende, Schwingungsbauch','festes Ende, Schwingungsknoten']:['festes Ende, Schwingungsknoten','festes Ende, Schwingungsbauch','loses Ende, Schwingungsknoten','loses Ende, Schwingungsbauch'],e:lose?'Der Ring kann frei auf und ab gleiten: loses Ende, dort entsteht ein Bauch.':'Das Ende kann sich nicht bewegen: festes Ende, dort entsteht ein Knoten.'}},
+()=>{const a=rnd([20,25,35,40,50,55]);
+ return{q:`Eine Wasserwelle trifft unter α = ${a}° (zum Lot) auf eine gerade Wand. Unter welchem Winkel zum Lot wird sie reflektiert?`,o:[a+'°',(90-a)+'°',2*a+'°',(180-2*a)+'°'],e:'Reflexionsgesetz: Einfallswinkel = Reflexionswinkel, beide zum Lot gemessen.'}},
+/* Überlagerung */
+()=>{const a=rnd([2,3,4,5,6]);const same=coin();const b=same?rnd([1,2,3,4]):1+Math.floor(Math.random()*a);const r=same?a+b:a-b;
+ return{q:`Ein Berg (${a} cm hoch) und ${same?'ein Berg':'ein Tal'} (${b} cm ${same?'hoch':'tief'}) laufen aufeinander zu. Wie groß ist die Auslenkung, wenn sie genau übereinander liegen?`,o:[r+' cm',(same?Math.abs(a-b):a+b)+' cm',Math.max(a,b)+' cm',a*b+' cm'],e:same?`Gleiche Richtung: Die Auslenkungen addieren sich, ${a} + ${b} = ${a+b} cm.`:`Berg und Tal: ${a} − ${b} = ${a-b} cm.`+' Danach laufen beide unverändert weiter.'}},
+()=>({q:'Zwei Pulse laufen aufeinander zu und überlagern sich. Was passiert danach?',o:['Sie laufen unverändert weiter.','Sie prallen voneinander ab.','Sie löschen sich dauerhaft aus.','Sie verschmelzen zu einem Puls.'],e:'Superpositionsprinzip: Am Ort der Begegnung addieren sich die Auslenkungen, danach läuft jede Welle unverändert weiter.'}),
+()=>{const A1=rnd([2,3,4,5]),A2=rnd([1,2,3]);const gl=coin();const r=gl?A1+A2:Math.abs(A1-A2);
+ return{q:`Zwei Wellen mit A₁ = ${A1} cm und A₂ = ${A2} cm überlagern sich ${gl?'gleichphasig':'gegenphasig (Δφ = 180°)'}. Wie groß ist die resultierende Amplitude?`,o:[r+' cm',(gl?Math.abs(A1-A2):A1+A2)+' cm',g(Math.sqrt(A1*A1+A2*A2),1)+' cm',Math.max(A1,A2)+' cm'],e:gl?'Berg trifft Berg: A = A₁ + A₂.':'Berg trifft Tal: A = |A₁ − A₂|.'}},
+()=>{const p=rnd([[90,'λ/4'],[180,'λ/2'],[270,'3λ/4'],[360,'λ'],[120,'λ/3'],[45,'λ/8']]);const wrong=['λ/8','λ/4','λ/3','λ/2','3λ/4','λ','2λ'].filter(s=>s!==p[1]).sort(()=>Math.random()-.5).slice(0,3);
+ return{q:`Eine Phasenverschiebung von ${p[0]}° entspricht welchem Wegunterschied?`,o:[p[1],...wrong],e:`360° ≙ λ, also ${p[0]}° ≙ ${p[0]}/360 · λ = ${p[1]}.`}},
+()=>({q:'Beim Noise-Cancelling löschen sich Schall und Gegenschall aus. Wo bleibt die Energie?',o:['Sie steckt in der Bewegung der Teilchen (kinetische Energie) und läuft weiter.','Sie wird vernichtet.','Sie wird in Licht umgewandelt.','Sie fließt zurück in den Akku.'],e:'Energie geht nicht verloren. Bei Auslöschung ist die Auslenkung null, die Teilchen bewegen sich aber → kinetische Energie.'}),
+/* Gangunterschied */
+()=>{const l=rnd([0.2,0.4,0.5,0.68,0.85,1]);const mx=coin();const k=rnd([1,2,3]);const ds=mx?k*l:(k-0.5)*l;const A=['laut (Maximum)','leise (Minimum)'];
+ return{q:`Zwei gleichphasige Lautsprecher, λ = ${g(l)} m. In P beträgt der Gangunterschied Δs = ${g(ds,3)} m. Was hört man in P?`,o:[mx?A[0]:A[1],mx?A[1]:A[0],'mittellaut','abwechselnd laut und leise'],e:`Δs/λ = ${g(ds,3)} ÷ ${g(l)} = ${g(ds/l)} → ${mx?'ganzzahlig, also konstruktive Interferenz':'ungerades Vielfaches von ½, also destruktive Interferenz'}.`}},
+()=>{const f=rnd([170,340,425,680,850,1000]);const l=340/f;const mx=coin(.4);const d=mx?l:l/2;const all=[l/4,l/2,l,2*l].filter(v=>v!==d);
+ return{q:`Zwei gleichphasige Lautsprecher senden f = ${f} Hz. Welcher Gangunterschied ist mindestens nötig, damit es in P ${mx?'laut ist (außer Δs = 0)':'leise ist (Auslöschung)'}? (c = 340 m/s)`,o:[g(d,3)+' m',...all.map(v=>g(v,3)+' m')],e:`λ = 340 ÷ ${f} = ${g(l,3)} m. ${mx?'Nächstes Maximum bei Δs = λ':'Erstes Minimum bei Δs = λ/2'} = ${g(d,3)} m.`}},
+()=>{const s1=rnd([2,3,4,5]),l=rnd([0.5,0.4,0.8]);const k=rnd([1,2,3]);const mn=coin();const s2=s1+(mn?(k-0.5)*l:k*l);const f=340/l;
+ return{q:`Ein Punkt P ist ${g(s1,2)} m von L₁ und ${g(s2,2)} m von L₂ entfernt. Beide senden gleichphasig f = ${g(f,0)} Hz. Laut oder leise in P? (c = 340 m/s)`,o:mn?['leise (Minimum)','laut (Maximum)','mittellaut','abwechselnd laut und leise']:['laut (Maximum)','leise (Minimum)','mittellaut','abwechselnd laut und leise'],e:`λ = 340 ÷ ${g(f,0)} = ${g(l)} m, Δs = ${g(s2-s1,2)} m, Δs/λ = ${g((s2-s1)/l)} → ${mn?'Minimum':'Maximum'}.`}},
+/* Stehende Wellen */
+()=>{const c=rnd([20,30,40,60,80]),f=rnd([10,20,25,40,50]);const l=c/f;const kb=coin(.4);const d=kb?l/4:l/2;const all=[l/4,l/2,l,2*l].filter(v=>v!==d);
+ return{q:`Auf einem Seil (c = ${c} m/s) bildet sich bei f = ${f} Hz eine stehende Welle. Wie groß ist der Abstand ${kb?'von einem Knoten zum nächsten Bauch':'zweier benachbarter Knoten'}?`,o:[g(d,3)+' m',...all.map(v=>g(v,3)+' m')],e:`λ = c/f = ${g(l,3)} m. ${kb?'Knoten bis Bauch = λ/4':'Knoten bis Knoten = λ/2'} = ${g(d,3)} m.`}},
+()=>{const L=rnd([0.6,0.9,1.2,1.5,1.8,2.4]),n=rnd([2,3,4,5]);const l=2*L/n;
+ return{q:`Ein Seil (L = ${g(L)} m, beide Enden fest) schwingt mit ${n} Bäuchen. Wie groß ist λ?`,o:[g(l,3)+' m',g(L/n,3)+' m',g(4*L/n,3)+' m',g(n*L/2,3)+' m'],e:`${n} Bäuche = ${n} halbe Wellenlängen: L = ${n}·λ/2 → λ = 2L/${n} = ${g(l,3)} m.`}},
+()=>{const f1=rnd([110,131,147,196,220,262]),k=rnd([2,3,4,5]);
+ return{q:`Eine Gitarrensaite hat die Grundfrequenz f₁ = ${f1} Hz. Wie groß ist ihre ${k}. Eigenfrequenz (${k-1}. Oberton)?`,o:[k*f1+' Hz',(k+1)*f1+' Hz',(k-1)*f1+' Hz',(f1+100*k)+' Hz'],e:`Beide Enden fest: fₖ = k·f₁ = ${k}·${f1} Hz = ${k*f1} Hz.`}},
+()=>{const nb=coin();
+ return{q:nb?'Wie schwingen zwei Seilstücke, die bei einer stehenden Welle zwischen denselben zwei Knoten liegen?':'Wie schwingen zwei Seilstücke einer stehenden Welle, die links und rechts von einem Knoten liegen?',o:nb?['gleichphasig, nur mit verschiedener Amplitude','gegenphasig','um 90° verschoben','gar nicht']:['gegenphasig','gleichphasig','um 90° verschoben','gar nicht'],e:'Innerhalb eines Abschnitts zwischen zwei Knoten schwingt alles im Gleichtakt. Benachbarte Abschnitte schwingen gegenphasig.'}},
+()=>({q:'Was unterscheidet eine stehende Welle von einer fortschreitenden Welle?',o:['Sie transportiert keine Energie, Knoten und Bäuche bleiben am Ort.','Sie hat keine Frequenz.','Alle Punkte schwingen mit gleicher Amplitude.','Sie entsteht nur bei Schall.'],e:'Hinlaufende und reflektierte Welle tragen gleich viel Energie in entgegengesetzte Richtungen. Netto wird nichts transportiert.'}),
+()=>({q:'Ein Seil wird mit einer Frequenz angeregt, die keine Eigenfrequenz ist. Was beobachtet man?',o:['Nur kleine, unregelmäßige Auslenkungen, keine ausgeprägte stehende Welle.','Eine besonders große stehende Welle.','Das Seil reißt.','Eine stehende Welle mit genau einem Bauch.'],e:'Große stehende Wellen gibt es nur bei Resonanz, also wenn ein ganzzahliges Vielfaches von λ/2 (bzw. λ/4 bei fest–lose) aufs Seil passt.'}),
+/* Pfeifen */
+()=>{const L=rnd([0.17,0.25,0.34,0.5,0.68,0.85,1]);const f=340/(2*L);
+ return{q:`Eine beidseitig offene Pfeife ist ${g(L,3)} m lang. Wie groß ist ihre Grundfrequenz? (c = 340 m/s)`,o:[g(f,0)+' Hz',g(f/2,0)+' Hz',g(2*f,0)+' Hz',g(f/4,0)+' Hz'],e:`Offen–offen: L = λ/2 → f₁ = c/(2L) = 340 ÷ (2·${g(L,3)}) ≈ ${g(f,0)} Hz.`}},
+()=>{const L=rnd([0.17,0.25,0.34,0.425,0.5,0.85]);const f=340/(4*L);
+ return{q:`Eine gedackte Pfeife (ein Ende geschlossen) ist ${g(L,3)} m lang. Grundfrequenz? (c = 340 m/s)`,o:[g(f,0)+' Hz',g(2*f,0)+' Hz',g(4*f,0)+' Hz',g(f/2,0)+' Hz'],e:`Gedackt ≙ fest–lose: L = λ/4 → f₁ = c/(4L) = 340 ÷ (4·${g(L,3)}) ≈ ${g(f,0)} Hz.`}},
+()=>{const f1=rnd([100,110,125,150,200]),m=rnd([3,5]);
+ return{q:`Eine gedackte Pfeife hat f₁ = ${f1} Hz. Welche Frequenz kann sie zusätzlich als Eigenton erzeugen?`,o:[m*f1+' Hz',2*f1+' Hz',4*f1+' Hz',6*f1+' Hz'],e:'Gedackt (fest–lose): nur ungerade Vielfache, also 3f₁, 5f₁, 7f₁ …'}},
+()=>{const auf=coin();
+ return{q:auf?'Man öffnet das geschlossene Ende einer gedackten Pfeife. Was passiert mit dem Grundton?':'Man verschließt ein Ende einer offenen Pfeife. Was passiert mit dem Grundton?',o:auf?['Er steigt um eine Oktave (doppelte Frequenz).','Er sinkt um eine Oktave.','Er bleibt gleich.','Er steigt auf die dreifache Frequenz.']:['Er sinkt um eine Oktave (halbe Frequenz).','Er steigt um eine Oktave.','Er bleibt gleich.','Er sinkt auf ein Drittel.'],e:'Gedackt: f₁ = c/(4L). Offen: f₁ = c/(2L). Offen ist der Grundton doppelt so hoch.'}},
+()=>{const lg=coin();
+ return{q:`Eine Pfeife wird ${lg?'doppelt so lang':'halb so lang'} gebaut, sonst bleibt alles gleich. Was passiert mit der Grundfrequenz?`,o:lg?['Sie halbiert sich.','Sie verdoppelt sich.','Sie bleibt gleich.','Sie wird viermal so klein.']:['Sie verdoppelt sich.','Sie halbiert sich.','Sie bleibt gleich.','Sie wird viermal so groß.'],e:'f₁ ist proportional zu 1/L: längere Pfeife → tieferer Ton.'}},
+()=>{const off=coin();
+ return{q:`Was liegt bei einer stehenden Schallwelle in einer Pfeife am ${off?'offenen':'geschlossenen'} Ende?`,o:off?['ein Bewegungsbauch der Luftteilchen','ein Bewegungsknoten der Luftteilchen','gar keine Schwingung','ein Knoten und ein Bauch gleichzeitig']:['ein Bewegungsknoten der Luftteilchen','ein Bewegungsbauch der Luftteilchen','ein Druckknoten','gar keine Schwingung'],e:off?'Am offenen Ende können die Luftteilchen frei schwingen (wie loses Ende): Bauch.':'Am geschlossenen Ende können die Luftteilchen nicht hin und her (wie festes Ende): Knoten.'}},
+/* Huygens, Brechung, Beugung */
+()=>({q:'Was besagt das Huygens\'sche Prinzip?',o:['Jeder Punkt einer Wellenfront ist Ausgangspunkt einer Elementarwelle.','Wellen breiten sich immer geradlinig aus.','Die Frequenz ändert sich beim Übergang in ein anderes Medium.','Der Reflexionswinkel ist doppelt so groß wie der Einfallswinkel.'],e:'Die Einhüllende aller Elementarwellen ergibt die neue Wellenfront. Damit erklärt man z. B. Reflexion und Beugung.'}),
+()=>{const b=rnd([2,4,5,6]);const ls=[b*1.5,b*0.5,b*0.2,b*0.1];
+ return{q:`Eine Wasserwelle trifft auf einen Spalt der Breite ${b} cm. Bei welcher Wellenlänge wird sie hinter dem Spalt am stärksten gebeugt?`,o:ls.map(v=>'λ = '+g(v,1)+' cm'),e:'Beugung ist umso stärker, je größer λ im Vergleich zur Spaltbreite ist.'}},
+()=>({q:'Warum hört man jemanden um die Ecke, sieht ihn aber nicht?',o:['Schall hat λ im Meterbereich, Licht unter 1 µm: nur Schall wird an der Ecke merklich gebeugt.','Licht wird von Luft absorbiert.','Schall ist schneller als Licht.','Licht ist eine Longitudinalwelle.'],e:'Beugung ist stark, wenn Hindernisse etwa so groß wie λ sind. Türen und Ecken passen zu Schallwellen, nicht zu Licht.'}),
+()=>{const f=rnd([200,340,500,1000]);const l1=340/f,l2=1480/f;
+ return{q:`Ein Ton (f = ${f} Hz) geht von Luft (340 m/s) in Wasser (1480 m/s) über. Wie groß ist λ im Wasser?`,o:[g(l2)+' m',g(l1)+' m',g(l1*340/1480,3)+' m',g(l2/2)+' m'],e:`f bleibt ${f} Hz, die Quelle gibt sie vor. λ = 1480 ÷ ${f} = ${g(l2)} m (in Luft: ${g(l1)} m).`}},
+()=>({q:'Welche Größe ändert sich NICHT, wenn eine Welle in ein anderes Medium übergeht?',o:['die Frequenz f','die Geschwindigkeit c','die Wellenlänge λ','die Amplitude bei Dämpfung'],e:'Die Frequenz wird von der Quelle vorgegeben. c und damit λ hängen vom Medium ab.'}),
+];
+function genPool(){const idx=TPL.map((_,i)=>i).sort(()=>Math.random()-.5);const out=[];
+ for(const i of idx){if(out.length>=10)break;for(let t=0;t<15;t++){const q=TPL[i]();if(new Set(q.o).size===q.o.length){q.a=0;out.push(q);break}}}
+ return out;}
+
+let quiz=[],qi=0,qok=0;
+function startQuiz(){const pool=genPool();quiz=pool.slice(0,10).map(q=>{const idx=q.o.map((_,i)=>i).sort(()=>Math.random()-0.5);return{...q,o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)}});qi=0;qok=0;showQ()}
+function showQ(){$('#qnext').hidden=true;$('#qf').innerHTML='';$('#pb').style.width=(qi/quiz.length*100)+'%';$('#qsum').textContent=`${qok} von ${qi} richtig`;
+  if(qi>=quiz.length){$('#qn').textContent='Fertig!';$('#qq').textContent=`${qok} von ${quiz.length} richtig.`;$('#qo').innerHTML='';quizRuns.push(qok);appChanged();$('#qf').innerHTML=`<div class="feedback ${qok>=8?'ok':'info'}">${qok>=8?'Stark, das sitzt.':'Schau dir die Themen mit falschen Antworten noch mal im Heft an und starte eine neue Runde.'}</div>`;return}
+  const q=quiz[qi];$('#qn').textContent=`Frage ${qi+1} von ${quiz.length}`;$('#qq').textContent=q.q;const box=$('#qo');box.innerHTML='';
+  q.o.forEach((o,i)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;const ok=i===q.a;b.className=ok?'ok':'no';box.children[q.a].className='ok';if(ok){qok++;award('q'+Date.now()+qi,1)}
+    $('#qf').innerHTML=`<div class="feedback ${ok?'ok':'no'}"><b>${ok?'Richtig.':'Nicht ganz.'}</b> ${q.e}</div>`;$('#qnext').hidden=false;$('#qsum').textContent=`${qok} von ${qi+1} richtig`};box.appendChild(b)});delete box.dataset.done}
+$('#qnext').onclick=()=>{qi++;showQ()};$('#qrestart').onclick=startQuiz;
+
+/* Loop */
+new2();new3();startQuiz();
+function loop(){if(!reduce)t+=0.05;else t=1;if(active==='s1')draw1();if(active==='s2')draw2();requestAnimationFrame(loop)}
+loop();
+addEventListener('resize',()=>{if(active==='s3')draw3()});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(active==='s3')draw3()});
+
+/* ===== Anbindung an die Klassen-App ===== */
+const STN=['Überlagerung','Stehende Welle','Gangunterschied','Schnellrunde'];
+if(window.AppBridge)AppBridge.register({
+  getState(){const erl=[];if(done1.size===chals.length)erl.push(STN[0]);if(s2ok>0)erl.push(STN[1]);if(s3ok>0)erl.push(STN[2]);if(quizRuns.some(r=>r>=8))erl.push(STN[3]);
+    return{punkte:score,stationen:STN,erledigt:erl,
+      details:{
+        'Überlagerung':done1.size+' von '+chals.length+' Challenges',
+        'Stehende Welle':s2ok+' Aufgaben komplett richtig ('+s2tries+'× geprüft)',
+        'Gangunterschied':s3ok+' Aufgaben komplett richtig ('+s3tries+'× geprüft)',
+        'Schnellrunde':quizRuns.length?'Runden: '+quizRuns.map(r=>r+'/10').join(', '):'noch keine Runde'},
+      daten:{score,awarded:[...awarded],done1:[...done1],s2tries,s2ok,s3tries,s3ok,quizRuns}}},
+  setState(s){const d=s&&s.daten;if(!d)return;
+    score=d.score||0;awarded.clear();(d.awarded||[]).forEach(k=>awarded.add(k));$('#score').textContent=score+' Punkte';
+    (d.done1||[]).forEach(i=>{if(chals[i])markChal(i)});
+    s2tries=d.s2tries||0;s2ok=d.s2ok||0;s3tries=d.s3tries||0;s3ok=d.s3ok||0;quizRuns=d.quizRuns||[]}
+});
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,589 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<script src="../bridge.js"></script>
+</head><body>
+<title>Schwingkreis-Labor TG2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: Kopf mit Punktestand, Stationen-Tabs (Reihenfolge = Stundenablauf), je Station Bühne (Simulation/Canvas) + Aufgabe mit Sofort-Feedback; stapelt auf Tablets im Hochformat */
+:root{
+  --bg:#F2F5F8; --panel:#FFFFFF; --ink:#15253A; --muted:#58697C; --line:#D3DCE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E2F0E5; --navySoft:#E3EAF3;
+  --efield:#C2571A; --bfield:#2F6FB5; --bad:#B3261E; --badSoft:#FBE6E4; --warnSoft:#FFF3D6;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --efield:#F09A5E; --bfield:#7FB2EE; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --efield:#F09A5E; --bfield:#7FB2EE; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:18px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,44px);line-height:1.05;margin:0;color:var(--navy);letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--muted);letter-spacing:0;margin-top:6px}
+.score{font-family:var(--f-mono);font-size:15px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap}
+.score b{color:var(--green);font-size:20px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:thin}
+nav button{flex:0 0 auto;font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;display:flex;gap:8px;align-items:center}
+nav button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button[aria-selected="true"] .n{color:var(--bg);opacity:.75}
+nav button .done{color:var(--green);font-weight:700}
+nav button[aria-selected="true"] .done{color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+section.st{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+section.st.single{grid-template-columns:minmax(0,1fr)}
+@media (max-width:860px){section.st{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0 0 6px;color:var(--navy);text-wrap:balance}
+.card h3{font-size:16px;margin:16px 0 6px}
+.lead{color:var(--muted);margin:0 0 12px}
+canvas{display:block;width:100%;max-width:100%;border-radius:10px;background:var(--bg);touch-action:manipulation}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:16px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:var(--bg);padding:10px 16px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn:disabled{opacity:.45;cursor:default}
+.task{border:2px solid var(--navy);border-radius:12px;padding:14px;margin-top:12px}
+.task p{margin:0 0 10px}
+.task .q{font-weight:700}
+.given{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin:0 0 10px;line-height:1.7}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.ans label{font-weight:700;min-width:0}
+.ans input{font:inherit;font-family:var(--f-mono);font-size:18px;width:9.5em;max-width:100%;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.ans input.ok{border-color:var(--green);background:var(--greenSoft)}
+.ans input.no{border-color:var(--bad);background:var(--badSoft)}
+.unit{font-family:var(--f-mono);font-size:16px;color:var(--muted)}
+.feedback{border-radius:10px;padding:10px 14px;margin-top:10px}
+.feedback.ok{background:var(--greenSoft);border:1.5px solid var(--green)}
+.feedback.no{background:var(--badSoft);border:1.5px solid var(--bad)}
+.feedback.info{background:var(--navySoft);border:1.5px solid var(--line)}
+.feedback.warn{background:var(--warnSoft);border:1.5px solid var(--line)}
+.steps{font-family:var(--f-mono);font-size:14.5px;line-height:1.8;white-space:pre-wrap;margin:8px 0 0}
+.slider{display:grid;grid-template-columns:5.5em minmax(0,1fr) 7.5em;gap:10px;align-items:center;margin:8px 0}
+.slider label{font-weight:700}
+.slider output{font-family:var(--f-mono);font-size:15px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--navy);min-height:32px}
+.readout{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pill{font-family:var(--f-mono);font-size:14.5px;border-radius:999px;padding:5px 12px;background:var(--navySoft);font-variant-numeric:tabular-nums}
+.pill.e{background:color-mix(in srgb,var(--efield) 18%,var(--panel))}
+.pill.b{background:color-mix(in srgb,var(--bfield) 18%,var(--panel))}
+.chal{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.chal li{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start}
+.chal li .mark{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;font-weight:700}
+.chal li.done{border-color:var(--green);background:var(--greenSoft)}
+.chal li.done .mark{border-color:var(--green);background:var(--green);color:var(--panel)}
+.chal li.active{border-color:var(--navy)}
+.chal .why{font-size:15px;color:var(--muted);margin-top:4px}
+.bet{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (max-width:560px){.bet{grid-template-columns:minmax(0,1fr)}}
+.bet button{font:inherit;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:12px;cursor:pointer;display:grid;gap:8px}
+.bet button canvas{background:var(--bg);height:90px}
+.bet button.sel{border-color:var(--navy);box-shadow:0 0 0 3px var(--navySoft)}
+.bet button.right{border-color:var(--green);background:var(--greenSoft)}
+.bet button b{font-size:16px}
+table.sys{border-collapse:collapse;width:100%;min-width:620px;font-size:15px}
+.tablewrap{overflow-x:auto}
+table.sys th,table.sys td{border:1.5px solid var(--line);padding:8px;text-align:left;vertical-align:middle}
+table.sys th{background:var(--navySoft);font-size:14px}
+table.sys td.t{font-family:var(--f-mono);white-space:nowrap;font-weight:700}
+table.sys select{font:inherit;font-size:15px;width:100%;min-width:8.5em;padding:7px;border-radius:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+table.sys select.ok{border-color:var(--green);background:var(--greenSoft)}
+table.sys select.no{border-color:var(--bad);background:var(--badSoft)}
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.match .col{display:grid;gap:8px;align-content:start}
+.match .colh{font-family:var(--f-display);font-weight:600;color:var(--navy);font-size:17px}
+.match button{font:inherit;font-size:15.5px;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:10px 12px;cursor:pointer;min-height:48px}
+.match button.sel{border-color:var(--navy);box-shadow:0 0 0 3px var(--navySoft)}
+.match button.paired{border-color:var(--green);background:var(--greenSoft);cursor:default}
+.match button.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.match button.shake{animation:none}}
+.formula{font-family:var(--f-mono);font-size:19px;background:var(--navySoft);padding:12px 14px;border-radius:10px;margin:10px 0;overflow-x:auto}
+.typechips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.typechips button{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.typechips button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--panel)}
+.streak{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+.qopts{display:grid;gap:8px;margin-top:10px}
+.qopts button{font:inherit;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:11px 14px;cursor:pointer;min-height:48px}
+.qopts button.ok{border-color:var(--green);background:var(--greenSoft)}
+.qopts button.no{border-color:var(--bad);background:var(--badSoft)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 12px}
+.bar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--muted);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
+.small{font-size:14.5px;color:var(--muted)}
+.lock{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+kbd{font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);border-radius:4px;padding:0 5px}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Schwingkreis-Labor<small>TG2 Physik · Elektromagnetische Schwingungen · Arbeite die Stationen der Reihe nach durch</small></h1>
+  <div class="score" aria-live="polite">Punkte <b id="pts">0</b></div>
+</header>
+
+<nav role="tablist" id="tabs"></nav>
+
+<!-- 0 WETTE -->
+<section class="st single" id="s0" role="tabpanel">
+  <div class="card">
+    <h2>Deine Wette</h2>
+    <p class="lead">Gedankenexperiment: Ein Kondensator (40 µF) wird an 10 V aufgeladen. Dann wird er von der Quelle getrennt und an einen Verbraucher angeschlossen. Ein Spannungsmessgerät mit Nullpunkt in der Mitte zeigt die Kondensatorspannung U<sub>C</sub>.</p>
+    <div class="feedback info"><b>Versuch A:</b> Der Verbraucher ist ein Widerstand. Ihr kennt das Ergebnis: Die Spannung fällt langsam auf 0 (Entladekurve).<br><b>Versuch B:</b> Der Verbraucher ist jetzt eine <b>Spule mit Eisenkern</b> (sehr großes L, kleiner Drahtwiderstand). <b>Was zeigt das Messgerät?</b></div>
+    <div class="bet" id="bet"></div>
+    <div id="betmsg"></div>
+  </div>
+</section>
+
+<!-- 1 SIMULATION -->
+<section class="st" id="s1" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Blick in den Schwingkreis</h2>
+    <p class="lead">Zeitlupe: Eine Periode dauert hier immer ca. 6 s, egal wie groß T in echt ist. Zum Nachschauen: <a href="https://www.youtube.com/watch?v=Kn8PbSl3riI" target="_blank" rel="noopener">Video zum elektromagnetischen Schwingkreis</a>. Halte bei den Aufträgen an und füll dazu Aufgabe 1 bis 3 auf dem Arbeitsblatt aus.</p>
+    <canvas id="circ" height="300" aria-label="Animation des Schwingkreises mit Kondensator und Spule"></canvas>
+    <div class="legend"><span style="--c:var(--efield)">E-Feld / Spannung U</span><span style="--c:var(--bfield)">B-Feld / Stromstärke I</span></div>
+    <canvas id="graph" height="200" style="margin-top:10px" aria-label="U(t)- und I(t)-Diagramm"></canvas>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="play">Pause</button>
+      <button class="btn ghost" id="back8">− T/8</button>
+      <button class="btn ghost" id="fwd8">+ T/8</button>
+      <button class="btn ghost" id="reset">Neu starten</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Regler und Aufträge</h2>
+    <div class="slider"><label for="sL">L</label><input type="range" id="sL" min="-6" max="3" step="0.01" value="0"><output id="oL"></output></div>
+    <div class="slider"><label for="sC">C</label><input type="range" id="sC" min="-12" max="-3" step="0.01" value="-5"><output id="oC"></output></div>
+    <div class="slider"><label for="sR">R (Draht)</label><input type="range" id="sR" min="0" max="100" step="1" value="0"><output id="oR"></output></div>
+    <div class="readout">
+      <span class="pill" id="rT"></span><span class="pill" id="rf"></span>
+      <span class="pill e" id="rE"></span><span class="pill b" id="rB"></span>
+    </div>
+    <ol class="chal" id="chal"></ol>
+    <div id="chalmsg"></div>
+  </div>
+</section>
+
+<!-- 2 TABELLE -->
+<section class="st single" id="s2" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Was passiert wann?</h2>
+    <p class="lead">Ungedämpfter Schwingkreis, bei t = 0 ist der Kondensator voll geladen (obere Platte +). Fülle die Tabelle aus und prüfe. Mit „Neue Zeilen“ bekommst du andere Zeitpunkte.</p>
+    <div class="tablewrap"><table class="sys" id="systab"></table></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="syscheck">Prüfen</button><button class="btn ghost" id="sysnew">Neue Zeilen</button></div>
+    <div id="sysmsg"></div>
+  </div>
+</section>
+
+<!-- 3 ANALOGIE -->
+<section class="st" id="s3" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Federpendel trifft Schwingkreis</h2>
+    <p class="lead">Tippe links eine Größe vom Federpendel an, dann rechts das passende Gegenstück im Schwingkreis.</p>
+    <div class="match"><div class="col" id="mL"><div class="colh">Federpendel</div></div><div class="col" id="mR"><div class="colh">Schwingkreis</div></div></div>
+    <div id="matchmsg"></div>
+  </div>
+  <div class="card">
+    <h2>Und was bringt das?</h2>
+    <p>Beim Federpendel kennt ihr:</p>
+    <div class="formula">T = 2π · √( m / D )</div>
+    <p>Wenn die Analogie stimmt, kannst du die Formel für den Schwingkreis einfach „übersetzen“. Ersetze m und D durch die Gegenstücke und vereinfache.</p>
+    <div class="task">
+      <p class="q">Welche Formel kommt raus?</p>
+      <div class="qopts" id="thomsonq"></div>
+      <div id="thomsonmsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 RECHNEN -->
+<section class="st" id="s4" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Rechentrainer</h2>
+    <p class="lead">Jede Aufgabe kommt mit neuen Zahlen. Komma oder Punkt ist egal. ±3 % Rundungstoleranz.</p>
+    <div class="typechips" id="chips"></div>
+    <div class="task" id="calc"></div>
+    <p class="streak" id="streak"></p>
+  </div>
+  <div class="card">
+    <h2>Spickzettel</h2>
+    <div class="formula">T = 2π·√(L·C)<br>f = 1 / T</div>
+    <div class="formula">E<sub>el</sub> = ½·C·U²<br>E<sub>mag</sub> = ½·L·I²</div>
+    <h3>Vorsilben</h3>
+    <div class="given">m = 10⁻³ · µ = 10⁻⁶ · n = 10⁻⁹ · p = 10⁻¹²<br>k = 10³ · M = 10⁶</div>
+    <h3>Taschenrechner-Tipp</h3>
+    <p class="small">Tippe 10⁻⁶ als <kbd>×10ˣ</kbd> <kbd>−6</kbd> bzw. <kbd>EXP</kbd> <kbd>−6</kbd>. Klammer um das Produkt unter der Wurzel nicht vergessen.</p>
+    <h3>Energieerhaltung</h3>
+    <p class="small">Ohne Dämpfung gilt: Die ganze Energie aus dem vollen Kondensator steckt eine Viertelperiode später in der Spule. ½·C·U<sub>max</sub>² = ½·L·I<sub>max</sub>²</p>
+  </div>
+</section>
+
+<!-- 5 OSZI -->
+<section class="st" id="s5" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Oszi-Trainer</h2>
+    <p class="lead">So sieht es morgen in der Laborübung aus. Lies das Oszillogramm ab und rechne weiter.</p>
+    <canvas id="scope" height="330" aria-label="Oszilloskop-Bild einer gedämpften Schwingung"></canvas>
+    <div class="given" id="scopeset" style="margin-top:10px"></div>
+    <div class="row"><button class="btn ghost" id="scopenew">Neues Oszillogramm</button><button class="btn ghost" id="scopehelp">Ablese-Hilfe zeigen</button></div>
+  </div>
+  <div class="card">
+    <h2>Auswertung</h2>
+    <div class="task" id="scopetask"></div>
+  </div>
+</section>
+
+<!-- 6 QUIZ -->
+<section class="st single" id="s6" role="tabpanel" hidden>
+  <div class="card" style="max-width:780px">
+    <h2>Exit-Check</h2>
+    <p class="lead">8 Fragen aus einem größeren Pool. Nach jeder Antwort kommt die Erklärung.</p>
+    <div class="bar"><i id="qbar"></i></div>
+    <p class="streak" id="qnum"></p>
+    <p class="q" id="qq" style="font-size:18px;font-weight:700;margin:0"></p>
+    <div class="qopts" id="qo"></div>
+    <div id="qf"></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="qnext" hidden>Weiter</button><button class="btn ghost" id="qrestart">Neue Runde</button></div>
+  </div>
+</section>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function nice(x,sig=2){if(x===0)return 0;const p=Math.pow(10,Math.floor(Math.log10(Math.abs(x)))-sig+1);return Math.round(x/p)*p}
+function fmt(x,sig=3){if(!isFinite(x))return '–';if(x===0)return '0';let s=Number(x.toPrecision(sig));
+  let str=Math.abs(s)>=1e5||Math.abs(s)<1e-3?s.toExponential(sig-1).replace('e',' · 10^'):String(s);return str.replace('.',',')}
+const PFX=[['p',1e-12],['n',1e-9],['µ',1e-6],['m',1e-3],['',1],['k',1e3],['M',1e6]];
+function withUnit(x,u,sig=3){let best=PFX[4];for(const p of PFX){if(Math.abs(x)>=p[1]*0.9999)best=p}return fmt(x/best[1],sig)+' '+best[0]+u}
+function parseNum(s){s=String(s).trim().replace(/\s/g,'').replace(',','.').replace(/·10\^|\*10\^|x10\^/i,'e');const v=parseFloat(s);return isNaN(v)?null:v}
+const rel=(a,b)=>Math.abs(a-b)<=Math.abs(b)*0.03+1e-15;
+const appChanged=()=>{if(window.AppBridge)AppBridge.changed()};
+
+/* Punkte */
+let pts=0;const got=new Set();
+function award(key,n=1){if(got.has(key))return;got.add(key);pts+=n;$('#pts').textContent=pts;appChanged()}
+
+/* Tabs */
+const TABS=[['Wette','s0'],['Simulation','s1'],['Analogie','s3'],['Rechnen','s4'],['Exit-Check','s6']];
+const done={};let active='s0';
+function renderTabs(){$('#tabs').innerHTML='';TABS.forEach(([t,id],i)=>{const b=document.createElement('button');b.role='tab';b.setAttribute('aria-selected',id===active);
+  b.innerHTML=`<span class="n">${i}</span>${t}${done[id]?' <span class="done">✓</span>':''}`;b.onclick=()=>show(id);$('#tabs').appendChild(b)})}
+function show(id){active=id;TABS.forEach(([,s])=>$('#'+s).hidden=s!==id);renderTabs();if(id==='s5')drawScope();if(id==='s0')drawBets();window.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
+function markDone(id){if(!done[id]){done[id]=true;renderTabs();appChanged()}}
+renderTabs();
+
+/* ===== 0 Wette ===== */
+const BETS=[
+ {k:'a',t:'Fällt auf 0, aber langsamer als beim Widerstand',f:t=>Math.exp(-t/3.5)},
+ {k:'b',t:'Fällt auf 0, aber schneller als beim Widerstand',f:t=>Math.exp(-t/0.6)},
+ {k:'c',t:'Bleibt ungefähr bei 10 V stehen, die Spule lässt nichts durch',f:t=>t<0.15?1:0.97},
+ {k:'d',t:'Geht unter 0 und pendelt hin und her',f:t=>Math.exp(-t/4)*Math.cos(2*Math.PI*t/2.2)}];
+let bet=null,betShown=false;
+function drawMini(cv,f,col){const dpr=devicePixelRatio||1,w=cv.clientWidth||240,h=90;cv.width=w*dpr;cv.height=h*dpr;const c=cv.getContext('2d');c.scale(dpr,dpr);c.clearRect(0,0,w,h);
+  c.strokeStyle=css('--line');c.lineWidth=1;c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();c.fillStyle=css('--muted');c.font='11px '+css('--f-mono');c.fillText('0 V',4,h/2-4);c.fillText('t',w-10,h/2+12);
+  c.strokeStyle=col;c.lineWidth=2.5;c.beginPath();for(let x=0;x<=w;x++){const t=x/w*8;const y=h/2-f(t)*(h/2-8);x?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()}
+function pickBet(k){if(betShown)return;bet=k;const box=$('#bet');[...box.children].forEach(x=>x.classList.toggle('sel',x.id==='bet-'+k));
+  $('#betmsg').innerHTML=`<div class="feedback info">Deine Wette: <b>${k.toUpperCase()}</b>. Begründe sie in einem Satz deinem Nachbarn. Dann schauen wir es uns in der Simulation an.</div><div class="row" style="margin-top:10px"><button class="btn ghost" id="betreveal">Auflösung zeigen</button></div>`;
+  $('#betreveal').onclick=reveal;appChanged()}
+function drawBets(){const box=$('#bet');if(!box.children.length){BETS.forEach(b=>{const el=document.createElement('button');el.id='bet-'+b.k;el.innerHTML=`<b>${b.k.toUpperCase()})</b><span>${b.t}</span><canvas></canvas>`;
+    el.onclick=()=>pickBet(b.k);box.appendChild(el)})}
+  BETS.forEach(b=>drawMini($('#bet-'+b.k+' canvas'),b.f,css('--navy')))}
+function reveal(){betShown=true;$('#bet-d').classList.add('right');const ok=bet==='d';if(ok)award('bet',2);markDone('s0');
+  $('#betmsg').innerHTML=`<div class="feedback ${ok?'ok':'warn'}"><b>${ok?'Getroffen!':'Überrascht?'}</b> Die Spannung geht durch 0 hindurch, der Kondensator lädt sich <b>andersherum</b> auf, dann wieder zurück … und das immer schwächer. Niemand hat umgepolt. Wer schiebt die Ladung zurück, und woher kommt die Energie dafür?<br>Schau es dir in Station 1 genau an.</div><div class="row" style="margin-top:10px"><button class="btn green" id="go1">Weiter zur Simulation</button></div>`;
+  $('#go1').onclick=()=>show('s1');appChanged()}
+addEventListener('resize',()=>{if(active==='s0')drawBets()});
+
+/* ===== 1 Simulation ===== */
+let L=1,C=1e-5,R=0,phase=0,playing=!reduce,lastTs=null,dotOff=0;
+const SLOW=6; // s pro Periode
+function T0(){return 2*Math.PI*Math.sqrt(L*C)}
+function state(ph){ // ph in Perioden (0..)
+  const w0=2*Math.PI/T0();const d=R/(2*L);const wd=Math.sqrt(Math.max(w0*w0-d*d,1e-12));
+  const t=ph*T0();const e=Math.exp(-d*t);
+  const q=e*Math.cos(wd*t);const dq=-e*(d*Math.cos(wd*t)+wd*Math.sin(wd*t));const i=dq/w0; // I = dQ/dt (IQB-Konvention)
+  return {q,i,Eel:q*q,Emag:i*i,overd:d>=w0}}
+function updReadout(){
+  $('#oL').textContent=withUnit(L,'H');$('#oC').textContent=withUnit(C,'F');
+  const Rv=Rval();$('#oR').textContent=fmt(Rv,2)+' Ω';
+  $('#rT').textContent='T = '+withUnit(T0(),'s');$('#rf').textContent='f = '+withUnit(1/T0(),'Hz');}
+function Rval(){const v=+$('#sR').value;if(v===0)return 0;const Rc=2*Math.sqrt(L/C);return Rc*Math.pow(v/100,2)*0.6} // bis 60 % der aperiodischen Grenze
+['sL','sC','sR'].forEach(id=>$('#'+id).addEventListener('input',()=>{L=Math.pow(10,+$('#sL').value);C=Math.pow(10,+$('#sC').value);R=Rval();updReadout();checkChal('slide')}));
+function sizeCanvas(cv,h){const dpr=devicePixelRatio||1,w=cv.clientWidth;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=w*dpr;cv.height=h*dpr}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return [c,w,h]}
+function arrow(c,x1,y1,x2,y2,col,lw=2){c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();const a=Math.atan2(y2-y1,x2-x1);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-9*Math.cos(a-0.45),y2-9*Math.sin(a-0.45));c.lineTo(x2-9*Math.cos(a+0.45),y2-9*Math.sin(a+0.45));c.closePath();c.fill()}
+function drawCirc(){const [c,w,h]=sizeCanvas($('#circ'),300);c.clearRect(0,0,w,h);const s=state(phase);
+  const ink=css('--ink'),E=css('--efield'),B=css('--bfield'),mut=css('--muted');
+  const sc=Math.min(1,w/560);const cx=w/2;const left=cx-200*sc,right=cx+200*sc,top=50,bot=250;
+  // Leitungen
+  c.strokeStyle=ink;c.lineWidth=3;c.beginPath();c.moveTo(left,top);c.lineTo(right,top);c.moveTo(left,bot);c.lineTo(right,bot);
+  c.moveTo(left,top);c.lineTo(left,125);c.moveTo(left,175);c.lineTo(left,bot);c.moveTo(right,top);c.lineTo(right,85);c.moveTo(right,215);c.lineTo(right,bot);c.stroke();
+  // Kondensator
+  const pw=46*sc+20;c.lineWidth=6;const qa=Math.abs(s.q);
+  c.strokeStyle=s.q>0.02?E:(s.q<-0.02?B:ink);c.strokeStyle=ink;
+  c.beginPath();c.moveTo(left-pw,125);c.lineTo(left+pw,125);c.moveTo(left-pw,175);c.lineTo(left+pw,175);c.stroke();
+  // Ladungen
+  const n=Math.round(qa*6);c.font='bold 15px '+css('--f-mono');c.textAlign='center';
+  for(let k=0;k<n;k++){const x=left-pw+8+k*(2*pw-16)/5;c.fillStyle=E;c.fillText(s.q>0?'+':'−',x,117);c.fillStyle=B;c.fillText(s.q>0?'−':'+',x,195)}
+  // E-Feld
+  c.globalAlpha=Math.min(1,qa*1.1);for(let k=0;k<5;k++){const x=left-pw+10+k*(2*pw-20)/4;if(s.q>0)arrow(c,x,130,x,168,E,2);else arrow(c,x,170,x,132,E,2)}c.globalAlpha=1;
+  c.fillStyle=mut;c.font='14px '+css('--f-body');c.textAlign='right';c.fillText('C',left-pw-8,155);
+  // Spule
+  const coilTop=85,coilBot=215,loops=7,cw=34*sc+10;c.strokeStyle=ink;c.lineWidth=3;c.beginPath();
+  for(let k=0;k<=loops*24;k++){const u=k/(loops*24);const y=coilTop+u*(coilBot-coilTop);const x=right+Math.sin(u*loops*2*Math.PI)*cw*0.5;k?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+  // Eisenkern
+  c.fillStyle=css('--line');c.fillRect(right-5,coilTop-8,10,coilBot-coilTop+16);
+  // B-Feld
+  const ia=Math.abs(s.i);c.globalAlpha=Math.min(1,ia*1.1);
+  for(const dx of[-cw*0.18,cw*0.18]){if(s.i>=0)arrow(c,right+dx,coilBot-8,right+dx,coilTop+8,B,2.5);else arrow(c,right+dx,coilTop+8,right+dx,coilBot-8,B,2.5)}
+  c.strokeStyle=B;c.lineWidth=1.8;for(const r of[1,1.6]){c.beginPath();c.ellipse(right,150,cw*0.6*r+12,(coilBot-coilTop)*0.62*r/1.25,0,0,Math.PI*2);c.stroke()}
+  c.globalAlpha=1;c.fillStyle=mut;c.textAlign='left';c.fillText('L',right+cw+28,155);
+  // Stromfluss: Punkte
+  const path=[[left,175],[left,bot],[right,bot],[right,215],[right,85],[right,top],[left,top],[left,125]];
+  const segs=[];let tot=0;for(let k=0;k<path.length-1;k++){const [x1,y1]=path[k],[x2,y2]=path[k+1];const l=Math.hypot(x2-x1,y2-y1);if(k===3){tot+=l;segs.push(null);continue}segs.push([x1,y1,x2,y2,tot,l]);tot+=l}
+  if(ia>0.03){c.fillStyle=B;c.globalAlpha=Math.min(1,0.25+ia);const gap=34;for(let p=((dotOff%gap)+gap)%gap;p<tot;p+=gap){for(const sg of segs){if(!sg)continue;const [x1,y1,x2,y2,o,l]=sg;if(p>=o&&p<o+l){const u=(p-o)/l;c.beginPath();c.arc(x1+(x2-x1)*u,y1+(y2-y1)*u,4,0,7);c.fill()}}}c.globalAlpha=1;
+    // Pfeil für Stromrichtung (technisch) oben
+    if(s.i>=0)arrow(c,cx+30,top-14,cx-30,top-14,B,2.5);else arrow(c,cx-30,top-14,cx+30,top-14,B,2.5);c.fillStyle=B;c.textAlign='center';c.font='14px '+css('--f-body');c.fillText('I',cx,top-22)}
+  else{c.fillStyle=mut;c.textAlign='center';c.font='14px '+css('--f-body');c.fillText('I = 0',cx,top-14)}
+  // Energiebalken
+  const bx=cx-70,by=268,bw=140;c.fillStyle=css('--line');c.fillRect(bx,by,bw,14);c.fillStyle=E;c.fillRect(bx,by,bw*s.Eel,14);c.fillStyle=B;c.fillRect(bx+bw*s.Eel,by,bw*s.Emag,14);
+  c.fillStyle=mut;c.textAlign='right';c.font='13px '+css('--f-body');c.fillText('Energie: E-Feld',bx-6,by+12);c.textAlign='left';c.fillText('B-Feld',bx+bw+6,by+12);
+  c.textAlign='left';c.fillStyle=ink;c.font='bold 14px '+css('--f-mono');c.fillText('t = '+fmt(phase,3).replace(',',',')+' T',10,20);
+  $('#rE').textContent='E_el = '+Math.round(s.Eel*100)+' %';$('#rB').textContent='E_mag = '+Math.round(s.Emag*100)+' %';
+}
+function tl(v){const n=Math.round(v*2);return n===1?'T/2':n%2===0?(n/2===1?'T':(n/2)+'T'):n+'T/2'}
+function drawGraph(){const [c,w,h]=sizeCanvas($('#graph'),200);c.clearRect(0,0,w,h);const span=2;const x0=36,x1=w-10,ym=h/2,A=h/2-18;
+  c.strokeStyle=css('--line');c.lineWidth=1;c.beginPath();c.moveTo(x0,ym);c.lineTo(x1,ym);c.moveTo(x0,8);c.lineTo(x0,h-8);c.stroke();
+  c.fillStyle=css('--muted');c.font='12px '+css('--f-mono');c.textAlign='center';
+  const start=Math.max(0,Math.floor(phase/span)*span);
+  for(let k=0;k<=8;k++){const x=x0+(x1-x0)*k/8;c.beginPath();c.moveTo(x,ym-4);c.lineTo(x,ym+4);c.stroke();const v=start+k/4;const lab=k%2===0?tl(v):'';if(k>0&&lab)c.fillText(lab,x,ym+16)}
+  for(const [key,col] of[['q',css('--efield')],['i',css('--bfield')]]){c.strokeStyle=col;c.lineWidth=2.5;c.beginPath();let first=true;
+    for(let x=x0;x<=x1;x+=2){const ph=start+(x-x0)/(x1-x0)*span;if(ph>phase+1e-9)break;const v=state(ph)[key];const y=ym-v*A;first?c.moveTo(x,y):c.lineTo(x,y);first=false}c.stroke()}
+  c.textAlign='left';c.fillStyle=css('--efield');c.fillText('U',x0-28,22);c.fillStyle=css('--bfield');c.fillText('I',x0-28,38);
+  const xc=x0+(phase-start)/span*(x1-x0);c.strokeStyle=css('--ink');c.setLineDash([4,4]);c.beginPath();c.moveTo(xc,8);c.lineTo(xc,h-8);c.stroke();c.setLineDash([])}
+function frame(ts){if(lastTs==null)lastTs=ts;const dt=Math.min(0.05,(ts-lastTs)/1000);lastTs=ts;
+  if(playing&&active==='s1'){phase+=dt/SLOW;dotOff+=state(phase).i*dt*90}
+  if(active==='s1'){drawCirc();drawGraph()}requestAnimationFrame(frame)}
+$('#play').onclick=()=>{playing=!playing;$('#play').textContent=playing?'Pause':'Abspielen';if(!playing)checkChal('stop')};
+$('#play').textContent=playing?'Pause':'Abspielen';
+function stepTo(d){playing=false;$('#play').textContent='Abspielen';phase=Math.max(0,Math.round((phase+d)*8)/8);checkChal('stop')}
+$('#fwd8').onclick=()=>stepTo(1/8);$('#back8').onclick=()=>stepTo(-1/8);
+$('#reset').onclick=()=>{phase=0;dotOff=0;playing=true;$('#play').textContent='Pause'};
+const CHAL=[
+ {t:'Halte die Simulation an, wenn die Stromstärke maximal ist.',test:e=>e==='stop'&&R===0?Math.abs(state(phase).i)>0.97:e==='stop'&&Math.abs(state(phase).i)>0.9*Math.abs(Math.exp(-R/(2*L)*phase*T0())),
+  why:'Genau jetzt ist der Kondensator leer (U = 0). Die ganze Energie steckt im Magnetfeld der Spule. Trotzdem fließt der Strom weiter, weil die Spule über Selbstinduktion jede Stromänderung bremst.'},
+ {t:'Halte an, wenn der Kondensator zum ersten Mal andersherum voll geladen ist.',test:e=>e==='stop'&&state(phase).q<-0.9*Math.exp(-R/(2*L)*phase*T0())&&phase<0.75,
+  why:'Das ist bei t = T/2. Die Spule hat den Strom so lange weitergetrieben, bis alle Energie wieder im E-Feld sitzt, nur mit vertauschten Vorzeichen.'},
+ {t:'Halte an, wenn die Energie genau halb im E-Feld und halb im B-Feld steckt.',test:e=>e==='stop'&&Math.abs(state(phase).Eel-state(phase).Emag)<0.08*(state(phase).Eel+state(phase).Emag)&&state(phase).Eel>0.02,
+  why:'Zum Beispiel bei t = T/8. Pro Periode passiert das 4-mal. Die Summe bleibt (ohne Widerstand) immer 100 %.'},
+ {t:'Stelle L und C so ein, dass die echte Periodendauer zwischen 0,9 s und 1,1 s liegt. (Tipp: L wie eine Spule mit Eisenkern, C wie ein Elko.)',test:()=>T0()>0.9&&T0()<1.1,
+  why:'Zum Beispiel L = 630 H und C = 40 µF ergibt T ≈ 1 s. So langsam, dass man es mit einem Zeigerinstrument sehen kann.'},
+ {t:'Bring T auf unter 1 µs. Was musst du dafür mit L und C machen?',test:()=>T0()<1e-6,
+  why:'Beides klein machen! So arbeiten Radio- und NFC-Schwingkreise: kleine Spulen (µH) und kleine Kondensatoren (pF).'},
+ {t:'Schalte einen Drahtwiderstand R zu. Was passiert mit der Amplitude?',test:()=>R>0,
+  why:'Die Schwingung wird gedämpft. Ein Teil der Energie wird bei jedem Umladen im Draht in Wärme umgewandelt. Genau das passiert in jedem echten Schwingkreis.'}];
+let chalDone=CHAL.map(()=>false);
+function renderChal(){const ol=$('#chal');ol.innerHTML='';const cur=chalDone.indexOf(false);CHAL.forEach((ch,k)=>{const li=document.createElement('li');li.className=chalDone[k]?'done':(k===cur?'active':'');
+  li.innerHTML=`<span class="mark">${chalDone[k]?'✓':k+1}</span><div>${ch.t}${chalDone[k]?`<div class="why">${ch.why}</div>`:''}</div>`;ol.appendChild(li)})}
+function checkChal(ev){const k=chalDone.indexOf(false);if(k<0)return;const ok=CHAL[k].test(ev);if(ok){chalDone[k]=true;award('ch'+k,1);renderChal();
+  $('#chalmsg').innerHTML='';if(chalDone.every(Boolean)){markDone('s1');$('#chalmsg').innerHTML='<div class="feedback ok"><b>Alle Aufträge geschafft.</b> Weiter mit Aufgabe 4 (Tabelle) auf dem Arbeitsblatt.</div>'}}
+  else if(ev==='stop'&&k<3){$('#chalmsg').innerHTML='<div class="feedback no">Noch nicht ganz. Nutze <b>± T/8</b> zum Feinjustieren und schau auf die Pfeile und die Energiebalken.</div>'}}
+renderChal();updReadout();requestAnimationFrame(frame);
+
+/* ===== 2 Tabelle ===== */
+const COLS=[
+ {h:'Spannung U<sub>C</sub>',o:['maximal (+)','fällt','0','maximal (−)','steigt']},
+ {h:'Stromstärke I',o:['0','Betrag steigt','Betrag maximal','Betrag fällt']},
+ {h:'Energie steckt …',o:['nur im E-Feld','in beiden Feldern','nur im B-Feld']},
+ {h:'Was treibt den Strom?',o:['Kondensator','Spule (Selbstinduktion)','niemand – es fließt kein Strom']}];
+const ROWS={0:['maximal (+)','0','nur im E-Feld','niemand – es fließt kein Strom'],1:['fällt','Betrag steigt','in beiden Feldern','Kondensator'],2:['0','Betrag maximal','nur im B-Feld','Spule (Selbstinduktion)'],
+ 3:['fällt','Betrag fällt','in beiden Feldern','Spule (Selbstinduktion)'],4:['maximal (−)','0','nur im E-Feld','niemand – es fließt kein Strom'],5:['steigt','Betrag steigt','in beiden Feldern','Kondensator'],
+ 6:['0','Betrag maximal','nur im B-Feld','Spule (Selbstinduktion)'],7:['steigt','Betrag fällt','in beiden Feldern','Spule (Selbstinduktion)']};
+const TLAB={0:'0',1:'T/8',2:'T/4',3:'3T/8',4:'T/2',5:'5T/8',6:'3T/4',7:'7T/8'};
+let sysRows=[];let sysRound=0;
+function newSys(first){sysRound++;sysRows=first?[0,1,2,3,4]:shuffle([0,1,2,3,4,5,6,7]).slice(0,5).sort((a,b)=>a-b);
+  let html='<tr><th>t</th>'+COLS.map(c=>`<th>${c.h}</th>`).join('')+'</tr>';
+  sysRows.forEach(r=>{html+=`<tr><td class="t">${TLAB[r]}</td>`+COLS.map((c,j)=>`<td><select id="sys-${r}-${j}" aria-label="${TLAB[r]} ${c.h.replace(/<[^>]+>/g,'')}"><option value="">– wählen –</option>${c.o.map(o=>`<option>${o}</option>`).join('')}</select></td>`).join('')+'</tr>'});
+  $('#systab').innerHTML=html;$('#sysmsg').innerHTML='';
+}
+$('#syscheck').onclick=()=>{let ok=0,tot=0,empty=0;sysRows.forEach(r=>COLS.forEach((c,j)=>{const s=$(`#sys-${r}-${j}`);tot++;s.classList.remove('ok','no');if(!s.value){empty++;return}if(s.value===ROWS[r][j]){ok++;s.classList.add('ok')}else s.classList.add('no')}));
+  if(ok===tot){award('sys'+sysRound,3);markDone('s2');$('#sysmsg').innerHTML='<div class="feedback ok"><b>Alles richtig.</b> Probier noch eine Runde mit anderen Zeitpunkten, bis es ohne Nachdenken klappt.</div>'}
+  else $('#sysmsg').innerHTML=`<div class="feedback ${empty?'info':'no'}">${ok} von ${tot} richtig.${empty?` ${empty} Felder sind noch leer.`:''} <br><b>Tipp:</b> Spannung und Strom sind um eine Viertelperiode versetzt: Wenn das eine maximal ist, ist das andere 0. „Steigt“ bei U heißt: U wird größer (z. B. von −U<sub>max</sub> Richtung 0). Wer den Strom treibt: Solange der Strom <i>betragsmäßig zunimmt</i>, entlädt sich der Kondensator. Nimmt er ab, hält die Spule ihn aufrecht.</div>`};
+$('#sysnew').onclick=()=>newSys(false);newSys(true);
+
+/* ===== 3 Analogie ===== */
+const PAIRS=[['Auslenkung s','Ladung Q bzw. Spannung U'],['Geschwindigkeit v','Stromstärke I'],['Masse m (Trägheit)','Induktivität L'],['Federhärte D','1 / C (Kehrwert der Kapazität)'],
+ ['Spannenergie ½·D·s²','Feldenergie im Kondensator ½·C·U²'],['Bewegungsenergie ½·m·v²','Feldenergie in der Spule ½·L·I²'],['Reibung','ohmscher Widerstand R']];
+let selL=null,paired=0;
+function buildMatch(){const L1=$('#mL'),R1=$('#mR');L1.querySelectorAll('button').forEach(b=>b.remove());R1.querySelectorAll('button').forEach(b=>b.remove());paired=0;selL=null;
+  shuffle(PAIRS.map((p,i)=>[p[0],i])).forEach(([t,i])=>{const b=document.createElement('button');b.textContent=t;b.dataset.i=i;b.onclick=()=>{if(b.classList.contains('paired'))return;L1.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');selL=b};L1.appendChild(b)});
+  shuffle(PAIRS.map((p,i)=>[p[1],i])).forEach(([t,i])=>{const b=document.createElement('button');b.textContent=t;b.dataset.i=i;b.onclick=()=>{if(!selL||b.classList.contains('paired'))return;
+    if(selL.dataset.i===b.dataset.i){selL.classList.remove('sel');selL.classList.add('paired');b.classList.add('paired');selL=null;paired++;award('m'+b.dataset.i,1);
+      if(paired===PAIRS.length){$('#matchmsg').innerHTML='<div class="feedback ok" style="margin-top:12px"><b>Alle Paare gefunden.</b> Die Spule ist „träge“ wie die Masse: Sie will den Strom so lassen, wie er ist. Ein kleiner Kondensator ist wie eine harte Feder: Schon wenig Ladung erzeugt eine große Spannung.</div>';checkAnalog()}}
+    else{b.classList.add('shake');selL.classList.add('shake');setTimeout(()=>{b.classList.remove('shake');selL&&selL.classList.remove('shake')},400);
+      $('#matchmsg').innerHTML='<div class="feedback no" style="margin-top:12px">Passt nicht. Überleg: Was ist beim Federpendel „gespeichert“, was „bewegt“ sich, was ist „träge“?</div>'}};R1.appendChild(b)})}
+buildMatch();
+const TQ=[['T = 2π · √(L / C)',false,'Hier wurde D durch C statt durch 1/C ersetzt. D entspricht dem Kehrwert 1/C.'],['T = 2π · √(L · C)',true,'m → L und D → 1/C:  √(m/D) → √(L / (1/C)) = √(L·C). Das ist die Thomson’sche Schwingungsgleichung. Sie steht so auch in eurer Formelsammlung.'],
+ ['T = 2π · √(C / L)',false,'Hier sind L und C vertauscht. Die Masse (Trägheit) entspricht der Spule.'],['T = 2π · L · C',false,'Die Wurzel bleibt erhalten, sie kommt ja aus der Federpendel-Formel.']];
+let tqDone=false;
+(function(){const box=$('#thomsonq');shuffle(TQ).forEach(([t,ok,e])=>{const b=document.createElement('button');b.textContent=t;b.style.fontFamily=css('--f-mono');b.onclick=()=>{
+  [...box.children].forEach(x=>x.classList.remove('no'));b.classList.add(ok?'ok':'no');$('#thomsonmsg').innerHTML=`<div class="feedback ${ok?'ok':'no'}">${e}</div>`;if(ok){tqDone=true;award('thomson',2);checkAnalog()}};box.appendChild(b)})})();
+function checkAnalog(){if(tqDone&&paired===PAIRS.length)markDone('s3')}
+
+/* ===== 4 Rechentrainer ===== */
+const SCEN={
+ lab:()=>({ctx:'Laborversuch mit Eisenkernspule',L:nice(rnd(50,900)),C:nice(rnd(2,100))*1e-6}),
+ lab2:()=>({ctx:'Laborversuch mit Luftspule',L:nice(rnd(5,60))*1e-3,C:nice(rnd(0.5,20))*1e-6}),
+ radio:()=>({ctx:'Mittelwellen-Radio',L:nice(rnd(0.15,0.8))*1e-3,C:nice(rnd(60,450))*1e-12}),
+ nfc:()=>({ctx:'NFC-Antenne im Smartphone',L:nice(rnd(1,3))*1e-6,C:nice(rnd(30,90))*1e-12})};
+function unitFor(x,u,list){let best=list[0];for(const p of list){if(Math.abs(x)>=p[1]*0.9999)best=p}return best} // returns [pfx,factor]
+const UL=[['p',1e-12],['n',1e-9],['µ',1e-6],['m',1e-3],['',1],['k',1e3],['M',1e6]];
+const TYPES=[
+ {id:'T',name:'T berechnen',gen(){const s=pick(Object.values(SCEN))();const T=2*Math.PI*Math.sqrt(s.L*s.C);const [p,f]=unitFor(T,'s',UL.slice(0,5));
+   return {given:`${s.ctx}\nL = ${withUnit(s.L,'H')}\nC = ${withUnit(s.C,'F')}`,q:'Berechne die Periodendauer T.',unit:p+'s',ans:T/f,
+    steps:`T = 2π·√(L·C)\n  = 2π·√(${fmt(s.L)} H · ${fmt(s.C)} F)\n  = ${withUnit(T,'s')}`}}},
+ {id:'f',name:'f berechnen',gen(){const s=pick(Object.values(SCEN))();const T=2*Math.PI*Math.sqrt(s.L*s.C),F=1/T;const [p,f]=unitFor(F,'Hz',UL.slice(4));
+   return {given:`${s.ctx}\nL = ${withUnit(s.L,'H')}\nC = ${withUnit(s.C,'F')}`,q:'Berechne die Eigenfrequenz f.',unit:p+'Hz',ans:F/f,
+    steps:`T = 2π·√(L·C) = ${withUnit(T,'s')}\nf = 1/T = ${withUnit(F,'Hz')}`}}},
+ {id:'C',name:'C gesucht',gen(){const s=pick([SCEN.radio,SCEN.nfc,SCEN.lab2])();const F=nice(1/(2*Math.PI*Math.sqrt(s.L*s.C)));const Cx=1/(4*Math.PI**2*F*F*s.L);const [p,f]=unitFor(Cx,'F',UL.slice(0,4));
+   return {given:`${s.ctx}\nL = ${withUnit(s.L,'H')}\nZiel: f = ${withUnit(F,'Hz')}`,q:'Welche Kapazität C braucht der Kondensator?',unit:p+'F',ans:Cx/f,
+    steps:`f = 1/(2π·√(LC))  ⇒  C = 1/(4π²·f²·L)\nC = 1/(4π² · (${fmt(F)} Hz)² · ${fmt(s.L)} H)\n  = ${withUnit(Cx,'F')}`}}},
+ {id:'L',name:'L aus Messung',gen(){const s=pick([SCEN.lab,SCEN.lab2])();const T=nice(2*Math.PI*Math.sqrt(s.L*s.C));const Lx=T*T/(4*Math.PI**2*s.C);const [p,f]=unitFor(Lx,'H',UL.slice(3,5));
+   return {given:`Messung: Am Oszilloskop misst du\nT = ${withUnit(T,'s')}\nDer Kondensator hat C = ${withUnit(s.C,'F')}`,q:'Bestimme die Induktivität L der Spule.',unit:p+'H',ans:Lx/f,
+    steps:`T = 2π·√(L·C)  ⇒  T² = 4π²·L·C  ⇒  L = T²/(4π²·C)\nL = (${fmt(T)} s)² / (4π² · ${fmt(s.C)} F)\n  = ${withUnit(Lx,'H')}`}}},
+ {id:'k',name:'Faktor',gen(){const what=pick(['C','L']);const k=pick([4,9,16,0.25,2,0.5]);const res=pick(['T','f']);const fac=res==='T'?Math.sqrt(k):1/Math.sqrt(k);
+   const ks=k===0.25?'ein Viertel':k===0.5?'die Hälfte':'das '+k+'-Fache';
+   return {given:`Ein Schwingkreis schwingt. Nun wird ${what==='C'?'die Kapazität C':'die Induktivität L'} auf ${ks} geändert.\nDas andere Bauteil bleibt gleich.`,q:`Um welchen Faktor ändert sich ${res==='T'?'die Periodendauer T':'die Frequenz f'}? (z. B. 2 für „verdoppelt“, 0,5 für „halbiert“)`,unit:'· '+res+'_alt',ans:fac,
+    steps:`T ~ √(${what}) ⇒ T ändert sich um √${fmt(k)} = ${fmt(Math.sqrt(k))}\n${res==='f'?`f = 1/T ⇒ f ändert sich um 1/${fmt(Math.sqrt(k))} = ${fmt(fac)}`:''}`.trim()}}},
+ {id:'E',name:'Energie',gen(){const s=pick([SCEN.lab,SCEN.lab2])();const U=pick([6,8,10,12,15,20]);const E=0.5*s.C*U*U;const [p,f]=unitFor(E,'J',UL.slice(2,5));
+   return {given:`Der Kondensator (C = ${withUnit(s.C,'F')}) wird an U = ${U} V aufgeladen und dann mit der Spule verbunden.`,q:'Wie viel Energie steckt zu Beginn im Schwingkreis?',unit:p+'J',ans:E/f,
+    steps:`E = ½·C·U²\n  = ½ · ${fmt(s.C)} F · (${U} V)²\n  = ${withUnit(E,'J')}`}}},
+ {id:'I',name:'I_max',gen(){const s=pick([SCEN.lab,SCEN.lab2])();const U=pick([6,8,10,12,15,20]);const I=U*Math.sqrt(s.C/s.L);const [p,f]=unitFor(I,'A',UL.slice(2,5));
+   return {given:`C = ${withUnit(s.C,'F')}, L = ${withUnit(s.L,'H')}\nKondensator zu Beginn auf U = ${U} V geladen, Dämpfung vernachlässigen.`,q:'Wie groß ist die maximale Stromstärke I_max in der Spule?',unit:p+'A',ans:I/f,
+    steps:`Energieerhaltung: ½·C·U² = ½·L·I_max²\n⇒ I_max = U·√(C/L)\n  = ${U} V · √(${fmt(s.C)} F / ${fmt(s.L)} H)\n  = ${withUnit(I,'A')}`}}}];
+let enabled=new Set(TYPES.map(t=>t.id)),cur=null,tries=0,streak=0,best=0,solved=0;
+function renderChips(){const box=$('#chips');box.innerHTML='';TYPES.forEach(t=>{const b=document.createElement('button');b.textContent=t.name;b.setAttribute('aria-pressed',enabled.has(t.id));
+  b.onclick=()=>{if(enabled.has(t.id)&&enabled.size>1)enabled.delete(t.id);else enabled.add(t.id);renderChips();newCalc()};box.appendChild(b)})}
+function newCalc(){const t=pick(TYPES.filter(x=>enabled.has(x.id)));cur=t.gen();cur.id=t.id;tries=0;
+  $('#calc').innerHTML=`<p class="given" style="white-space:pre-line">${cur.given}</p><p class="q">${cur.q}</p>
+   <div class="ans"><input id="cin" inputmode="decimal" autocomplete="off" aria-label="Deine Antwort"><span class="unit">${cur.unit}</span><button class="btn" id="cchk">Prüfen</button><button class="btn ghost" id="csol">Lösungsweg</button></div><div id="cfb"></div>`;
+  $('#cchk').onclick=checkCalc;$('#csol').onclick=()=>showSol(false);$('#cin').addEventListener('keydown',e=>{if(e.key==='Enter')checkCalc()})}
+function showSol(ok){$('#cfb').innerHTML=`<div class="feedback ${ok?'ok':'info'}">${ok?'<b>Richtig!</b> ':''}Lösungsweg:<div class="steps">${cur.steps}</div>Ergebnis: <b>${fmt(cur.ans)} ${cur.unit}</b></div><div class="row" style="margin-top:10px"><button class="btn green" id="cnext">Nächste Aufgabe</button></div>`;
+  $('#cnext').onclick=newCalc;if(!ok){streak=0;updStreak()}}
+function checkCalc(){const v=parseNum($('#cin').value);const inp=$('#cin');if(v==null){$('#cfb').innerHTML='<div class="feedback info">Gib eine Zahl ein.</div>';return}tries++;
+  if(rel(v,cur.ans)){inp.className='ok';streak++;solved++;best=Math.max(best,streak);award('calc'+solved,tries===1?2:1);if(solved>=5)markDone('s4');updStreak();showSol(true);return}
+  inp.className='no';let hint='Noch nicht. ';const r=v/cur.ans;
+  if([1e3,1e-3,1e6,1e-6,1e9,1e-9].some(p=>rel(r,p)))hint+='Die Ziffern stimmen, aber eine <b>Vorsilbe</b> ist falsch umgerechnet (Faktor 1000 daneben). Achte auf die Einheit hinter dem Eingabefeld.';
+  else if(rel(r,1/(2*Math.PI))||rel(r,2*Math.PI))hint+='Du bist um den Faktor 2π daneben. Hast du 2π vergessen oder doppelt genommen?';
+  else if(cur.id==='T'&&rel(v*v,cur.ans))hint+='Sieht aus, als fehlt die <b>Wurzel</b>.';
+  else if(rel(v*cur.ans,1)||(cur.id==='f'&&rel(v,1/cur.ans)))hint+='Verwechselt? f = 1/T.';
+  else hint+=tries>=2?'Schau dir den Lösungsweg an und vergleiche Schritt für Schritt.':'Prüfe die Formel und setze die Werte mit Zehnerpotenzen ein.';
+  $('#cfb').innerHTML=`<div class="feedback no">${hint}</div>`}
+function updStreak(){$('#streak').textContent=`Gelöst: ${solved} · Serie: ${streak} · Beste Serie: ${best}`}
+renderChips();newCalc();updStreak();
+
+/* ===== 5 Oszi ===== */
+let sc=null,scHelp=false;
+const TDIV=[0.2e-3,0.5e-3,1e-3,2e-3,5e-3,10e-3,20e-3];
+function newScope(){const td=pick(TDIV);const per=pick([2,2.4,2.5,3,3.2,3.5,4]);const T=per*td;const C=nice(pick([0.47,1,2.2,4.7,10,22])*1e-6,2);const L=T*T/(4*Math.PI**2*C);
+  const vd=pick([1,2,5]);const amp=pick([3,3.5,4]);const d=rnd(0.08,0.2)/T;
+  sc={td,T,C,L,vd,amp,d,step:0,tries:0};scHelp=false;$('#scopehelp').textContent='Ablese-Hilfe zeigen';
+  $('#scopeset').innerHTML=`Zeitbasis: <b>${withUnit(td,'s')}/DIV</b> · Y: <b>${vd} V/DIV</b> · Kondensator: <b>C = ${withUnit(C,'F')}</b>`;drawScope();scopeTask()}
+function drawScope(){if(!sc)return;const cv=$('#scope');const [c,w]=sizeCanvas(cv,330);const h=330;const W=Math.min(w-20,(h-30)*10/8);const gx=(w-W)/2,gy=10,G=W/10,H=G*8;
+  c.fillStyle='#0b1a14';c.fillRect(0,0,w,h);c.strokeStyle='rgba(140,220,170,.22)';c.lineWidth=1;
+  for(let k=0;k<=10;k++){c.beginPath();c.moveTo(gx+k*G,gy);c.lineTo(gx+k*G,gy+H);c.stroke()}for(let k=0;k<=8;k++){c.beginPath();c.moveTo(gx,gy+k*G);c.lineTo(gx+W,gy+k*G);c.stroke()}
+  c.strokeStyle='rgba(140,220,170,.45)';for(let k=0;k<=50;k++){const x=gx+k*G/5;c.beginPath();c.moveTo(x,gy+4*G-3);c.lineTo(x,gy+4*G+3);c.stroke()}
+  for(let k=0;k<=40;k++){const y=gy+k*G/5;c.beginPath();c.moveTo(gx+5*G-3,y);c.lineTo(gx+5*G+3,y);c.stroke()}
+  c.strokeStyle='#7CFFB0';c.lineWidth=2.4;c.shadowColor='#7CFFB0';c.shadowBlur=6;c.beginPath();
+  for(let x=0;x<=W;x++){const t=(x/G)*sc.td;const y=gy+4*G-sc.amp*G*Math.exp(-sc.d*t)*Math.cos(2*Math.PI*t/sc.T);x?c.lineTo(gx+x,y):c.moveTo(gx+x,y)}c.stroke();c.shadowBlur=0;
+  if(scHelp){const xT=gx+sc.T/sc.td*G;c.strokeStyle='#FFD36A';c.setLineDash([5,5]);c.lineWidth=1.5;c.beginPath();c.moveTo(gx,gy);c.lineTo(gx,gy+H);c.moveTo(xT,gy);c.lineTo(xT,gy+H);c.stroke();c.setLineDash([]);
+    c.fillStyle='#FFD36A';c.font='14px '+css('--f-mono');c.textAlign='center';c.fillText('1 Periode',(gx+xT)/2,gy+H-10);arrow(c,gx+4,gy+H-26,xT-4,gy+H-26,'#FFD36A',1.5);arrow(c,xT-4,gy+H-26,gx+4,gy+H-26,'#FFD36A',1.5)}}
+const SSTEPS=[
+ {q:()=>'1) Lies die Periodendauer T ab. Zähle die Kästchen (DIV) von einem Maximum zum nächsten.',unit:'ms',ans:()=>sc.T*1e3,tol:0.06,
+  sol:()=>`Abstand zweier Maxima: ${fmt(sc.T/sc.td,2)} DIV\nT = ${fmt(sc.T/sc.td,2)} DIV · ${withUnit(sc.td,'s')}/DIV = ${fmt(sc.T*1e3)} ms`},
+ {q:()=>'2) Berechne die Frequenz f.',unit:'Hz',ans:()=>1/sc.T,tol:0.06,sol:()=>`f = 1/T = 1/(${fmt(sc.T*1e3)} ms) = ${fmt(1/sc.T)} Hz`},
+ {q:()=>'3) Bestimme die Induktivität L der Spule.',unit:'mH',ans:()=>sc.L*1e3,tol:0.08,sol:()=>`L = T²/(4π²·C)\n  = (${fmt(sc.T)} s)² / (4π² · ${fmt(sc.C)} F)\n  = ${withUnit(sc.L,'H')}`},
+ {q:()=>'4) Wie groß war die Kondensatorspannung beim Start (t = 0, linker Rand)?',unit:'V',ans:()=>sc.amp*sc.vd,tol:0.06,sol:()=>`${fmt(sc.amp,2)} DIV · ${sc.vd} V/DIV = ${fmt(sc.amp*sc.vd)} V`}];
+function scopeTask(){const s=SSTEPS[sc.step];const box=$('#scopetask');if(!s){box.innerHTML=`<div class="feedback ok"><b>Fertig ausgewertet.</b> Genau so geht ihr morgen in der Laborübung vor. Hol dir ein neues Oszillogramm und übe weiter.</div>`;markDone('s5');return}
+  sc.tries=0;box.innerHTML=`<p class="q">${s.q()}</p><div class="ans"><input id="sin" inputmode="decimal" autocomplete="off" aria-label="Antwort"><span class="unit">${s.unit}</span><button class="btn" id="schk">Prüfen</button><button class="btn ghost" id="ssol">Lösung</button></div><div id="sfb"></div>`;
+  const solve=(ok)=>{$('#sfb').innerHTML=`<div class="feedback ${ok?'ok':'info'}">${ok?'<b>Stimmt.</b> ':''}<div class="steps">${s.sol()}</div></div><div class="row" style="margin-top:10px"><button class="btn green" id="snext">Weiter</button></div>`;$('#snext').onclick=()=>{sc.step++;scopeTask()}};
+  $('#ssol').onclick=()=>solve(false);
+  const chk=()=>{const v=parseNum($('#sin').value);if(v==null)return;sc.tries++;const a=s.ans();if(Math.abs(v-a)<=a*s.tol){$('#sin').className='ok';award('sc'+Date.now(),sc.tries===1?2:1);solve(true)}
+   else{$('#sin').className='no';let h='Noch nicht.';const r=v/a;if(sc.step===0&&[0.5,2].some(x=>Math.abs(r-x)<0.08))h+=' Hast du von Maximum zu <b>Minimum</b> gezählt? Eine Periode geht von Maximum zu Maximum.';
+     else if([1e3,1e-3].some(x=>Math.abs(r/x-1)<0.08))h+=' Faktor 1000 daneben: Einheit beachten.';else if(sc.step===0)h+=' Zähle die Kästchen nochmal und multipliziere mit der Zeitbasis. Die Ablese-Hilfe links zeigt dir eine Periode.';
+     $('#sfb').innerHTML=`<div class="feedback no">${h}</div>`}};
+  $('#schk').onclick=chk;$('#sin').addEventListener('keydown',e=>{if(e.key==='Enter')chk()})}
+$('#scopenew').onclick=newScope;$('#scopehelp').onclick=()=>{scHelp=!scHelp;$('#scopehelp').textContent=scHelp?'Ablese-Hilfe ausblenden':'Ablese-Hilfe zeigen';drawScope()};
+addEventListener('resize',()=>{if(active==='s5')drawScope()});
+newScope();
+
+/* ===== 6 Quiz ===== */
+const POOL=[
+ ['Der Kondensator ist gerade vollständig entladen. Was gilt für den Strom?',['Er ist maximal','Er ist null','Er wechselt gerade die Richtung','Er ist halb so groß wie maximal'],0,'Bei U = 0 steckt die ganze Energie im Magnetfeld, also ist I maximal.'],
+ ['Warum hört der Strom nicht auf, sobald der Kondensator leer ist?',['Die Spule hält den Strom durch Selbstinduktion aufrecht','Die Batterie liefert noch Strom nach','Der Kondensator lädt sich sofort neu','Der Widerstand treibt den Strom weiter'],0,'Nimmt der Strom ab, induziert die Spule eine Spannung, die der Abnahme entgegenwirkt (Lenz). So lädt sie den Kondensator andersherum auf.'],
+ ['Warum entlädt sich der Kondensator über die Spule nicht schlagartig?',['Die Selbstinduktion der Spule bremst den Stromanstieg','Der Eisenkern speichert die Ladung','Die Spule hat einen riesigen ohmschen Widerstand','Der Kondensator ist zu groß'],0,'Die Spule wirkt jeder Stromänderung entgegen, auch dem Anstieg. Deshalb wächst I nur langsam.'],
+ ['Die Kapazität wird vervierfacht. Was passiert mit T?',['T verdoppelt sich','T vervierfacht sich','T halbiert sich','T bleibt gleich'],0,'T ~ √C, √4 = 2.'],
+ ['Die Induktivität wird auf ein Viertel verkleinert. Was passiert mit f?',['f verdoppelt sich','f halbiert sich','f wird viermal so groß','f bleibt gleich'],0,'T ~ √L, also T halbiert sich und f = 1/T verdoppelt sich.'],
+ ['Warum wird die Schwingung im echten Versuch immer kleiner?',['Im Drahtwiderstand wird Energie in Wärme umgewandelt','Die Ladung geht durch den Kondensator verloren','Die Frequenz nimmt ab','Das Magnetfeld wird immer stärker'],0,'Bei jedem Umladen fließt Strom durch den Widerstand R der Spule. Die Energie geht als Wärme verloren: gedämpfte Schwingung.'],
+ ['Um wie viel sind Spannung und Strom gegeneinander versetzt?',['um T/4 (90°)','um T/2 (180°)','gar nicht','um T (360°)'],0,'Wenn U maximal ist, ist I = 0 und umgekehrt. Dazwischen liegt eine Viertelperiode.'],
+ ['Welches Bauteil entspricht beim Federpendel der Masse m?',['die Spule (L)','der Kondensator (C)','der Widerstand (R)','die Spannungsquelle'],0,'Masse und Spule sind beide „träge“: Sie wollen die Bewegung bzw. den Strom beibehalten.'],
+ ['Was ist beim Schwingkreis die „Feder“?',['der Kondensator','die Spule','der Draht','der Schalter'],0,'Die Feder speichert Spannenergie, der Kondensator speichert Feldenergie ½·C·U². Genauer: D entspricht 1/C.'],
+ ['Ein Radio soll Sender mit hoher Frequenz empfangen. Wie muss der Schwingkreis sein?',['kleine Induktivität und kleine Kapazität','große Induktivität und große Kapazität','große Induktivität, kleine Kapazität reicht nicht','Die Frequenz hängt nur vom Widerstand ab'],0,'f = 1/(2π√(LC)): Je kleiner L·C, desto größer f. Deshalb arbeiten Radios mit µH und pF.'],
+ ['Was gilt (ungedämpft) nach genau einer halben Periode?',['Der Kondensator ist gleich stark, aber umgekehrt geladen','Der Kondensator ist leer','Der Strom ist maximal','Die Energie ist halb verbraucht'],0,'Bei T/2 sitzt die ganze Energie wieder im E-Feld, nur mit vertauschter Polung.'],
+ ['Wie oft pro Periode ist das Magnetfeld der Spule maximal?',['2-mal','1-mal','4-mal','gar nicht'],0,'Bei T/4 und bei 3T/4, einmal in jede Stromrichtung.'],
+ ['Wo steckt die Energie bei t = T/8 (ungedämpft)?',['je zur Hälfte im E-Feld und im B-Feld','nur im E-Feld','nur im B-Feld','sie ist verloren gegangen'],0,'Bei T/8 ist cos² = sin² = ½. Die Summe bleibt konstant.'],
+ ['Am Oszi siehst du bei 2 ms/DIV genau 4 DIV von Maximum zu Maximum. Wie groß ist f?',['125 Hz','8 Hz','250 Hz','500 Hz'],0,'T = 4 · 2 ms = 8 ms, f = 1/8 ms = 125 Hz.'],
+ ['Welche Energie hat ein Kondensator mit 40 µF bei 10 V?',['2 mJ','4 mJ','0,4 mJ','400 µJ'],0,'E = ½ · 40·10⁻⁶ F · (10 V)² = 2·10⁻³ J = 2 mJ.'],
+ ['Was passiert, wenn man im Schwingkreis die Spule durch einen Widerstand ersetzt?',['Der Kondensator entlädt sich nur, es gibt keine Schwingung','Es schwingt schneller','Es schwingt langsamer','Es schwingt genauso'],0,'Ohne Spule fehlt der „Energiespeicher“, der den Strom weitertreibt. Es bleibt eine einfache Entladekurve.']];
+let quiz=[],qi=0,qok=0,quizRuns=[];
+function startQuiz(){quiz=shuffle(POOL).slice(0,8).map(([q,o,a,e])=>{const idx=shuffle(o.map((_,i)=>i));return{q,o:idx.map(i=>o[i]),a:idx.indexOf(a),e}});qi=0;qok=0;showQ()}
+function showQ(){$('#qnext').hidden=true;$('#qf').innerHTML='';$('#qbar').style.width=(qi/quiz.length*100)+'%';
+  if(qi>=quiz.length){$('#qnum').textContent='';$('#qq').textContent=`${qok} von ${quiz.length} richtig.`;$('#qo').innerHTML='';quizRuns.push(qok);appChanged();if(qok>=6)markDone('s6');
+    $('#qf').innerHTML=`<div class="feedback ${qok>=6?'ok':'info'}">${qok>=6?'Das sitzt.':'Schau dir die Simulation (Station 1) und Aufgabe 4 auf dem Arbeitsblatt nochmal an und starte eine neue Runde.'}</div>`;return}
+  const q=quiz[qi];$('#qnum').textContent=`Frage ${qi+1} von ${quiz.length} · ${qok} richtig`;$('#qq').textContent=q.q;const box=$('#qo');box.innerHTML='';let answered=false;
+  q.o.forEach((o,i)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;const ok=i===q.a;b.classList.add(ok?'ok':'no');box.children[q.a].classList.add('ok');
+    if(ok){qok++;award('q'+qi+q.q.length+Math.random(),1)}$('#qf').innerHTML=`<div class="feedback ${ok?'ok':'no'}"><b>${ok?'Richtig.':'Nicht ganz.'}</b> ${q.e}</div>`;$('#qnext').hidden=false;$('#qnum').textContent=`Frage ${qi+1} von ${quiz.length} · ${qok} richtig`};box.appendChild(b)})}
+$('#qnext').onclick=()=>{qi++;showQ()};$('#qrestart').onclick=startQuiz;startQuiz();
+
+drawBets();
+
+/* ===== Anbindung an die Klassen-App ===== */
+if(window.AppBridge)AppBridge.register({
+  getState(){return{
+    punkte:pts,
+    stationen:TABS.map(t=>t[0]),
+    erledigt:TABS.filter(t=>done[t[1]]).map(t=>t[0]),
+    details:{
+      'Wette':bet?bet.toUpperCase()+(betShown?(bet==='d'?' (richtig)':' (falsch)'):' (noch nicht aufgelöst)'):'–',
+      'Simulation':chalDone.filter(Boolean).length+' von '+CHAL.length+' Aufträgen',
+      'Analogie':paired+' von '+PAIRS.length+' Paaren, Thomson-Formel '+(tqDone?'gefunden':'offen'),
+      'Rechnen':solved+' gelöst, beste Serie '+best,
+      'Exit-Check':quizRuns.length?'Runden: '+quizRuns.map(r=>r+'/8').join(', '):'noch keine Runde'
+    },
+    daten:{pts,got:[...got],done,bet,betShown,chalDone,tqDone,solved,best,quizRuns}
+  }},
+  setState(s){const d=s&&s.daten;if(!d)return;
+    pts=d.pts||0;got.clear();(d.got||[]).forEach(k=>got.add(k));$('#pts').textContent=pts;
+    Object.assign(done,d.done||{});renderTabs();
+    if(Array.isArray(d.chalDone)&&d.chalDone.length===CHAL.length){chalDone=d.chalDone;renderChal()}
+    tqDone=!!d.tqDone;solved=d.solved||0;best=d.best||0;updStreak();quizRuns=d.quizRuns||[];
+    if(d.bet){pickBet(d.bet);if(d.betShown)reveal()}}
+});
+})();
+</script>
+
+</body></html>

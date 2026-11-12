@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Physik-App · Auswertung</title>
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--bg:#F2F5F8;--panel:#fff;--ink:#15253A;--muted:#58697C;--line:#D3DCE6;--navy:#1F3A5F;--green:#3C7A4E;--navySoft:#E3EAF3;--greenSoft:#E2F0E5;--warn:#FFF3D6;--bad:#B3261E;--badSoft:#FBE6E4;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+[hidden]{display:none!important}
+.wrap{max-width:1280px;margin:0 auto;padding:20px}
+h1,h2,h3{font-family:var(--f-display);color:var(--navy);margin:0 0 8px;line-height:1.15}
+h1{font-size:34px;font-weight:800}
+h2{font-size:22px;font-weight:600}
+button,select,input,textarea{font:inherit}
+.btn{font-weight:700;border-radius:10px;border:2px solid var(--navy);background:var(--navy);color:#fff;padding:8px 14px;cursor:pointer}
+.btn.ghost{background:var(--panel);color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn.small{padding:4px 10px;font-size:14px}
+nav{display:flex;gap:6px;margin:14px 0 18px;flex-wrap:wrap}
+nav button{border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:700;color:var(--ink)}
+nav button[aria-selected=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+select,input[type=text]{padding:8px 10px;border:2px solid var(--line);border-radius:8px;background:#fff}
+textarea{width:100%;min-height:90px;padding:10px;border:2px solid var(--line);border-radius:10px;resize:vertical}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--navySoft);font-size:14px}
+td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+.muted{color:var(--muted);font-size:14px}
+.msg{border-radius:10px;padding:10px 14px;margin:10px 0}
+.msg.info{background:var(--navySoft)}
+.msg.warn{background:var(--warn)}
+.msg.ok{background:var(--greenSoft)}
+.drop{border:3px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--muted);cursor:pointer}
+.drop.over{border-color:var(--green);background:var(--greenSoft)}
+.matrix td.cell{cursor:pointer;min-width:150px}
+.matrix td.cell:hover{outline:2px solid var(--navy)}
+.matrix td.sel{outline:3px solid var(--green)}
+.pbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:4px 0}
+.pbar i{display:block;height:100%;background:var(--green)}
+.none{color:var(--muted)}
+.stn{list-style:none;padding:0;margin:8px 0}
+.stn li{padding:6px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:26px 1fr;gap:6px}
+.stn .ok{color:var(--green);font-weight:700}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--navy);margin-left:6px;vertical-align:middle}
+#viewer{position:fixed;inset:0;background:rgba(15,25,40,.6);display:flex;flex-direction:column;padding:20px;z-index:20}
+#viewer .vbar{background:var(--navy);color:#fff;padding:10px 14px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+#viewer iframe{flex:1;border:0;background:#fff;border-radius:0 0 12px 12px}
+/* Druck: Code-Kärtchen */
+#print{display:none}
+@media print{
+  body>*:not(#print){display:none!important}
+  #print{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .karte{border:1px dashed #999;padding:14px;height:42mm;font-family:var(--f-body)}
+  .karte b{display:block;font-size:13pt}
+  .karte .c{font:700 20pt ui-monospace,Menlo,monospace;letter-spacing:.08em;margin:6px 0}
+  .karte small{font-size:9pt;color:#444}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Physik-App · Auswertung</h1>
+  <div class="muted">Namen und Rückmeldungen bleiben nur in diesem Browser auf deinem Rechner. Mach ab und zu eine Sicherung (Reiter „Sicherung“).</div>
+  <nav>
+    <button data-tab="tAbg" aria-selected="true">Abgaben</button>
+    <button data-tab="tKl" aria-selected="false">Klassen &amp; Codes</button>
+    <button data-tab="tSich" aria-selected="false">Sicherung</button>
+  </nav>
+
+  <!-- ABGABEN -->
+  <section id="tAbg">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div class="row"><label>Klasse <select id="aKlasse"></select></label></div>
+        <div class="row"><button class="btn green" id="rmExport">Rückmeldungsdatei für die Klasse erstellen</button></div>
+      </div>
+      <div class="drop" id="drop" style="margin-top:12px">Abgabe-Dateien hierher ziehen oder <b>klicken</b> und auswählen (mehrere gleichzeitig möglich, z. B. den ganzen Nextcloud-Ordner markieren).</div>
+      <input type="file" id="aFiles" multiple accept=".json" hidden>
+      <div id="aMsg"></div>
+    </div>
+    <div class="cols">
+      <div class="card" style="overflow-x:auto"><h2>Übersicht</h2><div id="matrix"></div></div>
+      <div class="card" id="detail"><h2>Details</h2><p class="muted">Klick links auf ein Feld, um den Stand eines Schülers in einem Modul zu sehen und eine Rückmeldung zu schreiben.</p></div>
+    </div>
+  </section>
+
+  <!-- KLASSEN -->
+  <section id="tKl" hidden>
+    <div class="cols">
+      <div class="card">
+        <h2>Codes erzeugen</h2>
+        <div class="row"><label>Klasse <select id="kKlasse"></select></label></div>
+        <p class="muted">Die ersten zwei Ziffern des Codes stehen für die Klasse (aus <code>module/module.json</code>). Neue Klasse? Dort unter „klassen“ eintragen, z. B. <code>"22": "TG2.2"</code>.</p>
+        <label>Namen, einer pro Zeile (z. B. aus der Schülerliste kopieren)</label>
+        <textarea id="kNamen" placeholder="Anna Beispiel&#10;Ben Muster"></textarea>
+        <div class="row" style="margin-top:8px"><button class="btn green" id="kGo">Codes erzeugen</button></div>
+        <div id="kMsg"></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h2>Klassenliste</h2>
+          <div class="row"><button class="btn ghost small" id="kCsv">Als CSV (Excel)</button><button class="btn ghost small" id="kPrint">Code-Kärtchen drucken</button></div></div>
+        <div id="kListe"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SICHERUNG -->
+  <section id="tSich" hidden>
+    <div class="card">
+      <h2>Sicherung</h2>
+      <p>Alles, was die Auswertung weiß (Klassenlisten mit Codes, eingelesene Abgaben, deine Rückmeldungen), steckt in einer Datei. Leg sie z. B. in deine Nextcloud. Auf einem anderen Rechner kannst du sie hier wieder einlesen.</p>
+      <div class="row"><button class="btn" id="sExport">Sicherung herunterladen</button><button class="btn ghost" id="sImport">Sicherung einlesen</button></div>
+      <input type="file" id="sFile" accept=".json" hidden>
+      <div id="sMsg"></div>
+    </div>
+  </section>
+</div>
+
+<div id="viewer" hidden><div class="vbar"><b id="vTitle"></b><span class="muted" style="color:#cfe">Ansicht mit dem Stand des Schülers. Änderungen hier werden nicht gespeichert.</span><button class="btn ghost small" id="vClose">Schließen</button></div><iframe id="vFrame"></iframe></div>
+<div id="print"></div>
+
+<script src="gemeinsam.js"></script>
+<script>
+(() => {
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const zeit = (iso) => iso ? new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+const SKEY = 'klassenapp-lehrer';
+let cfg = { klassen: {}, module: [] };
+let db = JSON.parse(localStorage.getItem(SKEY) || 'null') || { schueler: {}, abgaben: {}, rm: {} };
+/* db.schueler[code] = {name, klasse}; db.abgaben[code][modulId] = {titel, geaendert, eingereicht, state}; db.rm[code] = {gesamt, module:{id:text}} */
+const sichern = () => localStorage.setItem(SKEY, JSON.stringify(db));
+let auswahl = null; // {code, mid}
+
+/* Tabs */
+document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach((o) => o.setAttribute('aria-selected', o === b));
+  ['tAbg', 'tKl', 'tSich'].forEach((t) => $('#' + t).hidden = t !== b.dataset.tab);
+  if (b.dataset.tab === 'tKl') renderListe(); else if (b.dataset.tab === 'tAbg') renderMatrix();
+});
+
+function klassenOptionen(sel) {
+  const ids = new Set([...Object.keys(cfg.klassen), ...Object.values(db.schueler).map((s) => s.klasse)]);
+  sel.innerHTML = [...ids].sort().map((id) => `<option value="${id}">${esc(cfg.klassen[id] || 'Klasse ' + id)} (${id})</option>`).join('');
+}
+const klName = (id) => cfg.klassen[id] || 'Klasse ' + id;
+
+/* ================= KLASSEN & CODES ================= */
+$('#kGo').onclick = () => {
+  const kl = $('#kKlasse').value; if (!kl) return;
+  const namen = $('#kNamen').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  const vorhanden = new Set(Object.keys(db.schueler));
+  const schonDa = new Set(Object.values(db.schueler).filter((s) => s.klasse === kl).map((s) => s.name.toLowerCase()));
+  let neu = 0;
+  namen.forEach((n) => { if (schonDa.has(n.toLowerCase())) return; const c = KA.neuerCode(kl, vorhanden); vorhanden.add(c); db.schueler[c] = { name: n, klasse: kl }; neu++; });
+  sichern(); $('#kNamen').value = '';
+  $('#kMsg').innerHTML = `<div class="msg ok">${neu} neue Codes erzeugt.${namen.length - neu ? ` ${namen.length - neu} Namen gab es schon.` : ''}</div>`;
+  renderListe();
+};
+$('#kKlasse').onchange = renderListe;
+function schuelerDerKlasse(kl) {
+  return Object.entries(db.schueler).filter(([, s]) => s.klasse === kl).sort((a, b) => a[1].name.localeCompare(b[1].name, 'de'));
+}
+function renderListe() {
+  const kl = $('#kKlasse').value; const liste = schuelerDerKlasse(kl);
+  if (!liste.length) { $('#kListe').innerHTML = '<p class="muted">Noch keine Schüler in dieser Klasse.</p>'; return; }
+  $('#kListe').innerHTML = `<table><tr><th>Name</th><th>Code</th><th></th></tr>${liste.map(([c, s]) => `<tr><td>${esc(s.name)}</td><td class="code">${KA.codeHuebsch(c)}</td><td><button class="btn ghost small" data-del="${c}">entfernen</button></td></tr>`).join('')}</table>`;
+  $('#kListe').querySelectorAll('[data-del]').forEach((b) => b.onclick = () => {
+    if (!confirm('Schüler entfernen? Der Code wird damit ungültig für die Auswertung.')) return;
+    delete db.schueler[b.dataset.del]; sichern(); renderListe();
+  });
+}
+$('#kCsv').onclick = () => {
+  const kl = $('#kKlasse').value;
+  const csv = '﻿Name;Code;Klasse\n' + schuelerDerKlasse(kl).map(([c, s]) => `${s.name};${KA.codeHuebsch(c)};${klName(kl)}`).join('\n');
+  download(new Blob([csv], { type: 'text/csv' }), `Codes_${klName(kl)}.csv`);
+};
+$('#kPrint').onclick = () => {
+  const kl = $('#kKlasse').value;
+  $('#print').innerHTML = schuelerDerKlasse(kl).map(([c, s]) => `<div class="karte"><b>${esc(s.name)}</b><div class="c">${KA.codeHuebsch(c)}</div><small>Dein Code für die Physik-App (${esc(klName(kl))}). Gut aufheben!</small></div>`).join('');
+  window.print();
+};
+
+/* ================= ABGABEN ================= */
+$('#drop').onclick = () => $('#aFiles').click();
+$('#drop').ondragover = (e) => { e.preventDefault(); $('#drop').classList.add('over'); };
+$('#drop').ondragleave = () => $('#drop').classList.remove('over');
+$('#drop').ondrop = (e) => { e.preventDefault(); $('#drop').classList.remove('over'); einlesen([...e.dataTransfer.files]); };
+$('#aFiles').onchange = (e) => { einlesen([...e.target.files]); e.target.value = ''; };
+async function einlesen(files) {
+  let ok = 0, neu = 0, fehler = [], fremd = new Set(), vorschauDateien = [];
+  for (const f of files) {
+    try {
+      const o = JSON.parse(await f.text());
+      if (o.typ !== 'klassenapp-abgabe' || !KA.codeGueltig(o.code)) { fehler.push(f.name); continue; }
+      ok++; if (!db.schueler[o.code]) fremd.add(o.code);
+      if (o.vorschau) vorschauDateien.push(f.name);
+      if (o.geraet) {
+        db.geraete = db.geraete || {};
+        const g = (db.geraete[o.code] = db.geraete[o.code] || {});
+        const e = g[o.geraet] || { erst: o.erstellt, eingerichtet: o.eingerichtet };
+        e.zuletzt = !e.zuletzt || o.erstellt > e.zuletzt ? o.erstellt : e.zuletzt;
+        if (o.erstellt < e.erst) e.erst = o.erstellt;
+        g[o.geraet] = e;
+      }
+      db.abgaben[o.code] = db.abgaben[o.code] || {};
+      for (const [mid, m] of Object.entries(o.module)) {
+        const alt = db.abgaben[o.code][mid];
+        if (!alt || new Date(m.geaendert) >= new Date(alt.geaendert)) { db.abgaben[o.code][mid] = { titel: m.titel, geaendert: m.geaendert, eingereicht: o.erstellt, state: m.state }; neu++; }
+      }
+    } catch { fehler.push(f.name); }
+  }
+  sichern();
+  $('#aMsg').innerHTML = `<div class="msg ${fehler.length || fremd.size ? 'warn' : 'ok'}">${ok} Dateien eingelesen, ${neu} Modulstände aktualisiert.` +
+    (fehler.length ? `<br>Nicht lesbar: ${fehler.map(esc).join(', ')}` : '') +
+    (fremd.size ? `<br>Unbekannte Codes (nicht in deiner Klassenliste): ${[...fremd].map(KA.codeHuebsch).join(', ')}` : '') +
+    (vorschauDateien.length ? `<br>Aus dem Vorschau-Modus (Browser statt App): ${vorschauDateien.map(esc).join(', ')}` : '') + '</div>' +
+    warnHtml();
+  renderMatrix();
+}
+
+/* ---- Prüfung: Code auf mehreren Geräten / Gerät mit mehreren Codes ---- */
+function warnungen() {
+  const g = db.geraete || {}, proGeraet = {}, w = { codes: {}, liste: [] };
+  Object.entries(g).forEach(([c, gs]) => Object.keys(gs).forEach((id) => (proGeraet[id] = proGeraet[id] || []).push(c)));
+  const name = (c) => (db.schueler[c] ? db.schueler[c].name : '?') + ' (' + KA.codeHuebsch(c) + ')';
+  Object.entries(proGeraet).forEach(([id, cs]) => {
+    if (cs.length > 1) { cs.forEach((c) => (w.codes[c] = 'Tablet mit mehreren Codes')); w.liste.push(`<b>Ein Tablet, mehrere Codes:</b> ${cs.map(name).join(', ')}. Hier wurde vermutlich ein Code getauscht oder fremd benutzt.`); }
+  });
+  Object.entries(g).forEach(([c, gs]) => {
+    const n = Object.keys(gs).length;
+    if (n > 1) { w.codes[c] = w.codes[c] || `Code auf ${n} Tablets`; w.liste.push(`<b>Ein Code auf ${n} Tablets:</b> ${name(c)}. Kann ein neues Tablet oder eine Neuinstallation sein, kann aber auch heißen, dass jemand anderes den Code benutzt. Nachfragen.`); }
+  });
+  return w;
+}
+function warnHtml() { const w = warnungen(); return w.liste.length ? `<div class="msg warn">⚠️ ${w.liste.join('<br>⚠️ ')}</div>` : ''; }
+$('#aKlasse').onchange = () => { auswahl = null; renderMatrix(); renderDetail(); };
+
+function moduleDerKlasse(kl) {
+  const ids = new Map();
+  cfg.module.filter((m) => (m.klassen || []).includes(kl)).forEach((m) => ids.set(m.id, m.titel));
+  Object.entries(db.abgaben).forEach(([c, ms]) => { if (c.slice(0, 2) === kl) Object.entries(ms).forEach(([mid, m]) => { if (!ids.has(mid)) ids.set(mid, m.titel); }); });
+  return [...ids];
+}
+function renderMatrix() {
+  const kl = $('#aKlasse').value; if (!kl) { $('#matrix').innerHTML = '<p class="muted">Noch keine Klasse angelegt.</p>'; return; }
+  const mods = moduleDerKlasse(kl);
+  const codes = new Map(schuelerDerKlasse(kl));
+  Object.keys(db.abgaben).filter((c) => c.slice(0, 2) === kl && !codes.has(c)).forEach((c) => codes.set(c, { name: '? ' + KA.codeHuebsch(c), klasse: kl }));
+  if (!codes.size) { $('#matrix').innerHTML = '<p class="muted">Noch keine Schüler oder Abgaben für diese Klasse.</p>'; return; }
+  const warn = warnungen();
+  let h = warnHtml() + `<table class="matrix"><tr><th>Name</th>${mods.map(([, t]) => `<th>${esc(t)}</th>`).join('')}</tr>`;
+  codes.forEach((s, c) => {
+    h += `<tr><td>${warn.codes[c] ? `<span title="${esc(warn.codes[c])}">⚠️ </span>` : ''}${esc(s.name)}${db.rm[c] && (db.rm[c].gesamt || Object.values(db.rm[c].module || {}).some(Boolean)) ? '<span class="dot" title="Rückmeldung geschrieben"></span>' : ''}</td>`;
+    mods.forEach(([mid]) => {
+      const a = db.abgaben[c] && db.abgaben[c][mid];
+      const sel = auswahl && auswahl.code === c && auswahl.mid === mid ? ' sel' : '';
+      if (!a) { h += `<td class="cell none${sel}" data-c="${c}" data-m="${mid}">–</td>`; return; }
+      const st = a.state || {}, n = (st.stationen || []).length, k = (st.erledigt || []).length;
+      h += `<td class="cell${sel}" data-c="${c}" data-m="${mid}"><b>${k}/${n}</b> Stationen · ${st.punkte ?? 0} P<div class="pbar"><i style="width:${n ? k / n * 100 : 0}%"></i></div><span class="muted">${zeit(a.geaendert)}</span>${db.rm[c] && db.rm[c].module && db.rm[c].module[mid] ? '<span class="dot"></span>' : ''}</td>`;
+    });
+    h += '</tr>';
+  });
+  $('#matrix').innerHTML = h + '</table>';
+  $('#matrix').querySelectorAll('td.cell').forEach((td) => td.onclick = () => { auswahl = { code: td.dataset.c, mid: td.dataset.m }; renderMatrix(); renderDetail(); });
+}
+function renderDetail() {
+  const box = $('#detail');
+  if (!auswahl) { box.innerHTML = '<h2>Details</h2><p class="muted">Klick links auf ein Feld, um den Stand eines Schülers in einem Modul zu sehen und eine Rückmeldung zu schreiben.</p>'; return; }
+  const { code: c, mid } = auswahl;
+  const name = db.schueler[c] ? db.schueler[c].name : 'Unbekannt';
+  const a = db.abgaben[c] && db.abgaben[c][mid];
+  const modCfg = cfg.module.find((m) => m.id === mid);
+  const titel = a ? a.titel : (modCfg ? modCfg.titel : mid);
+  db.rm[c] = db.rm[c] || { gesamt: '', module: {} };
+  const rm = db.rm[c];
+  let h = `<h2>${esc(name)}</h2><div class="muted">Code ${KA.codeHuebsch(c)} · ${esc(titel)}</div>`;
+  const gs = (db.geraete || {})[c];
+  if (gs) {
+    const w = warnungen().codes[c];
+    h += `<div class="msg ${w ? 'warn' : 'info'}" style="font-size:14px">${w ? '⚠️ ' + esc(w) + '<br>' : ''}` +
+      Object.entries(gs).map(([id, e], i) => `Tablet ${i + 1} (${id.slice(0, 8)}): eingerichtet ${zeit(e.eingerichtet) || '?'}, Abgaben ${zeit(e.erst)} bis ${zeit(e.zuletzt)}`).join('<br>') + '</div>';
+  }
+  if (a) {
+    const st = a.state || {};
+    h += `<p class="muted">Stand vom ${zeit(a.geaendert)}, abgegeben ${zeit(a.eingereicht)} · <b>${st.punkte ?? 0} Punkte</b></p><ul class="stn">` +
+      (st.stationen || []).map((s) => `<li><span class="${(st.erledigt || []).includes(s) ? 'ok' : ''}">${(st.erledigt || []).includes(s) ? '✓' : '○'}</span><span><b>${esc(s)}</b>${st.details && st.details[s] ? '<br><span class="muted">' + esc(st.details[s]) + '</span>' : ''}</span></li>`).join('') + '</ul>' +
+      (modCfg ? `<button class="btn ghost" id="dView">Im Modul ansehen</button>` : '');
+  } else h += '<p class="muted">Für dieses Modul liegt noch keine Abgabe vor.</p>';
+  h += `<h3 style="margin-top:16px">Rückmeldung zu „${esc(titel)}“</h3><textarea id="dRmMod" placeholder="z. B. Simulation super, beim Rechnen nochmal die Vorsilben üben.">${esc(rm.module[mid] || '')}</textarea>
+    <h3 style="margin-top:12px">Allgemeine Rückmeldung an ${esc(name.split(' ')[0])}</h3><textarea id="dRmGes">${esc(rm.gesamt || '')}</textarea>
+    <p class="muted">Wird automatisch gespeichert. Schüler bekommen sie über die Rückmeldungsdatei.</p>`;
+  box.innerHTML = h;
+  $('#dRmMod').oninput = (e) => { rm.module[mid] = e.target.value; sichern(); };
+  $('#dRmGes').oninput = (e) => { rm.gesamt = e.target.value; sichern(); };
+  $('#dRmMod').onblur = $('#dRmGes').onblur = renderMatrix;
+  if ($('#dView')) $('#dView').onclick = () => ansehen(modCfg, a.state, name);
+}
+
+/* Modul mit Schülerstand ansehen */
+let viewState = null;
+function ansehen(m, state, name) {
+  viewState = state; $('#vTitle').textContent = `${m.titel} · ${name}`;
+  $('#viewer').hidden = false; $('#vFrame').src = 'module/' + m.datei;
+}
+$('#vClose').onclick = () => { $('#viewer').hidden = true; $('#vFrame').src = 'about:blank'; viewState = null; };
+addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data || e.data.app !== 'klassenapp') return;
+  if (e.data.type === 'ready' && viewState) $('#vFrame').contentWindow.postMessage({ app: 'klassenapp', type: 'load', state: viewState }, location.origin);
+});
+
+/* Rückmeldungsdatei */
+$('#rmExport').onclick = async () => {
+  const kl = $('#aKlasse').value;
+  const codes = Object.keys(db.rm).filter((c) => c.slice(0, 2) === kl && (db.rm[c].gesamt || Object.values(db.rm[c].module || {}).some((t) => t && t.trim())));
+  if (!codes.length) { alert('Für diese Klasse ist noch keine Rückmeldung geschrieben.'); return; }
+  const paket = { typ: 'klassenapp-rueckmeldung', version: 1, id: crypto.randomUUID(), klasse: klName(kl), erstellt: new Date().toISOString(), eintraege: {} };
+  for (const c of codes) {
+    const r = db.rm[c]; const mods = {}; Object.entries(r.module || {}).forEach(([k, v]) => { if (v && v.trim()) mods[k] = v.trim(); });
+    paket.eintraege[await KA.kennung(c)] = await KA.verschluesseln(c, { gesamt: (r.gesamt || '').trim(), module: mods });
+  }
+  download(new Blob([JSON.stringify(paket)], { type: 'application/json' }), KA.dateiname(`Rueckmeldung_${klName(kl)}_${KA.stempel()}.json`));
+  $('#aMsg').innerHTML = `<div class="msg ok">Rückmeldungsdatei für ${codes.length} Schüler erstellt. Leg sie in einen Nextcloud-Ordner, den die Klasse sehen kann. Jeder Schüler lädt sie in der App unter „Mehr → Rückmeldung laden“ und sieht nur seine eigene (die Einträge sind mit dem jeweiligen Code verschlüsselt).</div>`;
+};
+
+/* ================= SICHERUNG ================= */
+$('#sExport').onclick = () => download(new Blob([JSON.stringify({ typ: 'klassenapp-lehrer-sicherung', erstellt: new Date().toISOString(), db })], { type: 'application/json' }), `Physik-App_Lehrer-Sicherung_${KA.stempel()}.json`);
+$('#sImport').onclick = () => $('#sFile').click();
+$('#sFile').onchange = async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const o = JSON.parse(await f.text()); if (o.typ !== 'klassenapp-lehrer-sicherung') throw 0;
+    if (!confirm('Sicherung einlesen? Der aktuelle Stand in diesem Browser wird ersetzt.')) return;
+    db = o.db; sichern(); init(); $('#sMsg').innerHTML = '<div class="msg ok">Sicherung eingelesen.</div>';
+  } catch { $('#sMsg').innerHTML = '<div class="msg warn">Das ist keine Sicherungsdatei der Auswertung.</div>'; }
+};
+
+function download(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+async function init() {
+  try { cfg = await (await fetch('module/module.json', { cache: 'no-store' })).json(); } catch {}
+  klassenOptionen($('#aKlasse')); klassenOptionen($('#kKlasse'));
+  renderMatrix(); renderDetail(); renderListe();
+}
+init();
+})();
+</script>
+</body>
+</html>
