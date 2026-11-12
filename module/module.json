@@ -1,0 +1,26 @@
+{
+  "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen.",
+  "klassen": {
+    "21": "TG2.1"
+  },
+  "module": [
+    {
+      "id": "schwingkreis-labor",
+      "titel": "Schwingkreis-Labor",
+      "untertitel": "Elektromagnetische Schwingungen",
+      "datei": "schwingkreis-labor.html",
+      "klassen": ["21"],
+      "freigegeben": true,
+      "farbe": "#1F3A5F"
+    },
+    {
+      "id": "wellen-training",
+      "titel": "Wellen-Training",
+      "untertitel": "Vorbereitung Klassenarbeit Wellen",
+      "datei": "wellen-training.html",
+      "klassen": ["21"],
+      "freigegeben": true,
+      "farbe": "#3C7A4E"
+    }
+  ]
+}
