@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Physik-App · Auswertung</title>
+<title>Physik App TG2 · Auswertung</title>
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
@@ -74,7 +74,7 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 </head>
 <body>
 <div class="wrap">
-  <h1>Physik-App · Auswertung</h1>
+  <h1>Physik App TG2 · Auswertung</h1>
   <div class="muted">Namen und Rückmeldungen bleiben nur in diesem Browser auf deinem Rechner. Mach ab und zu eine Sicherung (Reiter „Sicherung“).</div>
   <nav>
     <button data-tab="tAbg" aria-selected="true">Abgaben</button>
@@ -199,7 +199,7 @@ $('#kCsv').onclick = () => {
 const QR_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 31" style="width:100%;height:100%;display:block" shape-rendering="crispEdges" class="segno"><path fill="#fff" d="M0 0h31v31h-31z"/><path class="qrline" stroke="#000" d="M1 1.5h7m1 0h1m3 0h1m1 0h2m1 0h2m1 0h1m1 0h7m-29 1h1m5 0h1m2 0h1m7 0h1m1 0h2m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m3 0h4m1 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h5m2 0h1m2 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h6m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h2m1 0h1m1 0h2m3 0h2m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h1m2 0h2m2 0h4m1 0h1m-21 1h1m3 0h1m1 0h3m1 0h1m1 0h3m1 0h2m1 0h1m1 0h5m2 0h1m-29 1h1m1 0h2m3 0h1m1 0h1m1 0h2m1 0h5m2 0h2m1 0h5m-28 1h1m4 0h3m1 0h1m2 0h3m2 0h1m3 0h1m5 0h1m-27 1h1m4 0h1m1 0h5m1 0h4m2 0h2m2 0h1m1 0h2m-28 1h1m1 0h1m1 0h2m5 0h2m3 0h2m1 0h1m2 0h1m3 0h1m-27 1h1m3 0h1m3 0h1m1 0h8m2 0h8m-25 1h1m1 0h2m1 0h1m2 0h1m2 0h1m2 0h1m3 0h2m1 0h2m1 0h1m-29 1h2m3 0h1m1 0h1m1 0h2m1 0h1m1 0h2m1 0h2m1 0h1m1 0h3m2 0h2m-29 1h2m3 0h2m1 0h1m1 0h2m1 0h3m1 0h1m1 0h1m7 0h1m-28 1h1m1 0h1m1 0h2m2 0h1m2 0h1m3 0h1m5 0h5m1 0h2m-24 1h3m1 0h1m2 0h4m1 0h1m2 0h3m3 0h1m1 0h1m-26 1h1m6 0h1m2 0h1m2 0h2m3 0h3m3 0h2m-29 1h2m1 0h2m1 0h4m3 0h1m1 0h1m1 0h1m2 0h6m2 0h1m-21 1h1m1 0h11m3 0h1m3 0h1m-29 1h7m1 0h1m1 0h1m4 0h1m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m2 0h1m1 0h4m1 0h2m3 0h1m3 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1m1 0h7m1 0h1m-28 1h1m1 0h3m1 0h1m3 0h1m1 0h1m2 0h3m10 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m2 0h1m2 0h1m1 0h1m1 0h1m1 0h1m3 0h4m-29 1h1m5 0h1m3 0h3m3 0h3m1 0h1m2 0h1m1 0h1m1 0h2m-29 1h7m1 0h1m3 0h1m3 0h2m2 0h1m1 0h4m1 0h1"/></svg>';
 $('#kPrint').onclick = () => {
   const kl = $('#kKlasse').value;
-  $('#print').innerHTML = schuelerDerKlasse(kl).map(([c, s]) => `<div class="karte"><div class="txt"><div class="kopf">Physik-App · ${esc(klName(kl))}</div><b>${esc(s.name)}</b><div class="c">${KA.codeHuebsch(c)}</div><small>1. QR-Code scannen, 2. in Safari „Teilen“ → „Zum Home-Bildschirm“, 3. App öffnen und Code eingeben. Der Code gilt nur für dich. Gut aufheben!</small></div><div class="qr"><div>${QR_SVG}</div>App installieren</div></div>`).join('');
+  $('#print').innerHTML = schuelerDerKlasse(kl).map(([c, s]) => `<div class="karte"><div class="txt"><div class="kopf">Physik App TG2 · ${esc(klName(kl))}</div><b>${esc(s.name)}</b><div class="c">${KA.codeHuebsch(c)}</div><small>1. QR-Code scannen, 2. in Safari „Teilen“ → „Zum Home-Bildschirm“, 3. App öffnen und Code eingeben. Der Code gilt nur für dich. Gut aufheben!</small></div><div class="qr"><div>${QR_SVG}</div>App installieren</div></div>`).join('');
   window.print();
 };
 

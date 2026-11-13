@@ -1,6 +1,6 @@
 {
-  "name": "Physik-App",
-  "short_name": "Physik",
+  "name": "Physik App TG2",
+  "short_name": "Physik TG2",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
