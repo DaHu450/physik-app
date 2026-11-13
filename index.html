@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
 :root{
-  --bg:#F2F5F8;--panel:#fff;--ink:#15253A;--muted:#58697C;--line:#D3DCE6;
+  --bg:#E9EFF6;--panel:#fff;--ink:#15253A;--muted:#58697C;--line:#D3DCE6;
   --navy:#1F3A5F;--green:#3C7A4E;--navySoft:#E3EAF3;--greenSoft:#E2F0E5;--bad:#B3261E;--badSoft:#FBE6E4;--warn:#FFF3D6;
   --f-display:"Bricolage Grotesque",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;
   --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
@@ -57,12 +57,16 @@ h1,h2{font-family:var(--f-display);color:var(--navy);margin:0;line-height:1.1}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .tile{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column;color:inherit;min-height:190px}
 .tile:active{transform:scale(.99)}
-.tile .band{height:10px;background:var(--c,var(--navy))}
-.tile .ico{width:56px;height:56px;border-radius:16px;background:var(--c,var(--navy));color:#fff;display:grid;place-items:center;flex:none}
-.tile .ico svg{width:34px;height:34px}
-.tile .kopf{display:flex;gap:14px;align-items:center}
+.tile .band{display:none}
+.tile .ico{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.22);color:#fff;display:grid;place-items:center;flex:none}
+.tile .ico svg{width:40px;height:40px;stroke-width:3.2}
+.tile .kopf{display:flex;gap:14px;align-items:center;background:var(--c,var(--navy));color:#fff;padding:18px}
+.tile .kopf h2{color:#fff}
+.tile .kopf .sub{color:rgba(255,255,255,.92)}
+.tile{border-color:var(--c,var(--line));border-width:3px}
+.tile .bar i{background:var(--c,var(--green))}
 .tile .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
-.tile h2{font-size:24px;font-weight:600}
+.tile h2{font-size:25px;font-weight:800}
 .tile .sub{color:var(--muted);font-size:15px}
 .tile .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:15px;gap:8px;flex-wrap:wrap}
 .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}
@@ -81,7 +85,7 @@ h1,h2{font-family:var(--f-display);color:var(--navy);margin:0;line-height:1.1}
 .mbar h2{color:#fff;font-size:20px;font-weight:600;flex:1;min-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mbar .btn{border-color:#fff}
 .mbar .btn.ghost{background:transparent;color:#fff}
-.mbar .btn.green{border-color:var(--green)}
+.mbar .btn.green{background:#fff;color:#15253A;border-color:#fff}
 .mbar .saved{font-size:13px;opacity:.85}
 #frame{flex:1;width:100%;border:0;background:var(--bg)}
 #mfb{background:var(--navySoft);border-bottom:2px solid var(--navy);padding:10px 16px;white-space:pre-wrap}
@@ -309,8 +313,7 @@ function startHome() {
     const f = fortschritt(m.id), ico = ICONS[m.icon] || '', hatFb = rmFuer(m.id).length > 0;
     const b = document.createElement('button');
     b.className = 'tile'; b.style.setProperty('--c', m.farbe || 'var(--navy)');
-    b.innerHTML = `<div class="band"></div><div class="body">
-      <div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div>
+    b.innerHTML = `<div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div><div class="body">
       <div class="meta">${f ? `<span>${f.k} von ${f.n} Stationen · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
       ${f ? `<div class="bar"><i style="width:${Math.round(f.anteil * 100)}%"></i></div>` : ''}</div>`;
     b.onclick = () => oeffneModul(m);
@@ -325,6 +328,7 @@ function oeffneModul(m) {
   offenesModul = m;
   zeige('modul');
   $('#mTitle').textContent = m.titel;
+  document.querySelector('.mbar').style.background = m.farbe || '';
   $('#mSaved').textContent = daten.module[m.id] ? 'Stand vom ' + zeit(daten.module[m.id].geaendert) : '';
   const rm = rmFuer(m.id);
   $('#mFbBtn').hidden = !rm.length; $('#mfb').hidden = true;
