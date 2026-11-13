@@ -1,0 +1,68 @@
+{
+ "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen.",
+ "klassen": {
+  "41": "TGE"
+ },
+ "module": [
+  {
+   "id": "bad-einstein",
+   "titel": "1:0 für Bad Einstein",
+   "untertitel": "Wie schnell war Opa wirklich?",
+   "datei": "bad-einstein.html",
+   "klassen": [
+    "41"
+   ],
+   "freigegeben": true,
+   "farbe": "#2E8B4E",
+   "icon": "fussball"
+  },
+  {
+   "id": "ueberholvorgang",
+   "titel": "Der Überholvorgang",
+   "untertitel": "Simulation: PKW überholt LKW",
+   "datei": "ueberholvorgang.html",
+   "klassen": [
+    "41"
+   ],
+   "freigegeben": true,
+   "farbe": "#1F3A5F",
+   "icon": "auto"
+  },
+  {
+   "id": "ueberholspiel",
+   "titel": "Reicht das noch?",
+   "untertitel": "Das Überhol-Spiel",
+   "datei": "ueberholspiel.html",
+   "klassen": [
+    "41"
+   ],
+   "freigegeben": true,
+   "farbe": "#D2690A",
+   "icon": "spiel"
+  },
+  {
+   "id": "besch",
+   "titel": "Beschleunigte Bewegung",
+   "untertitel": "Lernpfad zu Weg, Zeit und Geschwindigkeit",
+   "datei": "besch.html",
+   "klassen": [
+    "41"
+   ],
+   "freigegeben": true,
+   "farbe": "#6A3DC4",
+   "icon": "tacho"
+  },
+  {
+   "id": "kin",
+   "titel": "Kinematik-Training",
+   "untertitel": "Übungsstudio für die Klassenarbeit",
+   "datei": "kin.html",
+   "klassen": [
+    "41"
+   ],
+   "freigegeben": true,
+   "farbe": "#0B7F8C",
+   "icon": "uhr"
+  }
+ ]
+}

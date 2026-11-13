@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Physik App TGE</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F3A5F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Physik TGE">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --bg:#E9EFF6;--panel:#fff;--ink:#15253A;--muted:#58697C;--line:#D3DCE6;
+  --navy:#1F3A5F;--green:#3C7A4E;--navySoft:#E3EAF3;--greenSoft:#E2F0E5;--bad:#B3261E;--badSoft:#FBE6E4;--warn:#FFF3D6;
+  --f-display:"Bricolage Grotesque",system-ui,sans-serif;--f-body:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 var(--f-body);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+.sr{position:absolute;left:-9999px}
+button{font:inherit;cursor:pointer}
+.btn{font-weight:700;border-radius:12px;border:2px solid var(--navy);background:var(--navy);color:#fff;padding:10px 18px;min-height:48px;display:inline-flex;align-items:center;gap:8px}
+.btn.ghost{background:var(--panel);color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn.small{min-height:40px;padding:6px 12px;font-size:15px}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+h1,h2{font-family:var(--f-display);color:var(--navy);margin:0;line-height:1.1}
+
+/* Anmeldung */
+#login{min-height:100%;display:grid;place-items:center;padding:calc(24px + var(--safe-t)) 20px 24px}
+.loginbox{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:32px;max-width:460px;width:100%}
+.loginbox h1{font-size:34px;font-weight:800}
+.loginbox p{color:var(--muted)}
+#codeIn{font:700 32px ui-monospace,Menlo,monospace;letter-spacing:.12em;width:100%;padding:14px;border:3px solid var(--navy);border-radius:14px;text-align:center;margin:8px 0 14px;background:var(--bg);color:var(--ink)}
+.msg{border-radius:12px;padding:10px 14px;margin-top:12px}
+.msg.no{background:var(--badSoft);border:2px solid var(--bad)}
+.msg.ok{background:var(--greenSoft);border:2px solid var(--green)}
+.msg.info{background:var(--navySoft);border:2px solid var(--line)}
+.msg.warn{background:var(--warn);border:2px solid var(--line)}
+.steps{padding-left:24px;margin:10px 0 14px}.steps li{margin:6px 0}
+
+/* Übersicht */
+#home{max-width:1100px;margin:0 auto;padding:calc(18px + var(--safe-t)) 20px calc(40px + var(--safe-b))}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
+.top h1{font-size:clamp(30px,5vw,42px);font-weight:800}
+.who{color:var(--muted);margin-top:4px}
+.who b{font-family:ui-monospace,Menlo,monospace;color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.status{font-size:14px;color:var(--muted);margin:-6px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:34px 34px;position:relative}
+.pfeil{position:absolute;width:34px;height:34px;display:grid;place-items:center;color:var(--navy);font-size:26px;font-weight:800;pointer-events:none;line-height:1}
+.tile{position:relative}
+.tile .nr{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:#fff;color:var(--c,var(--navy));border:3px solid var(--c,var(--navy));font:800 18px var(--f-display);display:grid;place-items:center;z-index:2}
+.tile{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column;color:inherit;min-height:190px}
+.tile:active{transform:scale(.99)}
+.tile .band{display:none}
+.tile .ico{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.22);color:#fff;display:grid;place-items:center;flex:none}
+.tile .ico svg{width:40px;height:40px;stroke-width:3.2}
+.tile .kopf{display:flex;gap:14px;align-items:center;background:var(--c,var(--navy));color:#fff;padding:18px 54px 18px 18px}
+.tile .kopf h2{color:#fff}
+.tile .kopf .sub{color:rgba(255,255,255,.92)}
+.tile{border-color:var(--c,var(--line));border-width:3px}
+.tile .bar i{background:var(--c,var(--green))}
+.tile .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tile h2{font-size:25px;font-weight:800}
+.tile .sub{color:var(--muted);font-size:15px}
+.tile .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:15px;gap:8px;flex-wrap:wrap}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--green)}
+.badge{font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--green);color:#fff}
+.badge.fb{background:var(--navy)}
+.feedback-card{background:var(--panel);border:2px solid var(--navy);border-radius:16px;padding:16px 18px;margin-bottom:16px}
+.feedback-card h2{font-size:20px;margin-bottom:6px}
+.feedback-card .when{font-size:14px;color:var(--muted)}
+.feedback-card p{white-space:pre-wrap;margin:6px 0 0}
+.empty{color:var(--muted);padding:30px;text-align:center;border:2px dashed var(--line);border-radius:18px}
+
+/* Modulansicht */
+#modul{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.mbar{display:flex;align-items:center;gap:8px;padding:calc(8px + var(--safe-t)) 12px 8px;background:var(--navy);color:#fff;flex-wrap:wrap}
+.mbar h2{color:#fff;font-size:20px;font-weight:600;flex:1;min-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbar .btn{border-color:#fff}
+.mbar .btn.ghost{background:transparent;color:#fff}
+.mbar .btn.green{background:#fff;color:#15253A;border-color:#fff}
+.mbar .saved{font-size:13px;opacity:.85}
+#frame{flex:1;width:100%;border:0;background:var(--bg)}
+#mfb{background:var(--navySoft);border-bottom:2px solid var(--navy);padding:10px 16px;white-space:pre-wrap}
+
+/* Dialoge */
+dialog{border:0;border-radius:20px;padding:0;max-width:560px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.25);color:var(--ink)}
+dialog::backdrop{background:rgba(15,25,40,.45)}
+.dlg{padding:24px}
+.dlg h2{font-size:26px;margin-bottom:10px}
+.dlg ol{padding-left:22px;margin:8px 0}
+.dlg li{margin:4px 0}
+.choice{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;cursor:pointer}
+.choice input{width:24px;height:24px;accent-color:var(--green)}
+.dlg .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:16px}
+.menu button{display:block;width:100%;text-align:left;margin:6px 0}
+#toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ANMELDUNG -->
+<section id="login" hidden>
+  <div class="loginbox">
+    <h1>Physik App TGE</h1>
+    <div id="loginInstall" hidden>
+      <p>Bevor es losgeht, holst du dir die App auf den Home-Bildschirm:</p>
+      <ol class="steps">
+        <li>Tippe oben in Safari auf <b>Teilen</b> (□↑).</li>
+        <li>Wähle <b>„Zum Home-Bildschirm"</b> und tippe auf <b>Hinzufügen</b>.</li>
+        <li>Schließ Safari und öffne die App über das neue <b>Physik TGE</b>-Symbol.</li>
+      </ol>
+      <div class="msg info">Deinen Code gibst du erst in der App ein, nicht hier.</div>
+    </div>
+    <div id="loginCode" hidden>
+      <p>Gib deinen 8-stelligen Code von deiner Lehrerin ein. <b>Das geht nur einmal.</b> Danach ist die App fest mit deinem Code verbunden.</p>
+      <form id="loginForm" autocomplete="off">
+        <label for="codeIn" class="sr">Dein Code</label>
+        <input id="codeIn" inputmode="numeric" maxlength="9" placeholder="0000 0000" autocomplete="off">
+        <button class="btn green" style="width:100%;justify-content:center">Weiter</button>
+      </form>
+      <div id="loginMsg"></div>
+    </div>
+    <div id="loginConfirm" hidden>
+      <p>Ist das wirklich <b>dein</b> Code?</p>
+      <div id="confirmCode" style="font:700 36px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-align:center;margin:10px 0;color:var(--navy)"></div>
+      <div class="msg warn">Wenn du bestätigst, kannst du den Code <b>nie mehr ändern</b>. Alles, was du abgibst, wird diesem Code zugeordnet.</div>
+      <div class="row" style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn ghost" id="confirmNo" style="flex:1;justify-content:center">Nein, ändern</button>
+        <button class="btn green" id="confirmYes" style="flex:1;justify-content:center">Ja, das ist mein Code</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ÜBERSICHT -->
+<section id="home" hidden>
+  <div class="top">
+    <div>
+      <h1>Physik App TGE</h1>
+      <div class="who">Code <b id="codeShow"></b></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnSave">💾 Speichern</button>
+      <button class="btn green" id="btnHand">📤 Abgeben</button>
+      <button class="btn ghost" id="btnMore">⋯ Mehr</button>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+  <div id="installHint2" class="msg warn" hidden style="margin-bottom:16px"><b>Tipp:</b> Leg die App auf den Home-Bildschirm (Safari → Teilen → „Zum Home-Bildschirm"). Dann läuft sie auch ohne Internet.</div>
+  <div id="fbList"></div>
+  <div class="grid" id="tiles"></div>
+</section>
+
+<!-- MODUL -->
+<section id="modul" hidden>
+  <div class="mbar">
+    <button class="btn ghost small" id="btnBack">← Übersicht</button>
+    <h2 id="mTitle"></h2>
+    <span class="saved" id="mSaved"></span>
+    <button class="btn ghost small" id="mFbBtn" hidden>💬 Rückmeldung</button>
+    <button class="btn ghost small" id="mSave">💾 Speichern</button>
+    <button class="btn green small" id="mHand">📤 Abgeben</button>
+  </div>
+  <div id="mfb" hidden></div>
+  <iframe id="frame" title="Modul"></iframe>
+</section>
+
+<!-- ABGABE -->
+<dialog id="dlgHand"><div class="dlg">
+  <h2>Abgeben</h2>
+  <p>Was willst du abgeben?</p>
+  <div id="handChoices"></div>
+  <div class="msg info" style="margin-top:12px">So geht's:
+    <ol><li>Tippe auf <b>Datei erstellen</b>.</li><li>Im Teilen-Menü wählst du <b>Nextcloud</b>.</li><li>Lade die Datei in den Abgabe-Ordner, den deine Lehrerin mit dir geteilt hat.</li></ol>
+    Klappt das Teilen nicht, wird die Datei in „Dateien" gespeichert. Von dort kannst du sie in Nextcloud hochladen.</div>
+  <div class="row"><button class="btn ghost" data-close>Abbrechen</button><button class="btn green" id="handGo">Datei erstellen</button></div>
+</div></dialog>
+
+<!-- MEHR -->
+<dialog id="dlgMore"><div class="dlg menu">
+  <h2>Mehr</h2>
+  <button class="btn ghost" id="mLoad">📥 Rückmeldung oder Sicherung laden</button>
+  <button class="btn ghost" id="mBackup">🗂️ Sicherung als Datei speichern</button>
+  <button class="btn ghost" id="mLogout" hidden>🧪 Vorschau zurücksetzen</button>
+  <p style="font-size:14px;color:var(--muted);margin-top:14px">Diese App ist fest mit deinem Code verbunden. Mit der Sicherungsdatei kannst du deinen Stand auf ein neues Tablet mitnehmen (nur mit demselben Code).</p>
+  <div class="row"><button class="btn" data-close>Schließen</button></div>
+</div></dialog>
+
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+<div id="toast"></div>
+
+<script src="gemeinsam.js"></script>
+<script>
+(() => {
+const $ = (s) => document.querySelector(s);
+const VERSION = 1;
+let cfg = null, code = null, daten = null, offenesModul = null, warteAufStand = null;
+
+/* ---------- Hilfen ---------- */
+const istIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const istInstalliert = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+const zeit = (iso) => iso ? new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200); }
+function zeige(id) { ['login', 'home', 'modul'].forEach((s) => $('#' + s).hidden = s !== id); }
+document.querySelectorAll('[data-close]').forEach((b) => b.onclick = () => b.closest('dialog').close());
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- Konfiguration (welche Module freigegeben sind) ---------- */
+async function ladeCfg() {
+  try {
+    const r = await fetch('module/module.json', { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    cfg = await r.json();
+    localStorage.setItem('tgeapp:cfg', JSON.stringify(cfg));
+  } catch {
+    cfg = JSON.parse(localStorage.getItem('tgeapp:cfg') || 'null') || { klassen: {}, module: [] };
+  }
+}
+const klassenId = () => code.slice(0, 2);
+const meineModule = () => cfg.module.filter((m) => m.freigegeben && (m.klassen || []).includes(klassenId()));
+
+/* ---------- Speicher ---------- */
+const KEY = (c) => 'tgeapp:daten:' + c;
+function ladeDaten() {
+  daten = JSON.parse(localStorage.getItem(KEY(code)) || 'null') || { code, module: {}, rueckmeldungen: [], abgaben: [] };
+}
+function schreibe() {
+  daten.gespeichert = new Date().toISOString();
+  try { localStorage.setItem(KEY(code), JSON.stringify(daten)); return true; }
+  catch (e) { alert('Speichern hat nicht geklappt: Der Speicher ist voll.'); return false; }
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+
+/* ---------- Anmeldung: nur in der installierten App, nur einmal ---------- */
+/* ?vorschau=1 erlaubt dir das Testen im normalen Browser (wird in der Abgabe markiert) */
+const vorschau = new URLSearchParams(location.search).has('vorschau') || localStorage.getItem('tgeapp:vorschau') === '1';
+if (vorschau) localStorage.setItem('tgeapp:vorschau', '1');
+let kandidat = null;
+function startLogin() {
+  zeige('login');
+  const darf = istInstalliert || vorschau;
+  $('#loginInstall').hidden = darf;
+  $('#loginCode').hidden = !darf;
+  $('#loginConfirm').hidden = true;
+  $('#codeIn').value = '';
+  $('#loginMsg').innerHTML = '';
+}
+function geraeteId() {
+  let g = localStorage.getItem('tgeapp:geraet');
+  if (!g) { g = crypto.randomUUID(); localStorage.setItem('tgeapp:geraet', g); }
+  return g;
+}
+$('#codeIn').addEventListener('input', (e) => {
+  const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+  e.target.value = d.length > 4 ? d.slice(0, 4) + ' ' + d.slice(4) : d;
+});
+$('#loginForm').onsubmit = (e) => {
+  e.preventDefault();
+  const c = $('#codeIn').value.replace(/\D/g, '');
+  const box = $('#loginMsg');
+  if (c.length !== 8) { box.innerHTML = '<div class="msg no">Der Code hat 8 Ziffern.</div>'; return; }
+  if (!KA.codeGueltig(c)) { box.innerHTML = '<div class="msg no">Diesen Code gibt es nicht. Hast du dich vertippt?</div>'; return; }
+  if (cfg.klassen && Object.keys(cfg.klassen).length && !cfg.klassen[c.slice(0, 2)]) { box.innerHTML = '<div class="msg no">Zu diesem Code ist keine Klasse eingetragen. Frag deine Lehrerin.</div>'; return; }
+  kandidat = c;
+  $('#confirmCode').textContent = KA.codeHuebsch(c);
+  $('#loginCode').hidden = true; $('#loginConfirm').hidden = false;
+};
+$('#confirmNo').onclick = () => { kandidat = null; $('#loginConfirm').hidden = true; $('#loginCode').hidden = false; $('#codeIn').focus(); };
+$('#confirmYes').onclick = () => {
+  if (!kandidat || localStorage.getItem('tgeapp:aktiv')) return;
+  code = kandidat;
+  localStorage.setItem('tgeapp:aktiv', code);
+  localStorage.setItem('tgeapp:seit', new Date().toISOString());
+  geraeteId();
+  ladeDaten(); schreibe(); startHome();
+  toast('Willkommen!');
+};
+
+/* ---------- Übersicht ---------- */
+function fortschritt(id) {
+  const s = daten.module[id] && daten.module[id].state;
+  if (!s) return null;
+  const n = (s.stationen || []).length, k = (s.erledigt || []).length;
+  return { punkte: s.punkte || 0, n, k, anteil: n ? k / n : 0 };
+}
+function rmFuer(id) { return daten.rueckmeldungen.filter((r) => id ? r.module && r.module[id] : r.gesamt); }
+function startHome() {
+  zeige('home');
+  if ($('#klName')) $('#klName').textContent = (cfg.klassen && cfg.klassen[klassenId()]) || '';
+  $('#codeShow').textContent = KA.codeHuebsch(code);
+  $('#installHint2').hidden = !(istIOS && !istInstalliert);
+  const letzte = daten.abgaben[daten.abgaben.length - 1];
+  $('#status').textContent = [daten.gespeichert ? 'Gespeichert: ' + zeit(daten.gespeichert) : '', letzte ? 'Zuletzt abgegeben: ' + zeit(letzte.datum) : ''].filter(Boolean).join(' · ');
+
+  /* Rückmeldungen (allgemein) */
+  const fb = daten.rueckmeldungen.filter((r) => r.gesamt).slice(-3).reverse();
+  $('#fbList').innerHTML = fb.map((r) => `<div class="feedback-card"><h2>💬 Rückmeldung</h2><div class="when">${zeit(r.datum)}</div><p>${esc(r.gesamt)}</p></div>`).join('');
+
+  const mods = meineModule();
+  const box = $('#tiles');
+  if (!mods.length) { box.innerHTML = '<div class="empty">Noch nichts freigeschaltet. Schau später nochmal rein.</div>'; return; }
+  box.innerHTML = '';
+  mods.forEach((m) => {
+    const f = fortschritt(m.id), ico = ICONS[m.icon] || '', hatFb = rmFuer(m.id).length > 0;
+    const b = document.createElement('button');
+    b.className = 'tile'; b.style.setProperty('--c', m.farbe || 'var(--navy)');
+    b.innerHTML = `<span class="nr">${mods.indexOf(m) + 1}</span><div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div><div class="body">
+      <div class="meta">${f ? `<span>${f.k} von ${f.n} Stationen · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
+      ${f ? `<div class="bar"><i style="width:${Math.round(f.anteil * 100)}%"></i></div>` : ''}</div>`;
+    b.onclick = () => oeffneModul(m);
+    box.appendChild(b);
+  });
+  pfeileSetzen();
+}
+function pfeileSetzen() {
+  const box = $('#tiles'); box.querySelectorAll('.pfeil').forEach((p) => p.remove());
+  const t = [...box.querySelectorAll('.tile')];
+  t.forEach((a, k) => {
+    const n = t[k + 1]; if (!n) return;
+    const p = document.createElement('span'); p.className = 'pfeil'; p.setAttribute('aria-hidden', 'true');
+    if (Math.abs(n.offsetTop - a.offsetTop) < 5) { // nächste Kachel in derselben Zeile
+      p.textContent = '➜'; p.style.left = (a.offsetLeft + a.offsetWidth) + 'px'; p.style.top = (a.offsetTop + a.offsetHeight / 2 - 17) + 'px';
+    } else { // Zeilenumbruch: Pfeil nach unten-links zur nächsten Zeile
+      p.textContent = '⬇'; p.style.left = (a.offsetLeft + a.offsetWidth / 2 - 17) + 'px'; p.style.top = (a.offsetTop + a.offsetHeight) + 'px';
+    }
+    box.appendChild(p);
+  });
+}
+addEventListener('resize', () => { if ($('#tiles')) pfeileSetzen(); });
+
+/* ---------- Modul öffnen ---------- */
+const ICONS = {"welle": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 24c4-14 8-14 12 0s8 14 12 0 8-14 12 0\"/></svg>", "schwingkreis": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8h24M12 40h24M12 8v10M12 30v10M5 18h14M5 30h14\"/><path d=\"M36 8v6c7 0 7 7 0 7s-7 7 0 7 7 7 0 7v5\"/></svg>", "ordnung": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"5\" y=\"6\" width=\"26\" height=\"10\" rx=\"3\"/><rect x=\"12\" y=\"19\" width=\"26\" height=\"10\" rx=\"3\"/><rect x=\"19\" y=\"32\" width=\"24\" height=\"10\" rx=\"3\"/><path d=\"M10 11h6M17 24h6M24 37h6\"/></svg>", "dipol": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M24 6v36\"/><path d=\"M18 14h12M18 34h12\"/><path d=\"M33 17c4 4 4 10 0 14M39 11c7 8 7 18 0 26M15 17c-4 4-4 10 0 14M9 11c-7 8-7 18 0 26\"/></svg>", "abi": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M24 9 3 19l21 10 21-10z\"/><path d=\"M12 24v9c4 4 20 4 24 0v-9\"/><path d=\"M45 19v12\"/></svg>", "fussball": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"24\" cy=\"24\" r=\"17\"/><path d=\"M24 15l8 6-3 9H19l-3-9z\"/><path d=\"M24 15V7M32 21l8-3M29 30l5 7M19 30l-5 7M16 21l-8-3\"/></svg>", "auto": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 30v-6l5-9h22l7 9v6z\"/><path d=\"M12 15l-3 9h24l-5-9\"/><circle cx=\"14\" cy=\"32\" r=\"4\" fill=\"var(--bg,#fff)\"/><circle cx=\"34\" cy=\"32\" r=\"4\" fill=\"var(--bg,#fff)\"/></svg>", "spiel": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"24\" cy=\"24\" r=\"17\"/><circle cx=\"24\" cy=\"24\" r=\"4\"/><path d=\"M7 24h13M28 24h13M24 28v13\"/></svg>", "tacho": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 34a18 18 0 1 1 36 0\"/><path d=\"M24 34l9-12\"/><path d=\"M10 34h4M34 34h4M24 12v4\"/></svg>", "uhr": "<svg viewBox=\"0 0 48 48\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"24\" cy=\"27\" r=\"15\"/><path d=\"M24 27v-8M20 6h8M24 6v6M37 12l3-3\"/></svg>"};
+
+function oeffneModul(m) {
+  offenesModul = m;
+  zeige('modul');
+  $('#mTitle').textContent = m.titel;
+  document.querySelector('.mbar').style.background = m.farbe || '';
+  $('#mSaved').textContent = daten.module[m.id] ? 'Stand vom ' + zeit(daten.module[m.id].geaendert) : '';
+  const rm = rmFuer(m.id);
+  $('#mFbBtn').hidden = !rm.length; $('#mfb').hidden = true;
+  $('#mfb').textContent = rm.length ? '💬 ' + rm[rm.length - 1].module[m.id] : '';
+  $('#frame').src = 'module/' + m.datei;
+}
+$('#mFbBtn').onclick = () => $('#mfb').hidden = !$('#mfb').hidden;
+$('#btnBack').onclick = async () => { await standHolen(); offenesModul = null; $('#frame').src = 'about:blank'; startHome(); };
+
+addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data || e.data.app !== 'tgeapp' || !offenesModul) return;
+  const id = offenesModul.id, d = e.data;
+  if (d.type === 'ready') {
+    const alt = daten.module[id];
+    if (alt && alt.state) $('#frame').contentWindow.postMessage({ app: 'tgeapp', type: 'load', state: alt.state }, location.origin);
+    return;
+  }
+  if (d.type === 'state' && d.state) {
+    daten.module[id] = { state: d.state, geaendert: new Date().toISOString() };
+    schreibe();
+    $('#mSaved').textContent = 'automatisch gesichert ' + zeit(daten.module[id].geaendert).split(', ')[1];
+    if (warteAufStand) { warteAufStand(); warteAufStand = null; }
+  }
+});
+function standHolen() {
+  if (!offenesModul) return Promise.resolve();
+  return new Promise((ok) => {
+    warteAufStand = ok;
+    $('#frame').contentWindow.postMessage({ app: 'tgeapp', type: 'collect' }, location.origin);
+    setTimeout(() => { if (warteAufStand) { warteAufStand = null; ok(); } }, 800);
+  });
+}
+
+/* ---------- Speichern ---------- */
+async function speichern() {
+  await standHolen();
+  if (schreibe()) toast('Gespeichert ✓');
+  if (!offenesModul) startHome();
+}
+$('#btnSave').onclick = speichern; $('#mSave').onclick = speichern;
+
+/* ---------- Abgeben ---------- */
+function abgabeDialog(nurId) {
+  const mods = meineModule().filter((m) => daten.module[m.id]);
+  const box = $('#handChoices');
+  if (!mods.length) { box.innerHTML = '<div class="msg warn">Du hast noch in keinem Modul gearbeitet.</div>'; $('#handGo').disabled = true; }
+  else {
+    $('#handGo').disabled = false;
+    box.innerHTML = mods.map((m) => `<label class="choice"><input type="checkbox" value="${m.id}" ${!nurId || nurId === m.id ? 'checked' : ''}><span><b>${esc(m.titel)}</b><br><small>Stand vom ${zeit(daten.module[m.id].geaendert)}</small></span></label>`).join('');
+  }
+  $('#dlgHand').showModal();
+}
+$('#btnHand').onclick = () => abgabeDialog(null);
+$('#mHand').onclick = async () => { await standHolen(); abgabeDialog(offenesModul.id); };
+$('#handGo').onclick = async () => {
+  const ids = [...document.querySelectorAll('#handChoices input:checked')].map((i) => i.value);
+  if (!ids.length) { toast('Wähle mindestens ein Modul'); return; }
+  const kl = (cfg.klassen && cfg.klassen[klassenId()]) || klassenId();
+  const paket = { typ: 'tgeapp-abgabe', version: VERSION, code, klasse: kl, erstellt: new Date().toISOString(),
+    geraet: geraeteId(), eingerichtet: localStorage.getItem('tgeapp:seit'), installiert: !!istInstalliert, vorschau: vorschau || undefined, module: {} };
+  ids.forEach((id) => { const m = cfg.module.find((x) => x.id === id); paket.module[id] = { titel: m ? m.titel : id, geaendert: daten.module[id].geaendert, state: daten.module[id].state }; });
+  const teil = ids.length === meineModule().filter((m) => daten.module[m.id]).length && ids.length > 1 ? 'alle' : ids.join('+');
+  const name = KA.dateiname(`Abgabe_${kl}_${code}_${teil}_${KA.stempel()}.json`);
+  const ok = await dateiRaus(paket, name);
+  if (ok) {
+    daten.abgaben.push({ datum: paket.erstellt, module: ids }); schreibe();
+    $('#dlgHand').close(); toast('Datei erstellt. Jetzt in Nextcloud hochladen.');
+    if (!offenesModul) startHome();
+  }
+};
+async function dateiRaus(obj, name) {
+  const blob = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' });
+  const file = new File([blob], name, { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return true; }
+    catch (e) { if (e.name === 'AbortError') return false; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  return true;
+}
+
+/* ---------- Mehr: Laden, Sicherung, Abmelden ---------- */
+$('#btnMore').onclick = () => { $('#mLogout').hidden = !vorschau; $('#dlgMore').showModal(); };
+$('#mBackup').onclick = async () => {
+  const paket = { typ: 'tgeapp-sicherung', version: VERSION, code, erstellt: new Date().toISOString(), daten };
+  if (await dateiRaus(paket, `Sicherung_Physik_${code}_${KA.stempel()}.json`)) { $('#dlgMore').close(); toast('Sicherung erstellt'); }
+};
+/* Nur im Vorschau-Modus (Lehrerin testet im Browser) */
+$('#mLogout').onclick = () => {
+  if (!vorschau || !confirm('Vorschau zurücksetzen? Code und Stand in diesem Browser werden gelöscht.')) return;
+  Object.keys(localStorage).filter((k) => k.startsWith('tgeapp:') && k !== 'tgeapp:vorschau').forEach((k) => localStorage.removeItem(k));
+  $('#dlgMore').close(); code = null; startLogin();
+};
+$('#mLoad').onclick = () => $('#fileIn').click();
+$('#fileIn').onchange = async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  let obj; try { obj = JSON.parse(await f.text()); } catch { alert('Diese Datei kann ich nicht lesen.'); return; }
+  $('#dlgMore').close();
+  if (obj.typ === 'tgeapp-rueckmeldung') return rueckmeldungLaden(obj);
+  if (obj.typ === 'tgeapp-sicherung' || obj.typ === 'tgeapp-abgabe') {
+    if (obj.code !== code) { alert('Diese Datei gehört zu einem anderen Code.'); return; }
+    if (!confirm('Stand aus der Datei übernehmen? Dein aktueller Stand für diese Module wird ersetzt.')) return;
+    if (obj.typ === 'tgeapp-sicherung') daten = obj.daten;
+    else Object.entries(obj.module).forEach(([id, m]) => daten.module[id] = { state: m.state, geaendert: m.geaendert });
+    schreibe(); startHome(); toast('Stand übernommen'); return;
+  }
+  alert('Das ist keine Datei aus der Physik App TGE.');
+};
+async function rueckmeldungLaden(obj) {
+  const id = await KA.kennung(code);
+  const eintrag = obj.eintraege && obj.eintraege[id];
+  if (!eintrag) { alert('In dieser Datei ist keine Rückmeldung für dich.'); return; }
+  try {
+    const rm = await KA.entschluesseln(code, eintrag);
+    rm.datum = obj.erstellt; rm.datei = obj.id;
+    daten.rueckmeldungen = daten.rueckmeldungen.filter((r) => r.datei !== obj.id);
+    daten.rueckmeldungen.push(rm); schreibe(); startHome(); toast('Rückmeldung geladen 💬');
+  } catch { alert('Die Rückmeldung konnte nicht geöffnet werden.'); }
+}
+
+/* ---------- Start ---------- */
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+(async () => {
+  await ladeCfg();
+  code = localStorage.getItem('tgeapp:aktiv');
+  if (code && KA.codeGueltig(code)) { ladeDaten(); startHome(); } else startLogin();
+})();
+})();
+</script>
+</body>
+</html>
