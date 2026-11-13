@@ -125,6 +125,12 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
       <h2>Sicherung</h2>
       <p>Alles, was die Auswertung weiß (Klassenlisten mit Codes, eingelesene Abgaben, deine Rückmeldungen), steckt in einer Datei. Leg sie z. B. in deine Nextcloud. Auf einem anderen Rechner kannst du sie hier wieder einlesen.</p>
       <div class="row"><button class="btn" id="sExport">Sicherung herunterladen</button><button class="btn ghost" id="sImport">Sicherung einlesen</button></div>
+      <div id="sOrdnerBox" hidden style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <b>Automatisch in einen Ordner sichern</b> <span class="muted">(Chrome/Edge am Rechner)</span>
+        <p class="muted" style="margin:6px 0">Wähl einmal deinen Ordner „Physik App" (z. B. in der Nextcloud). Danach wird bei jeder Änderung automatisch dort gesichert. Die Nextcloud lädt die Datei dann hoch.</p>
+        <div class="row"><button class="btn ghost" id="sOrdner">Ordner wählen</button><button class="btn ghost" id="sOrdnerJetzt" hidden>Jetzt in den Ordner sichern</button></div>
+        <div id="sOrdnerInfo" class="muted" style="margin-top:6px"></div>
+      </div>
       <input type="file" id="sFile" accept=".json" hidden>
       <div id="sMsg"></div>
     </div>
@@ -144,7 +150,7 @@ const SKEY = 'klassenapp-lehrer';
 let cfg = { klassen: {}, module: [] };
 let db = JSON.parse(localStorage.getItem(SKEY) || 'null') || { schueler: {}, abgaben: {}, rm: {} };
 /* db.schueler[code] = {name, klasse}; db.abgaben[code][modulId] = {titel, geaendert, eingereicht, state}; db.rm[code] = {gesamt, module:{id:text}} */
-const sichern = () => localStorage.setItem(SKEY, JSON.stringify(db));
+const sichern = () => { localStorage.setItem(SKEY, JSON.stringify(db)); ordnerSichernSpaeter(); };
 let auswahl = null; // {code, mid}
 
 /* Tabs */
@@ -340,6 +346,45 @@ $('#rmExport').onclick = async () => {
 };
 
 /* ================= SICHERUNG ================= */
+
+/* ---- Sicherung direkt in einen Ordner (File System Access API: Chrome/Edge am Rechner) ---- */
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open('klassenapp-lehrer-ordner', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const idbGet = async () => { const d = await idb(); return new Promise((res) => { const q = d.transaction('h').objectStore('h').get('ordner'); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); };
+const idbSet = async (v) => { const d = await idb(); return new Promise((res) => { const t = d.transaction('h', 'readwrite'); t.objectStore('h').put(v, 'ordner'); t.oncomplete = res; }); };
+let ordner = null, ordnerTimer = null;
+function sicherungText() { return JSON.stringify({ typ: 'klassenapp-lehrer-sicherung', erstellt: new Date().toISOString(), db }); }
+async function ordnerRecht(anfragen) {
+  if (!ordner) return false;
+  const o = { mode: 'readwrite' };
+  if ((await ordner.queryPermission(o)) === 'granted') return true;
+  return anfragen ? (await ordner.requestPermission(o)) === 'granted' : false;
+}
+async function inOrdnerSichern(anfragen) {
+  try {
+    if (!(await ordnerRecht(anfragen))) { ordnerInfo(); return false; }
+    const txt = sicherungText(), tag = new Date().toISOString().slice(0, 10);
+    for (const name of ['Physik-App_Lehrer-Sicherung.json', `Physik-App_Lehrer-Sicherung_${tag}.json`]) {
+      const fh = await ordner.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(txt); await w.close();
+    }
+    ordnerInfo('Zuletzt gesichert: ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr');
+    return true;
+  } catch (e) { ordnerInfo('Sichern in den Ordner hat nicht geklappt: ' + e.message); return false; }
+}
+function ordnerSichernSpaeter() { if (!ordner) return; clearTimeout(ordnerTimer); ordnerTimer = setTimeout(() => inOrdnerSichern(false), 3000); }
+async function ordnerInfo(extra) {
+  if (!ordner) return;
+  const ok = await ordner.queryPermission({ mode: 'readwrite' }) === 'granted';
+  $('#sOrdnerInfo').textContent = `Ordner: ${ordner.name}. ` + (extra || (ok ? 'Automatisch sichern ist aktiv.' : 'Zum Weitersichern einmal auf „Jetzt in den Ordner sichern“ tippen (Browser fragt nach Erlaubnis).'));
+  $('#sOrdnerJetzt').hidden = false;
+}
+if (window.showDirectoryPicker) {
+  $('#sOrdnerBox').hidden = false;
+  idbGet().then((h) => { ordner = h; ordnerInfo(); });
+  $('#sOrdner').onclick = async () => {
+    try { ordner = await showDirectoryPicker({ mode: 'readwrite', id: 'physik-app-sicherung' }); await idbSet(ordner); await inOrdnerSichern(true); } catch (e) { if (e.name !== 'AbortError') ordnerInfo('Das hat nicht geklappt: ' + e.message); }
+  };
+  $('#sOrdnerJetzt').onclick = () => inOrdnerSichern(true);
+}
 $('#sExport').onclick = () => download(new Blob([JSON.stringify({ typ: 'klassenapp-lehrer-sicherung', erstellt: new Date().toISOString(), db })], { type: 'application/json' }), `Physik-App_Lehrer-Sicherung_${KA.stempel()}.json`);
 $('#sImport').onclick = () => $('#sFile').click();
 $('#sFile').onchange = async (e) => {
