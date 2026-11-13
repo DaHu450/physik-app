@@ -1,8 +1,8 @@
 /* Offline-Speicher der App.
    module.json kommt immer frisch aus dem Netz (sonst aus dem Speicher),
    alles andere aus dem Speicher und wird im Hintergrund aktualisiert. */
-const CACHE = 'klassenapp-v9';
-const GRUND = ['./', 'index.html', 'gemeinsam.js', 'bridge.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'module/module.json'];
+const CACHE = 'klassenapp-v10';
+const GRUND = ['./', 'index.html', 'gemeinsam.js', 'bridge.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'module/module.json', 'fonts/fonts.css', 'lib/jspdf.umd.min.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(GRUND)).then(() => self.skipWaiting()));

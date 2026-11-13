@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Abi-Trainer Schwingkreis</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="../fonts/fonts.css">
 <style>
 /* Layout: Kopf mit BE-Stand, Tabs je Abiaufgabe, je Teilaufgabe eine Karte mit Antwortfeld, Prüfen und Hilfe-Treppe */
 :root{
@@ -848,7 +847,7 @@ function renderOverview(ov) {
 let jspdfLoading = null;
 function loadJsPdf() {
   if (window.jspdf) return Promise.resolve();
-  if (!jspdfLoading) jspdfLoading = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'; sc.onload = res; sc.onerror = rej; document.head.append(sc); });
+  if (!jspdfLoading) jspdfLoading = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = '../lib/jspdf.umd.min.js'; sc.onload = res; sc.onerror = rej; document.head.append(sc); });
   return jspdfLoading;
 }
 async function makePdf(name, msg) {
