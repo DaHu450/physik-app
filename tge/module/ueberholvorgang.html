@@ -1,0 +1,345 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Der Überholvorgang</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Straßenansicht oben (Kamera folgt dem Überholer), darunter Reglerblock und s-t-Diagramm nebeneinander */
+:root{
+  --bg:#F3F6F8;--card:#FFFFFF;--fg:#1B2733;--muted:#5A6B7B;--line:#D5DEE6;
+  --navy:#1F3A5F;--green:#3C7A4E;--pkw:#2F7FC1;--lkw:#E8833A;--geg:#B03A2E;--warnbg:#FBE9E7;--okbg:#E6F2E9;--soft:#E8EEF5;
+  --body:"Segoe UI",Arial,Helvetica,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1720;--card:#17222E;--fg:#E6EDF3;--muted:#9AAAB9;--line:#2A3A4A;
+  --navy:#9DBBE6;--green:#7CC492;--pkw:#5AA8E8;--lkw:#F29A55;--geg:#EF7B6C;--warnbg:#3A1F1C;--okbg:#17301F;--soft:#1F2D3B;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1720;--card:#17222E;--fg:#E6EDF3;--muted:#9AAAB9;--line:#2A3A4A;
+  --navy:#9DBBE6;--green:#7CC492;--pkw:#5AA8E8;--lkw:#F29A55;--geg:#EF7B6C;--warnbg:#3A1F1C;--okbg:#17301F;--soft:#1F2D3B;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.4}
+.wrap{max-width:1040px;margin:0 auto;padding-block:18px 36px;display:grid;gap:14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+h1{margin:4px 0 0;font-size:clamp(26px,5vw,36px);line-height:1.1;color:var(--navy)}
+h2{margin:0 0 8px;font-size:17px;color:var(--navy)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+#road{display:block;width:100%;height:auto;aspect-ratio:1000/300;border-radius:8px;background:#6E7A86;touch-action:none}
+#strip{display:block;width:100%;height:auto;aspect-ratio:1000/58;margin-top:8px;border-radius:6px}
+.stage{position:relative}
+.msg{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:92%;padding:8px 16px;border-radius:999px;font-weight:700;
+  background:#fff;color:#14243A;box-shadow:0 2px 10px rgba(0,0,0,.3);text-align:center}
+.msg.ok{background:#CFEBD6}.msg.bad{background:#F7C9C2}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+button{font:600 16px var(--body);padding:10px 18px;min-height:44px;border-radius:8px;border:2px solid var(--green);background:var(--green);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--green)}
+button.seg{padding:8px 14px;min-height:40px;border-color:var(--line);color:var(--fg);background:var(--card)}
+button.seg[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--card)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #F2C14E;outline-offset:2px}
+.timer{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.ctrl{display:grid;gap:2px;margin-bottom:10px}
+.ctrl label{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.ctrl output{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+input[type=range]{width:100%;height:30px;accent-color:var(--green)}
+#vp{accent-color:var(--pkw)}#vl{accent-color:var(--lkw)}#vg,#dg{accent-color:var(--geg)}
+.pkw b,.pkw output{color:var(--pkw)}.lkw b,.lkw output{color:var(--lkw)}
+.chk{display:flex;align-items:center;gap:8px;font-weight:700;margin:6px 0 10px}
+.chk input{width:22px;height:22px;accent-color:var(--geg)}
+.geg{border-top:1px dashed var(--line);padding-top:8px}
+.geg.off{opacity:.45}
+#chart{width:100%;height:auto;aspect-ratio:5/4;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.res{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.res div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--soft)}
+.res span{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.res b{font-size:22px;font-variant-numeric:tabular-nums;color:var(--navy)}
+.verdict{margin-top:10px;padding:10px 12px;border-radius:8px;font-weight:600;background:var(--soft)}
+.verdict.ok{background:var(--okbg)}.verdict.bad{background:var(--warnbg)}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+summary{font-weight:700;color:var(--navy);cursor:pointer}
+details p{margin:8px 0;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:14px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kinematik · Simulation</div>
+    <h1>Der Überholvorgang</h1>
+    <p class="hint" style="margin:6px 0 0;max-width:70ch">Ein PKW überholt einen LKW. Stellen Sie die Geschwindigkeiten ein, bevor Sie rechnen, und prüfen Sie danach Ihr Ergebnis.</p>
+  </header>
+
+  <section class="card">
+    <div class="stage">
+      <canvas id="road" width="1000" height="300" aria-label="Landstraße von oben mit PKW, LKW und optional Gegenverkehr"></canvas>
+      <div class="msg" id="msg" hidden></div>
+    </div>
+    <canvas id="strip" width="1000" height="58" aria-label="Übersicht der Positionen auf der Straße"></canvas>
+    <div class="row">
+      <button id="play">Start ▶</button>
+      <button id="reset" class="ghost">Zurücksetzen</button>
+      <span class="hint">Tempo:</span>
+      <button class="seg" data-warp="0.5" aria-pressed="false">0,5×</button>
+      <button class="seg" data-warp="1" aria-pressed="true">1×</button>
+      <button class="seg" data-warp="3" aria-pressed="false">3×</button>
+      <button class="seg" data-warp="10" aria-pressed="false">10×</button>
+      <span class="timer" id="clock">t = 0,0 s</span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Einstellungen</h2>
+      <div class="ctrl pkw"><label for="vp"><b>PKW</b><output id="vp-o"></output></label><input type="range" id="vp" min="60" max="160" step="1" value="100"></div>
+      <div class="ctrl lkw"><label for="vl"><b>LKW</b><output id="vl-o"></output></label><input type="range" id="vl" min="40" max="100" step="1" value="80"></div>
+      <div class="ctrl"><label for="ga">Sicherheitsabstand (vorher und nachher)<output id="ga-o"></output></label><input type="range" id="ga" min="0" max="40" step="1" value="18"></div>
+      <div class="ctrl"><label for="lp">Länge PKW<output id="lp-o"></output></label><input type="range" id="lp" min="3" max="18" step="1" value="5"></div>
+      <div class="ctrl"><label for="ll">Länge LKW<output id="ll-o"></output></label><input type="range" id="ll" min="8" max="25" step="1" value="18"></div>
+      <label class="chk"><input type="checkbox" id="og"> Gegenverkehr einschalten</label>
+      <div class="geg off" id="gegbox">
+        <div class="ctrl"><label for="vg">Gegenverkehr fährt mit<output id="vg-o"></output></label><input type="range" id="vg" min="40" max="130" step="1" value="100"></div>
+        <div class="ctrl"><label for="dg">Gegenverkehr ist am Start noch weit weg<output id="dg-o"></output></label><input type="range" id="dg" min="100" max="1500" step="10" value="700"></div>
+      </div>
+      <div class="hint" style="margin-bottom:6px">Fertige Beispiele:</div>
+      <div class="presets">
+        <button class="seg" data-pre="leifi">108 / 90 km/h</button>
+        <button class="seg" data-pre="land">Landstraße 100 / 80</button>
+        <button class="seg" data-pre="elefant">Elefantenrennen</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Weg-Zeit-Diagramm</h2>
+      <canvas id="chart" width="800" height="640" aria-label="s-t-Diagramm: PKW und LKW (um die Überholstrecke nach oben verschoben)"></canvas>
+      <div class="legend"><span><i style="background:var(--pkw)"></i>PKW</span><span><i style="background:var(--lkw)"></i>LKW + Überholstrecke zum PKW</span></div>
+      <div class="res">
+        <div><span>Dauer des Überholens</span><b id="r-t">–</b></div>
+        <div><span>Weg des PKW</span><b id="r-sp">–</b></div>
+        <div><span>Weg des LKW</span><b id="r-sl">–</b></div>
+        <div><span>Frei bleiben muss</span><b id="r-free">–</b></div>
+      </div>
+      <div class="verdict" id="verdict">Drücken Sie Start. Die Werte erscheinen, wenn der Überholvorgang beendet ist.</div>
+    </section>
+  </div>
+
+  <details>
+    <summary>Rechenweg mit den aktuellen Einstellungen anzeigen</summary>
+    <div id="calc"></div>
+  </details>
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const f1=(x,d=1)=>x.toFixed(d).replace('.',',');
+const kmh=v=>v/3.6;
+let S={vp:100,vl:80,ga:18,lp:5,ll:18,og:false,vg:100,dg:700};
+let t=0,running=false,last=0,warp=1,done=false,crash=false,tCrash=0;
+let runs=0,runsGeg=0,crashes=0;
+const appChanged=()=>{if(window.AppBridge)AppBridge.changed()};
+const road=$('road'),rc=road.getContext('2d'),strip=$('strip'),sc=strip.getContext('2d'),chart=$('chart'),cc=chart.getContext('2d');
+const cs=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function rel(){return S.ga+S.ll+S.ga+S.lp}
+function dv(){return kmh(S.vp-S.vl)}
+function tEnd(){return dv()>0?rel()/dv():Infinity}
+function sp(tt){return kmh(S.vp)*tt}
+function slk(tt){return kmh(S.vl)*tt}
+function gegFront(tt){return S.dg-kmh(S.vg)*tt}
+const LG=4.5, LANE=1.0;
+// seitlicher Versatz des PKW (0 = rechte Spur, 1 = linke Spur)
+function lane(tt){const te=tEnd();const up=Math.min(tt/1.0,1);const dn=isFinite(te)?Math.min(Math.max((tt-te)/1.0,0),1):0;
+  const s=x=>x*x*(3-2*x);return s(up)*(1-s(dn));}
+
+function fmtOut(){
+  $('vp-o').textContent=`${S.vp} km/h (${f1(kmh(S.vp))} m/s)`;
+  $('vl-o').textContent=`${S.vl} km/h (${f1(kmh(S.vl))} m/s)`;
+  $('ga-o').textContent=`${S.ga} m`;$('lp-o').textContent=`${S.lp} m`;$('ll-o').textContent=`${S.ll} m`;
+  $('vg-o').textContent=`${S.vg} km/h (${f1(kmh(S.vg))} m/s)`;$('dg-o').textContent=`${S.dg} m`;
+}
+function calc(){
+  const te=tEnd();
+  if(!isFinite(te)){$('calc').innerHTML='<p>Der PKW ist nicht schneller als der LKW. Er kann ihn nicht überholen.</p>';return;}
+  const r=rel(),d=dv();
+  $('calc').innerHTML=
+   `<p><b>1. Umrechnen:</b> PKW ${S.vp} km/h : 3,6 = ${f1(kmh(S.vp),2)} m/s · LKW ${S.vl} km/h : 3,6 = ${f1(kmh(S.vl),2)} m/s</p>`+
+   `<p><b>2. Geschwindigkeitsunterschied:</b> ${f1(kmh(S.vp),2)} m/s − ${f1(kmh(S.vl),2)} m/s = ${f1(d,2)} m/s</p>`+
+   `<p><b>3. Strecke, die der PKW dem LKW abnehmen muss:</b> ${S.ga} m + ${S.ll} m + ${S.ga} m + ${S.lp} m = ${r} m</p>`+
+   `<p><b>4. Dauer:</b> t = ${r} m : ${f1(d,2)} m/s = ${f1(te,1)} s</p>`+
+   `<p><b>5. Überholweg des PKW:</b> s = ${f1(kmh(S.vp),2)} m/s · ${f1(te,1)} s = ${f1(sp(te),0)} m</p>`+
+   (S.og?`<p><b>6. Gegenverkehr in dieser Zeit:</b> ${f1(kmh(S.vg),2)} m/s · ${f1(te,1)} s = ${f1(kmh(S.vg)*te,0)} m · Die Straße muss also ${f1(sp(te)+kmh(S.vg)*te,0)} m frei sein.</p>`:'');
+}
+
+// ---------- Zeichnen
+const W=1000,H=300,PX=6.4; // px pro m
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);}
+function car(c,x,y,len,wid,col,dir,truck){ // x = hintere Kante in px (bei dir=1), y = Mitte
+  c.save();c.translate(x,y);
+  c.fillStyle='rgba(0,0,0,.25)';rr(c,2,-wid/2+4,len,wid,5);c.fill();
+  c.fillStyle=col;rr(c,0,-wid/2,len,wid,truck?3:7);c.fill();
+  c.fillStyle='rgba(255,255,255,.35)';
+  if(truck){ // Fahrerhaus vorn
+    const cab=Math.min(len*0.22,40);const cx=dir>0?len-cab:0;
+    c.fillStyle='rgba(0,0,0,.18)';c.fillRect(dir>0?0:cab,-wid/2+2,len-cab,wid-4);
+    c.fillStyle='rgba(255,255,255,.55)';c.fillRect(dir>0?len-cab*0.35:0,-wid/2+4,cab*0.35,wid-8);
+  }else{
+    c.fillRect(dir>0?len*0.55:len*0.12,-wid/2+3,len*0.22,wid-6);
+    c.fillRect(dir>0?len*0.14:len*0.66,-wid/2+3,len*0.14,wid-6);
+  }
+  c.restore();
+}
+function drawRoad(){
+  const st=state();
+  const camC=(st.xPf+st.xLf)/2;       // Kamera in der Mitte zwischen den Fronten
+  const cx=W/2-camC*PX;                 // Weltkoordinate → px
+  const X=m=>cx+m*PX;
+  rc.clearRect(0,0,W,H);
+  // Straße
+  rc.fillStyle='#6E7A86';rc.fillRect(0,0,W,H);
+  rc.fillStyle='#7C8793';rc.fillRect(0,60,W,180);
+  rc.fillStyle='#fff';rc.fillRect(0,56,W,4);rc.fillRect(0,240,W,4);
+  rc.strokeStyle='#fff';rc.lineWidth=4;rc.setLineDash([36,28]);
+  const off=((cx%64)+64)%64;rc.lineDashOffset=-off;rc.beginPath();rc.moveTo(0,150);rc.lineTo(W,150);rc.stroke();rc.setLineDash([]);
+  rc.fillStyle='rgba(255,255,255,.55)';rc.font='600 13px Arial';rc.textAlign='left';
+  rc.fillText('Gegenspur',10,76);rc.fillText('eigene Spur',10,230);
+  // Meter-Skala am oberen Rand
+  rc.fillStyle='#fff';rc.textAlign='center';rc.font='12px Arial';
+  const m0=Math.floor((-cx)/PX/10)*10;
+  for(let m=m0;m<m0+W/PX+20;m+=10){const x=X(m);if(x<0||x>W)continue;rc.fillRect(x,40,1,m%50===0?10:5);if(m%50===0)rc.fillText(m+' m',x,34);}
+  const yR=195,yL=105;
+  const yP=yR+(yL-yR)*st.lane;
+  // LKW (immer rechts)
+  car(rc,X(st.xLf-S.ll),yR,S.ll*PX,30,cs('--lkw'),1,true);
+  // PKW
+  car(rc,X(st.xPf-S.lp),yP,S.lp*PX,22,cs('--pkw'),1,false);
+  // Gegenverkehr
+  if(S.og){
+    const gx=st.xG;const px=X(gx);
+    if(px<W+20&&px>-LG*PX-20){car(rc,X(gx),yL,LG*PX,22,cs('--geg'),-1,false);}
+    else if(px>=W){rc.fillStyle='#fff';rc.textAlign='right';rc.font='700 15px Arial';rc.fillText(`Gegenverkehr in ${f1(Math.max(gx-st.xPf,0),0)} m ▶`,W-12,yL+5);}
+  }
+  if(crash){rc.fillStyle='#fff';rc.font='700 28px Arial';rc.textAlign='center';rc.fillText('💥',X(st.xPf),yL-2);}
+}
+function drawStrip(){
+  const st=state();
+  const maxM=Math.max(S.og?S.dg+40:0, sp(isFinite(tEnd())?tEnd():20)+rel()+60, 300);
+  const X=m=>20+(m/maxM)*(strip.width-40);
+  sc.clearRect(0,0,strip.width,strip.height);
+  sc.fillStyle=cs('--soft');rr(sc,0,0,strip.width,strip.height,6);sc.fill();
+  sc.fillStyle=cs('--muted');sc.font='12px Arial';sc.textBaseline='top';sc.textAlign='center';
+  const step=maxM>900?200:maxM>500?100:50;
+  for(let m=0;m<=maxM;m+=step){sc.fillRect(X(m),30,1,6);sc.fillText(m+' m',X(m),38);}
+  sc.fillStyle=cs('--muted');sc.fillRect(20,28,strip.width-40,2);
+  const dot=(m,col,lab)=>{sc.fillStyle=col;sc.beginPath();sc.arc(X(m),20,8,0,7);sc.fill();};
+  dot(st.xLf,cs('--lkw'));dot(st.xPf,cs('--pkw'));
+  if(S.og&&st.xG<maxM+50)dot(st.xG,cs('--geg'));
+  sc.textBaseline='alphabetic';
+}
+function chartScale(){
+  const te=isFinite(tEnd())?tEnd():10;
+  const tmax=Math.max(10,Math.ceil(te*1.25/ (te>40?20:te>20?5:2))*(te>40?20:te>20?5:2));
+  const smax=niceMax(sp(tmax)*1.0+rel());
+  return {tmax,smax};
+}
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;}
+function drawChart(){
+  const {tmax,smax}=chartScale();
+  const Wc=chart.width,Hc=chart.height,L=92,R=24,T=24,B=74;
+  const cx=v=>L+v/tmax*(Wc-L-R),cy=v=>Hc-B-v/smax*(Hc-T-B);
+  cc.clearRect(0,0,Wc,Hc);
+  const mu=cs('--muted'),ln=cs('--line'),fg=cs('--fg');
+  cc.font='22px Arial';
+  const ts=tmax>=100?20:tmax>=40?10:tmax>20?5:tmax>10?2:1;
+  const ss=niceMax(smax/5)>0?niceMax(smax/5):50;
+  const sstep=smax/ss>8?ss*2:ss;
+  for(let v=0;v<=smax+1;v+=sstep){cc.strokeStyle=ln;cc.lineWidth=1;cc.beginPath();cc.moveTo(L,cy(v));cc.lineTo(Wc-R,cy(v));cc.stroke();cc.fillStyle=mu;cc.textAlign='right';cc.textBaseline='middle';cc.fillText(f1(v,0),L-10,cy(v));}
+  for(let v=0;v<=tmax+0.01;v+=ts){cc.strokeStyle=ln;cc.beginPath();cc.moveTo(cx(v),T);cc.lineTo(cx(v),Hc-B);cc.stroke();cc.fillStyle=mu;cc.textAlign='center';cc.textBaseline='top';cc.fillText(f1(v,0),cx(v),Hc-B+8);}
+  cc.fillStyle=fg;cc.font='600 22px Arial';cc.textAlign='center';cc.textBaseline='alphabetic';cc.fillText('t in s',(L+Wc-R)/2,Hc-14);
+  cc.save();cc.translate(24,(T+Hc-B)/2);cc.rotate(-Math.PI/2);cc.textAlign='center';cc.fillText('s in m',0,0);cc.restore();
+  cc.strokeStyle=fg;cc.lineWidth=3;cc.beginPath();cc.moveTo(L,T);cc.lineTo(L,Hc-B);cc.lineTo(Wc-R,Hc-B);cc.stroke();
+  const line=(fn,col)=>{cc.strokeStyle=col;cc.lineWidth=4.5;cc.beginPath();let first=true;for(let i=0;i<=120;i++){const tt=tmax*i/120;const v=fn(tt);if(v>smax)break;const x=cx(tt),y=cy(v);first?cc.moveTo(x,y):cc.lineTo(x,y);first=false;}cc.stroke();};
+  line(sp,cs('--pkw'));line(tt=>slk(tt)+rel(),cs('--lkw'));
+  const te=tEnd();
+  if(isFinite(te)&&te<=tmax){
+    const x=cx(te),y=cy(sp(te));
+    cc.setLineDash([8,7]);cc.lineWidth=2;cc.strokeStyle=mu;cc.beginPath();cc.moveTo(x,y);cc.lineTo(x,Hc-B);cc.moveTo(x,y);cc.lineTo(L,y);cc.stroke();cc.setLineDash([]);
+    cc.fillStyle=fg;cc.beginPath();cc.arc(x,y,9,0,7);cc.fill();
+  }
+  if(t>0){const x=cx(Math.min(t,tmax));cc.strokeStyle=fg;cc.globalAlpha=.45;cc.lineWidth=2;cc.beginPath();cc.moveTo(x,T);cc.lineTo(x,Hc-B);cc.stroke();cc.globalAlpha=1;}
+}
+function state(){
+  const tt=Math.min(t,3600);
+  const xPf=sp(tt),xLf=S.ga+S.ll+slk(tt);
+  return {xPf,xLf,xG:gegFront(tt),lane:lane(tt)};
+}
+function draw(){drawRoad();drawStrip();drawChart();$('clock').textContent='t = '+f1(t,1)+' s';}
+
+// ---------- Ablauf
+function msg(txt,cls){const m=$('msg');if(!txt){m.hidden=true;return;}m.hidden=false;m.className='msg '+(cls||'');m.textContent=txt;}
+function results(){
+  const te=tEnd();
+  if(!isFinite(te)){$('verdict').className='verdict bad';$('verdict').textContent='Der PKW ist nicht schneller als der LKW. Er holt nie auf.';return;}
+  runs++;if(S.og)runsGeg++;if(crash)crashes++;appChanged();
+  $('r-t').textContent=f1(te,1)+' s';$('r-sp').textContent=f1(sp(te),0)+' m';$('r-sl').textContent=f1(slk(te),0)+' m';
+  if(S.og){
+    const free=sp(te)+kmh(S.vg)*te;
+    $('r-free').textContent=f1(free,0)+' m';
+    if(crash){$('verdict').className='verdict bad';$('verdict').textContent=`Zusammenstoß! Der Gegenverkehr war bei t = ${f1(tCrash,1)} s zu nah. Frei sein müssen mindestens ${f1(free,0)} m.`;}
+    else{const gap=gegFront(te)-sp(te);$('verdict').className='verdict ok';$('verdict').textContent=`Geschafft. Beim Überholen bleiben ${f1(gap,0)} m Abstand zum Gegenverkehr. Mindestens nötig wären ${f1(free,0)} m freie Sicht.`;}
+  }else{
+    $('r-free').textContent='Gegenverkehr aus';
+    $('verdict').className='verdict ok';$('verdict').textContent=`Der PKW braucht ${f1(te,1)} s und fährt dabei ${f1(sp(te),0)} m weit. Schalten Sie den Gegenverkehr ein: Wie viel Straße muss frei sein?`;
+  }
+}
+function clearResults(){['r-t','r-sp','r-sl','r-free'].forEach(i=>$(i).textContent='–');$('verdict').className='verdict';$('verdict').textContent='Drücken Sie Start. Die Werte erscheinen, wenn der Überholvorgang beendet ist.';}
+function reset(){running=false;done=false;crash=false;t=0;$('play').textContent='Start ▶';msg(null);clearResults();calc();draw();}
+function loop(now){
+  if(!running)return;
+  const dt=Math.min((now-last)/1000,0.05);last=now;
+  const te=tEnd();
+  t+=dt*warp;
+  if(S.og&&!crash){const lim=isFinite(te)?te+1:20;
+    if(t<=lim&&sp(t)>=gegFront(t)){crash=true;tCrash=t;running=false;done=true;draw();msg('Zusammenstoß!','bad');results();$('play').textContent='Nochmal ▶';return;}}
+  const stopT=isFinite(te)?te+1.3:30;
+  if(t>=stopT){t=stopT;running=false;done=true;draw();msg(isFinite(te)?'Überholvorgang beendet':'Kein Überholen möglich',isFinite(te)?'ok':'bad');results();$('play').textContent='Nochmal ▶';return;}
+  draw();requestAnimationFrame(loop);
+}
+$('play').onclick=()=>{
+  if(running){running=false;$('play').textContent='Weiter ▶';return;}
+  if(done)reset();
+  running=true;msg(null);$('play').textContent='Pause ❚❚';last=performance.now();requestAnimationFrame(loop);
+};
+$('reset').onclick=reset;
+function setWarp(w){warp=w;document.querySelectorAll('[data-warp]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.warp===w));}
+document.querySelectorAll('[data-warp]').forEach(b=>b.onclick=()=>setWarp(+b.dataset.warp));
+const map={vp:'vp',vl:'vl',ga:'ga',lp:'lp',ll:'ll',vg:'vg',dg:'dg'};
+Object.keys(map).forEach(k=>{$(k).oninput=e=>{S[k]=+e.target.value;fmtOut();reset();};});
+$('og').onchange=e=>{S.og=e.target.checked;$('gegbox').classList.toggle('off',!S.og);reset();};
+function setAll(o){Object.assign(S,o);for(const k in map)$(k).value=S[k];$('og').checked=S.og;$('gegbox').classList.toggle('off',!S.og);fmtOut();reset();}
+document.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{
+  const p=b.dataset.pre;
+  if(p==='leifi')setAll({vp:108,vl:90,ga:5,lp:5,ll:20,og:false});
+  if(p==='land')setAll({vp:100,vl:80,ga:18,lp:5,ll:18,og:false});
+  if(p==='elefant'){setAll({vp:82,vl:80,ga:10,lp:18,ll:18,og:false});setWarp(10);}
+});
+new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',draw);
+fmtOut();reset();
+
+/* ===== Anbindung an die Klassen-App ===== */
+if(window.AppBridge)AppBridge.register({
+  getState(){
+    const st=['Überholen ohne Gegenverkehr','Überholen mit Gegenverkehr'];
+    const ok=[];if(runs-runsGeg>0)ok.push(st[0]);if(runsGeg>0)ok.push(st[1]);
+    return{punkte:ok.length*5,stationen:st,erledigt:ok,
+      details:{[st[0]]:(runs-runsGeg)+' Durchläufe',[st[1]]:runsGeg+' Durchläufe, davon '+crashes+' mit Zusammenstoß'},
+      daten:{runs,runsGeg,crashes}};
+  },
+  setState(s){const d=s&&s.daten;if(!d)return;runs=d.runs||0;runsGeg=d.runsGeg||0;crashes=d.crashes||0;}
+});
+})();
+</script>
+
+</body></html>
