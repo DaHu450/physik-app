@@ -735,7 +735,7 @@ function applyCode(code){const c=code.toLowerCase().replace(/[^0-9a-z]/g,'');if(
 function totals(){let c=0,t=0,xp=0;ORDER.forEach(id=>{t+=LEVELS[id].total;const p=prog.levels[id];if(p){c+=p.best;xp+=p.xp;}});return{c,t,xp,pct:t?c/t:0};}
 const isDone=id=>!!(prog.levels[id]&&prog.levels[id].done);
 const allDone=()=>ORDER.every(isDone);
-const unlocked=id=>prog.teacher||PRE[id].every(isDone);
+const unlocked=id=>true; // in der Klassen-App sind alle Stationen frei
 
 /* ---------- Icons ---------- */
 const IC={
