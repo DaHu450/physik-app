@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Reicht das noch? – Das Überhol-Spiel</title>
+<style>
+:root{--navy:#1F3A5F;--green:#3C7A4E;--orange:#E8833A;--red:#C8433A;--blue:#2F7FC1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#4f8a4b;color:#1b2430;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hud{position:fixed;top:10px;left:10px;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:230px}
+.card{background:rgba(255,255,255,.94);border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.lbl{font-size:12px;color:#5a6675;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.big{font-size:52px;font-weight:900;color:var(--green);line-height:1}
+.time{font-size:30px;font-weight:800;color:var(--navy);line-height:1.1}
+.time.low{color:var(--red)}
+.row{display:flex;justify-content:space-between;font-size:15px;padding:2px 0;white-space:nowrap}
+.row b{color:var(--navy);margin-left:8px}
+#hold{position:fixed;right:22px;bottom:22px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.92);border:5px solid var(--navy);color:var(--navy);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;font-size:20px;line-height:1.2;box-shadow:0 4px 14px rgba(0,0,0,.35);pointer-events:none}
+#hold.on{background:var(--orange);color:#fff;border-color:#b55e1f}
+.overlay{position:fixed;inset:0;background:rgba(15,27,43,.55);display:none;align-items:center;justify-content:center;padding:14px;touch-action:pan-y;z-index:10}
+.overlay.show{display:flex}
+.panel{background:#fff;border-radius:18px;max-width:600px;width:100%;max-height:94vh;overflow:auto;padding:24px 28px;box-shadow:0 10px 40px rgba(0,0,0,.4);touch-action:pan-y}
+.panel h1{margin:0 0 6px;color:var(--navy);font-size:32px}
+.rub{color:var(--green);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.panel p{margin:8px 0;line-height:1.45;font-size:17px}
+.rules{font-size:18px;line-height:1.7;margin:12px 0;padding:12px 16px;background:#FDEBDD;border-left:6px solid var(--orange);border-radius:8px}
+.go{border:none;border-radius:14px;padding:16px 26px;font-size:20px;font-weight:800;color:#fff;background:var(--green);cursor:pointer}
+input[type=text],input[type=number]{font-size:18px;padding:10px 12px;border:2px solid var(--navy);border-radius:10px;width:100%;max-width:300px;user-select:text;-webkit-user-select:text}
+.res{font-size:72px;font-weight:900;color:var(--green);line-height:1}
+.codebox{font-size:38px;font-weight:900;letter-spacing:.15em;color:var(--navy);background:#FFF6D6;border:3px dashed #E0A800;border-radius:14px;padding:4px 18px;display:inline-block}
+.small{font-size:13px;color:#5a6675}
+a.lk{color:var(--navy);text-decoration:underline;cursor:pointer;font-size:13px}
+.q{background:#E3F0FA;border-left:6px solid var(--blue);border-radius:8px;padding:10px 14px;margin-top:14px;font-size:17px}
+#rot{position:fixed;inset:0;background:var(--navy);color:#fff;display:none;align-items:center;justify-content:center;text-align:center;font-size:22px;padding:30px;z-index:50}
+@media (orientation:portrait) and (max-width:820px){#rot{display:flex}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div class="hud" id="hud">
+  <div class="card">
+    <div class="lbl">Überholt</div>
+    <div class="big" id="hN">0</div>
+  </div>
+  <div class="card">
+    <div class="time" id="hT">⏱ 1:30</div>
+  </div>
+  <div class="card">
+    <div class="row"><span>Sie</span><b id="hV">80 km/h</b></div>
+    <div class="row"><span id="hFn">🚛 LKW</span><b id="hF">80 km/h</b></div>
+  </div>
+</div>
+<div id="hold">GEDRÜCKT<br>HALTEN =<br>ÜBERHOLEN</div>
+
+<div class="overlay show" id="oStart"><div class="panel">
+  <div class="rub">Physik · Einstieg</div>
+  <h1>Reicht das noch?</h1>
+  <div class="rules">
+    👆 <b>Finger drauf halten</b> = ausscheren und überholen<br>
+    ✋ <b>Loslassen</b> = zurück nach rechts<br>
+    🏆 Möglichst viele Fahrzeuge überholen, Sie haben <b>90 Sekunden</b>.<br>
+    💥 Ein Unfall beendet die Fahrt sofort.
+  </div>
+  <p><b>Ihr Name</b></p>
+  <input type="text" id="nameIn" maxlength="24" placeholder="Vorname" autocomplete="off">
+  <div style="margin-top:16px"><button class="go" id="startBtn">Los geht’s →</button></div>
+  <p style="margin-top:16px"><a class="lk" id="chkLink">Lehrkraft: Code prüfen</a></p>
+  <div id="chkBox" style="display:none;font-size:15px">
+    Name <input type="text" id="cName" style="max-width:160px;font-size:15px;padding:6px">
+    Anzahl <input type="number" id="cPts" style="max-width:80px;font-size:15px;padding:6px">
+    → Code: <b id="cOut" style="font-size:20px;letter-spacing:.1em">–</b>
+  </div>
+</div></div>
+
+<div class="overlay" id="oEnd"><div class="panel">
+  <div class="rub" id="eRub">Zeit um!</div>
+  <h1 id="eTitle"></h1>
+  <p>Fahrzeuge überholt:</p>
+  <div class="res" id="eN">0</div>
+  <p id="eClose"></p>
+  <p id="eCodeP">Ihr Code: <span class="codebox" id="eCode"></span></p>
+  <p class="small" id="eCodeHint">Das war die Wertungsfahrt: Name, Anzahl und Code an die Lehrkraft melden. Jede weitere Fahrt hat eine neue, zufällige Strecke und ist nur zum Üben.</p>
+  <p class="small" id="ePractice" style="display:none">Übungsfahrt auf zufälliger Strecke, zählt nicht für die Rangliste.</p>
+  <div class="q">🤔 <b>Schätzen Sie:</b> Wie viele Meter freie Strecke braucht man, um einen LKW mit 80 km/h zu überholen, wenn man selbst 100 km/h fährt?</div>
+  <div style="margin-top:18px"><button class="go" id="againBtn">Nochmal fahren</button></div>
+</div></div>
+
+<div id="rot">📱 Bitte das Tablet quer halten.</div>
+
+<script src="../bridge.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const ms=k=>k/3.6, kmh=v=>v*3.6;
+const CAR_LEN=4.5, V_OVER=100, GAME_TIME=90;
+const TYPES=[
+  {type:'lkw',name:'LKW',icon:'🚛',len:18,v:80,w:40},
+  {type:'bus',name:'Reisebus',icon:'🚌',len:12,v:70,w:25},
+  {type:'traktor',name:'Traktor',icon:'🚜',len:5,v:30,w:20},
+  {type:'lkw',name:'LKW',icon:'🚛',len:18,v:90,w:15}
+];
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function code(name,n){let h=5381;const s=String(name).trim().toLowerCase()+'|'+n+'|tge-ueberhol2';for(const ch of s)h=(Math.imul(h,33)^ch.charCodeAt(0))>>>0;return h.toString(36).toUpperCase().padStart(4,'0').slice(-4);}
+
+let G=null, screen='start', playerName='', pressed=0;
+
+let round=0;
+/* Stand für die Klassen-App (ohne Namen): beste Fahrt, Wertungsfahrt, Anzahl Fahrten */
+let rides=0,best=0,rankedN=null,crashes=0;
+const appChanged=()=>{if(window.AppBridge)AppBridge.changed()};
+function newGame(){
+  const ranked=round===1;
+  const rA=ranked?rng(20261103):rng((Math.random()*1e9)|0), rB=ranked?rng(777):rng((Math.random()*1e9)|0);
+  G={t:0,left:GAME_TIME,xP:0,vP:ms(80),lat:0,n:0,crashed:false,crashT:0,over:false,phase:'count',count:3,
+     veh:[],onc:[],rA,rB,lastOncX:0,mergeT:-99,closest:null,started:false};
+  addVehicle(38,true);
+  G.vP=ms(G.veh[0].v);
+  // Gegenverkehr: erste Lücke ist eine Falle
+  G.lastOncX=480;G.onc.push(mkOnc(480));
+  fillOnc();
+}
+function pickType(r){let s=0,x=r*100;for(const t of TYPES){s+=t.w;if(x<s)return t;}return TYPES[0];}
+function addVehicle(x,first){
+  const t=first?TYPES[0]:pickType(G.rA());
+  G.veh.push({...t,x:x+(first?0:t.len),vel:ms(t.v),passed:false});
+}
+function mkOnc(x){const v=[80,90,100][Math.floor(G.rB()*3)];return {x,vel:ms(v),v,len:4.5,met:false};}
+function fillOnc(){
+  while(G.lastOncX<G.xP+1600){
+    const r=G.rB();
+    const gap=r<0.33?220+G.rB()*260:650+G.rB()*700;
+    G.lastOncX+=gap;G.onc.push(mkOnc(G.lastOncX));
+  }
+}
+function front(){ // nächstes Fahrzeug vor mir (rechte Spur)
+  let best=null;for(const v of G.veh){if(!v.passed&&(!best||v.x<best.x))best=v;}return best;
+}
+function overlapsRight(){
+  for(const v of G.veh){if(G.xP+1>v.x-v.len&&G.xP-CAR_LEN-1<v.x)return v;}return null;
+}
+
+function step(dt){
+  const g=G;g.t+=dt;
+  if(!g.crashed){
+    g.left-=dt;
+    const want=pressed>0;
+    const f=front();
+    let latT=want?1:0, vT;
+    const ov=overlapsRight();
+    if(want){vT=ms(V_OVER);}
+    else{
+      if(ov&&g.lat>0.3){vT=ov.vel-ms(18);latT=g.lat>0.62?0.62:g.lat;} // neben dem Fahrzeug: zurückfallen lassen
+      else{
+        const gap=f?(f.x-f.len)-g.xP:999;
+        vT=gap>35?ms(V_OVER):gap>18?Math.min(ms(V_OVER),f.vel+ms(8)):f.vel-(gap<12?ms(8):0);
+      }
+    }
+    if(!want&&ov&&g.lat>0.3)latT=Math.max(0.62,0);
+    const a=(vT>g.vP?ms(14):ms(22))*dt;g.vP+=Math.max(-a,Math.min(a,vT-g.vP));
+    const ld=1.4*dt;let nl=g.lat+Math.max(-ld,Math.min(ld,latT-g.lat));
+    if(!want&&ov&&nl<0.62)nl=Math.max(nl,0.62);
+    g.lat=nl;
+    g.xP+=g.vP*dt;
+  }else{g.vP=Math.max(0,g.vP-ms(80)*dt);g.xP+=g.vP*dt;}
+  const fr=front();
+  for(const v of g.veh){if(v.passed)v.vel=Math.max(ms(20),Math.min(ms(v.v),(fr?fr.vel:ms(v.v))-ms(15)));v.x+=v.vel*dt;}
+  for(const o of g.onc)if(!(g.crashed&&o.hit))o.x-=o.vel*dt;
+  if(g.crashed){if(g.t-g.crashT>1.6)end();return;}
+  // überholt?
+  for(const v of g.veh){
+    if(!v.passed&&g.lat<0.12&&g.xP-CAR_LEN>v.x){
+      v.passed=true;g.n++;g.mergeT=g.t;pop('+1',v);
+      addVehicle(g.xP+30+g.rA()*30,false);
+    }
+  }
+  // Unfall Gegenverkehr
+  for(const o of g.onc){
+    if(g.lat>0.38&&g.xP>o.x&&g.xP-CAR_LEN<o.x+o.len){g.crashed=true;g.crashT=g.t;o.hit=true;o.vel=0;break;}
+    if(!o.met&&o.x<=g.xP){o.met=true;const d=g.t-g.mergeT;if(d<6&&(g.closest===null||d<g.closest))g.closest=d;}
+  }
+  // Auffahren (Sicherheitsnetz)
+  if(!g.crashed){for(const v of g.veh){if(g.lat<0.55&&g.xP>v.x-v.len&&g.xP-CAR_LEN<v.x){g.crashed=true;g.crashT=g.t;g.rear=true;break;}}}
+  g.onc=g.onc.filter(o=>o.x>g.xP-200);
+  g.veh=g.veh.filter(v=>v.x>g.xP-200);
+  fillOnc();
+  if(g.left<=0){g.left=0;end();}
+}
+let pops=[];
+function pop(txt,v){pops.push({txt,x:G.xP,t:0});}
+
+function end(){
+  if(G.over)return;G.over=true;pressed=0;
+  rides++;if(G.n>best)best=G.n;if(G.crashed)crashes++;if(round===1)rankedN=G.n;appChanged();
+  setTimeout(()=>{
+    screen='end';
+    $('eRub').textContent=G.crashed?'💥 Unfall!':'⏱ Zeit um!';
+    $('eTitle').textContent=G.crashed?'Das war zu knapp, '+playerName+'!':'Gut gefahren, '+playerName+'!';
+    $('eN').textContent=G.n;
+    const ranked=round===1;
+    $('eCodeP').style.display=ranked?'block':'none';$('eCodeHint').style.display=ranked?'block':'none';
+    $('ePractice').style.display=ranked?'none':'block';
+    $('eCode').textContent=code(playerName,G.n);
+    $('eClose').textContent=(!G.crashed&&G.closest!==null)?'Knappster Moment: nur '+G.closest.toFixed(1).replace('.',',')+' s vor dem Gegenverkehr wieder rechts.':'';
+    $('oEnd').classList.add('show');
+  },G.crashed?200:400);
+}
+
+/* Eingabe */
+const active=new Set();
+function isGame(){return screen==='drive'&&G&&G.phase==='drive'&&!G.over;}
+window.addEventListener('pointerdown',e=>{if(!isGame())return;e.preventDefault();active.add(e.pointerId);pressed=active.size;});
+['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,e=>{active.delete(e.pointerId);pressed=active.size;}));
+window.addEventListener('blur',()=>{active.clear();pressed=0;});
+window.addEventListener('contextmenu',e=>e.preventDefault());
+let keyDown=false;
+window.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'){if(e.key==='Enter'&&screen==='start')$('startBtn').click();return;}
+  if(e.code==='Space'||e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();if(!keyDown){keyDown=true;active.add('k');pressed=active.size;}}
+});
+window.addEventListener('keyup',e=>{if(e.code==='Space'||e.key==='ArrowLeft'||e.key==='ArrowUp'){keyDown=false;active.delete('k');pressed=active.size;}});
+
+$('startBtn').onclick=()=>{
+  const n=$('nameIn').value.trim();
+  if(!n){$('nameIn').style.borderColor='#C8433A';$('nameIn').focus();return;}
+  playerName=n;$('nameIn').blur();start();
+};
+$('againBtn').onclick=start;
+function start(){active.clear();pressed=0;round++;newGame();screen='drive';$('oStart').classList.remove('show');$('oEnd').classList.remove('show');}
+$('chkLink').onclick=()=>{const b=$('chkBox');b.style.display=b.style.display==='none'?'block':'none';};
+function chk(){const n=$('cName').value.trim(),p=$('cPts').value;$('cOut').textContent=(n&&p!=='')?code(n,parseInt(p,10)):'–';}
+$('cName').oninput=chk;$('cPts').oninput=chk;
+
+/* Zeichnen */
+const cv=$('c'),ctx=cv.getContext('2d');let W=0,H=0,DPR=1;
+function resize(){DPR=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;}
+addEventListener('resize',resize);resize();
+function hash(i){let x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawVeh(type,x,y,dir,S,K,col){
+  ctx.save();ctx.translate(x,y);if(dir<0)ctx.rotate(Math.PI);
+  if(type==='car'){
+    const L=4.5*S,w=1.8*K;
+    ctx.fillStyle='rgba(0,0,0,.25)';rr(-w/2+3,3,w,L,6);ctx.fill();
+    ctx.fillStyle=col;rr(-w/2,0,w,L,6);ctx.fill();
+    ctx.fillStyle='#1d2a38';rr(-w/2+3,L*0.2,w-6,L*0.18,3);ctx.fill();rr(-w/2+3,L*0.74,w-6,L*0.12,3);ctx.fill();
+    ctx.fillStyle='#fff6b0';ctx.fillRect(-w/2+2,0,5,3);ctx.fillRect(w/2-7,0,5,3);
+  }else if(type==='lkw'){
+    const L=18*S,w=2.5*K,cab=2.4*S;
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(-w/2+3,3,w,L);
+    ctx.fillStyle='#d9534f';rr(-w/2,0,w,cab,4);ctx.fill();
+    ctx.fillStyle='#1d2a38';ctx.fillRect(-w/2+3,cab*0.2,w-6,cab*0.25);
+    ctx.fillStyle='#eef1f4';ctx.fillRect(-w/2,cab+3,w,L-cab-3);
+    ctx.fillStyle='#E8833A';ctx.fillRect(-w/2,cab+3+(L-cab)*0.35,w,(L-cab)*0.12);
+    ctx.strokeStyle='#9aa4af';ctx.lineWidth=1;ctx.strokeRect(-w/2,cab+3,w,L-cab-3);
+  }else if(type==='bus'){
+    const L=12*S,w=2.5*K;
+    ctx.fillStyle='rgba(0,0,0,.25)';rr(-w/2+3,3,w,L,6);ctx.fill();
+    ctx.fillStyle='#E0A800';rr(-w/2,0,w,L,6);ctx.fill();
+    ctx.fillStyle='#1d2a38';rr(-w/2+3,L*0.04,w-6,L*0.08,3);ctx.fill();
+    ctx.fillStyle='rgba(29,42,56,.55)';for(let i=0;i<6;i++)ctx.fillRect(-w/2+4,L*(0.2+i*0.12),w-8,L*0.07);
+  }else if(type==='traktor'){
+    const L=5*S,w=2.2*K;
+    ctx.fillStyle='#222';ctx.fillRect(-w/2-4,L*0.55,8,L*0.35);ctx.fillRect(w/2-4,L*0.55,8,L*0.35);
+    ctx.fillRect(-w/2+2,L*0.05,5,L*0.2);ctx.fillRect(w/2-7,L*0.05,5,L*0.2);
+    ctx.fillStyle='#3C7A4E';rr(-w/2+5,0,w-10,L,5);ctx.fill();
+    ctx.fillStyle='#cfe6d6';rr(-w/2+8,L*0.55,w-16,L*0.3,3);ctx.fill();
+  }
+  ctx.restore();
+}
+function draw(dt){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle='#4f8a4b';ctx.fillRect(0,0,W,H);
+  if(!G){newGame();G.phase='idle';}
+  const g=G,S=H/72,K=S*1.45,LW=4*K;
+  const cx=Math.max(W*0.47,260+LW),yP=H*0.72,Y=x=>yP-(x-g.xP)*S;
+  const x0=g.xP-(H-yP)/S-30,x1=g.xP+yP/S+30;
+  for(let i=Math.floor(x0/9);i<=x1/9;i++){const h=hash(i);if(h<0.55)continue;
+    const side=hash(i+0.5)<0.5?-1:1,off=LW+40+hash(i+0.3)*Math.min(160,cx-LW-60),tx=cx+side*off,ty=Y(i*9),r=10+hash(i+0.7)*12;
+    ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.arc(tx+4,ty+4,r,0,7);ctx.fill();
+    ctx.fillStyle=hash(i+0.9)<0.5?'#2f6b37':'#3d7d40';ctx.beginPath();ctx.arc(tx,ty,r,0,7);ctx.fill();}
+  ctx.fillStyle='#8a8f73';ctx.fillRect(cx-LW-14,0,2*LW+28,H);
+  ctx.fillStyle='#5a5f66';ctx.fillRect(cx-LW-6,0,2*LW+12,H);
+  ctx.fillStyle='#fff';ctx.fillRect(cx-LW-2,0,3,H);ctx.fillRect(cx+LW-1,0,3,H);
+  for(let i=Math.floor(x0/18);i<=x1/18;i++){const a=Y(i*18),b=Y(i*18+6);ctx.fillRect(cx-1.5,b,3,a-b);}
+  for(let i=Math.floor(x0/50);i<=x1/50;i++){const y=Y(i*50);[cx-LW-20,cx+LW+16].forEach(px=>{ctx.fillStyle='#fff';ctx.fillRect(px,y-7,4,14);ctx.fillStyle='#111';ctx.fillRect(px,y-3,4,4);});}
+  const lane=lat=>cx+LW/2-lat*LW;
+  for(const v of g.veh)drawVeh(v.type,lane(0),Y(v.x),1,S,K);
+  for(const o of g.onc)drawVeh('car',lane(1),Y(o.x),-1,S,K,'#C8433A');
+  drawVeh('car',lane(g.lat),Y(g.xP),1,S,K,'#2F7FC1');
+  // nächster Gegenverkehr außerhalb des Bildes
+  const next=g.onc.filter(o=>o.x>g.xP).sort((a,b)=>a.x-b.x)[0];
+  if(next&&Y(next.x)<0&&!g.crashed){const px=lane(1);
+    ctx.fillStyle='rgba(200,67,58,.95)';rr(px-48,8,96,32,16);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 16px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('▼ '+Math.round(next.x-g.xP)+' m',px,24);}
+  if(g.crashed){const px=lane(g.lat),py=Y(g.xP);
+    ctx.fillStyle='#ffcc33';ctx.beginPath();for(let k=0;k<16;k++){const a=k*Math.PI/8,r=k%2?20:46;ctx.lineTo(px+Math.cos(a)*r,py+Math.sin(a)*r);}ctx.closePath();ctx.fill();
+    ctx.fillStyle='#e8562a';ctx.beginPath();ctx.arc(px,py,15,0,7);ctx.fill();}
+  // +1
+  pops=pops.filter(p=>p.t<1.2);for(const p of pops){p.t+=dt;ctx.globalAlpha=1-p.t/1.2;ctx.fillStyle='#fff';ctx.strokeStyle='#3C7A4E';ctx.lineWidth=6;
+    ctx.font='900 44px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';const y=yP-60-p.t*60;ctx.strokeText(p.txt,lane(0)+70,y);ctx.fillText(p.txt,lane(0)+70,y);ctx.globalAlpha=1;}
+  // Übersicht 1 km
+  const mx=Math.min(W-230,cx+LW+95),mt=60,mb=H-60,R=1100,back=100;
+  if(mx>cx+LW+60){const M=x=>mb-((x-(g.xP-back))/R)*(mb-mt);
+    ctx.fillStyle='rgba(15,27,43,.78)';rr(mx-16,mt-28,32,mb-mt+42,10);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('1 km',mx,mt-15);
+    ctx.fillStyle='#8a8f9a';ctx.fillRect(mx-3,mt,6,mb-mt);ctx.textAlign='left';ctx.font='11px system-ui';
+    for(let k=0;k<=10;k++){const y=M(g.xP+k*100);ctx.fillStyle='#fff';ctx.fillRect(mx-8,y,16,1.5);if(k%2===0){ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(k*100+' m',mx+20,y);}}
+    for(const v of g.veh){const a=M(v.x),b=M(v.x-v.len);if(a>mt&&a<mb){ctx.fillStyle='#E8833A';ctx.fillRect(mx-6,a,12,Math.max(3,b-a));}}
+    for(const o of g.onc){const y=M(o.x);if(y>mt&&y<mb){ctx.fillStyle='#ff4a3d';ctx.beginPath();ctx.arc(mx,y,6,0,7);ctx.fill();}}
+    const yp=M(g.xP);ctx.fillStyle='#4fa3ff';ctx.beginPath();ctx.moveTo(mx,yp-8);ctx.lineTo(mx+8,yp+6);ctx.lineTo(mx-8,yp+6);ctx.closePath();ctx.fill();}
+  if(g.phase==='count'){ctx.fillStyle='rgba(15,27,43,.35)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#fff';ctx.font='900 130px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.ceil(g.count),cx,H*0.42);}
+}
+function hud(){
+  const g=G,show=screen==='drive';
+  $('hud').style.visibility=show?'visible':'hidden';$('hold').style.visibility=show?'visible':'hidden';
+  if(!g)return;
+  $('hN').textContent=g.n;
+  const s=Math.ceil(g.left);$('hT').textContent='⏱ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  $('hT').classList.toggle('low',g.left<=10);
+  $('hV').textContent=Math.round(kmh(g.vP))+' km/h';
+  const f=front();if(f){$('hFn').textContent=f.icon+' '+f.name;$('hF').textContent=f.v+' km/h';}
+  $('hold').classList.toggle('on',pressed>0&&isGame());
+}
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(G&&screen==='drive'){
+    if(G.phase==='count'){G.count-=dt;if(G.count<=0)G.phase='drive';}
+    else if(G.phase==='drive'&&!G.over)step(dt);
+    else if(G.over&&G.crashed)step(dt);
+  }
+  draw(dt);hud();requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ===== Anbindung an die Klassen-App (ohne Namen und ohne Code) ===== */
+if(window.AppBridge)AppBridge.register({
+  getState(){
+    const st=[],ok=[];
+    st.push('Wertungsfahrt');if(rankedN!==null)ok.push('Wertungsfahrt');
+    return{punkte:best,stationen:st,erledigt:ok,
+      details:{'Wertungsfahrt':rankedN!==null?rankedN+' Fahrzeuge überholt (beste Fahrt insgesamt: '+best+', '+rides+' Fahrten, '+crashes+' Unfälle)':'Noch nicht gefahren'},
+      daten:{rides,best,rankedN,crashes}};
+  },
+  setState(s){const d=s&&s.daten;if(!d)return;
+    rides=d.rides||0;best=d.best||0;rankedN=(d.rankedN==null)?null:d.rankedN;crashes=d.crashes||0;
+    if(rankedN!==null)round=Math.max(round,1); // die Wertungsfahrt ist schon gefahren, weitere Fahrten sind Übung
+  }
+});
+})();
+</script>
+</body>
+</html>
