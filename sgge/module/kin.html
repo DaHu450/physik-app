@@ -1,0 +1,1204 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kinematik-Übungsstudio</title>
+<style>
+:root{--navy:#1F3A5F;--green:#3C7A4E;--blue:#2F7FC1;--orange:#E8833A;--bg:#F4F7FA;--card:#fff;--line:#D3DCE6;--ok:#2E7D4F;--okbg:#E4F3E9;--bad:#B3402F;--badbg:#FBE9E5;--gold:#FFF6D6;--goldbar:#E0A800;--txt:#1b2733}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:1.5}
+header{background:var(--navy);color:#fff;padding:14px 16px}
+header .in{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:22px;letter-spacing:.2px}
+header small{opacity:.85;display:block;font-size:14px;font-weight:400}
+.score{background:rgba(255,255,255,.14);border-radius:999px;padding:6px 14px;font-size:15px;white-space:nowrap}
+main{max-width:900px;margin:0 auto;padding:16px}
+h2{color:var(--navy);margin:8px 0 6px;font-size:21px}
+p.lead{margin:0 0 14px;color:#41505f}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.topic{background:var(--card);border:2px solid var(--line);border-left:8px solid var(--green);border-radius:12px;padding:12px 14px;text-align:left;font:inherit;color:inherit;cursor:pointer;min-height:96px}
+.topic:active,.topic:hover{border-color:var(--green)}
+.topic b{display:block;color:var(--navy);font-size:18px}
+.topic span{display:block;font-size:15px;color:#4a5a69}
+.topic em{display:block;font-style:normal;font-size:14px;color:var(--green);margin-top:4px}
+.mix{margin-top:14px;width:100%;background:var(--green);color:#fff;border:0;border-radius:12px;padding:14px;font:inherit;font-weight:700;cursor:pointer}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.back{background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px 14px;font:inherit;cursor:pointer;color:var(--navy)}
+.tag{background:var(--navy);color:#fff;border-radius:6px;padding:2px 10px;font-size:15px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.card h3{margin:0 0 8px;color:var(--navy);font-size:20px}
+.fig{margin:10px 0;text-align:center}
+.fig svg{max-width:100%;height:auto}
+.row{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.row label{min-width:150px;font-weight:600;color:var(--navy)}
+input[type=text]{font:inherit;font-size:20px;width:130px;padding:10px 12px;border:2px solid var(--navy);border-radius:10px;background:#fff;color:var(--txt)}
+input[type=text].ok{border-color:var(--ok);background:var(--okbg)}
+input[type=text].no{border-color:var(--bad);background:var(--badbg)}
+.unit{color:#41505f}
+.mark{font-weight:700}
+.choices{display:grid;gap:10px;margin:10px 0}
+.choices.c2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.choices.c3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.choices.c1{grid-template-columns:1fr}
+.choice{background:#fff;border:3px solid var(--line);border-radius:12px;padding:10px;font:inherit;color:inherit;cursor:pointer;text-align:center}
+.choice .lab{display:block;font-weight:700;color:var(--navy);margin-bottom:4px}
+.choice.sel{border-color:var(--navy);background:#EAF0F8}
+.choice.ok{border-color:var(--ok);background:var(--okbg)}
+.choice.no{border-color:var(--bad);background:var(--badbg)}
+.choice svg{max-width:100%;height:auto}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+button.b{font:inherit;font-weight:700;border:0;border-radius:12px;padding:12px 20px;cursor:pointer;min-height:48px}
+.b.main{background:var(--navy);color:#fff}
+.b.alt{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+.b.next{background:var(--green);color:#fff}
+.b[disabled]{opacity:.45;cursor:default}
+.fb{border-radius:12px;padding:12px 14px;margin-top:12px;font-weight:600}
+.fb.ok{background:var(--okbg);border-left:8px solid var(--ok);color:#16502f}
+.fb.no{background:var(--badbg);border-left:8px solid var(--bad);color:#7a2417}
+.tip{background:var(--gold);border-left:8px solid var(--goldbar);border-radius:12px;padding:12px 14px;margin-top:12px}
+.expl{background:#E3F0FA;border-left:8px solid var(--blue);border-radius:12px;padding:12px 14px;margin-top:12px}
+.expl h4,.tip h4{margin:0 0 6px;color:var(--navy);font-size:17px}
+.expl ol{margin:6px 0 6px 20px;padding:0}
+.expl li{margin:3px 0}
+.res{font-weight:700;color:var(--green)}
+.hidden{display:none}
+footer{max-width:900px;margin:0 auto;padding:6px 16px 28px;color:#5b6a79;font-size:14px}
+@media(max-width:520px){body{font-size:17px}.row label{min-width:100%}}
+.simbox{border:2px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;background:#FAFCFE}
+.simbox canvas{width:100%;display:block;border-radius:8px;touch-action:manipulation}
+.simbox .sbtn{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.simbox .sbtn button{font:inherit;font-size:16px;font-weight:700;border-radius:10px;padding:8px 14px;cursor:pointer;min-height:44px;border:2px solid var(--navy);background:#fff;color:var(--navy)}
+.simbox .sbtn button.on{background:var(--navy);color:#fff}
+.simbox .sbtn button[disabled]{opacity:.4;cursor:default}
+.simbox .note{font-size:14px;color:#4a5a69;margin-top:6px}
+
+.tip{background:#EFEAFB;border-left:8px solid #7B61C9}
+.hero{background:linear-gradient(0deg,#fff,#fff);border-color:#BFD3EA}
+.hero h2{margin-top:0}
+.mix.exam{background:var(--navy);margin-top:6px}
+ul.check{list-style:none;margin:0;padding:0}
+ul.check li{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+ul.check li:first-child{border-top:0}
+ul.check li>span:first-child{flex:1 1 320px;line-height:1.55}
+.go{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:14px;border:2px solid var(--blue);color:var(--navy);background:#EEF4FA;border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip em{font-style:normal;color:var(--green);font-weight:700;margin-left:4px}
+.form .fr{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;margin:6px 0}
+.form .f{font-size:21px;font-weight:700;color:var(--navy)}
+.form .small{font-size:16px;color:#33475b}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px;line-height:1.15}
+.frac>span:first-child{border-bottom:2px solid currentColor;padding:0 3px}
+.frac>span:last-child{padding:0 3px}
+table.mt{border-collapse:collapse;margin:10px auto;font-size:17px}
+table.mt th,table.mt td{border:1.5px solid var(--navy);padding:6px 12px;text-align:center}
+table.mt th{background:#E8EEF5;color:var(--navy)}
+.choice table.mt{font-size:15px;margin:4px auto}
+.tag.light{background:#E3F0FA;color:var(--navy)}
+.prog{height:8px;background:#DDE6F0;border-radius:99px;overflow:hidden;margin:0 0 12px}
+.prog i{display:block;height:100%;background:var(--blue)}
+.back.warn{border-color:var(--bad);color:var(--bad)}
+.res3{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:10px 0}
+.res3 div{background:#EEF4FA;border-radius:12px;padding:12px;text-align:center}
+.res3 b{display:block;font-size:30px;color:var(--navy)}
+.res3 span{font-size:14px;color:#4a5a69}
+p.small{font-size:14px;color:#5b6a79;margin:4px 0 0}
+details.rev summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;color:var(--navy);list-style:none}
+details.rev summary::-webkit-details-marker{display:none}
+details.rev .pp{font-weight:700}
+details.okc{border-left:8px solid var(--ok)}
+details.noc{border-left:8px solid var(--bad)}
+details.rev[open] summary{margin-bottom:8px}
+div.choice{cursor:default}
+.areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px 18px;margin-top:10px}
+.ar{display:grid;grid-template-columns:1fr 90px 48px;align-items:center;gap:8px;font-size:15px}
+.ar em{font-style:normal;color:#4a5a69;text-align:right}
+.bar2{height:10px;background:#DDE6F0;border-radius:99px;overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--blue)}
+.ar.full .bar2 i{background:var(--green)}
+.ar.full em{color:var(--green);font-weight:700}
+h2.ah{margin:22px 0 8px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2.ah small{font-size:15px;font-weight:600;color:var(--green)}
+.topic.tx{border-left-color:#7B61C9}
+.chal{margin-top:22px;border-color:var(--navy);border-width:3px}
+.chal.locked{background:#EEF2F7;border-color:#B9C6D6}
+.chal.locked h3{color:#5b6a79}
+.tlink{text-align:right;margin:6px 0 0}
+details.form summary{cursor:pointer;list-style:none}
+details.form summary::-webkit-details-marker{display:none}
+details.form summary h3{display:inline;margin:0}
+details.form summary::after{content:' ▾';color:var(--navy)}
+details.form[open] summary::after{content:' ▴'}
+.selfcheck{margin-top:22px}
+.gkwrap{margin:6px 0 10px}
+.gkl{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--navy);flex-wrap:wrap}
+.gkl input{width:180px}
+h2.ah small .req{font-weight:500;color:#7B61C9;font-size:14px}
+button.ar{font:inherit;color:inherit;background:none;border:0;padding:6px 4px;border-radius:8px;cursor:pointer;text-align:left}
+button.ar:hover{background:#EEF4FA}
+ol.how{margin:4px 0 6px 20px;padding:0;font-size:16px;line-height:1.55}
+ol.how li{margin:3px 0}
+.aline{background:#EEF4FA;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:15px;color:var(--navy)}
+.fb.plus{background:#E3F0FA;border-left:8px solid var(--blue);color:var(--navy);line-height:2.2}
+.fb.plus .b{min-height:40px;padding:6px 16px;margin-left:8px}
+.tlink button{background:none;border:0;color:#6b7a89;text-decoration:underline;font:inherit;font-size:13px;cursor:pointer}
+.mt td,.mt th{white-space:nowrap}
+</style>
+</head>
+<body>
+<header><div class="in"><h1>Kinematik-Übungsstudio<small>Vorbereitung auf die Klassenarbeit · üben, prüfen, Challenge freischalten</small></h1><div class="score" id="score">Richtig: 0 von 0</div></div></header>
+<main id="app"></main>
+<footer>Tipp: Rechne mit Zettel und Stift. Kommazahlen darfst du mit Komma oder Punkt eingeben. Die Einheit musst du nicht mit eintippen.</footer>
+
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+/* ---------- Helfer ---------- */
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=(x,d=1)=>{let s=Number(x.toFixed(d)).toString();return s.replace('.',',')};
+const NAV='#1F3A5F',BLUE='#2F7FC1',ORG='#E8833A',GRN='#3C7A4E',GRID='#D6DEE8';
+function niceStep(max,target=6){const raw=max/target;const p=Math.pow(10,Math.floor(Math.log10(raw)));for(const m of [1,2,5,10]){if(m*p>=raw)return m*p}return 10*p}
+
+/* ---------- Diagramme (SVG) ---------- */
+function chart(o){
+  const W=o.w||440,H=o.h||270,L=o.nums===false?30:48,R=16,Tp=22,B=o.nums===false?30:40;
+  const pw=W-L-R,ph=H-Tp-B;
+  const x0=o.xmin||0,x1=o.xmax,y0=o.ymin||0,y1=o.ymax;
+  const X=x=>L+(x-x0)/(x1-x0)*pw,Y=y=>Tp+ph-(y-y0)/(y1-y0)*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" xmlns="http://www.w3.org/2000/svg" font-family="Arial,Helvetica,sans-serif">`;
+  s+=`<rect x="${L}" y="${Tp}" width="${pw}" height="${ph}" fill="#fff" stroke="${GRID}"/>`;
+  if(o.nums===false){
+    for(let i=1;i<8;i++){s+=`<line x1="${L+pw*i/8}" y1="${Tp}" x2="${L+pw*i/8}" y2="${Tp+ph}" stroke="#EEF2F7"/>`}
+    for(let i=1;i<6;i++){s+=`<line x1="${L}" y1="${Tp+ph*i/6}" x2="${L+pw}" y2="${Tp+ph*i/6}" stroke="#EEF2F7"/>`}
+  }else{
+    const sx=o.xstep||niceStep(x1-x0),sy=o.ystep||niceStep(y1-y0);
+    for(let x=Math.ceil(x0/sx)*sx;x<=x1+1e-9;x+=sx){s+=`<line x1="${X(x)}" y1="${Tp}" x2="${X(x)}" y2="${Tp+ph}" stroke="${GRID}"/><text x="${X(x)}" y="${Tp+ph+16}" font-size="12" text-anchor="middle" fill="${NAV}">${fmt(x,2)}</text>`}
+    for(let y=Math.ceil(y0/sy)*sy;y<=y1+1e-9;y+=sy){s+=`<line x1="${L}" y1="${Y(y)}" x2="${L+pw}" y2="${Y(y)}" stroke="${GRID}"/><text x="${L-6}" y="${Y(y)+4}" font-size="12" text-anchor="end" fill="${NAV}">${fmt(y,2)}</text>`}
+  }
+  if(y0<0&&y1>0)s+=`<line x1="${L}" y1="${Y(0)}" x2="${L+pw}" y2="${Y(0)}" stroke="${NAV}" stroke-width="1.6"/>`;
+  s+=`<line x1="${L}" y1="${Tp}" x2="${L}" y2="${Tp+ph}" stroke="${NAV}" stroke-width="1.6"/>`;
+  if(!(y0<0&&y1>0))s+=`<line x1="${L}" y1="${Tp+ph}" x2="${L+pw}" y2="${Tp+ph}" stroke="${NAV}" stroke-width="1.6"/>`;
+  (o.secs||[]).forEach(([a,b,lab])=>{s+=`<line x1="${X(b)}" y1="${Tp}" x2="${X(b)}" y2="${Tp+ph}" stroke="#9AA9BA" stroke-dasharray="4 4"/><text x="${(X(a)+X(b))/2}" y="${Tp+14}" font-size="13" font-weight="700" text-anchor="middle" fill="${NAV}">${lab}</text>`});
+  (o.series||[]).forEach(se=>{
+    const c=se.color||BLUE;
+    if(se.segs){se.segs.forEach(([a,b,v])=>{s+=`<line x1="${X(a)}" y1="${Y(v)}" x2="${X(b)}" y2="${Y(v)}" stroke="${c}" stroke-width="3.4" stroke-linecap="round"/>`})}
+    else{s+=`<polyline fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="${se.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}"/>`}
+    if(se.label){const p=se.pts[se.pts.length-1];s+=`<text x="${Math.min(X(p[0])-4,W-R-2)}" y="${Y(p[1])-7}" font-size="13" font-weight="700" text-anchor="end" fill="${c}">${se.label}</text>`}
+  });
+  s+=`<text x="${L+pw}" y="${H-4}" font-size="13" text-anchor="end" fill="${NAV}" font-weight="700">${o.xlabel||''}</text>`;
+  s+=`<text x="${L}" y="14" font-size="13" fill="${NAV}" font-weight="700">${o.ylabel||''}</text>`;
+  return s+'</svg>';
+}
+
+/* ---------- Bewegung aus Abschnitten ---------- */
+function pathFrom(segs,s0){let t=0,s=s0;const pts=[[0,s0]];segs.forEach(g=>{t+=g.d;s+=g.v*g.d;pts.push([t,s])});return pts}
+function s0For(segs){const p=pathFrom(segs,0);const m=Math.min(...p.map(q=>q[1]));return m<0?-m:0}
+function vSegs(segs){let t=0;return segs.map(g=>{const a=t;t+=g.d;return [a,t,g.v]})}
+function key(segs){return JSON.stringify(segs.map(g=>[g.v,g.d]))}
+function distractors(segs,vals,allowDur){
+  const c=[];
+  const rev=segs.slice().reverse().map((g,i)=>({v:g.v,d:segs[i].d}));c.push(rev);
+  segs.forEach((g,i)=>{vals.filter(v=>v!==g.v).forEach(v=>{const n=segs.map(x=>({...x}));n[i].v=v;c.push(n)})});
+  const neg=segs.map(g=>({v:-g.v,d:g.d}));c.push(neg);
+  if(allowDur){for(let i=0;i<segs.length;i++)for(let j=i+1;j<segs.length;j++){if(segs[i].d!==segs[j].d){const n=segs.map(x=>({...x}));n[i].d=segs[j].d;n[j].d=segs[i].d;c.push(n)}}}
+  const seen=new Set([key(segs)]);const out=[];
+  shuffle(c).forEach(n=>{const k=key(n);if(seen.has(k))return;seen.add(k);out.push(n)});
+  return out;
+}
+function motionTask(segs,vals,mode,opt){
+  /* mode 'sv': s(t) gegeben -> v(t) wählen ; 'vs': v(t) gegeben -> s(t) wählen */
+  const ds=distractors(segs,vals,opt.allowDur).slice(0,2);
+  const all=shuffle([{segs,ok:true},...ds.map(d=>({segs:d,ok:false}))]);
+  const Ttot=segs.reduce((a,g)=>a+g.d,0);
+  const q=opt.nums!==false;
+  const sAll=all.map(a=>{const s0=s0For(a.segs);return pathFrom(a.segs,s0)});
+  const smax=Math.max(...sAll.flat().map(p=>p[1]));
+  const vmaxA=Math.max(...all.flatMap(a=>a.segs.map(g=>g.v)),0),vminA=Math.min(...all.flatMap(a=>a.segs.map(g=>g.v)),0);
+  const vtop=vmaxA+ (vmaxA===0?1:Math.max(1,vmaxA*0.15)),vbot=vminA<0?vminA-Math.max(1,-vminA*0.15):0;
+  const sy=q?Math.ceil(smax*1.1/ (niceStep(smax))) *niceStep(smax):smax*1.12;
+  const common={xmax:Ttot,nums:q};
+  const sOpt=(a,i)=>chart({...common,w:300,h:200,ymax:sy,ylabel:'s',xlabel:'t',series:[{pts:sAll[i],color:BLUE}],xstep:opt.xstep,ystep:opt.ystep});
+  const vOpt=a=>chart({...common,w:300,h:200,ymax:vtop,ymin:vbot,ylabel:'v',xlabel:'t',series:[{segs:vSegs(a.segs),color:ORG}],xstep:opt.xstep,ystep:opt.vstep});
+  const correct=all.find(a=>a.ok),ci=all.indexOf(correct);
+  const sOK=sAll[ci];
+  let fig,choices,qtxt;
+  if(mode==='sv'){
+    fig=chart({...common,w:440,h:270,ymax:sy,ylabel:'s',xlabel:'t',series:[{pts:sOK,color:BLUE}],xstep:opt.xstep,ystep:opt.ystep});
+    choices=all.map((a,i)=>({html:vOpt(a),correct:a.ok}));
+    qtxt='Hier siehst du das <b>s(t)-Diagramm</b>. Welches <b>v(t)-Diagramm</b> gehört dazu?';
+  }else{
+    const cmx=Math.max(...segs.map(g=>g.v),0),cmn=Math.min(...segs.map(g=>g.v),0);fig=chart({...common,w:440,h:270,ymax:cmx+(cmx===0?1:Math.max(1,cmx*.15)),ymin:cmn<0?cmn-1:0,ylabel:'v',xlabel:'t',series:[{segs:vSegs(segs),color:ORG}],xstep:opt.xstep,ystep:opt.vstep});
+    choices=all.map((a,i)=>({html:sOpt(a,i),correct:a.ok}));
+    qtxt='Hier siehst du das <b>v(t)-Diagramm</b>. Welches <b>s(t)-Diagramm</b> gehört dazu?';
+  }
+  return {fig,choices,qtxt,all};
+}
+function explainMotion(segs,names,qual){
+  const li=segs.map((g,i)=>{
+    const n=names[i]||('Abschnitt '+(i+1));
+    let t;
+    if(g.v===0)t=`<b>${n}:</b> Die s(t)-Linie ist <b>waagrecht</b>, der Körper steht. Im v(t)-Diagramm liegt die Linie deshalb auf <b>v = 0</b>.`;
+    else if(g.v>0)t=`<b>${n}:</b> Die s(t)-Linie <b>steigt</b>. Der Weg wächst, v ist positiv.${qual?'':' Steigung = '+fmt(g.v,1)+' m/s, also v = '+fmt(g.v,1)+' m/s.'}`;
+    else t=`<b>${n}:</b> Die s(t)-Linie <b>fällt</b>. Der Körper fährt zurück, v ist <b>negativ</b>.${qual?'':' Steigung = '+fmt(g.v,1)+' m/s.'}`;
+    return '<li>'+t+'</li>';
+  }).join('');
+  return `<p>Die Geschwindigkeit ist die <b>Steigung</b> der Linie im s(t)-Diagramm. Gehe Abschnitt für Abschnitt vor:</p><ol>${li}</ol><p>Gleichförmige Abschnitte erscheinen im v(t)-Diagramm als <b>waagrechte Linien</b>. Je steiler die s(t)-Linie, desto höher liegt die v(t)-Linie.</p>`;
+}
+
+/* ---------- Aufgabentypen ---------- */
+const TOPICS=[];
+
+/* 1 Zeitpunkt oder Zeitraum */
+TOPICS.push({id:'zz',title:'Zeitpunkt oder Zeitraum?',desc:'Momentan- oder Durchschnittsgeschwindigkeit erkennen',gen(){
+  const P=['Der Tacho zeigt gerade 120 km/h.','Der Blitzer misst bei deinem Auto 63 km/h.','Beim Überqueren der Ziellinie hat die Läuferin 8,5 m/s.','In diesem Augenblick fährt der Bus 50 km/h.','Das Navi zeigt jetzt 87 km/h an.','Der Radar misst am Ortseingang 58 km/h.'];
+  const Z=['Der Zug fährt in 2 Stunden 200 km weit.','Jonas joggt in 20 Minuten 3 km weit.','Die Radfahrerin braucht für 30 km genau 1,5 Stunden.','Das Auto kommt von 8 bis 10 Uhr 180 km weit.','Die Marathonläuferin läuft 42 km in 3 Stunden.','Der Bus fährt in 45 Minuten 30 km weit.'];
+  const isP=Math.random()<.5;const sent=pick(isP?P:Z);
+  return {title:'Zeitpunkt oder Zeitraum?',q:`<p>„<i>${sent}</i>“</p><p>Sagt dieser Satz etwas über einen <b>Zeitpunkt</b> oder über einen <b>Zeitraum</b>? Welche Geschwindigkeit ist gemeint?</p>`,
+  choices:shuffle([{html:'<b>Zeitpunkt</b><br>Momentangeschwindigkeit',correct:isP},{html:'<b>Zeitraum</b><br>Durchschnittsgeschwindigkeit',correct:!isP}]),cl:'c2',
+  hint:'Frage dich: Gilt die Zahl für einen einzigen Augenblick („gerade“, „jetzt“, „in diesem Moment“) oder für eine Fahrt mit Anfang und Ende?',
+  expl:isP?`<p>Der Satz beschreibt einen <b>einzigen Augenblick</b>. Gemessen wird die <b>Momentangeschwindigkeit</b>: So schnell ist der Körper <i>genau jetzt</i>. Davor oder danach kann er schneller oder langsamer sein.</p>`:`<p>Im Satz kommen eine <b>Strecke und eine Dauer</b> vor. Das beschreibt einen <b>Zeitraum</b>. Gemeint ist die <b>Durchschnittsgeschwindigkeit</b>: v = s : t. Zwischendurch kann der Körper schneller oder langsamer gewesen sein.</p>`};
+}});
+
+/* 2 Umrechnen */
+TOPICS.push({id:'um',title:'Umrechnen km/h ↔ m/s',desc:'km/h, m/s und m/min sicher umrechnen',gen(){
+  const m=rnd(1,4);let q,ans,tol,expl,hint,unit;
+  if(m===1){const k=pick([18,36,54,72,90,108,126,144]);ans=k/3.6;tol=.05;q=`Rechne <b>${k} km/h</b> in <b>m/s</b> um.`;unit='m/s';hint='km/h → m/s: durch 3,6 teilen.';expl=`<p>km/h → m/s: <b>durch 3,6</b>.</p><p class="res">${k} km/h : 3,6 = ${fmt(ans,0)} m/s</p><p>Probe: ${fmt(ans,0)} m/s · 3,6 = ${k} km/h ✓</p>`}
+  else if(m===2){const k=pick([50,80,100,120,130,30,60]);ans=k/3.6;tol=.12;q=`Rechne <b>${k} km/h</b> in <b>m/s</b> um. Runde auf eine Nachkommastelle.`;unit='m/s';hint='km/h → m/s: durch 3,6 teilen.';expl=`<p>km/h → m/s: <b>durch 3,6</b>.</p><p class="res">${k} km/h : 3,6 = ${fmt(ans,2)} m/s ≈ ${fmt(ans,1)} m/s</p>`}
+  else if(m===3){const k=pick([5,8,10,12,15,20,25,30,35]);ans=k*3.6;tol=.15;q=`Rechne <b>${k} m/s</b> in <b>km/h</b> um.`;unit='km/h';hint='m/s → km/h: mit 3,6 multiplizieren.';expl=`<p>m/s → km/h: <b>mal 3,6</b>.</p><p class="res">${k} m/s · 3,6 = ${fmt(ans,1)} km/h</p>`}
+  else{const k=pick([60,90,120,150,180,240,300,420]);ans=k/60;tol=.03;q=`Eine Schnecke-Rennmaus schafft <b>${k} m</b> in einer <b>Minute</b>, also ${k} m/min. Rechne in <b>m/s</b> um.`;unit='m/s';hint='Eine Minute hat 60 Sekunden: durch 60 teilen.';expl=`<p>m/min → m/s: <b>durch 60</b>, denn 1 min = 60 s.</p><p class="res">${k} m/min : 60 = ${fmt(ans,2)} m/s</p>`}
+  return {title:'Umrechnen',q:`<p>${q.replace('Schnecke-Rennmaus','Rennmaus')}</p>`,inputs:[{label:'Ergebnis',unit,ans,tol}],hint,expl};
+}});
+
+/* 3 v = s : t */
+TOPICS.push({id:'v',title:'Geschwindigkeit berechnen',desc:'v = s : t, auch nach s oder t umstellen',gen(){
+  const who=pick([['Lena','läuft'],['Ben','radelt'],['Tarek','fährt Skateboard'],['Mia','schwimmt'],['Der Roboter','rollt']]);
+  const v=pick([2,2.5,4,5,6,8,10,12,15]),t=pick([4,5,8,10,12,20,30]);const s=v*t;const m=rnd(1,3);
+  const [n,vb]=who;
+  if(m===1)return {title:'Geschwindigkeit berechnen',q:`<p>${n} ${vb} <b>${fmt(s,0)} m</b> in <b>${t} s</b> (gleichmäßig). Wie groß ist die Geschwindigkeit?</p>`,inputs:[{label:'v',unit:'m/s',ans:v,tol:.03}],hint:'v = s : t (Strecke geteilt durch Zeit).',expl:`<ol><li>Gegeben: s = ${fmt(s,0)} m, t = ${t} s</li><li>Formel: v = s : t</li><li class="res">v = ${fmt(s,0)} m : ${t} s = ${fmt(v,2)} m/s</li></ol>`};
+  if(m===2)return {title:'Strecke berechnen',q:`<p>${n} ${vb} mit <b>${fmt(v,1)} m/s</b> gleichmäßig. Wie weit kommt das in <b>${t} s</b>?</p>`,inputs:[{label:'s',unit:'m',ans:s,tol:.3}],hint:'Stelle um: s = v · t.',expl:`<ol><li>Gegeben: v = ${fmt(v,1)} m/s, t = ${t} s</li><li>Aus v = s : t folgt s = v · t</li><li class="res">s = ${fmt(v,1)} m/s · ${t} s = ${fmt(s,1)} m</li></ol>`};
+  return {title:'Zeit berechnen',q:`<p>${n} ${vb} mit <b>${fmt(v,1)} m/s</b> gleichmäßig. Wie lange braucht das für <b>${fmt(s,0)} m</b>?</p>`,inputs:[{label:'t',unit:'s',ans:t,tol:.05}],hint:'Stelle um: t = s : v.',expl:`<ol><li>Gegeben: s = ${fmt(s,0)} m, v = ${fmt(v,1)} m/s</li><li>Aus v = s : t folgt t = s : v</li><li class="res">t = ${fmt(s,0)} m : ${fmt(v,1)} m/s = ${fmt(t,1)} s</li></ol>`};
+}});
+
+/* 4 Durchschnittsgeschwindigkeit mit Halt */
+TOPICS.push({id:'dv',title:'Fahrt mit Halt',desc:'Durchschnittsgeschwindigkeit, Momentangeschwindigkeit',gen(){
+  const vo=[40,60,80,100],to=[1,1.5,2];
+  let v1=pick(vo),v2=pick(vo),t1=pick(to),t2=pick(to),p=pick([.5,1]);
+  while(v1===v2)v2=pick(vo);
+  const s1=v1*t1,s2=v2*t2,S=s1+s2,Tt=t1+p+t2,vm=S/Tt;
+  const veh=pick([['Ein Reisebus','fährt'],['Ein Zug','fährt'],['Familie Weber','fährt mit dem Auto']]);
+  const pts=[[0,0],[t1,s1],[t1+p,s1],[Tt,S]];
+  const ymax=Math.ceil(S/50)*50;
+  const fig=chart({xmax:Math.ceil(Tt),ymax,xlabel:'t in h',ylabel:'s in km',series:[{pts,color:BLUE}],xstep:.5,ystep:50});
+  return {title:'Fahrt mit Halt',q:`<p>${veh[0]} ${veh[1]} zuerst <b>${fmt(t1,1)} h</b> lang mit konstant <b>${v1} km/h</b>, hält dann <b>${fmt(p,1)} h</b> an einer Raststätte und fährt anschließend <b>${fmt(t2,1)} h</b> lang mit konstant <b>${v2} km/h</b> weiter.</p><p>Bestimme die <b>Durchschnittsgeschwindigkeit der ganzen Fahrt</b> (mit dem Halt) und die <b>Momentangeschwindigkeit</b> mitten im Halt.</p>`,fig,
+  inputs:[{label:'Durchschnitt',unit:'km/h',ans:vm,tol:.6,id:'avg'},{label:'Momentan im Halt',unit:'km/h',ans:0,tol:.01,id:'mom'}],
+  wrong(v){const a=v.avg;if(a==null)return '';if(Math.abs(a-(v1+v2)/2)<.6&&Math.abs(vm-(v1+v2)/2)>1)return 'Du hast die beiden Tempi gemittelt. Das geht nicht, weil die Zeiten verschieden lang sind. Rechne Gesamtstrecke : Gesamtzeit.';if(Math.abs(a-S/(t1+t2))<.6&&Math.abs(vm-S/(t1+t2))>1)return 'Du hast den Halt vergessen. Die Pause zählt zur Gesamtzeit.';return ''},
+  hint:'Durchschnitt = Gesamtstrecke : Gesamtzeit. Die Pause gehört zur Gesamtzeit. Im Halt steht der Körper still.',
+  expl:`<ol><li>Strecke 1: ${v1} km/h · ${fmt(t1,1)} h = ${fmt(s1,0)} km</li><li>Strecke 2: ${v2} km/h · ${fmt(t2,1)} h = ${fmt(s2,0)} km</li><li>Gesamtstrecke: ${fmt(S,0)} km</li><li>Gesamtzeit <b>mit Halt</b>: ${fmt(t1,1)} h + ${fmt(p,1)} h + ${fmt(t2,1)} h = ${fmt(Tt,1)} h</li><li class="res">v<sub>Durchschnitt</sub> = ${fmt(S,0)} km : ${fmt(Tt,1)} h ≈ ${fmt(vm,1)} km/h</li><li class="res">Im Halt: v = 0 km/h (waagrechte Linie im Diagramm).</li></ol><p>Achtung: Der Durchschnitt ist <b>nicht</b> der Mittelwert von ${v1} und ${v2} km/h.</p>`};
+}});
+
+/* 5 Diagramm lesen */
+TOPICS.push({id:'lesen',title:'s(t)-Diagramm lesen',desc:'Geschwindigkeit aus der Steigung bestimmen',gen(){
+  let segs;
+  for(;;){segs=[0,1,2].map(()=>({d:pick([2,3,4]),v:pick([0,1,2,3,4,5])}));
+    const vs=segs.map(g=>g.v);if(new Set(vs).size===3&&vs.filter(v=>v===0).length<=1)break}
+  const sec=['I','II','III'];let t=0;const secs=segs.map((g,i)=>{const a=t;t+=g.d;return [a,t,sec[i]]});
+  const pts=pathFrom(segs,0),smax=pts[pts.length-1][1]===0?5:Math.max(...pts.map(p=>p[1]));
+  const st=niceStep(smax,5);const ymax=Math.ceil(smax*1.05/st)*st;
+  const fig=chart({xmax:t,ymax,xlabel:'t in s',ylabel:'s in m',series:[{pts,color:BLUE}],secs,xstep:1,ystep:st});
+  const mode=Math.random()<.5?'fast':'num';
+  if(mode==='fast'){
+    const mx=Math.max(...segs.map(g=>g.v));const ci=segs.findIndex(g=>g.v===mx);
+    return {title:'Diagramm lesen',q:`<p>Das Diagramm zeigt die Fahrt eines Spielzeugautos in drei Abschnitten. In welchem Abschnitt ist es am <b>schnellsten</b>?</p>`,fig,
+    choices:sec.map((n,i)=>({html:'<b>Abschnitt '+n+'</b>',correct:i===ci})),cl:'c3',hint:'Je steiler die Linie, desto schneller. Waagrecht heißt: Stillstand.',
+    expl:`<p>Die Geschwindigkeit ist die <b>Steigung</b> der Linie: v = Δs : Δt.</p><ol>${segs.map((g,i)=>`<li>Abschnitt ${sec[i]}: ${fmt(g.v*g.d,0)} m in ${g.d} s → v = ${fmt(g.v,0)} m/s${g.v===0?' (steht)':''}</li>`).join('')}</ol><p class="res">Am schnellsten ist Abschnitt ${sec[ci]} (${fmt(mx,0)} m/s). Das ist die steilste Linie.</p>`};
+  }
+  const k=rnd(0,2),g=segs[k];
+  return {title:'Diagramm lesen',q:`<p>Das Diagramm zeigt die Fahrt eines Spielzeugautos. Bestimme die Geschwindigkeit im <b>Abschnitt ${sec[k]}</b>.</p>`,fig,inputs:[{label:'v im Abschnitt '+sec[k],unit:'m/s',ans:g.v,tol:.15}],
+  hint:'Lies am Anfang und am Ende des Abschnitts den Weg ab. v = (Weg am Ende − Weg am Anfang) : Zeit des Abschnitts.',
+  expl:`<ol><li>Abschnitt ${sec[k]} dauert von t = ${fmt(secs[k][0],0)} s bis t = ${fmt(secs[k][1],0)} s, also ${g.d} s.</li><li>Weg am Anfang: ${fmt(pts[k][1],0)} m, Weg am Ende: ${fmt(pts[k+1][1],0)} m → Strecke ${fmt(g.v*g.d,0)} m.</li><li class="res">v = ${fmt(g.v*g.d,0)} m : ${g.d} s = ${fmt(g.v,1)} m/s</li></ol>`};
+}});
+
+/* 6 s(t) <-> v(t) zuordnen */
+TOPICS.push({id:'zuo',title:'s(t) und v(t) zuordnen',desc:'Welches Diagramm passt zum anderen?',gen(){
+  let segs;
+  for(;;){const n=3;segs=[];for(let i=0;i<n;i++)segs.push({d:pick([2,3,4]),v:pick([0,1,2,3,4])});
+    if(Math.random()<.4)segs[2].v=-pick([1,2]);
+    let ok=true;for(let i=1;i<n;i++)if(segs[i].v===segs[i-1].v)ok=false;
+    if(segs.filter(g=>g.v===0).length>1)ok=false;
+    if(ok)break}
+  const mode=Math.random()<.5?'sv':'vs';
+  const m=motionTask(segs,[-2,-1,0,1,2,3,4],mode,{allowDur:true,xstep:1,ystep:undefined,vstep:1});
+  return {title:'Diagramme zuordnen',q:`<p>${m.qtxt}</p>`,fig:m.fig,choices:m.choices.map((c,i)=>({...c,label:'ABC'[i]})),cl:'c3',
+  hint:'Waagrecht im s(t)-Diagramm heißt: v = 0. Je steiler, desto größer v. Eine fallende s(t)-Linie bedeutet negative Geschwindigkeit.',expl:explainMotion(segs,['Abschnitt 1','Abschnitt 2','Abschnitt 3'],false)};
+}});
+
+/* 7 Geschichten */
+const STORIES=[
+ {t:'Karl fährt mit dem Fahrrad einen steilen Berg hoch und braucht 15 Minuten. Oben dreht er sofort um und fährt den gleichen Weg bergab mit dem doppelten Tempo zurück.',segs:[{v:1,d:6},{v:-2,d:3}],names:['Bergauf','Bergab']},
+ {t:'Moritz fährt mit dem Auto zu seiner Oma und braucht dazu eine Stunde. Er bleibt 3 Stunden zu Besuch. Danach fährt er wieder nach Hause, braucht aber doppelt so lang, weil der Verkehr dichter ist.',segs:[{v:2,d:2},{v:0,d:6},{v:-1,d:4}],names:['Hinfahrt','Besuch','Rückfahrt']},
+ {t:'Ein Zug steht auf einem Abstellgleis 200 m vor dem Bahnsteig. Er fährt mit 2 m/s los, hält am Bahnsteig und fährt dann mit 3 m/s weiter. (Der Weg wird ab dem Abstellgleis gemessen.)',segs:[{v:2,d:4},{v:0,d:3},{v:3,d:3}],names:['Anfahrt','Halt am Bahnsteig','Weiterfahrt']},
+ {t:'Lena joggt zehn Minuten gleichmäßig. Dann bindet sie fünf Minuten lang ihren Schuh zu und joggt danach mit größerem Tempo weiter.',segs:[{v:1,d:4},{v:0,d:2},{v:2,d:3}],names:['Joggen','Schuhe binden','Schneller weiter']},
+ {t:'Eine Bäckerin radelt gleichmäßig zum Markt, baut dort lange ihren Stand auf und radelt dann doppelt so schnell zurück.',segs:[{v:1,d:4},{v:0,d:4},{v:-2,d:2}],names:['Hinfahrt','Standaufbau','Rückfahrt']},
+ {t:'Elias schwimmt eine Bahn gleichmäßig bis zum Beckenrand, ruht sich kurz aus und schwimmt dann doppelt so schnell zurück.',segs:[{v:1,d:6},{v:0,d:2},{v:-2,d:3}],names:['Hin','Pause','Zurück']}
+];
+TOPICS.push({id:'story',title:'Heiteres Diagramm-Raten',desc:'Geschichten in Diagramme übersetzen',gen(){
+  const st=pick(STORIES);const mode=Math.random()<.5?'s':'v';
+  const segs=st.segs.map(g=>({...g}));
+  const m=motionTask(segs,[-2,-1,0,1,2,3],mode==='s'?'vs':'sv',{allowDur:true,nums:false});
+  /* bei Geschichten wird kein Ausgangsdiagramm gezeigt, nur die Auswahl */
+  const choices=m.choices.map((c,i)=>({...c,label:'ABC'[i]}));
+  return {title:'Heiteres Diagramm-Raten',q:`<p><i>${st.t}</i></p><p>Welches <b>${mode==='s'?'s(t)':'v(t)'}-Diagramm</b> passt zur Geschichte? (Nur die Form zählt, keine genauen Zahlen. v &lt; 0 heißt: Der Weg wird wieder kleiner.)</p>`,choices,cl:'c3',
+  hint:'Zerlege die Geschichte in Abschnitte: Wann steigt der Weg, wann steht der Körper, wann fährt er zurück? Zeichne dir erst selbst eine Skizze.',
+  expl:explainMotion(st.segs,st.names,true)};
+}});
+
+/* 8 Läufer */
+TOPICS.push({id:'lauf',title:'Zwei Läufer im Diagramm',desc:'Geschwindigkeiten ablesen, Überholpunkt finden',gen(){
+  const vA=pick([4,5,6,8]),vB=pick([2,3,4].filter(x=>x<vA));const to=pick([5,8,10,12]);
+  const s0=(vA-vB)*to;const xmax=Math.round(to*1.6);const ymax=Math.ceil(Math.max(vA*xmax,s0+vB*xmax)*1.05/niceStep(vA*xmax,6))*niceStep(vA*xmax,6);
+  const so=vA*to;
+  const fig=chart({xmax,ymax,xlabel:'t in s',ylabel:'s in m',xstep:niceStep(xmax,8)<=1?1:(xmax>10?2:1),ystep:niceStep(ymax,6),series:[{pts:[[0,0],[xmax,vA*xmax]],color:BLUE,label:'A'},{pts:[[0,s0],[xmax,s0+vB*xmax]],color:ORG,label:'B'}]});
+  return {title:'Zwei Läufer',q:`<p>Läufer <b>A</b> (blau) startet am Startpunkt. Läuferin <b>B</b> (orange) bekommt einen Vorsprung. Beide laufen gleichmäßig. Lies die Werte aus dem Diagramm ab.</p>`,fig,
+  inputs:[{label:'v von A',unit:'m/s',ans:vA,tol:.3},{label:'v von B',unit:'m/s',ans:vB,tol:.3},{label:'A überholt B bei t =',unit:'s',ans:to,tol:.6}],
+  hint:'Lies bei jeder Linie zwei Punkte ab und rechne v = Δs : Δt. Überholt wird dort, wo sich die Linien schneiden.',
+  expl:`<ol><li>A: Nach ${to} s ist A bei ${fmt(so,0)} m → v<sub>A</sub> = ${fmt(so,0)} m : ${to} s = ${fmt(vA,0)} m/s.</li><li>B startet bei ${fmt(s0,0)} m und ist nach ${to} s bei ${fmt(s0+vB*to,0)} m. Das sind ${fmt(vB*to,0)} m in ${to} s → v<sub>B</sub> = ${fmt(vB,0)} m/s.</li><li class="res">Die Linien schneiden sich bei t = ${to} s (Ort ${fmt(so,0)} m). Dort überholt A die Läuferin B.</li></ol><p>Probe: Δv = v<sub>A</sub> − v<sub>B</sub> = ${vA} m/s − ${vB} m/s = ${vA-vB} m/s, Vorsprung ${fmt(s0,0)} m → t = ${fmt(s0,0)} m : ${vA-vB} m/s = ${to} s ✓</p>`};
+}});
+
+/* 9 Überholvorgang */
+TOPICS.push({id:'ueh',title:'Der Überholvorgang',desc:'Überholdauer, Überholweg und freie Strecke bei Gegenverkehr',gen(){
+  const pr=pick([[108,90,30,25],[90,72,25,20],[72,54,20,15],[126,90,35,25],[144,108,40,30],[108,72,30,20],[144,126,40,35]]);
+  const [k1,k2,m1,m2]=pr;const a=pick([5,10]),L=pick([10,15,20]),l=pick([4,5]);
+  const S=2*a+L+l,D=m1-m2,t=S/D,sp=m1*t,sg=m1*t;const frei=sp+sg;
+  const stFig=chart({xmax:Math.ceil(t*1.25),ymax:Math.ceil(m1*Math.ceil(t*1.25)/niceStep(m1*t*1.25,6))*niceStep(m1*t*1.25,6),xlabel:'t in s',ylabel:'s in m',series:[{pts:[[0,0],[Math.ceil(t*1.25),m1*Math.ceil(t*1.25)]],color:BLUE,label:'PKW'},{pts:[[0,S],[Math.ceil(t*1.25),S+m2*Math.ceil(t*1.25)]],color:ORG,label:'LKW'}],ystep:niceStep(m1*t*1.25,6)});
+  return {sim:{m1,m2,a,L,l,S,t,sp,frei},title:'Der Überholvorgang',q:`<p>Ein PKW (l<sub>PKW</sub> = <b>${l} m</b>) fährt mit v<sub>PKW</sub> = <b>${k1} km/h</b> hinter einem LKW (l<sub>LKW</sub> = <b>${L} m</b>, v<sub>LKW</sub> = <b>${k2} km/h</b>) her. Vor und nach dem Überholen hält er je s<sub>A</sub> = <b>${a} m</b> Sicherheitsabstand. Auf der Gegenspur kommt ein Auto mit v<sub>G</sub> = <b>${k1} km/h</b> entgegen.</p><p>Berechne die <b>Überholdauer t<sub>ü</sub></b>, den <b>Überholweg s<sub>PKW</sub></b> und wie weit die Gegenspur mindestens <b>frei</b> sein muss (<b>s<sub>frei</sub></b>).</p>`,
+  inputs:[{label:'Überholdauer t<sub>ü</sub>',unit:'s',ans:t,tol:.06,id:'t'},{label:'Überholweg s<sub>PKW</sub>',unit:'m',ans:sp,tol:1.5,id:'s'},{label:'freie Strecke s<sub>frei</sub>',unit:'m',ans:frei,tol:2.5,id:'f'}],
+  hint:'Rechne zuerst alles in m/s (km/h : 3,6). Der PKW muss die Aufholstrecke s<sub>auf</sub> = s<sub>A</sub> + l<sub>LKW</sub> + s<sub>A</sub> + l<sub>PKW</sub> aufholen, und zwar mit dem Geschwindigkeitsunterschied Δv = v<sub>PKW</sub> − v<sub>LKW</sub>.',
+  wrong(v){if(v.t!=null&&Math.abs(v.t-S/m1)<.1&&Math.abs(t-S/m1)>.2)return 'Du hast mit der ganzen PKW-Geschwindigkeit gerechnet. Zum Überholen zählt nur der Geschwindigkeitsunterschied Δv = v<sub>PKW</sub> − v<sub>LKW</sub>.';return ''},
+  expl:`<ol><li>Umrechnen: v<sub>PKW</sub> = ${k1} km/h = ${m1} m/s, v<sub>LKW</sub> = ${k2} km/h = ${m2} m/s</li><li>Aufholstrecke: s<sub>auf</sub> = s<sub>A</sub> + l<sub>LKW</sub> + s<sub>A</sub> + l<sub>PKW</sub> = ${a} m + ${L} m + ${a} m + ${l} m = <b>${S} m</b></li><li>Geschwindigkeitsunterschied: Δv = v<sub>PKW</sub> − v<sub>LKW</sub> = ${m1} m/s − ${m2} m/s = <b>${D} m/s</b></li><li class="res">Überholdauer: t<sub>ü</sub> = s<sub>auf</sub> : Δv = ${S} m : ${D} m/s = ${fmt(t,2)} s</li><li class="res">Überholweg: s<sub>PKW</sub> = v<sub>PKW</sub> · t<sub>ü</sub> = ${m1} m/s · ${fmt(t,2)} s = ${fmt(sp,1)} m</li><li class="res">Gegenverkehr: s<sub>G</sub> = v<sub>G</sub> · t<sub>ü</sub> = ${fmt(sg,1)} m. Freie Strecke: s<sub>frei</sub> = s<sub>PKW</sub> + s<sub>G</sub> = ${fmt(sp,1)} m + ${fmt(sg,1)} m = ${fmt(frei,1)} m</li></ol><p><b>Im s(t)-Diagramm:</b> Die LKW-Linie startet bei s<sub>auf</sub> = ${S} m (so weit muss der PKW aufholen). Der Schnittpunkt zeigt das Ende des Überholens.</p><div class="fig">${stFig}</div><p>Spiel jetzt oben die Simulation ab: Zeit und Wege werden angezeigt. Mit „Gegenverkehr“ startet das Auto genau ${fmt(frei,0)} m vor dem PKW. Es kommt knapp vorbei.</p>`};
+}});
+
+/* 10 Gleichzeitig ankommen */
+TOPICS.push({id:'gz',title:'Gleichzeitig ankommen',desc:'Zeit gleichsetzen, Geschwindigkeit bestimmen',gen(){
+  let t,vb,vo;do{t=pick([2,2.5,3,4,5]);vb=pick([8,10,12,13,15]);vo=pick([2,3,4,5,6])}while(vb*t<16||vb*t>40||vo*t>22);const sb=vb*t,so=vo*t;
+  const V=[
+   {q:`Blattschuß passt den Ball aus <b>${fmt(sb,0)} m</b> mit <b>${vb} m/s</b> Richtung Elfmeterpunkt. Opa Krawuttke steht <b>${fmt(so,1)} m</b> vom Elfmeterpunkt entfernt. Wie schnell muss Opa laufen, damit er genau dann am Elfmeterpunkt ist, wenn der Ball ankommt?`,who:'Opa'},
+   {q:`Mia wirft einen Frisbee <b>${fmt(sb,0)} m</b> weit, er fliegt mit <b>${vb} m/s</b>. Ihr Hund Rex sitzt <b>${fmt(so,1)} m</b> von der Landestelle entfernt. Wie schnell muss Rex rennen, um genau dann dort anzukommen, wenn der Frisbee landet?`,who:'Rex'},
+   {q:`Ein Paket rollt auf einem Band mit <b>${vb} m/s</b> auf die Sortierstelle zu, noch <b>${fmt(sb,0)} m</b> entfernt. Ein Roboter steht <b>${fmt(so,1)} m</b> von der Sortierstelle entfernt. Wie schnell muss der Roboter fahren, damit er gleichzeitig mit dem Paket dort ist?`,who:'der Roboter'}];
+  const v=Math.random()<.6?V[0]:pick(V.slice(1));const isOpa=v===V[0];
+  const tm=Math.ceil(t+1),stF=chart({xmax:tm,ymax:Math.ceil(sb/10)*10,xlabel:'t in s',ylabel:'s in m',xstep:tm>8?2:1,series:[{pts:[[0,0],[t,sb]],color:'#B3402F',label:isOpa?'Ball':''},{pts:[[0,0],[t,so]],color:NAV,label:isOpa?'Opa':''}]});
+  return {opa:isOpa?{sb,vb,so,vo,t}:null,title:'Gleichzeitig ankommen',q:`<p>${v.q}</p>`,inputs:[{label:'Geschwindigkeit',unit:'m/s',ans:vo,tol:.06}],
+  hint:'Beide brauchen dieselbe Zeit. Berechne zuerst die Zeit des Balls (Frisbees, Pakets) mit t = s : v.',
+  expl:`<ol><li>Zeit des Ankommenden: t = s : v = ${fmt(sb,0)} m : ${vb} m/s = <b>${fmt(t,1)} s</b></li><li>Dieselbe Zeit gilt für ${v.who}.</li><li class="res">v = s : t = ${fmt(so,1)} m : ${fmt(t,1)} s = ${fmt(vo,1)} m/s (= ${fmt(vo*3.6,1)} km/h)</li></ol><p>Im s(t)-Diagramm enden beide Linien <b>zur selben Zeit</b> (${fmt(t,1)} s), jede bei ihrem eigenen Weg. Die steilere Linie gehört zum Schnelleren.</p><div class="fig">${stF}</div>`};
+}});
+
+
+/* ===== Neue Themen (Klassenarbeits-Vorbereitung) ===== */
+const RED='#B3402F';
+function mtable(rows){return `<table class="mt">${rows.map(r=>`<tr><th>${r[0]}</th>${r.slice(1).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table>`}
+
+/* Messreihe auswerten (Blatt 1, 2, Luftblasenrennen) */
+TOPICS.push({id:'mess',title:'Messreihe auswerten',desc:'Aus einer Messtabelle v bestimmen, gleichförmig erkennen',gen(){
+  const obj=pick([['Die Luftblase','im Schlauch'],['Die Kakerlake','auf der Messstrecke'],['Der Wagen','auf der Fahrbahn']]);
+  if(Math.random()<.5){
+    const v=pick([2,2.5,4,5]);const S=[0,10,20,30,40,50];
+    const T=S.map((s,i)=>i?Math.max(.1,Math.round((s/v+(Math.random()-.5)*.3)*10)/10):0);
+    const tab=mtable([['s in cm',...S],['t in s',...T.map(x=>fmt(x,1))]]);
+    return {title:'Messreihe auswerten',q:`<p>${obj[0]} bewegt sich ${obj[1]}. Eine Gruppe hat diese Werte gemessen:</p>${tab}<p>Die Bewegung ist gleichförmig. Bestimme die <b>Geschwindigkeit</b> in cm/s.</p>`,
+      inputs:[{label:'v',unit:'cm/s',ans:v,tol:.3}],hint:'Nimm den letzten Messpunkt (der Fehler ist dort am kleinsten) und rechne v = s : t. Oder rechne für mehrere Punkte s : t und bilde den Mittelwert.',
+      expl:`<ol><li>Für jeden Messpunkt ist s : t ungefähr gleich groß, z. B. ${S[5]} cm : ${fmt(T[5],1)} s ≈ ${fmt(S[5]/T[5],1)} cm/s. Das zeigt: gleichförmig.</li><li>Kleine Abweichungen kommen von der Stoppuhr (Reaktionszeit).</li><li class="res">v ≈ ${fmt(v,1)} cm/s</li></ol><p>Im s(t)-Diagramm liegen die Punkte auf einer <b>Geraden durch den Ursprung</b>. Ihre Steigung ist v.</p>`};
+  }
+  const S=[0,10,20,30,40];const v=pick([2,4,5]);
+  const tc=S.map(s=>s/v),tf=S.map((s,i)=>Math.round(Math.sqrt(s*S[4]/v/v)*10)/10),ts=S.map((s,i)=>Math.round((s*s/S[4]/v)*10)/10);
+  const mk=t=>mtable([['s in cm',...S],['t in s',...t.map(x=>fmt(x,1))]]);
+  const ch=shuffle([{html:mk(tc),correct:true},{html:mk(tf),correct:false},{html:mk(ts),correct:false}]).map((c,i)=>({...c,label:'Messreihe '+'ABC'[i]}));
+  return {title:'Gleichförmig oder nicht?',q:`<p>Drei Gruppen haben ${obj[0].replace('Die ','die ').replace('Der ','den ')} gemessen. Welche Messreihe gehört zu einer <b>gleichförmigen Bewegung</b>?</p>`,choices:ch,cl:'c1',
+    hint:'Gleichförmig heißt: In gleichen Zeiten gleiche Wege. Rechne s : t für zwei Punkte. Bleibt der Wert gleich?',
+    expl:`<p>Bei der gleichförmigen Bewegung ist s : t immer gleich, hier ${fmt(v,0)} cm/s: Für je 10 cm braucht der Körper gleich lange (${fmt(10/v,1)} s). Der Weg ist <b>proportional</b> zur Zeit.</p><p>Bei den anderen Reihen werden die Zeitabstände für je 10 cm immer kleiner (Körper wird schneller) oder immer größer (Körper wird langsamer).</p>`};
+}});
+
+/* Situation -> s(t)-Diagramm mit Zahlen (Blatt 3) */
+TOPICS.push({id:'sit',title:'Situation → Diagramm',desc:'Schulweg-Geschichten mit Zahlen ins s(t)-Diagramm',gen(){
+  const vs=[40,60,80,100,120],ds=[2,3,4];let segs,txt,names;
+  if(Math.random()<.5){const v1=pick(vs),d1=pick(ds),d2=pick([1,2,3]),v2=pick(vs.filter(x=>x!==v1)),d3=pick(ds);
+    segs=[{v:v1,d:d1},{v:0,d:d2},{v:v2,d:d3}];names=['Hinweg','Warten','Weiter'];
+    txt=`Du gehst mit <b>${v1} m/min</b> von zu Hause los. Nach <b>${d1} min</b> triffst du eine Freundin und ihr redet <b>${d2} min</b>. Dann geht ihr zusammen <b>${d3} min</b> lang mit <b>${v2} m/min</b> weiter zur Schule.`;}
+  else{const v1=pick([40,60]),d1=pick([2,4]),v2=2*v1,d2=d1/2,d3=pick([1,2]);
+    segs=[{v:v1,d:d1},{v:-v2,d:d2},{v:0,d:d3}];names=['Hinweg','Zurück','Suchen'];
+    txt=`Du gehst mit <b>${v1} m/min</b> von zu Hause los. Nach <b>${d1} min</b> merkst du, dass dein Handy fehlt. Du rennst mit <b>${v2} m/min</b> zurück nach Hause und suchst dort <b>${d3} min</b> lang.`;}
+  const m=motionTask(segs,[-120,-80,-60,0,40,60,80,100,120],'vs',{allowDur:true,xstep:1});
+  const choices=m.choices.map((c,i)=>({...c,label:'ABC'[i]}));
+  let s=0,t=0;const li=segs.map((g,i)=>{const a=s;s+=g.v*g.d;t+=g.d;return `<li><b>${names[i]}</b> (bis t = ${t} min): ${g.v===0?'der Weg bleibt bei '+fmt(a,0)+' m, die Linie ist waagrecht':(g.v>0?'+':'−')+fmt(Math.abs(g.v)*g.d,0)+' m ('+fmt(Math.abs(g.v),0)+' m/min · '+g.d+' min) → s = '+fmt(s,0)+' m'}</li>`}).join('');
+  return {title:'Situation → Diagramm',q:`<p>${txt}</p><p>Welches <b>s(t)-Diagramm</b> passt? (t in min, s in m)</p>`,choices,cl:'c3',
+    hint:'Rechne für jeden Abschnitt aus, wie weit du kommst: s = v · t. Markiere dir die Punkte am Ende jedes Abschnitts.',
+    expl:`<ol>${li}</ol><p>Stehen = waagrechte Linie. Zurückgehen = fallende Linie. Je schneller, desto steiler.</p>`};
+}});
+
+/* Fachbegriffe-Check (Blatt 4, 6, 7) */
+const BEGR=[
+ ['Was gehört alles zur Geschwindigkeit?',['Tempo und Richtung','nur das Tempo','Weg und Zeit'],0,'Die Geschwindigkeit ist ein <b>Vektor</b>: Sie hat einen Betrag (Tempo) und eine Richtung. Man zeichnet sie als Pfeil.'],
+ ['Was gibt die Länge des Geschwindigkeitspfeils an?',['das Tempo','die Fahrzeit','die Richtung'],0,'Der Pfeil zeigt in Fahrtrichtung, seine Länge gibt das Tempo an (mit Maßstab).'],
+ ['Welche Bewegung ist gleichförmig?',['Ein Auto fährt mit konstant 50 km/h geradeaus durch den Ort.','Ein Stein fällt von einer Brücke.','Ein Schlitten fährt den Hang hinunter.'],0,'Gleichförmig heißt: Tempo und Richtung bleiben gleich. Stein und Schlitten werden immer schneller.'],
+ ['Wie sieht das s(t)-Diagramm einer gleichförmigen Bewegung aus?',['eine Gerade','eine Kurve, die immer steiler wird','eine waagrechte Linie, wenn der Körper fährt'],0,'In gleichen Zeiten gleiche Wege: Das ergibt eine Gerade. Startet der Körper bei s = 0, geht sie durch den Ursprung.'],
+ ['Was bedeutet eine waagrechte Linie im s(t)-Diagramm?',['Der Körper steht still.','Der Körper fährt mit konstanter Geschwindigkeit.','Der Körper fährt zurück.'],0,'Der Weg ändert sich nicht, also v = 0.'],
+ ['Was bedeutet eine waagrechte Linie im v(t)-Diagramm (über der Achse)?',['Der Körper fährt gleichförmig.','Der Körper steht still.','Der Körper wird schneller.'],0,'v bleibt gleich groß, also gleichförmige Bewegung. Stillstand wäre die Linie auf v = 0.'],
+ ['Was bedeutet eine fallende Linie im s(t)-Diagramm?',['Der Körper bewegt sich zurück, v ist negativ.','Der Körper wird langsamer.','Der Körper steht.'],0,'Der Weg (Abstand vom Start) wird kleiner, der Körper fährt zurück.'],
+ ['Woran erkennt man im s(t)-Diagramm, wer schneller ist?',['an der steileren Linie','an der höheren Linie','an der längeren Linie'],0,'Die Steigung ist die Geschwindigkeit. Höher heißt nur: weiter weg vom Start.'],
+ ['Der Tacho zeigt gerade 80 km/h. Welche Geschwindigkeit ist das?',['Momentangeschwindigkeit','Durchschnittsgeschwindigkeit','Höchstgeschwindigkeit'],0,'Der Tacho zeigt, wie schnell man in diesem Augenblick ist.'],
+ ['Ein Zug fährt in 2 h 300 km weit. Was kann man daraus berechnen?',['die Durchschnittsgeschwindigkeit','die Momentangeschwindigkeit an jeder Stelle','die Höchstgeschwindigkeit'],0,'v = 300 km : 2 h = 150 km/h ist ein Durchschnitt. Zwischendurch kann der Zug schneller oder langsamer gewesen sein.'],
+ ['Wie rechnet man km/h in m/s um?',['durch 3,6 teilen','mal 3,6 nehmen','durch 60 teilen'],0,'1 km/h = 1000 m : 3600 s = 1/3,6 m/s. Deshalb: km/h : 3,6 = m/s.'],
+ ['Wie berechnet man die Durchschnittsgeschwindigkeit einer Fahrt mit Pause?',['Gesamtstrecke : Gesamtzeit (mit Pause)','Mittelwert der beiden Geschwindigkeiten','Gesamtstrecke : Fahrzeit ohne Pause'],0,'Die Pause gehört zur Gesamtzeit. Einfach die Tempi mitteln geht nur bei gleich langen Zeiten.'],
+ ['s und t sind bei einer Bewegung proportional. Was heißt das?',['doppelte Zeit → doppelter Weg','doppelte Zeit → halber Weg','Weg und Zeit sind immer gleich groß'],0,'Proportional: Der Quotient s : t ist konstant, das ist die Geschwindigkeit.'],
+ ['Warum misst man bei einem Versuch mehrmals?',['um Messfehler (z. B. Reaktionszeit) auszugleichen','damit der Körper schneller wird','weil die Formel es verlangt'],0,'Mit der Stoppuhr macht man Fehler durch die Reaktionszeit. Der Mittelwert aus mehreren Messungen ist genauer.'],
+ ['Was zeigt der Schnittpunkt zweier Linien im s(t)-Diagramm?',['Beide sind zur selben Zeit am selben Ort.','Beide sind gleich schnell.','Beide stehen still.'],0,'Am Schnittpunkt treffen sie sich oder einer überholt den anderen.'],
+ ['Zum Überholen zählt welche Geschwindigkeit?',['der Geschwindigkeitsunterschied Δv = v_PKW − v_LKW','die Geschwindigkeit des PKW','die Summe beider Geschwindigkeiten'],0,'Der PKW kommt dem LKW pro Sekunde nur um Δv näher. Mit der Summe rechnet man beim Gegenverkehr.'],
+ ['Warum rechnet man bei Gegenverkehr mit der Summe der Wege?',['Beide fahren aufeinander zu.','Weil der LKW mitfährt.','Weil man in km/h rechnet.'],0,'Während des Überholens fahren PKW und Gegenverkehr aufeinander zu. Die freie Strecke muss beide Wege zusammen aufnehmen.']
+];
+TOPICS.push({id:'begr',title:'Begriffe-Check',desc:'Fachbegriffe und typische Fallen kurz abfragen',gen(){
+  const b=pick(BEGR);const ch=shuffle(b[1].map((o,i)=>({html:o.replace('v_PKW','v<sub>PKW</sub>').replace('v_LKW','v<sub>LKW</sub>'),correct:i===b[2]})));
+  return {title:'Begriffe-Check',q:`<p><b>${b[0]}</b></p>`,choices:ch,cl:'c1',hint:'Lies alle drei Antworten genau. Oft ist eine fast richtig.',expl:`<p>${b[3]}</p>`};
+}});
+
+/* Überholen im Diagramm und in Teilschritten (Blatt 8) */
+TOPICS.push({id:'ueh2',title:'Überholen: Diagramm und Teilschritte',desc:'Wer ist wer, Einholpunkt ablesen, Aufholstrecke und Δv',gen(){
+  const m=rnd(1,3);
+  if(m===1){const s0=40,T=10,vP=30,vL=25;const mk=(a,b)=>chart({w:300,h:200,xmax:T,ymax:350,nums:false,xlabel:'t',ylabel:'s',series:[{pts:a,color:BLUE,label:'PKW'},{pts:b,color:ORG,label:'LKW'}]});
+    const A=mk([[0,0],[T,vP*T]],[[0,s0],[T,s0+vL*T*.8]]),B=mk([[0,0],[T,vP*T*.75]],[[0,s0+40],[T,s0+40+vP*T*.75]]),C=mk([[0,0],[T,vP*T]],[[0,s0+200],[T,s0+40]]);
+    const ch=shuffle([{html:A,correct:true},{html:B,correct:false},{html:C,correct:false}]).map((c,i)=>({...c,label:'ABC'[i]}));
+    return {title:'Wer überholt wen?',q:`<p>Ein PKW (blau) überholt einen LKW (orange). Der LKW ist am Anfang 40 m weiter vorn. Welches s(t)-Diagramm zeigt den <b>Überholvorgang</b> richtig?</p>`,choices:ch,cl:'c3',
+      hint:'Überholen heißt: Der PKW ist erst hinten und am Ende vorn. Die Linien müssen sich also schneiden.',
+      expl:`<p>Richtig ist das Diagramm, in dem sich die Linien <b>schneiden</b>: Der PKW startet hinten, seine Linie ist steiler (v<sub>PKW</sub> &gt; v<sub>LKW</sub>), am Schnittpunkt sind beide am selben Ort, danach ist der PKW vorn.</p><p>Parallele Linien: gleich schnell, der PKW holt nie auf. Fallende LKW-Linie: Der LKW würde rückwärts fahren.</p>`};}
+  if(m===2){const dv=pick([5,10]),t=pick([4,6,8]),vL=pick([15,20,25]),vP=vL+dv,s0=dv*t,sx=vP*t,xm=Math.round(t*2);
+    const fig=chart({xmax:xm,ymax:Math.ceil(vP*xm/50)*50,xlabel:'t in s',ylabel:'s in m',xstep:xm>10?2:1,ystep:niceStep(vP*xm,6),series:[{pts:[[0,0],[xm,vP*xm]],color:BLUE,label:'PKW'},{pts:[[0,s0],[xm,s0+vL*xm]],color:ORG,label:'LKW'}]});
+    return {title:'Einholen im Diagramm',q:`<p>Der PKW (blau) fährt hinter dem LKW (orange) her und holt ihn ein. Lies aus dem Diagramm ab bzw. rechne:</p>`,fig,
+      inputs:[{label:'Vorsprung des LKW',unit:'m',ans:s0,tol:2},{label:'Einholen bei t =',unit:'s',ans:t,tol:.4},{label:'v<sub>PKW</sub>',unit:'m/s',ans:vP,tol:.6}],
+      hint:'Der Vorsprung ist der Startwert der LKW-Linie. Eingeholt wird am Schnittpunkt. v = Δs : Δt für die PKW-Linie.',
+      expl:`<ol><li>Die LKW-Linie startet bei <b>${s0} m</b>, das ist der Vorsprung.</li><li>Die Linien schneiden sich bei <b>t = ${t} s</b> (s = ${sx} m).</li><li class="res">v<sub>PKW</sub> = ${sx} m : ${t} s = ${vP} m/s</li></ol><p>Kontrolle: Der PKW holt ${dv} m pro Sekunde auf, ${s0} m : ${dv} m/s = ${t} s.</p>`};}
+  const pr=pick([[108,90,30,25],[90,72,25,20],[72,54,20,15],[126,90,35,25],[144,108,40,30]]);const [k1,k2,m1,m2]=pr;const a=pick([5,10,15,20]),L=pick([12,15,18,20]),l=pick([4,5]);const S=2*a+L+l;
+  return {title:'Überholen in Teilschritten',q:`<p>PKW: l<sub>PKW</sub> = <b>${l} m</b>, v<sub>PKW</sub> = <b>${k1} km/h</b>. LKW: l<sub>LKW</sub> = <b>${L} m</b>, v<sub>LKW</sub> = <b>${k2} km/h</b>. Sicherheitsabstand vorher und nachher je s<sub>A</sub> = <b>${a} m</b>.</p><p>Berechne die ersten beiden Schritte: die <b>Aufholstrecke</b> und den <b>Geschwindigkeitsunterschied</b> in m/s.</p>`,
+    inputs:[{label:'s<sub>auf</sub>',unit:'m',ans:S,tol:.5,id:'s'},{label:'Δv',unit:'m/s',ans:m1-m2,tol:.1,id:'d'}],
+    wrong(v){if(v.s!=null&&Math.abs(v.s-(a+L+l))<.5)return 'Du hast einen Sicherheitsabstand vergessen: Er gilt vorher und nachher.';if(v.d!=null&&Math.abs(v.d-(k1-k2))<.5)return 'Δv muss in m/s angegeben werden: erst durch 3,6 teilen.';return ''},
+    hint:'s<sub>auf</sub> = s<sub>A</sub> + l<sub>LKW</sub> + s<sub>A</sub> + l<sub>PKW</sub>. Für Δv zuerst beide Geschwindigkeiten in m/s umrechnen (: 3,6).',
+    expl:`<ol><li class="res">s<sub>auf</sub> = ${a} m + ${L} m + ${a} m + ${l} m = ${S} m</li><li>v<sub>PKW</sub> = ${k1} : 3,6 = ${m1} m/s, v<sub>LKW</sub> = ${k2} : 3,6 = ${m2} m/s</li><li class="res">Δv = ${m1} m/s − ${m2} m/s = ${m1-m2} m/s</li><li>Nächster Schritt wäre t<sub>ü</sub> = s<sub>auf</sub> : Δv = ${fmt(S/(m1-m2),1)} s.</li></ol>`};
+}});
+
+
+/* ===== Bilder zu den Textaufgaben (SVG) ===== */
+const SC={nav:'#1F3A5F',blue:'#2F6FB0',red:'#E2434B',grn:'#3C7A4E',vio:'#7B61C9',org:'#E8833A',grey:'#9AA9BA',sky:'#EAF3FB',road:'#D9DEE5',grass:'#DDEFD9'};
+const svgW=(w,h,inner)=>`<svg viewBox="0 0 ${w} ${h}" width="${w}" role="img" xmlns="http://www.w3.org/2000/svg" font-family="Arial,Helvetica,sans-serif" style="max-width:100%;height:auto">${inner}</svg>`;
+const T=(x,y,t,o)=>{o=o||{};return `<text x="${x}" y="${y}" font-size="${o.s||13}" font-weight="${o.b?700:400}" text-anchor="${o.a||'middle'}" fill="${o.c||SC.nav}">${t}</text>`};
+function dim(x1,x2,y,lab,col){col=col||SC.nav;return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width="1.5"/><path d="M${x1} ${y}l8 -4v8z M${x2} ${y}l-8 -4v8z" fill="${col}"/><line x1="${x1}" y1="${y-7}" x2="${x1}" y2="${y+7}" stroke="${col}"/><line x1="${x2}" y1="${y-7}" x2="${x2}" y2="${y+7}" stroke="${col}"/>`+T((x1+x2)/2,y-7,lab,{c:col,b:1})}
+function arr(x1,y1,x2,y2,col,lab,ly){col=col||SC.nav;const a=Math.atan2(y2-y1,x2-x1),h=9;return `<line x1="${x1}" y1="${y1}" x2="${x2-Math.cos(a)*h*.8}" y2="${y2-Math.sin(a)*h*.8}" stroke="${col}" stroke-width="2.5"/><path d="M${x2} ${y2}L${x2-h*Math.cos(a-.45)} ${y2-h*Math.sin(a-.45)}L${x2-h*Math.cos(a+.45)} ${y2-h*Math.sin(a+.45)}z" fill="${col}"/>`+(lab?T((x1+x2)/2,(ly!=null?ly:Math.min(y1,y2)-8),lab,{c:col,b:1,s:12}):'')}
+function snail(x,y,col,lab,flip){const f=flip?-1:1;return `<g transform="translate(${x} ${y}) scale(${f} 1)"><path d="M-22 0h40q6 0 6 -6" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"/><circle cx="-6" cy="-13" r="12" fill="${col}" opacity=".85"/><path d="M-6 -13m-6 0a6 6 0 1 0 6 -6" fill="none" stroke="#fff" stroke-width="2"/><line x1="22" y1="-6" x2="27" y2="-17" stroke="${col}" stroke-width="2"/><line x1="18" y1="-6" x2="19" y2="-18" stroke="${col}" stroke-width="2"/></g>`+(lab?T(x,y+18,lab,{s:12,b:1,c:col}):'')}
+function person(x,y,col,lab){return `<circle cx="${x}" cy="${y-30}" r="7" fill="${col}"/><line x1="${x}" y1="${y-23}" x2="${x}" y2="${y-8}" stroke="${col}" stroke-width="4" stroke-linecap="round"/><line x1="${x}" y1="${y-8}" x2="${x-6}" y2="${y}" stroke="${col}" stroke-width="4" stroke-linecap="round"/><line x1="${x}" y1="${y-8}" x2="${x+6}" y2="${y}" stroke="${col}" stroke-width="4" stroke-linecap="round"/><line x1="${x-8}" y1="${y-18}" x2="${x+8}" y2="${y-18}" stroke="${col}" stroke-width="3.5" stroke-linecap="round"/>`+(lab?T(x,y+16,lab,{s:12,b:1,c:col}):'')}
+function bike(x,y,col,lab){return `<circle cx="${x-12}" cy="${y-8}" r="8" fill="none" stroke="${col}" stroke-width="2.5"/><circle cx="${x+12}" cy="${y-8}" r="8" fill="none" stroke="${col}" stroke-width="2.5"/><path d="M${x-12} ${y-8}L${x-2} ${y-22}L${x+12} ${y-8}M${x-2} ${y-22}h10" stroke="${col}" stroke-width="2.5" fill="none"/><circle cx="${x-2}" cy="${y-34}" r="5" fill="${col}"/><line x1="${x-2}" y1="${y-29}" x2="${x-2}" y2="${y-22}" stroke="${col}" stroke-width="3"/>`+(lab?T(x,y+14,lab,{s:12,b:1,c:col}):'')}
+function car(x,y,w,col,lab,h){h=h||16;return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${col}"/>`+(lab?T(x+w/2,y+h/2+4,lab,{s:Math.min(11,w/4.2),b:1,c:'#fff'}):'')}
+function house(x,y,col,lab){return `<path d="M${x-16} ${y}v-20l16 -14l16 14v20z" fill="${col}"/><rect x="${x-4}" y="${y-10}" width="8" height="10" fill="#fff"/>`+(lab?T(x,y+15,lab,{s:12,b:1}):'')}
+function road(y,h,w){let s=`<rect x="0" y="${y}" width="${w}" height="${h}" fill="${SC.road}"/>`;for(let x=0;x<w;x+=26)s+=`<rect x="${x}" y="${y+h/2-1.5}" width="13" height="3" fill="#fff"/>`;return s}
+function clockFace(cx,cy,r,a,b){let s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff" stroke="${SC.nav}" stroke-width="4"/>`;for(let i=1;i<=12;i++){const t=i*Math.PI/6;s+=T(cx+Math.sin(t)*(r-16),cy-Math.cos(t)*(r-16)+5,i,{s:13,b:1})}
+  const ta=a%12*Math.PI/6;s+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.sin(ta)*(r-24)}" y2="${cy-Math.cos(ta)*(r-24)}" stroke="${SC.nav}" stroke-width="4" stroke-linecap="round"/>`;
+  const tb=b%12*Math.PI/6;s+=`<circle cx="${cx+Math.sin(tb)*(r-30)}" cy="${cy-Math.cos(tb)*(r-30)}" r="6" fill="${SC.red}"/>`;return s}
+
+const SCENES={
+ snail2:p=>svgW(600,170,`<rect x="0" y="120" width="600" height="50" fill="${SC.grass}"/><ellipse cx="50" cy="118" rx="34" ry="16" fill="#9aa5b1"/>${T(50,150,'Stein',{s:12})}${snail(60,112,SC.blue,'Max')}${snail(260,118,SC.org,'Lotte: '+p.vL+' cm/min')}<circle cx="545" cy="104" r="18" fill="#7cc36b"/><circle cx="535" cy="98" r="10" fill="#9bd68c"/>${T(545,150,'Salat',{s:12})}${dim(50,545,30,p.sal+' cm')}${arr(60,70,160,70,SC.blue,'Max: '+p.vM+' mm/s',62)}${T(260,62,p.t0+' min Vorsprung',{s:12,c:SC.org,b:1})}`),
+ meet:p=>svgW(600,160,`${road(95,30,600)}${house(40,92,SC.nav,p.a)}${house(560,92,SC.nav,p.b)}${bike(110,92,SC.blue,'Lena')}${bike(490,92,SC.red,'Tom')}${arr(135,62,215,62,SC.blue,p.v1+' km/h',52)}${arr(465,62,385,62,SC.red,p.v2+' km/h',52)}${dim(40,560,150,p.d+' km')}${p.late?T(490,30,'startet '+p.late+' min später',{s:12,c:SC.red,b:1}):''}`),
+ goal:p=>svgW(600,250,`<rect x="0" y="0" width="600" height="250" fill="#5aa560"/><rect x="200" y="12" width="200" height="14" fill="none" stroke="#fff" stroke-width="4"/>${T(300,8+0,'')}<circle cx="300" cy="215" r="6" fill="#fff"/>${T(332,219,'Elfmeterpunkt',{s:12,c:'#fff',a:'start'})}${person(300,40,SC.org,'')}${T(300,64,'Torwart',{s:12,c:'#fff',b:1})}<line x1="300" y1="215" x2="${300-p.sxp}" y2="28" stroke="#fff" stroke-width="2" stroke-dasharray="6 5"/><circle cx="${300-p.sxp}" cy="28" r="5" fill="#fff"/>${T(256,150,'11 m',{s:13,c:'#fff',b:1})}${T(150,130,p.kb+' km/h',{s:13,c:'#fff',b:1})}<line x1="300" y1="80" x2="${300-p.sxp}" y2="80" stroke="#fff" stroke-width="2"/>${T(300-p.sxp/2,96,p.sx+' m',{s:13,c:'#fff',b:1})}${T(470,40,'Reaktionszeit '+p.tr+' s',{s:13,c:'#fff',b:1})}`),
+ pass:p=>svgW(600,230,`<rect x="0" y="0" width="600" height="230" fill="#5aa560"/><rect x="190" y="0" width="220" height="80" fill="none" stroke="#fff" stroke-width="2.5"/><rect x="255" y="0" width="90" height="14" fill="none" stroke="#fff" stroke-width="3"/><circle cx="300" cy="60" r="5" fill="#fff"/>${T(300,48,'Elfmeterpunkt',{s:11,c:'#fff'})}${person(540,210,SC.blue,'')}${T(540,224,'Blattschuß',{s:11,c:'#fff',b:1})}<line x1="530" y1="200" x2="300" y2="60" stroke="#fff" stroke-width="2" stroke-dasharray="7 5"/>${T(440,120,p.sb+' m · '+p.vb+' m/s',{s:13,c:'#fff',b:1})}${person(150,150,SC.nav,'')}${T(150,166,'Opa Krawuttke',{s:11,c:'#fff',b:1})}<line x1="155" y1="135" x2="295" y2="65" stroke="#1F3A5F" stroke-width="2.5" stroke-dasharray="5 4"/>${T(200,92,p.so+' m',{s:13,c:'#fff',b:1})}${p.tr?T(150,190,'startet '+p.tr+' s später',{s:12,c:'#fff',b:1}):''}`),
+ storm:p=>svgW(600,170,`<rect x="0" y="125" width="600" height="45" fill="${SC.grass}"/>${road(118,10,600)}<ellipse cx="70" cy="40" rx="60" ry="22" fill="#6b7785"/><ellipse cx="40" cy="48" rx="34" ry="16" fill="#58636f"/><path d="M80 58l-14 26h12l-10 26l26 -34h-12l10 -18z" fill="#F2C94C"/>${bike(330,118,SC.blue,'du')}${house(560,118,SC.nav,'Zuhause')}${arr(120,30,210,30,'#58636f',p.vg+' km/h',22)}${arr(355,88,430,88,SC.blue,p.vr+' km/h',80)}${T(200,95,'Donner nach '+p.td+' s',{s:12,b:1,c:'#58636f'})}${dim(330,560,155,'3 km')}`),
+ tractor:p=>svgW(600,160,`${road(45,60,600)}${car(30,80,p.l*8,SC.blue,'PKW')}${car(30+p.l*8+p.sA*8,78,p.L*8,SC.grn,'Traktor',20)}${T(30+p.l*4,72,'v = ?',{s:11,c:SC.blue,b:1})}${T(30+p.l*8+p.sA*8+p.L*4,72,p.kT+' km/h',{s:11,c:SC.grn,b:1})}${dim(30+p.l*8,30+p.l*8+p.sA*8,135,p.sA+' m')}<path d="M560 45q30 30 0 60" fill="none" stroke="${SC.nav}" stroke-width="2" stroke-dasharray="5 4"/>${T(555,34,'Kurve',{s:12})}${T(300,28,'höchstens '+p.tg+' s Zeit zum Überholen',{s:13,b:1})}`),
+ sight:p=>svgW(600,170,`${road(55,60,600)}${car(20,92,22,SC.blue,'')}${car(60,90,62,SC.org,'LKW',20)}${car(555,62,22,SC.red,'')}${T(31,86,'PKW',{s:11,c:SC.blue,b:1})}${T(31,48,p.k1+' km/h',{s:11,c:SC.blue,b:1})}${T(91,84,p.k2+' km/h',{s:11,c:SC.org,b:1})}<path d="M470 55q20 -30 60 -30" fill="none" stroke="${SC.nav}" stroke-width="2"/>${T(470,28,'Kuppe',{s:12})}${T(595,134,'Gegenverkehr '+p.kg+' km/h',{s:11,c:SC.red,b:1,a:'end'})}${dim(20,470,155,'Sicht: '+p.sicht+' m')}`),
+ train:p=>svgW(600,205,`<g transform="translate(0 14)"><rect x="0" y="40" width="600" height="6" fill="#8a96a3"/><rect x="0" y="54" width="600" height="3" fill="#8a96a3"/>${Array.from({length:9},(_,i)=>car(40+i*52,18,48,i===8?SC.red:'#5b6a79',i===8?'Lok':'',22)).join('')}${dim(40,508,12-2,p.Lz+' m')}${arr(420,72,520,72,SC.red,p.kz+' km/h',88)}${road(110,26,600)}${bike(200,134,SC.blue,'')}${arr(225,160,295,160,SC.blue,'a) '+p.kr+' km/h',178)}${arr(175,160,105,160,SC.vio,'b) '+p.kr+' km/h',178)}</g>`),
+ trucks:p=>svgW(600,140,`${road(40,70,600)}${car(40,82,108,SC.org,'LKW '+p.k1+' km/h',20)}${car(300,48,108,SC.blue,'LKW '+p.k2+' km/h',20)}${dim(148,300,30,p.a+' m Abstand')}<rect x="10" y="85" width="22" height="14" rx="3" fill="${SC.red}"/>${T(21,124,'hupt',{s:11,c:SC.red,b:1})}`),
+ tacho:p=>svgW(600,150,`<rect x="40" y="30" width="200" height="90" rx="14" fill="${SC.nav}"/>${T(140,58,'Start',{s:12,c:'#fff'})}${T(140,86,p.t1+' Uhr',{s:20,c:'#fff',b:1})}${T(140,110,p.k1+' km',{s:16,c:'#8fd0f2',b:1})}<rect x="360" y="30" width="200" height="90" rx="14" fill="${SC.nav}"/>${T(460,58,'Ankunft',{s:12,c:'#fff'})}${T(460,86,p.t2+' Uhr',{s:20,c:'#fff',b:1})}${T(460,110,p.k2+' km',{s:16,c:'#8fd0f2',b:1})}${arr(250,75,350,75,SC.blue,'',0)}${bike(300,140,SC.blue,'')}`),
+ hill:p=>svgW(600,200,`${dim(10,575,18,p.S+' km')}<g transform="translate(0 30)"><path d="M0 40L260 120H600V170H0z" fill="${SC.grass}"/><path d="M0 40L260 120H600" fill="none" stroke="${SC.nav}" stroke-width="3"/>${house(20,38,SC.nav,'')}${T(44,30,'Schönberg',{s:12,b:1,a:'start'})}${house(575,118,SC.nav,'')}${T(598,82,'Neumarkt',{s:12,b:1,a:'end'})}${T(150,60,p.t1+' min mit '+p.v1+' km/h',{s:12,b:1,c:SC.blue})}${T(420,108,'noch '+p.t2+' min',{s:12,b:1,c:SC.red})}${arr(560,150,470,150,'#58636f','Gegenwind',166)}</g>`),
+ clock:p=>svgW(600,230,`<path d="M230 230V60l70 -55l70 55v170z" fill="#c9b79c"/>${clockFace(300,120,70,p.a,p.b)}${snail(300+Math.sin(p.a%12*Math.PI/6)*40,120-Math.cos(p.a%12*Math.PI/6)*40+6,SC.org,'',false)}${T(470,90,'Minutenzeiger auf '+p.a,{s:13,b:1})}${T(470,112,'Max will zur '+p.b,{s:13,b:1,c:SC.red})}${T(470,134,'noch '+p.d+' m',{s:13,b:1,c:SC.red})}`),
+ candle:p=>svgW(600,200,`<rect x="270" y="40" width="40" height="140" fill="#f4efe2" stroke="${SC.nav}"/><path d="M290 18q10 12 0 22q-10 -10 0 -22" fill="#F2C94C"/><line x1="290" y1="40" x2="290" y2="34" stroke="#333" stroke-width="2"/><line x1="245" y1="40" x2="245" y2="180" stroke="${SC.nav}" stroke-width="1.5"/>${T(232,114,'L = ?',{s:14,b:1,a:'end'})}${snail(400,180,SC.org,'Max betet')}${T(460,60,p.t+' min',{s:16,b:1})}${T(460,82,'v = '+p.v+' mm/s',{s:14,b:1,c:SC.red})}`),
+ pub:p=>svgW(600,160,`<rect x="0" y="120" width="600" height="40" fill="${SC.grass}"/>${snail(60,116,SC.org,'Max')}<rect x="470" y="40" width="110" height="80" fill="#c9b79c"/><path d="M460 40l65 -28l65 28z" fill="#8a5a44"/>${T(525,66,'Zum Flotten',{s:11,b:1})}${T(525,80,'Hugo',{s:11,b:1})}<rect x="448" y="104" width="10" height="14" fill="#cde"/>${dim(60,453,30,p.s+' m')}${arr(90,96,170,96,SC.org,p.v+' cm/s',88)}`),
+ market:p=>svgW(600,160,`<rect x="0" y="120" width="600" height="40" fill="#e6e1d6"/><ellipse cx="40" cy="118" rx="26" ry="12" fill="#9aa5b1"/>${T(40,146,"Stein",{s:10,c:"#58636f"})}${snail(95,118,SC.org,"Max")}<rect x="470" y="70" width="100" height="50" fill="#7cc36b"/><path d="M460 70h120l-10 -24h-100z" fill="${SC.red}"/>${T(520,98,'Frau Kohlrabi',{s:11,b:1,c:'#fff'})}${dim(50,470,30,'s = ?')}${T(260,70,'sonst '+p.tm+' min mit '+p.v+' cm/s',{s:12,b:1,c:SC.org})}${T(260,92,'heute '+p.late+' min zu spät',{s:12,b:1,c:SC.red})}`),
+ chase:p=>svgW(600,170,`${road(95,30,600)}<path d="M20 92V50l26 -20l26 20v42z" fill="#c9b79c"/>${T(46,112+30,'Bad Einstein',{s:12,b:1})}${house(560,92,SC.nav,'')}${T(560,142,'Bimmelstadt',{s:12,b:1})}${bike(330,92,SC.nav,'')}${T(330,40,'Pfarrer: '+p.v1+' km/h',{s:12,b:1})}${car(90,96,46,SC.red,'')}${T(113,82,p.t0+' min später: '+p.v2+' km/h',{s:12,b:1,c:SC.red,a:'start'})}${dim(46,560,158,p.B+' km')}`),
+ priest:p=>svgW(600,170,`<rect x="0" y="125" width="600" height="45" fill="${SC.grass}"/><path d="M20 125V60l40 -30l40 30v65z" fill="#c9b79c"/><path d="M52 125v-26h16v26z" fill="#6b5240"/>${person(110,125,SC.nav,'Pfarrer')}${snail(400,120,SC.org,'Max')}${arr(130,85,200,85,SC.nav,p.vp+' m/min',75)}${arr(420,85,470,85,SC.org,p.vm+' cm/s',75)}${dim(60,400,150+0,'Vorsprung nach '+p.t0+' min = ?')}`)
+};
+function sceneFig(kind,p){try{return SCENES[kind](p)}catch(e){return ''}}
+
+/* ===== Torwart-Simulation ===== */
+const GK=(function(){let P,c,ctx,raf=null,t=0,last=0,run=false,vk=5;
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=null;run=false}
+  function mount(host,p){stop();P=p;t=0;vk=5;
+    host.innerHTML=`<div class="simbox"><canvas id="gkc"></canvas><div class="sbtn"><button id="gkPlay">▶ Schuss</button><label class="gkl">Torwart nach der Reaktion: <b id="gkv">5,0</b> m/s<input type="range" id="gkr" min="1" max="25" step=".5" value="5"></label><button id="gkMine">Mein Ergebnis aus b)</button></div><div class="note" id="gkNote">Zeitlupe (8-mal langsamer). Stell die Geschwindigkeit des Torwarts ein. Ein Profi-Torwart schafft zur Seite etwa 4–6 m/s.</div></div>`;
+    c=document.getElementById('gkc');ctx=c.getContext('2d');size();
+    document.getElementById('gkPlay').onclick=()=>{t=0;run=true;last=performance.now();loop()};
+    const r=document.getElementById('gkr');r.oninput=()=>{vk=+r.value;document.getElementById('gkv').textContent=fmt(vk,1);t=0;draw()};
+    document.getElementById('gkMine').onclick=()=>{const i=document.getElementById('in1');const v=i?parse(i.value):null;if(v!=null&&v>0){vk=Math.min(40,v);r.value=Math.min(25,v);document.getElementById('gkv').textContent=fmt(vk,1);t=0;run=true;last=performance.now();loop()}else document.getElementById('gkNote').textContent='Trag zuerst bei b) dein Ergebnis ein.'};}
+  function size(){const w=Math.min(c.parentElement.clientWidth-4,700),h=Math.round(w*.55);const d=window.devicePixelRatio||1;c.width=w*d;c.height=h*d;c.style.height=h+'px';ctx.setTransform(d,0,0,d,0,0);c._w=w;c._h=h;draw()}
+  const tb=()=>11/P.vb;
+  function loop(){const n=performance.now();const dt=(n-last)/1000;last=n;if(run){t+=dt/8;if(t>=tb()+.15){t=tb()+.15;run=false}}draw();if(run)raf=requestAnimationFrame(loop)}
+  function draw(){if(!c)return;const W=c._w,H=c._h;const sc=H/14,X=x=>W/2+x*sc,Y=y=>H-20-y*sc;ctx.clearRect(0,0,W,H);ctx.fillStyle='#5aa560';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.strokeRect(X(-3.66),Y(11)-8,7.32*sc,8);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,Y(11));ctx.lineTo(W,Y(11));ctx.stroke();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(X(0),Y(0),4,0,7);ctx.fill();
+    const tt=Math.min(t,tb()),f=tt/tb(),bx=-P.sx*f,by=11*f;const tm=Math.max(0,t-P.tr),kx=-Math.min(P.sx+.3,vk*tm);
+    ctx.setLineDash([6,5]);ctx.strokeStyle='rgba(255,255,255,.6)';ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(-P.sx),Y(11));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#E8833A';ctx.beginPath();ctx.arc(X(kx),Y(10.6),10,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText('TW',X(kx),Y(10.6)+4);
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(X(bx),Y(by),6,0,7);ctx.fill();ctx.strokeStyle='#222';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,0,W,26);ctx.fillStyle='#fff';ctx.font='bold 14px Arial';ctx.textAlign='left';ctx.fillText('t = '+fmt(Math.min(t,tb()),2)+' s',8,18);
+    ctx.textAlign='right';ctx.fillText(t<P.tr?'Torwart reagiert noch …':'Torwart: '+fmt(vk,1)+' m/s',W-8,18);
+    if(t>=tb()){const ok=Math.abs(kx)>=P.sx-.25;ctx.fillStyle=ok?'rgba(46,125,79,.95)':'rgba(179,64,47,.95)';ctx.fillRect(W/2-120,H/2-20,240,40);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 17px Arial';ctx.fillText(ok?'Gehalten!':'Tor! Zu langsam.',W/2,H/2+6)}}
+  return {mount,stop};})();
+
+/* ===== Textaufgaben (TG-Niveau): mehr Text, zwei Rechenschritte, überflüssige Angaben ===== */
+const rr2=x=>Math.round(x*100)/100;
+const rel=(a,p)=>Math.max(Math.abs(a)*(p||.03),.05);
+TOPICS.push({id:'text',title:'Textaufgaben: Treffen und Einholen',desc:'Längere Texte, wichtige Angaben finden, Treffen und Einholen im Diagramm',gen(){
+  const k=rnd(1,8);
+  if(k===6){/* Tacho und Uhrzeit (wie Peter, Blatt 7a) */
+    const h0=7,m0=pick([12,21,25,32]),dt=pick([12,15,18,20]),v=pick([12,15,16,18,20]),ds=v*dt/60,km0=pick([352.4,1284.6,817.2,2093.8]);
+    const t2=h0*60+m0+dt,hh=Math.floor(t2/60),mm=t2%60,z=n=>String(n).padStart(2,'0');
+    return {fig:sceneFig('tacho',{t1:h0+':'+z(m0),t2:hh+':'+z(mm),k1:fmt(km0,1),k2:fmt(km0+ds,1)}),title:'Tacho und Uhrzeit',q:`<p>Peter fährt jeden Morgen mit dem Fahrrad zur Schule. Er startet um <b>${h0}:${z(m0)} Uhr</b> und kommt um <b>${hh}:${z(mm)} Uhr</b> an. Sein Fahrradcomputer zeigt beim Start den Kilometerstand <b>${fmt(km0,1)} km</b> und bei der Ankunft <b>${fmt(km0+ds,1)} km</b>. Unterwegs zeigt das Display an einer abschüssigen Stelle kurz 32 km/h an.</p><p>a) Mit welcher Durchschnittsgeschwindigkeit fährt Peter (in km/h)?<br>b) Gib diese Geschwindigkeit in m/s an.</p>`,
+      inputs:[{label:'a) v in km/h',unit:'km/h',ans:v,tol:rel(v,.02),id:'k'},{label:'b) v in m/s',unit:'m/s',ans:v/3.6,tol:rel(v/3.6,.02),id:'m'}],
+      wrong(x){if(x.k!=null&&Math.abs(x.k-32)<.5)return '32 km/h ist nur eine Momentangeschwindigkeit an einer Stelle. Gefragt ist der Durchschnitt über die ganze Fahrt.';if(x.k!=null&&Math.abs(x.k-ds/dt)<.05)return 'Du hast km durch Minuten geteilt. Rechne die Zeit erst in Stunden um.';return ''},
+      hint:'Δs = Kilometerstand am Ende − Kilometerstand am Anfang. Δt = Ankunft − Start, in Stunden umrechnen (: 60). Dann v = Δs : Δt.',
+      expl:`<ol><li>Δs = ${fmt(km0+ds,1)} km − ${fmt(km0,1)} km = <b>${fmt(ds,1)} km</b></li><li>Δt = ${dt} min = ${fmt(dt/60,3)} h</li><li class="res">a) v = ${fmt(ds,1)} km : ${fmt(dt/60,3)} h = ${fmt(v,1)} km/h</li><li class="res">b) ${fmt(v,1)} km/h : 3,6 = ${fmt(v/3.6,2)} m/s</li></ol><p>Die 32 km/h sind eine <b>Momentangeschwindigkeit</b> und für den Durchschnitt egal.</p>`};}
+  if(k===7){/* Teilstrecken (Knobelaufgabe Peter) */
+    let v1,t1,s2,t2,s1;do{v1=pick([24,30,36]);t1=pick([5,10,15]);s1=v1*t1/60;s2=pick([1.5,2,3,4]);t2=pick([5,6,10,12])}while(s1+s2>12||(s2/t2*60)>=v1);
+    const S=s1+s2,T=t1+t2,va=S/T*60,v2=s2/t2*60;
+    return {fig:sceneFig('hill',{t1,v1,t2,S:fmt(S,1)}),title:'Bergab, dann Gegenwind',q:`<p>Peter fährt mit dem Fahrrad von Schönberg zum <b>${fmt(S,1)} km</b> entfernten Neumarkt. In den ersten <b>${t1} Minuten</b> fährt er mit der Durchschnittsgeschwindigkeit <b>${v1} km/h</b>, denn es geht bergab. Für die restliche Strecke braucht er bei Gegenwind noch <b>${t2} Minuten</b>.</p><p>a) Wie groß ist Peters Durchschnittsgeschwindigkeit für die ganze Strecke?<br>b) Mit welcher Durchschnittsgeschwindigkeit fährt er die letzten ${t2} Minuten?</p>`,
+      inputs:[{label:'a) ganze Strecke',unit:'km/h',ans:va,tol:rel(va,.02),id:'a'},{label:'b) letzter Teil',unit:'km/h',ans:v2,tol:rel(v2,.02),id:'b'}],
+      wrong(x){if(x.a!=null&&Math.abs(x.a-(v1+v2)/2)<.3&&Math.abs(va-(v1+v2)/2)>.5)return 'Geschwindigkeiten darf man nicht einfach mitteln, die Zeiten sind verschieden lang. Rechne Gesamtstrecke : Gesamtzeit.';return ''},
+      hint:'a) Gesamtstrecke : Gesamtzeit (in Stunden). b) Erst ausrechnen, wie weit Peter in den ersten '+t1+' Minuten kommt. Der Rest ist die Strecke des zweiten Teils.',
+      expl:`<ol><li class="res">a) v = ${fmt(S,1)} km : ${T} min = ${fmt(S,1)} km : ${fmt(T/60,3)} h = ${fmt(va,1)} km/h</li><li>Teil 1: s<sub>1</sub> = ${v1} km/h · ${fmt(t1/60,3)} h = ${fmt(s1,1)} km</li><li>Rest: ${fmt(S,1)} − ${fmt(s1,1)} = ${fmt(s2,1)} km</li><li class="res">b) v<sub>2</sub> = ${fmt(s2,1)} km : ${fmt(t2/60,3)} h = ${fmt(v2,1)} km/h</li></ol>`};}
+  if(k===8){/* Fahrplan */
+    const legs=pick([[['München','Stuttgart',200,'9:00','11:00'],['Stuttgart','Frankfurt',250,'11:15','12:30'],['Frankfurt','Dortmund',75,'13:00','16:00']],[['Basel','Karlsruhe',190,'8:00','9:40'],['Karlsruhe','Mannheim',70,'9:50','10:20'],['Mannheim','Köln',80,'10:30','13:00']]]);
+    const tm=x=>{const [h,m]=x.split(':').map(Number);return h+m/60};const L3=legs[2];const s3=L3[2]*(tm(L3[4])-tm(L3[3]));const S=legs[0][2]+legs[1][2]+s3,T=tm(L3[4])-tm(legs[0][3]),va=S/T;
+    const fast=legs.map((l,i)=>i<2?l[2]/(tm(l[4])-tm(l[3])):l[2]);const fi=fast.indexOf(Math.max(...fast));
+    return {title:'Mit dem Zug nach '+L3[1],q:`<p>Ein Zug fährt nach diesem Fahrplan:</p>${mtable([['Abfahrt',legs[0][0]+' '+legs[0][3],legs[1][0]+' '+legs[1][3],legs[2][0]+' '+legs[2][3]],['Ankunft',legs[0][1]+' '+legs[0][4],legs[1][1]+' '+legs[1][4],legs[2][1]+' '+legs[2][4]],['Strecke',legs[0][2]+' km',legs[1][2]+' km','mit konstant '+L3[2]+' km/h']])}<p>a) Wie lang ist der letzte Abschnitt?<br>b) Wie groß ist die Durchschnittsgeschwindigkeit für die ganze Fahrt, <b>mit</b> den Aufenthalten?</p>`,
+      inputs:[{label:'a) letzter Abschnitt',unit:'km',ans:s3,tol:rel(s3,.01),id:'s'},{label:'b) Durchschnitt gesamt',unit:'km/h',ans:va,tol:rel(va,.02),id:'v'}],
+      wrong(x){if(x.v!=null){const tf=legs.reduce((a,l)=>a+tm(l[4])-tm(l[3]),0);if(Math.abs(x.v-S/tf)<1)return 'Die Aufenthalte in den Bahnhöfen gehören zur Gesamtzeit. Rechne von der ersten Abfahrt bis zur letzten Ankunft.'}return ''},
+      hint:'a) Im letzten Abschnitt ist nur die Geschwindigkeit gegeben: s = v · t. b) Gesamtstrecke : Zeit von der ersten Abfahrt bis zur letzten Ankunft.',
+      expl:`<ol><li class="res">a) s<sub>3</sub> = ${L3[2]} km/h · ${fmt(tm(L3[4])-tm(L3[3]),2)} h = ${fmt(s3,0)} km</li><li>Gesamtstrecke: ${legs[0][2]} + ${legs[1][2]} + ${fmt(s3,0)} = ${fmt(S,0)} km</li><li>Gesamtzeit: ${legs[0][3]} bis ${L3[4]} Uhr = ${fmt(T,2)} h</li><li class="res">b) v = ${fmt(S,0)} km : ${fmt(T,2)} h ≈ ${fmt(va,1)} km/h</li></ol><p>Am schnellsten ist der Zug übrigens zwischen ${legs[fi][0]} und ${legs[fi][1]} (${fmt(fast[fi],0)} km/h).</p>`};}
+  if(k===1){/* Schnecke Max – zeichnerisch */
+    const C=pick([[3,2,10],[3,2,5],[6,4,5],[6,4,10],[6,5,5]]);const [vM,vL,t0]=C;const dv=vM-vL,s0=vL*t0,te=s0/dv,T=t0+te,S=vM*te;
+    const sal=S+pick([-10,10,20]),ok=sal>=S;const xmax=Math.ceil(T*1.4/5)*5,ymax0=Math.max(sal,S)*1.3;const ystep=ymax0>120?20:10,ymax=Math.ceil(ymax0/ystep)*ystep;
+    return {fig:sceneFig('snail2',{vL,vM:fmt(vM/6,1),t0,sal}),title:'Max will zum Salat',q:`<p>Max, die Schnecke aus Bad Einstein, und seine Freundin <b>Lotte</b> aus Bimmelstadt wohnen unter demselben Stein im Pfarrgarten. Max ist drei Jahre alt und wiegt stolze 12 g. Heute Morgen ist Lotte schon <b>${t0} Minuten</b> vor Max in Richtung Salatkopf losgekrochen, und zwar gleichmäßig mit <b>${vL} cm pro Minute</b>. Der Salatkopf ist <b>${sal} cm</b> vom Stein entfernt.</p><p>Max hat verschlafen. Er kriecht hinterher, ebenfalls gleichmäßig, mit <b>${fmt(vM/6,1)} mm/s</b>.</p><p>a) Rechne Max' Geschwindigkeit in cm pro Minute um.<br>b) Zeichne beide Bewegungen ins s(t)-Diagramm. Die Zeit zählt ab Lottes Start.<br>c) Lies ab: Wann und wo holt Max Lotte ein? Schafft er es vor dem Salat?</p>`,
+      draw:{xmax,ymax,xstep:5,ystep,xlabel:'t in min (ab Lottes Start)',ylabel:'s in cm',marks:[{s:sal,label:'Salat'}],lines:[{name:'Lotte',color:SC.org,a:[0,0],b:[T,S],tip:'Lotte startet bei t = 0 am Stein und schafft '+vL+' cm pro Minute.'},{name:'Max',color:SC.blue,a:[t0,0],b:[T,S],tip:'Max startet erst nach '+t0+' min am Stein. Wie viele cm schafft er in 10 min?'}]},
+      inputs:[{label:'a) v von Max',unit:'cm/min',ans:vM,tol:.05,id:'v'},{label:'c) Einholen bei t =',unit:'min',ans:T,tol:1.3,id:'t'},{label:'c) Entfernung vom Stein',unit:'cm',ans:S,tol:ystep*.3,id:'s'}],
+      hint:'1 mm/s = 0,1 cm/s = 6 cm pro Minute. Lottes Gerade startet bei (0 | 0), Max\' Gerade erst bei ('+t0+' | 0). Max holt Lotte dort ein, wo sich die Geraden schneiden.',
+      expl:`<ol><li>Unnötige Angaben: Alter und Gewicht von Max.</li><li class="res">a) ${fmt(vM/6,1)} mm/s = ${fmt(vM/60,2)} cm/s = ${vM} cm/min</li><li>b) Lotte: Gerade durch (0 | 0) und (10 min | ${vL*10} cm). Max: Gerade durch (${t0} min | 0) und (${t0+10} min | ${vM*10} cm). Max' Gerade ist steiler.</li><li class="res">c) Schnittpunkt bei t = ${fmt(T,0)} min und s = ${fmt(S,0)} cm (das ist ${fmt(te,0)} min nach Max' Start).</li><li>Der Salat liegt bei ${sal} cm: ${ok?'Der Schnittpunkt liegt unter der Salat-Linie, Max schafft es vorher.':'Die Geraden schneiden sich erst oberhalb der Salat-Linie, Lotte ist vorher am Salat.'}</li></ol>`};}
+  if(k===2){/* Begegnung – zeichnerisch */
+    let v1,v2,late,T,S,d,g=0;do{v1=pick([12,15,18,20,24]);v2=pick([10,12,15,18]);late=Math.random()<.45?pick([10,15]):0;T=pick([20,25,30,35,40,45]);S=v1*T/60;d=S+v2*(T-late)/60}while((g++<400)&&(Math.abs(S*2-Math.round(S*2))>1e-9||Math.abs(d*2-Math.round(d*2))>1e-9||d<5||d>18||T<=late+5));
+    const c1=pick([['Weinheim','Heidelberg'],['Mannheim','Ladenburg'],['Bensheim','Heppenheim']]);const xmax=Math.ceil(T*1.35/10)*10,ystep=d>10?2:1,ymax=Math.ceil(d/ystep)*ystep;
+    return {fig:sceneFig('meet',{a:c1[0],b:c1[1],v1,v2,d:fmt(d,1),late}),title:'Begegnung auf dem Radweg',q:`<p>Der Radweg zwischen <b>${c1[0]}</b> und <b>${c1[1]}</b> ist <b>${fmt(d,1)} km</b> lang. Um 14:00 Uhr fährt Lena in ${c1[0]} los, gleichmäßig mit <b>${v1} km/h</b>. Ihr Rad hat 21 Gänge, sie fährt im 7. Gang. ${late?`Tom startet erst <b>${late} Minuten später</b> in ${c1[1]}`:`Zur gleichen Zeit startet Tom in ${c1[1]}`} und fährt ihr mit <b>${v2} km/h</b> entgegen.</p><p>a) Zeichne beide Fahrten ins s(t)-Diagramm. s ist die Entfernung von ${c1[0]}.<br>b) Lies ab: Wann (Minuten nach 14:00 Uhr) und wo treffen sich die beiden?</p>`,
+      draw:{xmax,ymax,xstep:5,ystep,sy:.5,xlabel:'t in min (ab 14:00 Uhr)',ylabel:'s in km (ab '+c1[0]+')',lines:[{name:'Lena',color:SC.blue,a:[0,0],b:[T,S],tip:'Lena startet bei t = 0 in '+c1[0]+' (s = 0). In 30 min schafft sie die Hälfte von '+v1+' km.'},{name:'Tom',color:SC.red,a:[late,d],b:[T,S],tip:'Tom startet '+(late?'nach '+late+' min ':'bei t = 0 ')+'in '+c1[1]+', also bei s = '+fmt(d,1)+' km, und fährt Richtung s = 0. Seine Gerade fällt.'}]},
+      inputs:[{label:'b) Treffen nach',unit:'min',ans:T,tol:2.6,id:'t'},{label:'b) Entfernung von '+c1[0],unit:'km',ans:S,tol:.6,id:'s'}],
+      hint:'Lenas Gerade startet bei (0 | 0) und steigt. Toms Gerade startet bei ('+late+' | '+fmt(d,1)+' km) und fällt, weil er auf '+c1[0]+' zufährt. Für zwei Punkte: Wie weit kommt jeder in 30 Minuten?',
+      expl:`<ol><li>Unnötige Angabe: Gänge des Fahrrads.</li><li>Lena: Gerade durch (0 | 0) und (30 min | ${fmt(v1/2,1)} km).</li><li>Tom: Gerade durch (${late} min | ${fmt(d,1)} km) und (${late+30} min | ${fmt(d-v2/2,1)} km). Sie fällt, weil Tom auf ${c1[0]} zufährt.</li><li class="res">Schnittpunkt: nach ${T} min (also um 14:${String(T).padStart(2,'0')} Uhr), ${fmt(S,1)} km von ${c1[0]} entfernt.</li></ol>`};}
+  if(k===3){/* Torwart */
+    const kb=pick([90,108,126]),vb=kb/3.6,tr=pick([.2,.25,.3]),sx=pick([2,2.4,2.8]),tb=11/vb,rest=tb-tr,vt=sx/rest;
+    return {fig:sceneFig('goal',{kb,tr:fmt(tr,2),sx:fmt(sx,1),sxp:sx*40}),gk:{vb,tr,sx},title:'Elfmeter: Hat der Torwart eine Chance?',q:`<p>Kreisliga, Elfmeter für den 1. FC Bad Einstein. Der Ball liegt <b>11 m</b> vor dem Tor. Hubertus Blattschuß schießt mit <b>${kb} km/h</b> flach in die linke Ecke. Das Tor ist 7,32 m breit und 2,44 m hoch. Torwart Otto Totalblind vom SV Bimmelstadt steht in der Mitte und muss <b>${fmt(sx,1)} m</b> weit zur Seite, um den Ball zu erreichen. Erst nach seiner Reaktionszeit von <b>${fmt(tr,2)} s</b> kann er sich bewegen.</p><p>a) Wie lange ist der Ball bis zum Tor unterwegs?<br>b) Wie schnell müsste der Torwart nach der Reaktionszeit zur Seite kommen, um den Ball noch zu erreichen?</p>`,
+      inputs:[{label:'a) Flugzeit des Balls',unit:'s',ans:tb,tol:.02,id:'t'},{label:'b) nötige Geschwindigkeit',unit:'m/s',ans:vt,tol:rel(vt,.04),id:'v'}],
+      wrong(v){if(v.v!=null&&Math.abs(v.v-sx/tb)<rel(sx/tb,.04))return 'Die Reaktionszeit fehlt: Der Torwart hat nur die Zeit nach seiner Reaktion zur Verfügung.';if(v.t!=null&&Math.abs(v.t-11/kb)<.01)return 'Rechne erst km/h in m/s um (: 3,6).';return ''},
+      hint:'a) km/h in m/s umrechnen, dann t = s : v. b) Von der Flugzeit geht die Reaktionszeit ab. In der Restzeit muss der Torwart seine Strecke schaffen.',
+      expl:`<ol><li>Unnötig: Torbreite und Torhöhe.</li><li>${kb} km/h : 3,6 = ${fmt(vb,1)} m/s</li><li class="res">a) t = 11 m : ${fmt(vb,1)} m/s = ${fmt(tb,2)} s</li><li>Restzeit nach der Reaktion: ${fmt(tb,2)} s − ${fmt(tr,2)} s = ${fmt(rest,2)} s</li><li class="res">b) v = ${fmt(sx,1)} m : ${fmt(rest,2)} s ≈ ${fmt(vt,1)} m/s (≈ ${fmt(vt*3.6,0)} km/h)</li></ol><p>Das schafft kein Mensch aus dem Stand. Deshalb springen Torhüter schon <b>vor</b> dem Schuss in eine Ecke, sie raten.</p>`};}
+  if(k===4){/* Opa Krawuttke mit Reaktionszeit */
+    let tb,vb,vo,tr,sb,so;do{vb=pick([10,12,15]);tb=pick([2,2.5,3]);tr=pick([.5,1]);vo=pick([4,5,6]);sb=vb*tb;so=vo*(tb-tr)}while(so<4);
+    return {fig:sceneFig('pass',{sb:fmt(sb,0),vb,so:fmt(so,1),tr:fmt(tr,1)}),title:'Opa Krawuttke und der Steilpass',q:`<p>Kreisliga, 1. FC Bad Einstein gegen SV Bimmelstadt, 89. Minute, es steht 0:0. Hubertus Blattschuß spielt einen flachen Pass in den Strafraum. Der Ball rollt <b>${fmt(sb,0)} m</b> weit gleichmäßig mit <b>${vb} m/s</b> bis zum Elfmeterpunkt. Opa Krawuttke (72 Jahre, Vereinsmitglied seit 1971) steht <b>${fmt(so,1)} m</b> vom Elfmeterpunkt entfernt. Leider braucht er nach dem Pass erst <b>${fmt(tr,1)} s</b>, bis er losläuft.</p><p>a) Wie lange ist der Ball bis zum Elfmeterpunkt unterwegs?<br>b) Wie schnell muss Opa laufen, damit er genau gleichzeitig mit dem Ball am Elfmeterpunkt ist?</p>`,
+      inputs:[{label:'a) Zeit des Balls',unit:'s',ans:tb,tol:.03,id:'t'},{label:'b) Opas Geschwindigkeit',unit:'m/s',ans:vo,tol:rel(vo,.03),id:'v'}],
+      wrong(v){if(v.v!=null&&Math.abs(v.v-so/tb)<.1)return 'Opa kann erst nach '+fmt(tr,1)+' s loslaufen. Ihm bleibt weniger Zeit als dem Ball.';return ''},
+      hint:'Schritt 1: Zeit des Balls mit t = s : v. Schritt 2: Opa hat diese Zeit minus seine Reaktionszeit. In dieser Restzeit muss er seine Strecke schaffen.',
+      expl:`<ol><li>Unnötig: Spielminute, Alter, Vereinsjahre.</li><li class="res">a) t<sub>Ball</sub> = ${fmt(sb,0)} m : ${vb} m/s = ${fmt(tb,1)} s</li><li>Opa hat nur ${fmt(tb,1)} s − ${fmt(tr,1)} s = <b>${fmt(tb-tr,1)} s</b> zum Laufen.</li><li class="res">b) v = ${fmt(so,1)} m : ${fmt(tb-tr,1)} s = ${fmt(vo,1)} m/s (= ${fmt(vo*3.6,1)} km/h)</li></ol>`};}
+  /* Gewitter – zeichnerisch */
+  const tdon=pick([3,4.5,6]),sD=tdon/3*1000,vg=pick([36,54]),vr=18,vgm=vg/3.6,vrm=5,te=sD/(vgm-vrm),SE=vgm*te;
+  const xmax=Math.ceil(te*1.4/100)*100,xstep=xmax>400?100:50,ymax0=Math.max(SE,sD)*1.3,ystep=ymax0>4000?1000:500,ymax=Math.ceil(ymax0/ystep)*ystep;
+  return {fig:sceneFig('storm',{vg:fmt(vg,1),vr:fmt(vr,1),td:fmt(tdon,1)}),title:'Das Gewitter holt dich ein',q:`<p>Du bist mit dem Fahrrad unterwegs. Hinter dir siehst du einen Blitz, und <b>${fmt(tdon,1)} s</b> später hörst du den Donner. Faustregel: Der Schall legt in <b>3 s etwa 1 km</b> zurück, das Licht ist praktisch sofort da. Die Gewitterfront zieht mit <b>${vg} km/h</b> in deine Richtung. Du fährst mit <b>${vr} km/h</b> nach Hause. Dein Zuhause ist noch 3 km entfernt.</p><p>a) Wie weit ist das Gewitter von dir entfernt (in m)?<br>b) Rechne beide Geschwindigkeiten in m/s um und zeichne beide Bewegungen ins s(t)-Diagramm. s zählt ab dem jetzigen Ort des Gewitters.<br>c) Lies ab: Nach wie vielen Sekunden hat dich das Gewitter eingeholt?</p>`,
+    draw:{xmax,ymax,xstep,ystep,xlabel:'t in s',ylabel:'s in m',lines:[{name:'Gewitter',color:'#58636f',a:[0,0],b:[te,SE],tip:'Das Gewitter startet bei s = 0 und zieht mit '+fmt(vgm,0)+' m/s. Wie weit kommt es in 100 s?'},{name:'du',color:SC.blue,a:[0,sD],b:[te,SE],tip:'Du startest '+fmt(sD,0)+' m vor dem Gewitter und fährst mit 5 m/s weiter weg.'}]},
+    inputs:[{label:'a) Entfernung',unit:'m',ans:sD,tol:rel(sD,.03),id:'s'},{label:'c) Einholen nach',unit:'s',ans:te,tol:xstep*.3,id:'t'}],
+    hint:'a) '+fmt(tdon,1)+' s : 3 = Entfernung in km. b) km/h : 3,6 = m/s. Das Gewitter startet bei (0 | 0), du bei (0 | Entfernung). Wo schneiden sich die Geraden?',
+    expl:`<ol><li class="res">a) ${fmt(tdon,1)} s : 3 = ${fmt(tdon/3,1)} km = ${fmt(sD,0)} m (mit 340 m/s genauer: ${fmt(340*tdon,0)} m)</li><li>b) v<sub>Gewitter</sub> = ${vg} : 3,6 = ${fmt(vgm,0)} m/s, v<sub>Rad</sub> = ${vr} : 3,6 = 5 m/s</li><li>Gewitter: Gerade durch (0 | 0) und (100 s | ${fmt(vgm*100,0)} m). Du: Gerade durch (0 | ${fmt(sD,0)} m) und (100 s | ${fmt(sD+500,0)} m).</li><li class="res">c) Schnittpunkt bei t = ${fmt(te,0)} s (≈ ${fmt(te/60,1)} min)</li></ol><p>Für die 3 km nach Hause brauchst du 3000 m : 5 m/s = 600 s = 10 min. ${600<te?'Du schaffst es trocken nach Hause.':'Das wird nass!'}</p>`};
+}});
+
+TOPICS.push({id:'uetext',title:'Textaufgaben: Überholen',desc:'Überholen verstehen: Δv oder Summe? Reicht die Sicht?',gen(){
+  const k=rnd(1,4);
+  if(k===1){/* Mindestgeschwindigkeit */
+    const kT=pick([18,36,54]),vT=kT/3.6,L=pick([6,8,10]),l=4,sA=pick([10,15]),S=2*sA+L+l,tg=pick([5,6,8]),dv=S/tg,v=vT+dv;
+    return {fig:sceneFig('tractor',{l,L,sA,kT,tg}),title:'Wie schnell muss er mindestens sein?',q:`<p>Herr Kaya fährt mit seinem Kleinwagen (<b>${l} m</b> lang, 75 PS) auf der Landstraße hinter einem Traktor her. Der Traktor ist mit Anhänger <b>${L} m</b> lang und fährt <b>${kT} km/h</b>. Vor und nach dem Überholen will Herr Kaya je <b>${sA} m</b> Abstand halten. Wegen einer Kurve hat er für das Überholen höchstens <b>${tg} s</b> Zeit.</p><p>a) Um wie viel muss er schneller sein als der Traktor (in m/s)?<br>b) Wie schnell muss er also mindestens fahren (in km/h)?</p>`,
+      inputs:[{label:'a) Δv',unit:'m/s',ans:dv,tol:rel(dv,.03),id:'d'},{label:'b) v<sub>PKW</sub>',unit:'km/h',ans:v*3.6,tol:rel(v*3.6,.02),id:'v'}],
+      wrong(v){if(v.v!=null&&Math.abs(v.v-dv*3.6)<1)return 'Das ist nur der Unterschied. Herr Kaya muss so schnell sein wie der Traktor plus Δv.';if(v.d!=null&&Math.abs(v.d-(S-sA)/tg)<.2)return 'Der Sicherheitsabstand zählt zweimal: vorher und nachher.';return ''},
+      hint:'Aufholstrecke s<sub>auf</sub> = s<sub>A</sub> + l<sub>Traktor</sub> + s<sub>A</sub> + l<sub>PKW</sub>. In der verfügbaren Zeit muss er diese Strecke aufholen: Δv = s<sub>auf</sub> : t. Dann v<sub>PKW</sub> = v<sub>Traktor</sub> + Δv.',
+      expl:`<ol><li>Unnötig: 75 PS.</li><li>s<sub>auf</sub> = ${sA} + ${L} + ${sA} + ${l} = <b>${S} m</b></li><li class="res">a) Δv = ${S} m : ${tg} s = ${fmt(dv,2)} m/s</li><li>v<sub>Traktor</sub> = ${kT} : 3,6 = ${fmt(vT,1)} m/s</li><li class="res">b) v<sub>PKW</sub> = ${fmt(vT,1)} + ${fmt(dv,2)} = ${fmt(v,2)} m/s = ${fmt(v*3.6,1)} km/h</li></ol><p>Prüfe immer, ob das erlaubt ist (Landstraße: 100 km/h).</p>`};}
+  if(k===2){/* Reicht die Sicht? */
+    const pr=pick([[90,72,25,20],[108,90,30,25],[72,54,20,15]]);const [k1,k2,m1,m2]=pr;const L=18,l=5,sA=pick([10,15,18]),S=2*sA+L+l,t=S/(m1-m2),sp=m1*t,kg=pick([72,90,108]),sg=kg/3.6*t,fr=sp+sg,sicht=Math.round((fr+pick([-120,-60,80,150]))/10)*10,res=sicht-fr;
+    return {fig:sceneFig('sight',{kg,sicht,k1,k2}),title:'Reicht die Sichtweite?',q:`<p>Ein PKW (<b>${l} m</b>, <b>${k1} km/h</b>) will einen LKW (<b>${L} m</b>, <b>${k2} km/h</b>) überholen. Abstand vorher und nachher je <b>${sA} m</b>. Die Straße ist bis zur nächsten Kuppe <b>${sicht} m</b> weit einsehbar. Hinter der Kuppe könnte jederzeit ein Auto mit <b>${kg} km/h</b> auftauchen. Die Fahrerin hört gerade Radio.</p><p>a) Wie lang muss die freie Strecke s<sub>frei</sub> mindestens sein?<br>b) Wie viele Meter Reserve bleiben? (Negativ eingeben, wenn die Sicht <b>nicht</b> reicht.)</p>`,
+      inputs:[{label:'a) s<sub>frei</sub>',unit:'m',ans:fr,tol:rel(fr,.02),id:'f'},{label:'b) Reserve',unit:'m',ans:res,tol:Math.max(4,rel(fr,.02)),id:'r'}],
+      wrong(v){if(v.f!=null&&Math.abs(v.f-sp)<rel(sp,.02))return 'Das ist nur der Weg des PKW. Das entgegenkommende Auto fährt in derselben Zeit auch auf euch zu. Beide Wege zusammen sind s<sub>frei</sub>.';return ''},
+      hint:'Wie beim Arbeitsblatt: s<sub>auf</sub>, Δv, t<sub>ü</sub>, s<sub>PKW</sub> = v<sub>PKW</sub> · t<sub>ü</sub>. Der Gegenverkehr fährt in derselben Zeit s<sub>Gegen</sub> = v<sub>Gegen</sub> · t<sub>ü</sub>. s<sub>frei</sub> = s<sub>PKW</sub> + s<sub>Gegen</sub>.',
+      expl:`<ol><li>s<sub>auf</sub> = ${sA} + ${L} + ${sA} + ${l} = ${S} m, Δv = ${m1} − ${m2} = ${m1-m2} m/s</li><li>t<sub>ü</sub> = ${S} : ${m1-m2} = ${fmt(t,2)} s</li><li>s<sub>PKW</sub> = ${m1} m/s · ${fmt(t,2)} s = ${fmt(sp,0)} m</li><li>s<sub>Gegen</sub> = ${fmt(kg/3.6,1)} m/s · ${fmt(t,2)} s = ${fmt(sg,0)} m</li><li class="res">a) s<sub>frei</sub> = ${fmt(sp,0)} + ${fmt(sg,0)} = ${fmt(fr,0)} m</li><li class="res">b) Reserve = ${sicht} − ${fmt(fr,0)} = ${fmt(res,0)} m → ${res>=0?'Die Sicht reicht.':'Die Sicht reicht <b>nicht</b>. Nicht überholen!'}</li></ol>`};}
+  if(k===3){/* Zug und Radfahrerin */
+    const Lz=pick([300,400,600]),kz=pick([72,90,108]),kr=pick([18,36]),vz=kz/3.6,vr=kr/3.6,t1=Lz/(vz-vr),t2=Lz/(vz+vr);
+    return {fig:sceneFig('train',{Lz,kz,kr}),title:'Der lange Güterzug',q:`<p>Neben dem Radweg verläuft eine Bahnstrecke. Ein Güterzug mit 25 Wagen ist <b>${Lz} m</b> lang und fährt mit <b>${kz} km/h</b>. Eine Radfahrerin fährt mit <b>${kr} km/h</b>.</p><p>a) Die Radfahrerin fährt in <b>dieselbe Richtung</b> wie der Zug. Wie lange dauert es, bis der Zug vom letzten Wagen bis zur Lok komplett an ihr vorbeigefahren ist?<br>b) Wie lange dauert es, wenn sie dem Zug <b>entgegen</b>fährt?</p>`,
+      inputs:[{label:'a) gleiche Richtung',unit:'s',ans:t1,tol:rel(t1,.03),id:'a'},{label:'b) Gegenrichtung',unit:'s',ans:t2,tol:rel(t2,.03),id:'b'}],
+      wrong(v){if(v.a!=null&&Math.abs(v.a-Lz/vz)<rel(Lz/vz,.03))return 'Die Radfahrerin bewegt sich auch. Der Zug ist ihr gegenüber nur mit dem Unterschied der Geschwindigkeiten schneller.';if(v.a!=null&&v.b!=null&&Math.abs(v.a-t2)<rel(t2,.03))return 'Vertauscht? In gleicher Richtung zählt der Unterschied, in Gegenrichtung die Summe der Geschwindigkeiten.';return ''},
+      hint:'Der Zug muss sich um seine eigene Länge an ihr „vorbeischieben“. Gleiche Richtung: relative Geschwindigkeit = v<sub>Zug</sub> − v<sub>Rad</sub>. Gegenrichtung: v<sub>Zug</sub> + v<sub>Rad</sub>. Vorher in m/s umrechnen.',
+      expl:`<ol><li>Unnötig: Anzahl der Wagen.</li><li>v<sub>Zug</sub> = ${fmt(vz,1)} m/s, v<sub>Rad</sub> = ${fmt(vr,1)} m/s</li><li class="res">a) gleiche Richtung: t = ${Lz} m : (${fmt(vz,1)} − ${fmt(vr,1)}) m/s = ${fmt(t1,1)} s</li><li class="res">b) Gegenrichtung: t = ${Lz} m : (${fmt(vz,1)} + ${fmt(vr,1)}) m/s = ${fmt(t2,1)} s</li></ol><p>Das ist dieselbe Idee wie beim Überholen (Δv) und beim Gegenverkehr (Summe).</p>`};}
+  /* Elefantenrennen */
+  const k1=pick([89,90]),d=pick([2,3,4]),k2=k1-d,L=18,a=50,S=2*a+2*L,dv=d/3.6,t=S/dv,s1=k1/3.6*t;
+  return {fig:sceneFig('trucks',{k1,k2,a}),title:'Elefantenrennen auf der Autobahn',q:`<p>Auf der A5 überholt ein LKW (<b>${L} m</b>, Tacho <b>${k1} km/h</b>) einen anderen LKW (<b>${L} m</b>, <b>${k2} km/h</b>). Beide Fahrer halten vorher und nachher je <b>${a} m</b> Abstand („halber Tacho“). Hinter ihnen staut sich auf der linken Spur der Verkehr, ein Sportwagen hupt.</p><p>a) Wie lange blockiert der überholende LKW die linke Spur?<br>b) Welche Strecke legt er in dieser Zeit zurück (in km)?</p>`,
+    inputs:[{label:'a) Überholdauer',unit:'s',ans:t,tol:rel(t,.03),id:'t'},{label:'b) Strecke',unit:'km',ans:s1/1000,tol:rel(s1/1000,.03),id:'s'}],
+    wrong(v){if(v.t!=null&&Math.abs(v.t-S/(k1/3.6))<2)return 'Zum Überholen zählt nur der Geschwindigkeitsunterschied Δv = '+d+' km/h.';if(v.t!=null&&Math.abs(v.t-S/d)<2)return 'Δv muss in m/s sein: '+d+' km/h : 3,6.';return ''},
+    hint:'s<sub>auf</sub> = Abstand + LKW-Länge + Abstand + LKW-Länge. Δv = '+d+' km/h, in m/s umrechnen. t = s<sub>auf</sub> : Δv. Dann Strecke des Überholenden: s = v · t.',
+    expl:`<ol><li>s<sub>auf</sub> = ${a} + ${L} + ${a} + ${L} = ${S} m</li><li>Δv = ${d} km/h = ${fmt(dv,3)} m/s</li><li class="res">a) t = ${S} m : ${fmt(dv,3)} m/s ≈ ${fmt(t,0)} s ≈ ${fmt(t/60,1)} min</li><li class="res">b) s = ${fmt(k1/3.6,1)} m/s · ${fmt(t,0)} s ≈ ${fmt(s1,0)} m ≈ ${fmt(s1/1000,1)} km</li></ol><p>Wegen des winzigen Δv dauert das Überholen minutenlang. Deshalb gibt es auf vielen Strecken ein LKW-Überholverbot.</p>`};
+}});
+
+
+/* ===== Geschichten aus Bad Einstein (nach Blatt 5, M1–M4) ===== */
+TOPICS.push({id:'einstein',title:'Geschichten aus Bad Einstein',desc:'Max die Schnecke, Opa Krawuttke & Co.: lesen, umrechnen, rechnen',gen(){
+  const k=rnd(1,6);
+  if(k===1){/* M1 Leberschaden */
+    const s=pick([60,75,90,108,120]),v=pick([.4,.5,.6,.8]),t=s*100/v/60;
+    return {fig:sceneFig('pub',{s,v:fmt(v,1)}),title:'Leberschaden',q:`<p>Max, die liebe kleine Schnecke aus Bad Einstein, sieht vor der <b>${s} m</b> entfernten Kneipe „Zum Flotten Hugo“ ein herrenloses Gläschen Teufelsrachenputzer stehen. Mit einer Geschwindigkeit von <b>${fmt(v,1)} cm/s</b> jagt sie los.</p><p>Nach wie vielen <b>Minuten</b> kann Max damit beginnen, seine Leber durch Alkohol zu schädigen?</p>`,
+      inputs:[{label:'t',unit:'min',ans:t,tol:rel(t,.02)}],hint:'Gegeben: s und v. Gesucht: t. Formel umstellen: t = s : v. Achtung: m und cm passen nicht zusammen, erst umrechnen. Das Ergebnis kommt in Sekunden, dann noch in Minuten.',
+      expl:`<ol><li>Gegeben: s = ${s} m = ${s*100} cm, v = ${fmt(v,1)} cm/s. Gesucht: t</li><li>Formel: t = s : v</li><li>t = ${s*100} cm : ${fmt(v,1)} cm/s = ${fmt(s*100/v,0)} s</li><li class="res">${fmt(s*100/v,0)} s : 60 = ${fmt(t,1)} min</li></ol><p>Antwort: Nach ${fmt(t,1)} Minuten ist Max am Gläschen.</p>`};}
+  if(k===2){/* M2 Kirchturmuhr */
+    const st=pick([[12,6,30],[12,3,15],[3,9,30],[12,9,45],[6,12,30]]);const [a,b,tm]=st;const d=pick([3.6,4.5,5.4,7.2]),v=d*100/(tm*60);
+    return {fig:sceneFig('clock',{a,b,d:fmt(d,1)}),title:'Nanü?',q:`<p>Nun wird Max leichtsinnig! Er kriecht, obwohl es verboten ist, mit 2,4 Promille den Kirchturm hinauf, um auf der Kirchturmuhr Karussell zu fahren. Als der <b>Minutenzeiger auf der ${a}</b> steht, ist Max noch <b>${fmt(d,1)} m</b> von der <b>${b}</b> entfernt.</p><p>Welche Geschwindigkeit (in cm/s) muss er mindestens haben, um die Zeigerspitze bei der ${b} zu erreichen?</p>`,
+      inputs:[{label:'v',unit:'cm/s',ans:v,tol:rel(v,.03)}],hint:'Wie lange braucht der Minutenzeiger von der '+a+' bis zur '+b+'? Eine ganze Runde dauert 60 Minuten. Die 2,4 Promille brauchst du nicht.',
+      expl:`<ol><li>Unnötig: 2,4 Promille.</li><li>Der Minutenzeiger braucht von der ${a} bis zur ${b} genau <b>${tm} min</b> = ${tm*60} s.</li><li>s = ${fmt(d,1)} m = ${fmt(d*100,0)} cm</li><li class="res">v = s : t = ${fmt(d*100,0)} cm : ${tm*60} s = ${fmt(v,2)} cm/s</li></ol>`};}
+  if(k===3){/* M3 Kerze */
+    const t=pick([60,80,100,120,150]),v=pick([.01,.02,.025,.03]),L=v*t*60/10;
+    return {fig:sceneFig('candle',{t,v:fmt(v,3)}),title:'Psalm 32',q:`<p>Es kam, wie es kommen musste! Weil Max angetrunken und laut grölend auf der Kirchturmuhr Karussell gefahren ist, hat Pfarrer Eligius Rosenfranz ihn dazu verdonnert, eine Kerze zu stiften und so lange den Psalm 32 (Büßerglück) zu beten, bis die Kerze erloschen ist. Nach <b>${t} Minuten</b> kniet Max im Dunkeln.</p><p>Wie lang war die Kerze (in cm), wenn sie mit <b>v = ${fmt(v,3)} mm/s</b> abgebrannt ist?</p>`,
+      inputs:[{label:'Länge',unit:'cm',ans:L,tol:rel(L,.02)}],hint:'s = v · t. Rechne die Minuten in Sekunden um. Das Ergebnis kommt in mm, dann in cm umrechnen.',
+      expl:`<ol><li>t = ${t} min = ${t*60} s</li><li>s = v · t = ${fmt(v,3)} mm/s · ${t*60} s = ${fmt(L*10,0)} mm</li><li class="res">${fmt(L*10,0)} mm = ${fmt(L,1)} cm</li></ol><p>Antwort: Die Kerze war ${fmt(L,1)} cm lang.</p>`};}
+  if(k===4){/* M4 Opa Krawuttke */
+    const sb=pick([24,26,30,36]),vb=pick([12,13,15]),so=pick([8.5,10,11.5,12]),tb=sb/vb,vo=so/tb;
+    return {fig:sceneFig('pass',{sb,vb,so:fmt(so,1),tr:0}),title:'1:0 für Bad Einstein',q:`<p>Kreisligaspiel 1. FC Bad Einstein gegen SV Bimmelstadt, 28. Minute: Hubertus Blattschuß spielt aus <b>${sb} m</b> einen Pass auf den Elfmeterpunkt, genau in den Lauf von Opa Karl Krawuttke. Direktschuss! Keine Chance für Torhüter Otto Totalblind. 1:0 für Bad Einstein!</p><p>Welche Durchschnittsgeschwindigkeit hatte Opa Krawuttke, wenn er bei der Ballabgabe noch <b>${fmt(so,1)} m</b> vom Elfmeterpunkt entfernt war? Der Ball hatte eine Durchschnittsgeschwindigkeit von <b>${vb} m/s</b>.</p>`,
+      inputs:[{label:'Zeit des Balls',unit:'s',ans:tb,tol:rel(tb,.02),id:'t'},{label:'v von Opa',unit:'m/s',ans:vo,tol:rel(vo,.03),id:'v'}],
+      wrong(x){if(x.v!=null&&Math.abs(x.v-so/sb*1)<.2)return 'Du hast Strecke durch Strecke geteilt. Rechne zuerst die Zeit des Balls aus, die gilt auch für Opa.';return ''},
+      hint:'Zwei Schritte: Erst die Zeit des Balls (t = s : v). Opa hat genau dieselbe Zeit. Dann v<sub>Opa</sub> = s<sub>Opa</sub> : t.',
+      expl:`<ol><li class="res">Ball: t = ${sb} m : ${vb} m/s = ${fmt(tb,2)} s</li><li>Opa braucht dieselbe Zeit.</li><li class="res">v<sub>Opa</sub> = ${fmt(so,1)} m : ${fmt(tb,2)} s ≈ ${fmt(vo,2)} m/s (≈ ${fmt(vo*3.6,1)} km/h)</li></ol><p>Nicht schlecht für einen Opa!</p>`};}
+  if(k===5){/* Neu: Max und der Gemüsehändler */
+    const v=pick([.3,.4,.5]),tm=pick([20,25,30]),s=v*tm*60/100,late=pick([5,10]),tt=tm-late,vneu=s*100/(tt*60);
+    return {fig:sceneFig('market',{tm,v:fmt(v,1),late}),title:'Max hat verschlafen',q:`<p>Jeden Samstag kriecht Max mit <b>${fmt(v,1)} cm/s</b> zum Gemüsestand von Frau Kohlrabi auf dem Marktplatz von Bad Einstein. Dafür braucht er genau <b>${tm} Minuten</b>. Der Stand schließt pünktlich, und dann gibt es keine Salatblätter mehr.</p><p>Heute hat Max verschlafen und startet <b>${late} Minuten</b> zu spät.</p><p>a) Wie weit ist der Marktplatz von Max' Stein entfernt (in m)?<br>b) Wie schnell muss Max heute kriechen, um trotzdem rechtzeitig anzukommen (in cm/s)?</p>`,
+      inputs:[{label:'a) Entfernung',unit:'m',ans:s,tol:rel(s,.02),id:'s'},{label:'b) neue Geschwindigkeit',unit:'cm/s',ans:vneu,tol:rel(vneu,.03),id:'v'}],
+      wrong(x){if(x.v!=null&&Math.abs(x.v-v*tm/late)<.05)return 'Max hat nicht nur '+late+' Minuten, sondern '+tm+' − '+late+' = '+tt+' Minuten Zeit.';return ''},
+      hint:'a) s = v · t, Minuten in Sekunden umrechnen. b) Heute hat Max weniger Zeit. Dieselbe Strecke in kürzerer Zeit: v = s : t.',
+      expl:`<ol><li class="res">a) s = ${fmt(v,1)} cm/s · ${tm*60} s = ${fmt(s*100,0)} cm = ${fmt(s,1)} m</li><li>Heute bleiben ${tm} − ${late} = <b>${tt} min</b> = ${tt*60} s.</li><li class="res">b) v = ${fmt(s*100,0)} cm : ${tt*60} s = ${fmt(vneu,2)} cm/s</li></ol>`};}
+  /* Neu: Das vergessene Gebetbuch – zeichnerisch */
+  const v1=pick([18,24,30]),f=pick([2,1.5]),v2=v1*f,t0=pick([5,10]),T=t0*v2/(v2-v1),S=v1*T/60,B=S+pick([-2,2,3]);
+  const xmax=Math.ceil(T*1.4/5)*5,ymax0=Math.max(B,S)*1.3,ystep=ymax0>12?2:1,ymax=Math.ceil(ymax0/ystep)*ystep;
+  return {fig:sceneFig('chase',{v1,v2,t0,B:fmt(B,1)}),title:'Das vergessene Gebetbuch',q:`<p>Pfarrer Eligius Rosenfranz knattert mit seinem alten Mofa gleichmäßig mit <b>${v1} km/h</b> zu einer Taufe nach Bimmelstadt. Bimmelstadt ist <b>${fmt(B,1)} km</b> von Bad Einstein entfernt. Das Mofa ist Baujahr 1974.</p><p><b>${t0} Minuten</b> später entdeckt Haushälterin Frau Sauerampfer sein Gebetbuch auf dem Küchentisch. Sie springt ins Auto und fährt ihm mit <b>${v2} km/h</b> hinterher.</p><p>a) Zeichne beide Fahrten ins s(t)-Diagramm. Die Zeit zählt ab der Abfahrt des Pfarrers.<br>b) Lies ab: Wann und wo holt Frau Sauerampfer den Pfarrer ein? Schafft sie es vor Bimmelstadt?</p>`,
+    draw:{xmax,ymax,xstep:5,ystep,sy:.5,xlabel:'t in min',ylabel:'s in km',marks:[{s:B,label:'Bimmelstadt'}],lines:[{name:'Pfarrer',color:SC.nav,a:[0,0],b:[T,S],tip:'Der Pfarrer startet bei (0 | 0). In 10 min schafft er ein Sechstel von '+v1+' km.'},{name:'Frau Sauerampfer',color:SC.red,a:[t0,0],b:[T,S],tip:'Frau Sauerampfer startet erst nach '+t0+' min in Bad Einstein (s = 0). In 10 min schafft sie ein Sechstel von '+v2+' km.'}]},
+    inputs:[{label:'b) Einholen bei t =',unit:'min',ans:T,tol:1.3,id:'t'},{label:'b) Entfernung von Bad Einstein',unit:'km',ans:S,tol:.6,id:'s'}],
+    hint:'Für zwei Punkte jeder Geraden: Wo startet die Fahrt, und wie weit kommt man in 10 Minuten? (10 min sind ein Sechstel Stunde.) Eingeholt wird im Schnittpunkt.',
+    expl:`<ol><li>Unnötig: Baujahr des Mofas.</li><li>Pfarrer: Gerade durch (0 | 0) und (10 min | ${fmt(v1/6,1)} km).</li><li>Frau Sauerampfer: Gerade durch (${t0} min | 0) und (${t0+10} min | ${fmt(v2/6,1)} km). Sie ist steiler.</li><li class="res">Schnittpunkt: nach ${fmt(T,0)} min, ${fmt(S,1)} km von Bad Einstein.</li><li>Bimmelstadt liegt bei ${fmt(B,1)} km: ${S<=B?'Sie holt ihn vorher ein, die Taufe ist gerettet.':'Der Pfarrer ist schon vorher in Bimmelstadt. Die Geraden schneiden sich erst oberhalb der Bimmelstadt-Linie.'}</li></ol>`};
+}});
+
+/* Reihenfolge wie im Unterricht */
+(function(){const ord=['zz','um','v','mess','dv','lesen','sit','story','zuo','lauf','ueh2','ueh','einstein','gz','text','uetext','begr'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
+
+/* ---------- App ---------- */
+let stats={},cur=null,task=null,state=null,mixMode=false;const LOG=[];
+try{const x=localStorage.getItem('kin-ueb-v2');if(x)stats=JSON.parse(x)||{}}catch(e){}
+var appLive=false;function appChanged(){if(window.AppBridge&&appLive)AppBridge.changed()}
+function saveStats(){try{localStorage.setItem('kin-ueb-v2',JSON.stringify(stats))}catch(e){}appChanged()}
+function totals(){let r=0,n=0;Object.values(stats).forEach(s=>{r+=s.r||0;n+=s.n||0});return [r,n]}
+function updScore(){const [r,n]=totals();$('#score').textContent='Richtig im 1. Versuch: '+r+' von '+n}
+function start(id,keepMix){
+  leave();
+  cur=TOPICS.find(t=>t.id===id);if(!keepMix)mixMode=false;
+  task=cur.gen();state={tries:0,done:false,solved:false,sel:null,counted:false};render();window.scrollTo(0,0);
+}
+function render(){
+  let h=`<div class="bar"><button class="back" id="back">← Themen</button><span class="tag">${cur.title}</span></div><div class="card"><h3>${task.title}</h3>${task.q}`;
+  if(task.fig)h+=`<div class="fig">${task.fig}</div>`;
+  if(task.opa)h+=`<div class="simbox"><canvas id="pitch"></canvas><div class="sbtn"><button id="oPlay">Anstoß ▶</button><button id="oReset">↺ Anfang</button><button id="oSlow">Zeitlupe</button><button id="oRight" disabled>Mit richtiger Lösung</button></div><div class="note" id="oNote">Schau erst zu: Opa trödelt mit 1,5 m/s. Wenn du unten dein Ergebnis einträgst, läuft Opa beim nächsten Anstoß mit deinem Tempo – so kannst du deinen Wert prüfen.</div></div>`;
+  if(task.sim)h+=`<div class="simbox"><canvas id="simc"></canvas><div class="sbtn"><button id="sPlay">▶ Abspielen</button><button id="sReset">↺ Anfang</button><button id="sSlow">Zeitlupe</button><button id="sCam">Kamera: fährt mit LKW</button><button id="sOnc" disabled>Gegenverkehr</button></div><div class="note" id="sNote">Schau zu, wie der PKW überholt. Zeit und Wege siehst du erst, wenn du die Aufgabe gelöst hast.</div></div>`;
+  if(task.choices){h+=`<div class="choices ${task.cl||'c2'}">`;task.choices.forEach((c,i)=>{h+=`<button class="choice" data-i="${i}">${c.label?`<span class="lab">${c.label}</span>`:''}${c.html}</button>`});h+='</div>'}
+  if(task.inputs){task.inputs.forEach((inp,i)=>{h+=`<div class="row"><label for="in${i}">${inp.label}</label><input type="text" inputmode="decimal" autocomplete="off" id="in${i}" data-i="${i}"><span class="unit">${inp.unit}</span><span class="mark" id="mk${i}"></span></div>`})}
+  h+=`<div class="btns"><button class="b main" id="check">Prüfen</button><button class="b alt" id="tip">Tipp</button><button class="b alt" id="sol">Lösung zeigen</button><button class="b next" id="next">Neue Aufgabe</button></div><div id="fb"></div><div id="tipbox"></div><div id="ex"></div></div>`;
+  $('#app').innerHTML=h;
+  $('#back').onclick=home;
+  $('#next').onclick=()=>start(mixMode?pick(TOPICS).id:cur.id,mixMode);
+  $('#check').onclick=check;$('#tip').onclick=showTip;$('#sol').onclick=()=>reveal(false);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{if(state.done)return;state.sel=+b.dataset.i;document.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel','no'));b.classList.add('sel')});
+  document.querySelectorAll('input[type=text]').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')check()}));
+  if(task.sim)Sim.init(task.sim);else Sim.stop();
+  if(task.opa)Opa.init(task.opa);else Opa.stop();
+}
+function parse(s){if(s==null)return null;const m=String(s).replace(',','.').replace(/\s/g,'').match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):null}
+function count(ok){if(state.counted)return;state.counted=true;const s=stats[cur.id]||(stats[cur.id]={r:0,n:0});s.n++;if(ok&&state.tries===1)s.r++;if(ok)s.s=(s.s||0)+1;saveStats();updScore()}
+function check(){
+  if(state.done)return;
+  let ok=false;const fb=$('#fb');
+  if(task.choices){
+    if(state.sel==null){fb.innerHTML='<div class="fb no">Wähle zuerst eine Antwort aus.</div>';return}
+    state.lastAns=ansText();
+    state.tries++;const c=task.choices[state.sel];ok=c.correct;
+    const el=document.querySelectorAll('.choice')[state.sel];
+    if(ok){el.classList.remove('sel');el.classList.add('ok')}else{el.classList.remove('sel');el.classList.add('no');state.sel=null}
+  }else{
+    const vals={};let all=true,any=false;
+    task.inputs.forEach((inp,i)=>{const v=parse($('#in'+i).value);vals[inp.id||i]=v;if(v==null)all=false;else any=true});
+    if(!all){fb.innerHTML='<div class="fb no">Fülle zuerst alle Felder aus.</div>';return}
+    state.lastAns=ansText();
+    state.tries++;
+    task.inputs.forEach((inp,i)=>{const v=vals[inp.id||i];const good=Math.abs(v-inp.ans)<=inp.tol;const e=$('#in'+i);e.classList.remove('ok','no');e.classList.add(good?'ok':'no');$('#mk'+i).textContent=good?'✓':'✗';$('#mk'+i).style.color=good?'var(--ok)':'var(--bad)'});
+    ok=task.inputs.every((inp,i)=>Math.abs(vals[inp.id||i]-inp.ans)<=inp.tol);
+    state.extra=!ok&&task.wrong?task.wrong(vals):'';
+  }
+  if(ok){state.done=true;state.solved=true;count(true);logIt(state.tries===1?'Richtig im ersten Versuch':'Richtig im '+state.tries+'. Versuch','ok');fb.innerHTML=`<div class="fb ok">Richtig! ${state.tries===1?'Gleich im ersten Versuch.':'Beim '+state.tries+'. Versuch geschafft.'}</div>`;showExpl();lock();}
+  else{count(false);fb.innerHTML=`<div class="fb no">Noch nicht ganz. ${state.extra?state.extra+' ':''}${state.tries>=2?'Du kannst dir die Lösung mit Erklärung anzeigen lassen.':'Schau noch einmal hin oder nutze den Tipp, dann versuche es erneut.'}</div>`}
+}
+function lock(){if(task.sim)Sim.unlock();if(task.opa)Opa.unlock();document.querySelectorAll('input[type=text]').forEach(i=>i.disabled=true);$('#check').disabled=true;$('#sol').disabled=true}
+function showTip(){$('#tipbox').innerHTML=`<div class="tip"><h4>Tipp</h4>${task.hint}</div>`}
+function showExpl(){$('#ex').innerHTML=`<div class="expl"><h4>Lösung und Erklärung</h4>${task.expl}</div>`}
+function reveal(){
+  if(state.done)return;
+  state.done=true;count(false);{const a=ansText();if(a)state.lastAns=a}logIt(state.tries?'Lösung angesehen (nach '+state.tries+' Versuch'+(state.tries>1?'en':'')+')':'Lösung angesehen, ohne eigenen Versuch','no');
+  if(task.choices){task.choices.forEach((c,i)=>{const el=document.querySelectorAll('.choice')[i];el.classList.remove('sel','no');if(c.correct)el.classList.add('ok')})}
+  else{task.inputs.forEach((inp,i)=>{const e=$('#in'+i);e.value=fmt(inp.ans,2);e.classList.remove('no');e.classList.add('ok')})}
+  $('#fb').innerHTML='<div class="fb no">So sieht die Lösung aus. Lies die Erklärung und probiere danach eine neue Aufgabe.</div>';
+  showExpl();lock();
+}
+/* ---------- Protokoll + PDF ---------- */
+function plain(h){const d=document.createElement('div');d.innerHTML=String(h).replace(/<\/(li|p|h4|div)>|<br\s*\/?>/g,' $&');d.querySelectorAll('svg').forEach(x=>x.remove());return d.textContent.replace(/\s+/g,' ').trim()}
+function ansText(){
+  if(task.choices){if(state.sel==null)return '';const c=task.choices[state.sel];return c.label?('Diagramm '+c.label):plain(c.html)}
+  const p=[];task.inputs.forEach((inp,i)=>{const v=$('#in'+i).value.trim();if(v)p.push(plain(inp.label)+': '+v+' '+inp.unit)});return p.join(' | ');
+}
+function logIt(st,kind){if(state.logged)return;state.logged=true;
+  const hasFig=!!(task.fig||(task.choices&&task.choices.some(c=>/<svg/.test(c.html)))||task.sim||task.opa);
+  LOG.push({topic:cur.title,q:plain(task.q)+(hasFig?' (mit Diagramm/Simulation)':''),ans:state.lastAns||'–',st,kind,expl:plain(task.expl)})}
+function leave(){if(state&&cur&&state.tries>0&&!state.done)logIt('Nicht gelöst ('+state.tries+' Versuch'+(state.tries>1?'e':'')+')','no')}
+/* ---------- Überhol-Simulation ---------- */
+const Sim=(function(){
+  let P,c,ctx,raf=null,t=0,last=0,playing=false,slow=false,cam='lkw',unl=false,onc=false;
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=null;playing=false}
+  function init(p){stop();P=p;t=0;slow=false;cam='lkw';unl=false;onc=false;c=document.getElementById('simc');ctx=c.getContext('2d');
+    const btn=id=>document.getElementById(id);
+    btn('sPlay').onclick=()=>{if(playing){playing=false;btn('sPlay').textContent='▶ Weiter';return}if(t>=tEnd())t=0;playing=true;btn('sPlay').textContent='❚❚ Pause';last=performance.now();loop()};
+    btn('sReset').onclick=()=>{playing=false;t=0;btn('sPlay').textContent='▶ Abspielen';draw()};
+    btn('sSlow').onclick=()=>{slow=!slow;btn('sSlow').classList.toggle('on',slow)};
+    btn('sCam').onclick=()=>{cam=cam==='lkw'?'pkw':'lkw';btn('sCam').textContent=cam==='lkw'?'Kamera: fährt mit LKW':'Kamera: fährt mit PKW';draw()};
+    btn('sOnc').onclick=()=>{onc=!onc;btn('sOnc').classList.toggle('on',onc);t=0;playing=false;btn('sPlay').textContent='▶ Abspielen';draw()};
+    resize();window.onresize=resize;}
+  function unlock(){unl=true;const b=document.getElementById('sOnc');if(b)b.disabled=false;const n=document.getElementById('sNote');if(n)n.textContent='Jetzt mit Zahlen. Tipp: „Kamera: fährt mit LKW“ zeigt, dass der PKW nur mit dem Geschwindigkeitsunterschied Δv vorankommt.';draw()}
+  function tEnd(){return P.t+1.2}
+  function resize(){if(!c)return;const w=Math.min(c.parentElement.clientWidth-4,820),h=Math.round(Math.max(200,w*0.29));const d=window.devicePixelRatio||1;c.width=w*d;c.height=h*d;c.style.height=h+'px';ctx.setTransform(d,0,0,d,0,0);c._w=w;c._h=h;draw()}
+  function loop(){const now=performance.now();const dt=(now-last)/1000;last=now;if(playing){t+=dt*(slow?0.3:1);if(t>=tEnd()){t=tEnd();playing=false;document.getElementById('sPlay').textContent='▶ Nochmal'}}draw();if(playing)raf=requestAnimationFrame(loop)}
+  function rr(x,y,w,h,r,f){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fillStyle=f;ctx.fill()}
+  function draw(){
+    if(!c||!P)return;const W=c._w,H=c._h;ctx.clearRect(0,0,W,H);
+    const {m1,m2,a,L,l,S,t:tE}=P;const te=Math.min(t,tE);
+    /* Weltkoordinaten: LKW-Front bei xL, PKW-Front bei xP (t=0: xL=0) */
+    const xL=m2*t, xP=-L-a+m1*t;
+    const ph=Math.min(1,Math.max(0,t/tE));
+    /* Spurwechsel: links während des Überholens */
+    let lane;const k=Math.min(1,t/0.8);const kb=tE?Math.min(1,Math.max(0,(t-tE)/0.8)):0;lane=t<=tE?k:1-kb;
+    const roadTop=34,laneH=Math.min(48,(H-120)/2),roadH=laneH*2,yR=roadTop+laneH*1.5,yLft=roadTop+laneH*0.5;
+    const view=2*(L+a+l)+30;const camX=(cam==='lkw'?xL-L/2:xP-l/2)-view/2;
+    const sc=W/view;const X=x=>(x-camX)*sc;
+    /* Straße */
+    ctx.fillStyle='#E6EDE3';ctx.fillRect(0,roadTop-10,W,roadH+20);ctx.fillStyle='#5A6470';ctx.fillRect(0,roadTop,W,roadH);
+    ctx.fillStyle='#fff';ctx.fillRect(0,roadTop+1,W,2);ctx.fillRect(0,roadTop+roadH-3,W,2);
+    const dash=6,gap=6;let x0=Math.floor(camX/(dash+gap))*(dash+gap);for(let x=x0;x<camX+view;x+=dash+gap)ctx.fillRect(X(x),roadTop+laneH-1.5,dash*sc,3);
+    /* Fahrzeuge */
+    const vh=laneH*0.62;
+    rr(X(xL-L),yR-vh/2,L*sc,vh,4,'#E8833A');ctx.fillStyle='#fff';ctx.font='bold 13px Arial';ctx.textAlign='center';ctx.fillText('LKW',X(xL-L/2),yR+5);
+    const yP=yR+(yLft-yR)*lane;rr(X(xP-l),yP-vh*0.4,l*sc,vh*0.8,4,'#2F7FC1');ctx.fillStyle='#fff';ctx.font='bold 11px Arial';if(l*sc>26)ctx.fillText('PKW',X(xP-l/2),yP+4);
+    if(onc&&unl){const xO=-L-a+P.frei-m1*t;rr(X(xO),yLft-vh*0.4,l*sc,vh*0.8,4,'#B3402F')}
+    /* Infozeile */
+    ctx.textAlign='left';ctx.fillStyle='#1F3A5F';ctx.font='bold 14px Arial';
+    ctx.fillText(unl?`Zeit: ${fmt(Math.min(t,tE),1)} s`:'Zeit: ? s',8,20);
+    ctx.textAlign='right';ctx.fillText(unl?`PKW: ${fmt(m1*Math.min(t,tE),0)} m   LKW: ${fmt(m2*Math.min(t,tE),0)} m`:'Wege: ? m',W-8,20);
+    /* Abstand PKW–LKW anzeigen */
+    const gapBack=xL-L-xP, gapFront=(xP-l)-xL; ctx.font='12px Arial';ctx.textAlign='center';ctx.fillStyle='#1F3A5F';
+    const yI=roadTop+roadH+22;
+    if(t<0.05){ctx.fillText(`Start: ${a} m Abstand hinter dem LKW`,W/2,yI)}
+    else if(t>=tE-0.02){ctx.fillText(`Ende: ${a} m Abstand vor dem LKW  ✓`+(onc&&unl?'  –  der Gegenverkehr ist genau jetzt da: knapp!':''),W/2,yI)}
+    else ctx.fillText(unl?`Der PKW holt ${m1-m2} m pro Sekunde auf – noch ${fmt(Math.max(0,S-(m1-m2)*t),0)} m bis zum Ende`:'Der PKW holt auf … wie viele Meter pro Sekunde?',W/2,yI);
+    /* Übersichtsleiste */
+    const my=H-34,mx0=10,mw=W-20;const wStart=-L-a-l-5,wEnd=Math.max(P.sp+10,onc&&unl?P.frei-L-a+10:0)+5;const MX=x=>mx0+(x-wStart)/(wEnd-wStart)*mw;
+    ctx.fillStyle='#D3DCE6';ctx.fillRect(mx0,my-3,mw,6);ctx.fillStyle='#4a5a69';ctx.font='11px Arial';ctx.textAlign='left';ctx.fillText('Übersicht der ganzen Strecke',mx0,my+20);
+    ctx.fillStyle='#E8833A';ctx.fillRect(MX(xL-L),my-6,Math.max(3,MX(xL)-MX(xL-L)),12);
+    ctx.fillStyle='#2F7FC1';ctx.beginPath();ctx.arc(MX(xP),my,5,0,7);ctx.fill();
+    if(onc&&unl){const xO=-L-a+P.frei-m1*t;ctx.fillStyle='#B3402F';ctx.beginPath();ctx.arc(MX(xO),my,5,0,7);ctx.fill()}
+    if(unl){ctx.textAlign='right';ctx.fillStyle='#4a5a69';ctx.fillText(`${fmt(wEnd-wStart,0)} m`,mx0+mw,my+20)}
+  }
+  return {init,unlock,stop};
+})();
+
+/* ===== Startseite mit Klassenarbeits-Check ===== */
+const CHECK=[
+ ['Zeitpunkt oder Zeitraum: Momentan- und Durchschnittsgeschwindigkeit unterscheiden',['zz','dv']],
+ ['km/h in m/s umrechnen und zurück',['um']],
+ ['v = s : t anwenden und nach s oder t umstellen (Gegeben, Gesucht, Formel, Rechnung, Antwort)',['v']],
+ ['Eine Messreihe auswerten und erkennen, ob eine Bewegung gleichförmig ist',['mess']],
+ ['Die Durchschnittsgeschwindigkeit einer Fahrt mit Pause berechnen',['dv']],
+ ['Die Geschwindigkeit aus der Steigung im s(t)-Diagramm bestimmen',['lesen']],
+ ['Situationen in s(t)-Diagramme übersetzen (Stehen, Zurückgehen, schneller)',['sit','story']],
+ ['Zu einem s(t)-Diagramm das passende v(t)-Diagramm finden und umgekehrt',['zuo']],
+ ['Treffen und Einholen im s(t)-Diagramm ablesen',['lauf','ueh2']],
+ ['Einen Überholvorgang berechnen: Aufholstrecke, Δv, Überholdauer, Überholweg, freie Strecke',['ueh2','ueh']],
+ ['Textaufgaben lösen: wichtige Angaben finden, unnötige weglassen, umrechnen, in zwei Schritten rechnen',['einstein','text','gz']],
+ ['Überholen verstehen: Wann zählt Δv, wann die Summe? Reicht die Sichtweite?',['uetext']],
+ ['Fachbegriffe sicher verwenden',['begr']]
+];
+const AREAS=[
+ ['Grundlagen',['zz','um','v'],2],
+ ['Messen und Durchschnitt',['mess','dv'],2],
+ ['Diagramme',['lesen','sit','story','zuo','lauf'],3],
+ ['Überholen',['ueh2','ueh'],2],
+ ['Textaufgaben',['einstein','gz','text','uetext'],4,{ids:['einstein','text'],k:2,txt:'davon mindestens 2 lange Textaufgaben (Bad Einstein oder Treffen und Einholen)'}],
+ ['Begriffe',['begr'],2]
+];
+function areaVal(a){const [n,ids,k,req]=a;const st=solved(ids);if(!req)return Math.min(st,k);const sr=Math.min(solved(req.ids),req.k);return Math.min(k,sr+Math.min(st-sr,k-req.k))}
+function solved(ids){return ids.reduce((a,id)=>a+((stats[id]&&stats[id].s)||0),0)}
+function unlocked(){try{if(localStorage.getItem('kin-ueb-open')==='1')return true}catch(e){}return AREAS.every(a=>areaVal(a)>=a[2])}
+function home(){
+  leave();Sim.stop();Opa.stop();GK.stop();cur=null;mixMode=false;EX=null;
+  const done=AREAS.filter(a=>areaVal(a)>=a[2]).length,open=unlocked();
+  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p><ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse dort Aufgaben. <b>Jede Aufgabe, die du selbst richtig löst, bringt 1 Punkt</b> für den Bereich. Welches Thema du im Bereich nimmst, ist egal. Mit „Lösung zeigen“ gibt es keinen Punkt.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen und sammelst weiter, bis der Balken voll ist.</li><li>Sind alle sechs Balken voll, öffnet sich ganz unten die <b>Abschluss-Challenge</b>.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
+  h+=`<details class="card form"><summary><h3>Formeln zum Nachschauen</h3></summary><div class="fr"><span class="f">v = <span class="frac"><span>s</span><span>t</span></span></span><span class="f">s = v · t</span><span class="f">t = <span class="frac"><span>s</span><span>v</span></span></span><span class="f">km/h <b>: 3,6</b> = m/s</span></div><div class="fr small"><span>Überholen: s<sub>auf</sub> = s<sub>A</sub> + l<sub>LKW</sub> + s<sub>A</sub> + l<sub>PKW</sub></span><span>Δv = v<sub>PKW</sub> − v<sub>LKW</sub></span><span>t<sub>ü</sub> = <span class="frac"><span>s<sub>auf</sub></span><span>Δv</span></span></span><span>s<sub>frei</sub> = s<sub>PKW</sub> + s<sub>Gegen</sub></span></div><div class="fr small"><span>Gleiche Richtung (Einholen): Abstand schrumpft mit v<sub>1</sub> − v<sub>2</sub></span><span>Aufeinander zu (Begegnen): mit v<sub>1</sub> + v<sub>2</sub></span></div></details>`;
+  AREAS.forEach((A,ai)=>{const [n,ids,k,req]=A;const v=areaVal(A);
+    h+=`<h2 class="ah" id="area-${ai}">${n} <small>${v>=k?'✓ geschafft':v+' von '+k+' Punkten · noch '+(k-v)}${req&&v<k?'<br><span class="req">'+req.txt+'</span>':''}</small></h2><div class="grid">`;
+    ids.forEach(id=>{const t=TOPICS.find(x=>x.id===id);const s=stats[id]||{};h+=`<button class="topic ${n==='Textaufgaben'?'tx':''}" data-id="${id}"><b>${t.title}</b><span>${t.desc}</span><em>${s.n?('Richtig gelöst: '+(s.s||0)+' · im 1. Versuch: '+(s.r||0)):'noch nicht geübt'}</em></button>`});
+    h+='</div>'});
+  h+=`<button class="mix" id="mix">Bunte Mischung: Zufallsaufgabe</button>`;
+  h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>10 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 45 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
+  h+=`<div class="card selfcheck"><h3>Selbstcheck vor der Klassenarbeit</h3><p class="small" style="margin:0 0 6px">Geh die Liste durch. Wo du dir noch unsicher bist, tippe auf das Thema daneben und üb noch ein paar Aufgaben.</p><ul class="check">${CHECK.map(([t,ids])=>`<li><span>${t}</span><span class="go">${ids.map(id=>{const T=TOPICS.find(x=>x.id===id);return `<button class="chip" data-id="${id}">${T.title}</button>`}).join('')}</span></li>`).join('')}</ul></div>`;
+  h+=pdfCard()+`<p class="tlink"><button id="teach">Lehrkraft</button><span id="tbox" hidden> <input type="password" id="tcode" placeholder="Code" autocomplete="off" style="width:110px;font-size:15px;padding:6px 8px"> <button id="tok">Freischalten</button></span></p>`;
+  $('#app').innerHTML=h;
+  document.querySelectorAll('.topic,.chip').forEach(b=>b.onclick=()=>start(b.dataset.id));
+  $('#mix').onclick=()=>{mixMode=true;start(pick(TOPICS).id,true)};
+  document.querySelectorAll('.ar').forEach(b=>b.onclick=()=>{const el=$('#area-'+b.dataset.a);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+  if(window._goArea!=null){const el=$('#area-'+window._goArea);window._goArea=null;if(el)setTimeout(()=>el.scrollIntoView({block:'start'}),30)}
+  if($('#exam'))$('#exam').onclick=examStart;
+  if($('#toCh'))$('#toCh').onclick=()=>document.querySelector('.chal').scrollIntoView({behavior:'smooth',block:'start'});
+  $('#teach').onclick=()=>{$('#tbox').hidden=false;$('#tcode').focus()};
+  const tryCode=()=>{if(hcode($('#tcode').value.trim().toLowerCase())===TCODE){try{localStorage.setItem('kin-ueb-open','1')}catch(e){}home()}else{$('#tcode').value='';$('#tcode').placeholder='falsch'}};
+  $('#tok').onclick=tryCode;$('#tcode').onkeydown=e=>{if(e.key==='Enter')tryCode()};
+  bindPdf();updScore();
+}
+function pdfCard(){return `<div class="card" style="margin-top:16px"><h3>Meine Zusammenfassung als PDF</h3><p style="margin:0 0 8px">Bisher bearbeitet: <b>${LOG.length}</b> Aufgabe${LOG.length===1?'':'n'}${EXR?', dazu deine Abschluss-Challenge':''}. Trag deinen Namen ein und lade dir die Übersicht herunter: jede Aufgabe mit deiner Antwort, ob sie richtig war, und der Erklärung.</p><div class="row"><label for="nm">Name</label><input type="text" id="nm" style="width:260px" value="${(window._nm||'').replace(/"/g,'&quot;')}"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div></div>`}
+function bindPdf(){$('#nm').oninput=e=>window._nm=e.target.value;$('#pdfBtn').onclick=makePDF}
+
+/* ===== Abschluss-Challenge ===== */
+let EX=null,EXR=null;
+try{EXR=JSON.parse(localStorage.getItem('kin-ueb-exr')||'null')}catch(e){EXR=null}
+const EXAM_IDS=['zz','v','dv','lesen','sit','zuo','einstein','text','uetext','ueh'];
+function examStart(){leave();Sim.stop();Opa.stop();
+  EX={i:0,t0:Date.now(),items:EXAM_IDS.map(id=>{const T=TOPICS.find(x=>x.id===id);let tk=T.gen();let g=0;while(tk.draw&&g++<60)tk=T.gen();return {id,topic:T.title,task:tk,max:tk.choices?2:tk.inputs.length*2}})};
+  examRender();}
+function examRender(){
+  const it=EX.items[EX.i],tk=it.task;task=tk;cur=TOPICS.find(x=>x.id===it.id);state={sel:null};
+  let h=`<div class="bar"><button class="back" id="xq">Abbrechen</button><span class="tag">Abschluss-Challenge · Aufgabe ${EX.i+1} von ${EX.items.length}</span><span class="tag light" id="clock"></span><span class="tag light">${it.max} P.</span></div>`;
+  h+=`<div class="prog"><i style="width:${EX.i/EX.items.length*100}%"></i></div>`;
+  h+=`<div class="card"><h3>${EX.i+1}. ${tk.title}</h3>${tk.q}`;
+  if(tk.fig)h+=`<div class="fig">${tk.fig}</div>`;
+  if(tk.sim)h+=`<div class="simbox"><canvas id="simc"></canvas><div class="sbtn"><button id="sPlay">▶ Abspielen</button><button id="sReset">↺ Anfang</button><button id="sSlow">Zeitlupe</button><button id="sCam">Kamera: fährt mit LKW</button><button id="sOnc" disabled>Gegenverkehr</button></div><div class="note" id="sNote">Die Simulation zeigt den Ablauf ohne Zahlen.</div></div>`;
+  if(tk.choices){h+=`<div class="choices ${tk.cl||'c2'}">`;tk.choices.forEach((c,i)=>{h+=`<button class="choice" data-i="${i}">${c.label?`<span class="lab">${c.label}</span>`:''}${c.html}</button>`});h+='</div>'}
+  if(tk.inputs){tk.inputs.forEach((inp,i)=>{h+=`<div class="row"><label for="in${i}">${inp.label}</label><input type="text" inputmode="decimal" autocomplete="off" id="in${i}"><span class="unit">${inp.unit}</span></div>`})}
+  h+=`<div class="btns"><button class="b main" id="xn">${EX.i<EX.items.length-1?'Antwort speichern, weiter →':'Abgeben und auswerten'}</button></div><div id="fb"></div></div>`;
+  $('#app').innerHTML=h;window.scrollTo(0,0);
+  if(tk.sim)Sim.init(tk.sim);else Sim.stop();
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{state.sel=+b.dataset.i;document.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')});
+  $('#xq').onclick=()=>{if(confirmBox())home()};
+  $('#xn').onclick=examSave;tick();}
+function confirmBox(){const b=$('#xq');if(b.dataset.c){return true}b.dataset.c=1;b.textContent='Wirklich abbrechen? Nochmal tippen';b.classList.add('warn');return false}
+function tick(){const c=$('#clock');if(!c||!EX)return;const m=Math.floor((Date.now()-EX.t0)/60000);c.textContent='⏱ '+m+' min';setTimeout(tick,15000)}
+function examSave(){
+  const it=EX.items[EX.i],tk=it.task;let pts=0,ans='',right='';
+  if(tk.choices){if(state.sel==null){$('#fb').innerHTML='<div class="fb no">Wähle zuerst eine Antwort aus.</div>';return}
+    const c=tk.choices[state.sel];pts=c.correct?2:0;ans=c.label?('Antwort '+c.label):plain(c.html);const k=tk.choices.find(x=>x.correct);right=k.label?('Antwort '+k.label):plain(k.html);it.sel=state.sel;}
+  else{const vals=tk.inputs.map((inp,i)=>$('#in'+i).value.trim());
+    if(vals.some(v=>v==='')&&!$('#xn').dataset.c){$('#xn').dataset.c=1;$('#fb').innerHTML='<div class="fb no">Es sind noch Felder leer. Nochmal tippen, wenn du trotzdem weiter willst.</div>';return}
+    tk.inputs.forEach((inp,i)=>{const v=parse(vals[i]);const ok=v!=null&&Math.abs(v-inp.ans)<=inp.tol;if(ok)pts+=2;inp.got=vals[i];inp.ok=ok});
+    ans=tk.inputs.map(inp=>plain(inp.label)+': '+(inp.got||'–')+' '+inp.unit).join(' | ');right=tk.inputs.map(inp=>plain(inp.label)+' = '+fmt(inp.ans,2)+' '+inp.unit).join(' | ');}
+  it.pts=pts;it.ans=ans;it.right=right;
+  const s=stats[it.id]||(stats[it.id]={r:0,n:0});s.n++;if(pts===it.max)s.r++;saveStats();
+  LOG.push({topic:it.topic+' (Challenge)',q:plain(tk.q),ans,st:`Challenge: ${pts} von ${it.max} Punkten`,kind:pts===it.max?'ok':'no',expl:plain(tk.expl)});
+  Sim.stop();
+  if(EX.i<EX.items.length-1){EX.i++;examRender();}else examResult();}
+function examResult(){
+  const P=EX.items.reduce((a,b)=>a+b.pts,0),M=EX.items.reduce((a,b)=>a+b.max,0),pc=Math.round(P/M*100),mins=Math.max(1,Math.round((Date.now()-EX.t0)/60000));
+  EXR={P,M,pc,mins,items:EX.items.map(it=>({topic:it.topic,title:it.task.title,pts:it.pts,max:it.max,ans:it.ans,right:it.right})),when:new Date().toLocaleDateString('de-DE')};
+  try{localStorage.setItem('kin-ueb-exr',JSON.stringify(EXR))}catch(e){}appChanged();
+  let h=`<div class="card hero"><h2>Deine Abschluss-Challenge</h2><div class="res3"><div><b>${P}</b><span>von ${M} Punkten</span></div><div><b>${pc} %</b><span>richtig</span></div><div><b>${mins}</b><span>Minuten</span></div></div><p class="lead" style="margin-top:8px">Du hast <b>${pc} %</b> der Punkte geschafft. ${pc>=80?'Stark! Bleib dran und übe die Textaufgaben weiter.':pc>=50?'Gute Grundlage. Schau dir unten die Aufgaben an, die noch nicht geklappt haben.':'Da ist noch Luft nach oben. Übe die Bereiche unten noch einmal und starte die Challenge danach neu.'}</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du gerade stehst.</p></div>`;
+  const weak=[...new Set(EX.items.filter(i=>i.pts<i.max).map(i=>i.id))];
+  if(weak.length)h+=`<div class="card"><h3>Das solltest du noch üben</h3><div class="go">${weak.map(id=>`<button class="chip" data-id="${id}">${TOPICS.find(x=>x.id===id).title}</button>`).join('')}</div></div>`;
+  h+=`<h2>Alle Aufgaben mit Lösung</h2>`;
+  EX.items.forEach((it,k)=>{const tk=it.task;h+=`<details class="card rev ${it.pts===it.max?'okc':'noc'}"><summary><b>${k+1}. ${tk.title}</b><span class="pp">${it.pts} / ${it.max} P.</span></summary>${tk.q}${tk.fig?`<div class="fig">${tk.fig}</div>`:''}`;
+    if(tk.choices){h+=`<div class="choices ${tk.cl||'c2'}">`;tk.choices.forEach((c,i)=>{h+=`<div class="choice ${c.correct?'ok':(i===it.sel?'no':'')}">${c.label?`<span class="lab">${c.label}</span>`:''}${c.html}</div>`});h+='</div>'}
+    else h+=`<p><b>Deine Antwort:</b> ${it.ans}</p><p><b>Richtig:</b> ${it.right}</p>`;
+    h+=`<div class="expl"><h4>Lösung und Erklärung</h4>${tk.expl}</div></details>`});
+  h+=`<div class="btns"><button class="b next" id="again">Neue Challenge</button><button class="b alt" id="hm">Zu den Themen</button></div>`+pdfCard();
+  $('#app').innerHTML=h;window.scrollTo(0,0);EX=null;
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>start(b.dataset.id));
+  $('#again').onclick=examStart;$('#hm').onclick=home;bindPdf();updScore();}
+
+/* ===== PDF mit Schulkopf ===== */
+async function makePDF(){
+  const msg=$('#pdfMsg');const name=($('#nm').value||'').trim();
+  if(!name){msg.innerHTML='<div class="fb no">Bitte trag zuerst deinen Namen ein.</div>';$('#nm').focus();return}
+  if(!LOG.length&&!EXR){msg.innerHTML='<div class="fb no">Du hast noch keine Aufgabe bearbeitet.</div>';return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const X=18,WD=174,TOP=32,BOT=272;let y=TOP;const NAVc=[31,58,95],GRc=[60,122,78],RDc=[179,64,47],GYc=[95,105,118],BK=[25,32,45];
+  const header=()=>{try{doc.addImage(LOGO,'JPEG',X,9,46,7.3)}catch(e){}doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...NAVc);doc.text(safe('Physik · TGE'),X+WD,15,{align:'right'});doc.setDrawColor(...GRc);doc.setLineWidth(.7);doc.line(X,20,X+WD,20);doc.setLineWidth(.2)};
+  const need=h=>{if(y+h>BOT){doc.addPage();header();y=TOP}};
+  const txt=(t,size,col,bold,ind=0,lh=1.5)=>{doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...col);const L=doc.splitTextToSize(safe(t),WD-ind);L.forEach(l=>{need(size*.36*lh);doc.text(l,X+ind,y);y+=size*.36*lh})};
+  const label=(lab,col,title)=>{need(20);doc.setFont('helvetica','bold');doc.setFontSize(11);const lw=doc.getTextWidth(lab)+6;doc.setFillColor(...col);doc.rect(X,y-5,lw,7.4,'F');doc.setTextColor(255);doc.text(lab,X+3,y);doc.setFontSize(13.5);doc.setTextColor(...NAVc);doc.text(safe(title),X+lw+4,y+.3);y+=11};
+  header();
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...GRc);doc.text(safe('KINEMATIK – GLEICHFÖRMIGE BEWEGUNG'),X,y);y+=8;
+  doc.setFontSize(20);doc.setTextColor(...NAVc);doc.text(safe('Vorbereitung auf die Klassenarbeit'),X,y);y+=7.5;
+  doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(...GYc);doc.text(safe('Meine Zusammenfassung aus dem Kinematik-Übungsstudio'),X,y);y+=10;
+  const d=new Date();const r1=LOG.filter(e=>e.st==='Richtig im ersten Versuch').length,rr=LOG.filter(e=>e.kind==='ok').length;
+  doc.setFillColor(238,242,247);doc.rect(X,y,WD,22,'F');doc.setFillColor(...NAVc);doc.rect(X,y,1.6,22,'F');
+  doc.setTextColor(...BK);doc.setFont('helvetica','bold');doc.text('Name:',X+7,y+8.5);doc.text('Datum:',X+112,y+8.5);doc.text('Bearbeitet:',X+7,y+16);
+  doc.setFont('helvetica','normal');doc.text(safe(name),X+30,y+8.5);doc.text(d.toLocaleDateString('de-DE'),X+130,y+8.5);doc.text(safe(`${LOG.length} Aufgaben, davon ${rr} richtig (${r1} gleich im ersten Versuch)`),X+30,y+16);y+=33;
+  if(EXR){label('Challenge',[47,111,176],'Meine Abschluss-Challenge');
+    txt(`${EXR.P} von ${EXR.M} Punkten, also ${EXR.pc} % geschafft (Zeit: ${EXR.mins} min)`,12,BK,true);y+=2;
+    EXR.items.forEach((it,k)=>{need(7);doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(...BK);doc.text(safe(`${k+1}. ${it.title}`),X+2,y);doc.setFont('helvetica','bold');doc.setTextColor(...(it.pts===it.max?GRc:RDc));doc.text(`${it.pts} / ${it.max} P.`,X+WD,y,{align:'right'});y+=6.4});
+    txt('Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt nur, wo ich gerade stehe.',9,GYc,false);y+=8;}
+  const by={};LOG.forEach(e=>{const b=by[e.topic]||(by[e.topic]={n:0,r:0,r1:0});b.n++;if(e.kind==='ok')b.r++;if(e.st==='Richtig im ersten Versuch')b.r1++});
+  if(Object.keys(by).length){label('Überblick',[31,138,138],'Meine Themen');
+    Object.entries(by).forEach(([t,b])=>{need(7);doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(...BK);doc.text(safe(t),X+2,y);doc.setFont('helvetica','bold');doc.setTextColor(...(b.r===b.n?GRc:NAVc));doc.text(`${b.r} von ${b.n} richtig`,X+WD,y,{align:'right'});y+=6.4});y+=8;}
+  label('Aufgaben',[123,97,201],'Alle Aufgaben mit Lösung');
+  LOG.forEach((e,i)=>{need(34);txt((i+1)+'. '+e.topic,12,NAVc,true);y+=1;txt('Aufgabe: '+e.q,10,BK,false,2);y+=1;txt('Status: '+e.st,10,e.kind==='ok'?GRc:RDc,true,2);txt('Meine Antwort: '+e.ans,10,BK,false,2);y+=1;
+    const L=doc.splitTextToSize(safe('Lösung: '+e.expl),WD-12);const h=L.length*4.9+6;need(h+2);doc.setFillColor(227,240,250);doc.rect(X+2,y-3,WD-2,h,'F');doc.setFillColor(47,127,193);doc.rect(X+2,y-3,1.2,h,'F');doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(...BK);doc.text(L,X+7,y+1.5,{lineHeightFactor:1.45});y+=h+6});
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setDrawColor(190);doc.setLineWidth(.3);doc.line(X,284,X+WD,284);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...GYc);doc.text(safe('Kinematik-Übungsstudio · '+name),X,288.5);doc.text(`Seite ${i} / ${n}`,X+WD,288.5,{align:'right'})}
+  const fn='Kinematik_Vorbereitung_'+name.replace(/[^A-Za-z0-9ÄÖÜäöüß_-]+/g,'_')+'_'+d.toISOString().slice(0,10)+'.pdf';
+  const blob=doc.output('blob');let dl=null;try{dl=window.claude?await window.claude.use('downloads'):null}catch(e){dl=null}
+  const alt='<p class="small" style="margin-top:6px">Klappt das Speichern nicht? <button class="b alt" id="sumBtn">Zusammenfassung als Seite anzeigen</button> und Screenshots machen.</p>';
+  try{if(dl){await dl.save({filename:fn,data:blob});}else{doc.save(fn)}msg.innerHTML='<div class="fb ok">PDF gespeichert. Auf dem iPad findest du es unter „Dateien“ → „Downloads“.</div>'+alt}
+  catch(e){msg.innerHTML='<div class="fb no">'+(e&&e.code==='declined'?'Speichern abgebrochen.':'Speichern ist hier nicht erlaubt'+(e&&e.code?' ('+e.code+')':'')+'. Zeig dir die Zusammenfassung als Seite an und mach Screenshots.')+'</div>'+alt}
+  const sb=$('#sumBtn');if(sb)sb.onclick=()=>showSummary(name);
+}
+function showSummary(name){
+  const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  let h=`<div class="bar"><button class="back" id="sumBack">← Zurück</button><span class="tag">Meine Zusammenfassung</span></div>`;
+  h+=`<div class="card hero"><h2>Vorbereitung auf die Klassenarbeit</h2><p class="lead"><b>${esc(name)}</b> · ${new Date().toLocaleDateString('de-DE')} · ${LOG.length} Aufgaben bearbeitet, davon ${LOG.filter(e=>e.st==='Richtig im ersten Versuch').length} im ersten Versuch richtig</p></div>`;
+  if(EXR)h+=`<div class="card"><h3>🏁 Meine Abschluss-Challenge${EXR.when?' ('+EXR.when+')':''}</h3><p><b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min</p><ul class="sumlist">${EXR.items.map((it,k)=>`<li>${k+1}. ${esc(it.title)} <b style="color:${it.pts===it.max?'#3C7A4E':'#B3402F'}">${it.pts} / ${it.max} P.</b></li>`).join('')}</ul></div>`;
+  LOG.forEach((e,k)=>{h+=`<div class="card sumcard"><p class="small" style="margin:0"><b>${k+1}. ${esc(e.topic)}</b> · <span style="color:${e.kind==='ok'?'#3C7A4E':'#B3402F'}">${esc(e.st)}</span></p><p style="margin:6px 0">${esc(e.q)}</p><p style="margin:4px 0"><b>Meine Antwort:</b> ${esc(e.ans)}</p><p class="small" style="margin:4px 0"><b>Lösung:</b> ${esc(e.expl)}</p></div>`});
+  $('#app').innerHTML=h;window.scrollTo(0,0);$('#sumBack').onclick=home;
+}
+function safe(t){return String(t).replace(/Δ/g,'Delta ').replace(/→/g,'->').replace(/↔/g,'<->').replace(/≈/g,'ca.').replace(/[–—−]/g,'-').replace(/[✓✗⏱]/g,'').replace(/[„“”]/g,'"').replace(/[^\x00-\xFF·]/g,'')}
+
+function hcode(t){let h=5381;for(const c of t)h=((h*33)^c.charCodeAt(0))>>>0;return h}
+const TCODE=3975863653;
+
+/* ===== Bereichs-Anzeige in der Aufgabe ===== */
+function areaOf(id){return AREAS.findIndex(a=>a[1].includes(id))}
+function areaLine(){if(!cur)return '';const ai=areaOf(cur.id);if(ai<0)return '';const [n,ids,k,req]=AREAS[ai];const v=areaVal(AREAS[ai]);
+  return v>=k?`<b>Bereich ${n}:</b> geschafft ✓ (du kannst trotzdem weiterüben)`:`<b>Bereich ${n}:</b> ${v} von ${k} Punkten · noch ${k-v} richtig lösen${req?' ('+req.txt+')':''}`}
+const _render=render;
+render=function(){_render();GK.stop();if(task&&task.gk&&!EX){const f=document.querySelector('#app .fig');if(f){f.insertAdjacentHTML('afterend','<div class="gkwrap"><button class="b alt" id="gkOpen">▶ Simulation anzeigen</button><div id="gkHost"></div></div>');$('#gkOpen').onclick=()=>{const h=$('#gkHost');if(h.innerHTML){h.innerHTML='';GK.stop();$('#gkOpen').textContent='▶ Simulation anzeigen'}else{GK.mount(h,task.gk);$('#gkOpen').textContent='Simulation ausblenden'}}}}if(state&&cur){const ai=areaOf(cur.id);state.preVal=ai<0?null:areaVal(AREAS[ai])}const bar=document.querySelector('#app .bar');if(bar&&!EX){const d=document.createElement('div');d.className='aline';d.id='aline';d.innerHTML=areaLine();if(d.innerHTML)bar.after(d)}};
+const _showExpl=showExpl;
+showExpl=function(){_showExpl();if(EX||!state||!state.solved||state.areaMsg)return;state.areaMsg=true;const ai=areaOf(cur.id);if(ai<0)return;
+  const [n,ids,k,req]=AREAS[ai];const v=areaVal(AREAS[ai]);const al=$('#aline');if(al)al.innerHTML=areaLine();
+  let m;if(state.preVal!=null&&v===state.preVal&&v<k)m=`<div class="fb plus">Richtig! Dieser Punkt zählt aber nicht mehr für <b>${n}</b>: Dir fehlen noch lange Textaufgaben (Bad Einstein oder Treffen und Einholen).</div>`;
+  else if(v<k)m=`<div class="fb plus">+1 Punkt für <b>${n}</b>: ${v} von ${k}. Weiter mit „Neue Aufgabe“.</div>`;
+  else if(v===k&&state.preVal!==k){const nx=AREAS.findIndex(A=>areaVal(A)<A[2]);
+    m=nx<0?`<div class="fb plus">🏁 Alle Bereiche geschafft! Die <b>Abschluss-Challenge</b> ist jetzt frei. <button class="b main" id="goCh">Zur Challenge</button></div>`
+      :`<div class="fb plus">✓ Bereich <b>${n}</b> geschafft! Als Nächstes: <button class="b main" id="goNx">${AREAS[nx][0]}</button></div>`;
+    setTimeout(()=>{const g=$('#goNx');if(g)g.onclick=()=>{window._goArea=nx;home()};const c=$('#goCh');if(c)c.onclick=()=>{home();setTimeout(()=>{const e=document.querySelector('.chal');if(e)e.scrollIntoView({block:'center'})},50)}},0)}
+  else m=`<div class="fb plus">Bereich <b>${n}</b> ist schon voll ✓. Üb gern weiter oder nimm einen anderen Bereich.</div>`;
+  $('#fb').insertAdjacentHTML('beforeend',m)};
+
+const LOGO='data:image/jpeg;base64,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';
+/* ===== Zeichnen-Aufgaben: Bewegungen als Geraden ins s(t)-Diagramm ===== */
+const DRAW=(function(){
+  const W=520,H=330,L=58,R=18,Tp=24,B=44,pw=W-L-R,ph=H-Tp-B;
+  let o=null,cur=0,pts=[],shown=false,svg=null;
+  const X=t=>L+t/o.xmax*pw,Y=s=>Tp+ph-s/o.ymax*ph;
+  const snap=(v,st)=>Math.round(v/st)*st;
+  function grid(){
+    let s=`<rect x="${L}" y="${Tp}" width="${pw}" height="${ph}" fill="#fff"/>`;
+    const fx=o.xstep/2,fy=o.ystep/2;
+    for(let t=0;t<=o.xmax+1e-9;t+=fx){const major=Math.abs(t/o.xstep-Math.round(t/o.xstep))<1e-6;s+=`<line x1="${X(t)}" y1="${Tp}" x2="${X(t)}" y2="${Tp+ph}" stroke="${major?'#B9C6D6':'#E3E9F0'}"/>`;if(major)s+=`<text x="${X(t)}" y="${Tp+ph+17}" font-size="12" text-anchor="middle" fill="${SC.nav}">${fmt(t,2)}</text>`}
+    for(let v=0;v<=o.ymax+1e-9;v+=fy){const major=Math.abs(v/o.ystep-Math.round(v/o.ystep))<1e-6;s+=`<line x1="${L}" y1="${Y(v)}" x2="${L+pw}" y2="${Y(v)}" stroke="${major?'#B9C6D6':'#E3E9F0'}"/>`;if(major)s+=`<text x="${L-6}" y="${Y(v)+4}" font-size="12" text-anchor="end" fill="${SC.nav}">${fmt(v,2)}</text>`}
+    s+=`<line x1="${L}" y1="${Tp}" x2="${L}" y2="${Tp+ph}" stroke="${SC.nav}" stroke-width="1.8"/><line x1="${L}" y1="${Tp+ph}" x2="${L+pw}" y2="${Tp+ph}" stroke="${SC.nav}" stroke-width="1.8"/>`;
+    s+=`<text x="${L+pw}" y="${H-4}" font-size="13" font-weight="700" text-anchor="end" fill="${SC.nav}">${o.xlabel}</text><text x="${L}" y="15" font-size="13" font-weight="700" fill="${SC.nav}">${o.ylabel}</text>`;
+    (o.marks||[]).forEach(m=>{s+=`<line x1="${L}" y1="${Y(m.s)}" x2="${L+pw}" y2="${Y(m.s)}" stroke="${m.color||'#3C7A4E'}" stroke-width="2" stroke-dasharray="7 5"/><text x="${L+pw-4}" y="${Y(m.s)-6}" font-size="12" font-weight="700" text-anchor="end" fill="${m.color||'#3C7A4E'}">${m.label}</text>`});
+    return s}
+  function clip(p,q){/* Gerade durch p,q, auf das Diagramm begrenzt, ab dem früheren Punkt */
+    const m=(q[1]-p[1])/(q[0]-p[0]);const t0=Math.min(p[0],q[0]);let t1=o.xmax;const s0=p[1]+m*(t0-p[0]);let s1=p[1]+m*(t1-p[0]);
+    if(s1>o.ymax){t1=p[0]+(o.ymax-p[1])/m;s1=o.ymax}if(s1<0){t1=p[0]+(0-p[1])/m;s1=0}
+    return [[t0,s0],[t1,s1]]}
+  function draw(){
+    let s=grid();
+    o.lines.forEach((ln,i)=>{const P=pts[i];
+      if(shown){const [a,b]=clip(ln.a,ln.b);s+=`<line x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(b[0])}" y2="${Y(b[1])}" stroke="${ln.color}" stroke-width="3" stroke-dasharray="${P.length===2?'8 6':'none'}" opacity="${P.length===2?.55:1}"/>`}
+      if(P.length===2&&P[0][0]!==P[1][0]){const [a,b]=clip(P[0],P[1]);s+=`<line x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(b[0])}" y2="${Y(b[1])}" stroke="${ln.color}" stroke-width="3.4" stroke-linecap="round"/>`;
+        s+=`<text x="${Math.min(X(b[0]),L+pw-4)}" y="${Y(b[1])-8}" font-size="13" font-weight="700" text-anchor="end" fill="${ln.color}">${ln.name}</text>`}
+      P.forEach(p=>{s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5.5" fill="${ln.color}" stroke="#fff" stroke-width="1.5"/>`})});
+    svg.innerHTML=s;
+    const bt=document.querySelectorAll('#drw .dsel');bt.forEach((b,i)=>{b.classList.toggle('on',i===cur);b.querySelector('i').textContent=pts[i].length===2?'✓':pts[i].length+'/2'});
+  }
+  function tap(ev){
+    if(shown&&o.locked)return;
+    const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    let t=(p.x-L)/pw*o.xmax,s=(Tp+ph-p.y)/ph*o.ymax;if(t<-o.xmax*.04||t>o.xmax*1.04||s<-o.ymax*.05||s>o.ymax*1.05)return;
+    t=Math.min(o.xmax,Math.max(0,snap(t,o.sx)));s=Math.min(o.ymax,Math.max(0,snap(s,o.sy)));
+    const P=pts[cur];if(P.length>=2)P.length=0;P.push([t,s]);
+    if(P.length===2&&P[0][0]===P[1][0]){P.pop()}
+    if(P.length===2&&cur<o.lines.length-1&&pts[cur+1].length<2)cur++;
+    draw();
+  }
+  function mount(host,opt){
+    o=opt;o.sx=o.sx||o.xstep/2;o.sy=o.sy||o.ystep/2;cur=0;shown=false;pts=o.lines.map(()=>[]);
+    host.innerHTML=`<div id="drw" class="drw"><p class="dhow"><b>So zeichnest du:</b> Wähle unten eine Person. Tippe dann zwei Punkte ihrer Bewegung ins Diagramm (z. B. den Startpunkt und einen Punkt ein paar Minuten später). Die Gerade erscheint automatisch. Nochmal tippen = neu zeichnen.</p>
+      <svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:100%;height:auto;touch-action:manipulation;cursor:crosshair" xmlns="http://www.w3.org/2000/svg" font-family="Arial,Helvetica,sans-serif"></svg>
+      <div class="dbtns">${o.lines.map((l,i)=>`<button class="dsel" data-i="${i}" style="--c:${l.color}">${l.name} <i></i></button>`).join('')}<button class="dclr">Alles löschen</button></div></div>`;
+    svg=host.querySelector('svg');svg.addEventListener('pointerdown',tap);
+    host.querySelectorAll('.dsel').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;draw()});
+    host.querySelector('.dclr').onclick=()=>{pts=o.lines.map(()=>[]);cur=0;draw()};
+    draw();
+  }
+  function verify(){
+    if(!o)return null;
+    for(let i=0;i<o.lines.length;i++){if(pts[i].length<2)return {missing:true,name:o.lines[i].name}}
+    for(let i=0;i<o.lines.length;i++){const ln=o.lines[i],m=(ln.b[1]-ln.a[1])/(ln.b[0]-ln.a[0]);
+      const okP=p=>Math.abs(p[1]-(ln.a[1]+m*(p[0]-ln.a[0])))<=o.sy*.51&&p[0]>=ln.a[0]-1e-9;
+      if(!(okP(pts[i][0])&&okP(pts[i][1])))return {wrong:true,name:ln.name,i}}
+    return null}
+  function show(lock){shown=true;if(lock)o.locked=true;if(svg)draw()}
+  function desc(){return o.lines.map((l,i)=>pts[i].length===2?`${l.name}: (${fmt(pts[i][0][0],1)} | ${fmt(pts[i][0][1],1)}) und (${fmt(pts[i][1][0],1)} | ${fmt(pts[i][1][1],1)})`:'').filter(Boolean).join('; ')}
+  return {mount,verify,show,desc,stop(){o=null;svg=null}};
+})();
+
+/* Einbau in den Übungsablauf */
+(function(){
+  const r0=render;render=function(){r0();
+    if(task&&task.draw&&!EX){const card=document.querySelector('#app .card');const first=card.querySelector('.row');const host=document.createElement('div');
+      if(first)first.before(host);else card.querySelector('.btns').before(host);DRAW.mount(host,task.draw)}else DRAW.stop()};
+  const c0=check;check=function(){
+    if(task&&task.draw&&!EX&&!state.done){const v=DRAW.verify();const fb=$('#fb');
+      if(v&&v.missing){fb.innerHTML=`<div class="fb no">Zeichne zuerst die Gerade für <b>${v.name}</b> (zwei Punkte antippen).</div>`;return}
+      if(v&&v.wrong){state.tries++;state.lastAns='Zeichnung: '+DRAW.desc();count(false);
+        fb.innerHTML=`<div class="fb no">Die Gerade für <b>${v.name}</b> stimmt noch nicht. ${task.draw.lines[v.i].tip||'Wo startet die Bewegung, und wie weit kommt sie in einer bestimmten Zeit?'}</div>`;return}}
+    c0();
+    if(task&&task.draw&&!EX&&state.solved)DRAW.show(true)};
+  const v0=reveal;reveal=function(){v0();if(task&&task.draw&&!EX)DRAW.show(true)};
+})();
+document.head.insertAdjacentHTML('beforeend',`<style>
+.tocha{margin-top:10px;font-size:16px}
+.lastres{background:#EAF3FB;border:1px solid #C9D6E5;border-radius:10px;padding:10px 12px;margin:8px 0 10px;font-size:15px;color:#1F3A5F}
+.drw{margin:14px 0 8px;padding:12px;border:1.5px solid #C9D6E5;border-radius:12px;background:#F7FAFD}
+.drw .dhow{font-size:14px;margin:0 0 8px;color:#33475E}
+.drw .dbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.drw .dsel{border:2px solid var(--c);color:var(--c);background:#fff;border-radius:999px;padding:7px 14px;font-weight:700;font-size:15px;cursor:pointer}
+.drw .dsel.on{background:var(--c);color:#fff}
+.drw .dsel i{font-style:normal;font-weight:400;margin-left:4px;opacity:.85}
+.drw .dclr{border:1.5px solid #9AA9BA;background:#fff;color:#33475E;border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;margin-left:auto}
+</style>`);
+
+/* ===== Zwischenspeichern: Liste der Aufgaben und laufende Challenge ===== */
+const KEEP=(function(){
+  const K='kin-ueb-keep';let ok=true;
+  try{localStorage.setItem('kin-ueb-test','1');ok=localStorage.getItem('kin-ueb-test')==='1';localStorage.removeItem('kin-ueb-test')}catch(e){ok=false}
+  function save(){if(!ok)return;try{
+    const ex=(EX&&EX.items&&!EX.done)?{i:EX.i,t0:EX.t0,items:EX.items.map(it=>({id:it.id,topic:it.topic,max:it.max,pts:it.pts,ans:it.ans,right:it.right,task:{title:it.task.title,q:it.task.q,fig:it.task.fig,inputs:it.task.inputs,choices:it.task.choices,expl:it.task.expl}}))}:null;
+    localStorage.setItem(K,JSON.stringify({log:LOG,ex,nm:window._nm||''}))}catch(e){}}
+  function load(){if(!ok)return null;try{return JSON.parse(localStorage.getItem(K)||'null')}catch(e){return null}}
+  const d=load();if(d){if(Array.isArray(d.log))d.log.forEach(e=>LOG.push(e));if(d.nm)window._nm=d.nm}
+  setInterval(save,2500);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+  window.addEventListener('pagehide',save);window.addEventListener('blur',save);
+  return {ok,save,resume:d&&d.ex};
+})();
+(function(){
+  const r0=examResult;examResult=function(){if(EX)EX.done=true;r0();KEEP.save()};
+  const h0=home;home=function(){h0();KEEP.save();
+    if(!KEEP.ok){const hero=document.querySelector('#app .hero');if(hero)hero.insertAdjacentHTML('beforeend','<div class="fb no" style="margin-top:10px">Achtung: Dein Browser erlaubt hier kein Speichern. Wenn du die App wechselst, kann dein Fortschritt verloren gehen. Bleib in diesem Fenster oder mach Screenshots.</div>')}};
+  document.addEventListener('input',e=>{if(e.target&&e.target.id==='nm')window._nm=e.target.value});
+  if(KEEP.resume&&KEEP.resume.items&&KEEP.resume.items.length)setTimeout(()=>{EX=KEEP.resume;EX.done=false;examRender();
+    const app=document.querySelector('#app');if(app)app.insertAdjacentHTML('afterbegin','<div class="fb ok" style="margin-bottom:10px">Deine Challenge wurde wiederhergestellt. Du machst bei Aufgabe '+(EX.i+1)+' weiter.</div>')},0);
+})();
+
+
+/* ---------- Simulation 1:0 für Bad Einstein ---------- */
+const Opa=(function(){
+  let P,c,pc,raf=null,t=0,last=0,run=false,slow=false,unl=false,vO=1.5,useRight=false,done=false,res='';
+  const E={x:0,y:11},dB={x:0.8,y:0.6},dO={x:-0.6,y:0.8},GOAL={x:0,y:-0.6};
+  let B0,O0,X0,X1,Y0,Y1;
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=null;run=false}
+  function init(p){stop();P=p;t=0;unl=false;useRight=false;done=false;res='';
+    B0={x:E.x+P.sb*dB.x,y:E.y+P.sb*dB.y};O0={x:E.x+P.so*dO.x,y:E.y+P.so*dO.y};
+    X0=Math.min(-22,O0.x-6);X1=Math.max(22,B0.x+6);Y0=-3;Y1=Math.max(B0.y,O0.y,20)+4;
+    c=document.getElementById('pitch');pc=c.getContext('2d');
+    const b=id=>document.getElementById(id);
+    b('oPlay').onclick=()=>{if(run){run=false;b('oPlay').textContent='Weiter ▶';return}if(done||t===0){t=0;done=false;res='';pickSpeed()}run=true;b('oPlay').textContent='Pause ❚❚';last=performance.now();loop()};
+    b('oReset').onclick=()=>{run=false;t=0;done=false;res='';b('oPlay').textContent='Anstoß ▶';draw()};
+    b('oSlow').onclick=()=>{slow=!slow;b('oSlow').classList.toggle('on',slow)};
+    b('oRight').onclick=()=>{useRight=true;run=false;t=0;done=false;res='';vO=P.vo;b('oPlay').click()};
+    size();window.addEventListener('resize',size);}
+  function pickSpeed(){
+    if(useRight){vO=P.vo;return}
+    const inp=document.getElementById('in0');const v=inp?parse(inp.value):null;
+    vO=(v!=null&&v>0)?v:1.5;
+    const n=document.getElementById('oNote');
+    if(n&&!unl)n.textContent=(v!=null&&v>0)?`Opa läuft jetzt mit deinem Wert: ${fmt(vO,2)} m/s.`:'Opa trödelt mit 1,5 m/s. Trag unten dein Ergebnis ein, dann läuft Opa beim nächsten Anstoß mit deinem Tempo.';
+  }
+  function unlock(){unl=true;const b=document.getElementById('oRight');if(b)b.disabled=false;const n=document.getElementById('oNote');if(n)n.textContent='Jetzt mit Uhr. „Mit richtiger Lösung“ zeigt, wie Opa genau rechtzeitig ankommt.';draw()}
+  function size(){if(!c||!document.body.contains(c))return;const w=Math.min(c.parentElement.clientWidth-4,820);const h=Math.round(w*(Y1-Y0)/(X1-X0));const d=window.devicePixelRatio||1;c.width=w*d;c.height=h*d;c.style.height=h+'px';pc.setTransform(d,0,0,d,0,0);c._w=w;c._h=h;draw()}
+  const tB=()=>P.sb/P.vb,tO=()=>P.so/vO;
+  function endT(){const ok=tO()<=tB()+0.03;return ok?tB()+0.7:Math.max(tB()+1.1,Math.min(tO(),tB()+1.6))}
+  function loop(){const now=performance.now();const dt=Math.min((now-last)/1000,.05);last=now;if(run){t+=dt*(slow?.25:1);const te=endT();if(t>=te){t=te;run=false;done=true;finish();document.getElementById('oPlay').textContent='Nochmal ▶'}}draw();if(run)raf=requestAnimationFrame(loop)}
+  function finish(){const d=tO()-tB();if(d>0.03)res='late:'+d;else if(d<-0.25)res='early:'+(-d);else res='ok'}
+  function draw(){
+    if(!c||!P)return;const W=c._w,H=c._h,sc=W/(X1-X0);const px=x=>(x-X0)*sc,py=y=>(y-Y0)*sc;
+    const line=(a,b,cx,d)=>{pc.beginPath();pc.moveTo(px(a),py(b));pc.lineTo(px(cx),py(d));pc.stroke()};
+    const tag=(txt,p,dx,dy,bg)=>{pc.font='600 13px Arial';const w=pc.measureText(txt).width+12;const x=px(p.x)+dx,y=py(p.y)+dy;pc.fillStyle=bg;pc.beginPath();pc.roundRect?pc.roundRect(x-w/2,y-10,w,20,5):pc.rect(x-w/2,y-10,w,20);pc.fill();pc.fillStyle='#fff';pc.textAlign='center';pc.textBaseline='middle';pc.fillText(txt,x,y+1)};
+    const dot=(p,r,f,st,lab)=>{pc.beginPath();pc.arc(px(p.x),py(p.y),r,0,7);pc.fillStyle=f;pc.fill();if(st){pc.lineWidth=2;pc.strokeStyle=st;pc.stroke()}if(lab){pc.fillStyle='#fff';pc.font='bold 12px Arial';pc.textAlign='center';pc.textBaseline='middle';pc.fillText(lab,px(p.x),py(p.y)+1)}};
+    for(let i=0;i*4<Y1-Y0;i++){pc.fillStyle=i%2?'#2F7A3E':'#358746';pc.fillRect(0,py(Y0+i*4),W,sc*4+1)}
+    pc.strokeStyle='rgba(255,255,255,.85)';pc.lineWidth=2;line(X0,0,X1,0);
+    pc.strokeRect(px(-20.16),py(0),sc*40.32,sc*16.5);pc.strokeRect(px(-9.16),py(0),sc*18.32,sc*5.5);
+    pc.beginPath();pc.arc(px(E.x),py(E.y),9.15*sc,Math.asin(5.5/9.15),Math.PI-Math.asin(5.5/9.15));pc.stroke();
+    pc.fillStyle='rgba(255,255,255,.25)';pc.fillRect(px(-3.66),py(-2),sc*7.32,sc*2);pc.lineWidth=3;pc.strokeStyle='#fff';line(-3.66,0,-3.66,-2);line(3.66,0,3.66,-2);line(-3.66,-2,3.66,-2);
+    pc.beginPath();pc.arc(px(E.x),py(E.y),4,0,7);pc.fillStyle='#fff';pc.fill();
+    pc.setLineDash([7,6]);pc.lineWidth=2;pc.strokeStyle='rgba(255,255,255,.9)';line(B0.x,B0.y,E.x,E.y);pc.strokeStyle='rgba(20,36,58,.85)';line(O0.x,O0.y,E.x,E.y);pc.setLineDash([]);
+    tag(fmt(P.sb,0)+' m',{x:(B0.x+E.x)/2,y:(B0.y+E.y)/2},18,-14,'rgba(179,64,47,.92)');
+    tag(fmt(P.so,1)+' m',{x:(O0.x+E.x)/2,y:(O0.y+E.y)/2},22,10,'rgba(31,58,95,.92)');
+    pc.fillStyle='#fff';pc.font='600 12px Arial';pc.textAlign='left';pc.textBaseline='middle';pc.fillText('Elfmeterpunkt',px(E.x)+12,py(E.y));
+    /* Positionen */
+    const TB=tB(),TO=tO(),ok=TO<=TB+0.03;
+    const so=Math.min(vO*t,P.so);const opa={x:O0.x-dO.x*so,y:O0.y-dO.y*so};
+    let ball;if(t<=TB){const s=P.vb*t;ball={x:B0.x-dB.x*s,y:B0.y-dB.y*s}}
+    else if(ok){const f=Math.min((t-TB)*25/Math.hypot(E.x-GOAL.x,E.y-GOAL.y),1);ball={x:E.x+(GOAL.x-E.x)*f,y:E.y+(GOAL.y-E.y)*f}}
+    else{const s=P.vb*t;ball={x:B0.x-dB.x*s,y:Math.max(B0.y-dB.y*s,-1.5)}}
+    dot({x:0.6,y:0.8},9,'#E67E22','#7A3E0A','T');
+    dot(B0,10,'#3C7A4E','#fff','B');tag('Blattschuß',B0,0,-20,'rgba(60,122,78,.95)');
+    dot(opa,11,'#1F3A5F','#fff','K');tag('Opa Krawuttke',opa,-62,0,'rgba(31,58,95,.95)');
+    dot(ball,5.5,'#fff','#111');
+    /* Anzeige */
+    pc.fillStyle='rgba(0,0,0,.45)';pc.fillRect(0,0,W,26);pc.fillStyle='#fff';pc.font='bold 14px Arial';pc.textBaseline='middle';
+    pc.textAlign='left';pc.fillText(unl?`t = ${fmt(t,2)} s`:'t = ? s',8,13);
+    pc.textAlign='right';pc.fillText(`Opa läuft ${fmt(vO,2)} m/s`,W-8,13);
+    if(done&&res){let txt,bg;if(res==='ok'){txt='TOR! Opa Krawuttke trifft zum 1:0';bg='rgba(46,125,79,.95)'}else if(res.startsWith('late')){txt=unl?`Zu spät! Opa fehlen ${fmt(+res.split(':')[1],2)} s`:'Zu spät! Opa muss schneller laufen.';bg='rgba(179,64,47,.95)'}else{txt='Tor! Aber Opa war viel zu früh da – er hätte langsamer laufen können.';bg='rgba(224,168,0,.95)'}
+      pc.font='bold 15px Arial';const w=Math.min(W-20,pc.measureText(txt).width+24);pc.fillStyle=bg;pc.fillRect((W-w)/2,H-46,w,36);pc.fillStyle='#fff';pc.textAlign='center';pc.fillText(txt,W/2,H-28)}
+  }
+  return {init,unlock,stop};
+})();
+home();
+
+/* ===== Anbindung an die Klassen-App (ohne Namen und ohne Lehrer-Code!) ===== */
+if(window.AppBridge){
+  setTimeout(()=>{appLive=true},1500);
+  AppBridge.register({
+    getState(){
+      const details={},erl=[];
+      AREAS.forEach(a=>{const v=areaVal(a);details[a[0]]=v+' von '+a[2];if(v>=a[2])erl.push(a[0])});
+      const log=LOG.map(e=>Object.assign({},e));
+      return{punkte:totals()[0],stationen:AREAS.map(a=>a[0]),erledigt:erl,details,
+        daten:{stats:JSON.parse(JSON.stringify(stats)),exr:EXR?JSON.parse(JSON.stringify(EXR)):null,log}};
+    },
+    setState(s){const d=s&&s.daten;if(!d||!d.stats)return;
+      stats=d.stats;LOG.length=0;(d.log||[]).forEach(e=>LOG.push(e));
+      if(d.exr){EXR=d.exr;try{localStorage.setItem('kin-ueb-exr',JSON.stringify(EXR))}catch(e){}}
+      appLive=true;saveStats();try{updScore()}catch(e){}home();}
+  });
+}
+</script>
+<script src="../lib/jspdf.umd.min.js"></script>
+</body>
+</html>

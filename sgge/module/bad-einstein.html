@@ -1,0 +1,286 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>1:0 für Bad Einstein</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Anzeigetafel oben, Spielfeld (Draufsicht) groß, darunter Regler + s-t-Diagramm nebeneinander, Lösung zum Aufklappen */
+:root{
+  --bg:#F3F6F8; --card:#FFFFFF; --fg:#1B2733; --muted:#5A6B7B; --line:#D5DEE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --ball:#C0392B; --opa:#1F3A5F; --warn:#B35A00;
+  --board:#14243A; --boardfg:#F4F7FA; --led:#F2C14E;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1720; --card:#17222E; --fg:#E6EDF3; --muted:#9AAAB9; --line:#2A3A4A;
+  --navy:#8FB3E0; --green:#7CC492; --ball:#F07A6A; --opa:#8FB3E0; --warn:#F0A04B;
+  --board:#0A121C; --boardfg:#F4F7FA; --led:#F2C14E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1720; --card:#17222E; --fg:#E6EDF3; --muted:#9AAAB9; --line:#2A3A4A;
+  --navy:#8FB3E0; --green:#7CC492; --ball:#F07A6A; --opa:#8FB3E0; --warn:#F0A04B;
+  --board:#0A121C; --boardfg:#F4F7FA; --led:#F2C14E; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:1000px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;gap:16px}
+.eyebrow{font:700 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+h1{font:700 clamp(28px,5vw,40px)/1.05 var(--display);margin:6px 0 0;color:var(--navy);text-wrap:balance}
+.task{margin:6px 0 0;color:var(--muted);max-width:68ch}
+.board{background:var(--board);color:var(--boardfg);border-radius:10px;padding:10px 16px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;font-family:var(--display)}
+.board .team{font-size:clamp(16px,3vw,22px);font-weight:600;letter-spacing:.02em}
+.board .team.r{text-align:right}
+.score{font-size:clamp(30px,6vw,44px);font-weight:700;color:var(--led);font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.clock{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--body);font-size:13px;opacity:.8}
+.field{position:relative;border-radius:10px;overflow:hidden;background:#2F7A3E}
+#pitch{display:block;width:100%;height:auto;aspect-ratio:60/36;max-width:100%;touch-action:none}
+.banner{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:8px 16px;border-radius:999px;
+  font:700 clamp(16px,3vw,22px)/1.1 var(--display);letter-spacing:.03em;white-space:nowrap;
+  background:rgba(255,255,255,.95);color:#14243A;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.banner.win{background:#F2C14E}
+.panels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:760px){.panels{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px;min-width:0}
+.card h2{font:700 20px/1 var(--display);margin:0;color:var(--navy);letter-spacing:.02em}
+.ctrl{display:grid;gap:4px}
+.ctrl label{display:flex;justify-content:space-between;font-weight:600}
+.ctrl output{font-variant-numeric:tabular-nums;font-weight:700}
+.ctrl .ball output{color:var(--ball)}
+input[type=range]{width:100%;height:32px;accent-color:var(--green)}
+#vb{accent-color:var(--ball)} #vo{accent-color:var(--opa)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+button{font:600 16px var(--body);padding:10px 18px;border-radius:8px;border:2px solid var(--green);
+  background:var(--green);color:#fff;cursor:pointer;min-height:44px}
+button.ghost{background:transparent;color:var(--green)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+.chk{display:flex;align-items:center;gap:8px;font-weight:600}
+.chk input{width:20px;height:20px;accent-color:var(--green)}
+.read{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-variant-numeric:tabular-nums}
+.read div{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.read span{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.read b{font:700 22px/1.1 var(--display)}
+.read .rb b{color:var(--ball)} .read .ro b{color:var(--opa)}
+#chart{width:100%;height:auto;aspect-ratio:4/3;max-width:100%;display:block}
+.legend{display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details p{margin:8px 0;max-width:68ch}
+.calc{font-variant-numeric:tabular-nums;line-height:1.8}
+.hint{font-size:14px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kinematik · M4 · Simulation</div>
+    <h1>1:0 für Bad Einstein</h1>
+    <p class="task">Blattschuß passt den Ball aus 30 m mit 13 m/s Richtung Elfmeterpunkt. Opa Krawuttke steht 11,5 m vom Elfmeterpunkt entfernt. Wie schnell muss Opa laufen, damit er genau dann am Elfmeterpunkt ist, wenn der Ball ankommt? Stellen Sie Opas Tempo ein und testen Sie.</p>
+  </header>
+
+  <div class="board" aria-live="polite">
+    <div class="team">1. FC Bad Einstein</div>
+    <div class="score" id="score">0 : 0</div>
+    <div class="team r">SV Bimmelstadt</div>
+    <div class="clock"><span>Kreisligaspiel · 28. Minute</span><span id="tclock">t = 0,00 s</span></div>
+  </div>
+
+  <div class="field">
+    <canvas id="pitch" width="1200" height="720" aria-label="Spielfeld von oben: Ball, Blattschuß, Opa Krawuttke, Elfmeterpunkt und Tor"></canvas>
+    <div class="banner" id="banner" hidden></div>
+  </div>
+
+  <div class="panels">
+    <section class="card">
+      <h2>Einstellungen</h2>
+      <div class="ctrl"><label for="vo">Opa Krawuttke <output id="vo-out">3,0 m/s</output></label>
+        <input type="range" id="vo" min="1" max="8" step="0.1" value="3"></div>
+      <div class="ctrl ball"><label for="vb">Ball (Pass von Blattschuß) <output id="vb-out">13 m/s</output></label>
+        <input type="range" id="vb" min="8" max="20" step="0.5" value="13"></div>
+      <label class="chk"><input type="checkbox" id="slow"> Zeitlupe (¼ Tempo)</label>
+      <div class="btns">
+        <button id="play">Anstoß ▶</button>
+        <button id="reset" class="ghost">Zurück auf Anfang</button>
+      </div>
+      <div class="read">
+        <div><span>Zeit</span><b id="r-t">0,00 s</b></div>
+        <div class="rb"><span>Ball noch</span><b id="r-b">30,0 m</b></div>
+        <div class="ro"><span>Opa noch</span><b id="r-o">11,5 m</b></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Weg-Zeit-Diagramm</h2>
+      <canvas id="chart" width="800" height="600" aria-label="s-t-Diagramm von Ball und Opa"></canvas>
+      <div class="legend"><span><i style="background:var(--ball)"></i>Ball</span><span><i style="background:var(--opa)"></i>Opa Krawuttke</span><span>Punkt = Ankunft am Elfmeterpunkt</span></div>
+      <p class="hint">Beide Geraden starten bei 0. Opa schafft es, wenn er seine 11,5 m nicht später erreicht als der Ball seine 30 m.</p>
+    </section>
+  </div>
+
+  <details>
+    <summary>Lösung anzeigen</summary>
+    <p class="calc"><b>Gegeben:</b> Ball s = 30 m, v = 13 m/s · Opa s = 11,5 m, gleiche Zeit t<br>
+    <b>Gesucht:</b> v<sub>Opa</sub><br>
+    <b>1. Zeit des Balls:</b> t = s / v = 30 m / 13 m/s ≈ 2,31 s<br>
+    <b>2. Tempo von Opa:</b> v = s / t = 11,5 m / 2,31 s ≈ 5,0 m/s (≈ 18 km/h)</p>
+    <p>Opa Krawuttke lief im Schnitt etwa 5 m/s. Im Diagramm sieht man das daran, dass beide Ankunftspunkte bei derselben Zeit liegen.</p>
+  </details>
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const fmt=(x,d=1)=>x.toFixed(d).replace('.',',');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// Spielfeld in Metern: Torlinie y=0, Torzentrum x=0
+const E={x:0,y:11};                       // Elfmeterpunkt
+const dB={x:0.8,y:0.6}, dO={x:-0.6,y:0.8};
+const B0={x:E.x+30*dB.x,y:E.y+30*dB.y};   // Blattschuß, 30 m entfernt
+const O0={x:E.x+11.5*dO.x,y:E.y+11.5*dO.y}; // Opa, 11,5 m entfernt
+const GOAL={x:0,y:-0.6};
+const SB=30, SO=11.5, TOL=0.02;
+
+let vB=13,vO=3,t=0,running=false,last=0,done=false;
+let tries=0,solved=false;
+const appChanged=()=>{if(window.AppBridge)AppBridge.changed()};
+const pitch=$('pitch'),pc=pitch.getContext('2d');
+const chart=$('chart'),cc=chart.getContext('2d');
+const X0=-30,X1=30,Y0=-2,Y1=34;
+const px=x=>(x-X0)/(X1-X0)*pitch.width;
+const py=y=>(y-Y0)/(Y1-Y0)*pitch.height;
+const sc=pitch.width/(X1-X0);
+
+function tB(){return SB/vB} function tO(){return SO/vO}
+function success(){return tO()<=tB()+TOL}
+
+function state(){
+  const TB=tB(),TO=tO(),ok=success();
+  let ball,opa;
+  const so=Math.min(vO*t,SO);
+  opa={x:O0.x-dO.x*so,y:O0.y-dO.y*so};
+  if(t<=TB){const s=vB*t;ball={x:B0.x-dB.x*s,y:B0.y-dB.y*s};}
+  else if(ok){const f=Math.min((t-TB)*25/Math.hypot(E.x-GOAL.x,E.y-GOAL.y),1);
+    ball={x:E.x+(GOAL.x-E.x)*f,y:E.y+(GOAL.y-E.y)*f};}
+  else{const s=vB*t;const sx=B0.x-dB.x*s,sy=B0.y-dB.y*s;ball={x:sx,y:Math.max(sy,-1.5)};}
+  return {ball,opa,TB,TO,ok};
+}
+function endTime(){const TB=tB(),TO=tO();return success()?TB+0.6:Math.max(TB+1.1,Math.min(TO,TB+1.6));}
+
+function line(a,b,c,d){pc.beginPath();pc.moveTo(px(a),py(b));pc.lineTo(px(c),py(d));pc.stroke();}
+function dot(p,r,fill,stroke,label,lc){
+  pc.beginPath();pc.arc(px(p.x),py(p.y),r,0,7);pc.fillStyle=fill;pc.fill();
+  if(stroke){pc.lineWidth=3;pc.strokeStyle=stroke;pc.stroke();}
+  if(label){pc.fillStyle=lc||'#fff';pc.font='700 22px "Barlow Condensed",Arial';pc.textAlign='center';pc.textBaseline='middle';pc.fillText(label,px(p.x),py(p.y)+1);}
+}
+function tag(text,p,dx,dy,bg){
+  pc.font='600 22px "Source Sans 3",Arial';const w=pc.measureText(text).width+16;
+  const x=px(p.x)+dx,y=py(p.y)+dy;
+  pc.fillStyle=bg;pc.beginPath();pc.roundRect(x-w/2,y-15,w,30,6);pc.fill();
+  pc.fillStyle='#fff';pc.textAlign='center';pc.textBaseline='middle';pc.fillText(text,x,y+1);
+}
+
+function drawPitch(){
+  const W=pitch.width,H=pitch.height;
+  for(let i=0;i<9;i++){pc.fillStyle=i%2?'#2F7A3E':'#358746';pc.fillRect(0,py(Y0+i*4),W,sc*4+1);}
+  pc.strokeStyle='rgba(255,255,255,.85)';pc.lineWidth=3;
+  line(X0,0,X1,0);
+  pc.strokeRect(px(-20.16),py(0),sc*40.32,sc*16.5);
+  pc.strokeRect(px(-9.16),py(0),sc*18.32,sc*5.5);
+  pc.beginPath();pc.arc(px(E.x),py(E.y),9.15*sc,Math.asin(5.5/9.15),Math.PI-Math.asin(5.5/9.15));pc.stroke();
+  // Tor
+  pc.fillStyle='rgba(255,255,255,.25)';pc.fillRect(px(-3.66),py(-2),sc*7.32,sc*2);
+  pc.lineWidth=5;pc.strokeStyle='#fff';line(-3.66,0,-3.66,-2);line(3.66,0,3.66,-2);line(-3.66,-2,3.66,-2);
+  // Elfmeterpunkt
+  pc.beginPath();pc.arc(px(E.x),py(E.y),6,0,7);pc.fillStyle='#fff';pc.fill();
+  // Wege
+  pc.setLineDash([10,9]);pc.lineWidth=3;
+  pc.strokeStyle='rgba(255,255,255,.9)';line(B0.x,B0.y,E.x,E.y);
+  pc.strokeStyle='rgba(20,36,58,.85)';line(O0.x,O0.y,E.x,E.y);
+  pc.setLineDash([]);
+  tag('30 m',{x:(B0.x+E.x)/2,y:(B0.y+E.y)/2},26,-22,'rgba(192,57,43,.92)');
+  tag('11,5 m',{x:(O0.x+E.x)/2,y:(O0.y+E.y)/2},-38,-10,'rgba(31,58,95,.92)');
+  pc.fillStyle='#fff';pc.font='600 20px "Source Sans 3",Arial';pc.textAlign='left';pc.textBaseline='middle';
+  pc.fillText('Elfmeterpunkt',px(E.x)+28,py(E.y)-2);
+}
+
+function draw(){
+  pc.clearRect(0,0,pitch.width,pitch.height);
+  drawPitch();
+  const s=state();
+  dot({x:0.6,y:0.8},16,'#E67E22','#7A3E0A','T');
+  tag('Torwart Totalblind',{x:0.6,y:0.8},150,0,'rgba(122,62,10,.9)');
+  dot(B0,18,'#3C7A4E','#fff','B');
+  tag('Blattschuß',B0,0,-36,'rgba(60,122,78,.95)');
+  dot(s.opa,20,'#1F3A5F','#fff','K');
+  tag('Opa Krawuttke',s.opa,0,38,'rgba(31,58,95,.95)');
+  dot(s.ball,10,'#fff','#111');
+  drawChart(s);
+  const remB=Math.max(SB-vB*t,0),remO=Math.max(SO-vO*t,0);
+  $('r-t').textContent=fmt(t,2)+' s';$('tclock').textContent='t = '+fmt(t,2)+' s';
+  $('r-b').textContent=fmt(remB)+' m';$('r-o').textContent=fmt(remO)+' m';
+}
+
+function drawChart(s){
+  const W=chart.width,H=chart.height,L=80,R=24,T=20,Bm=76;
+  const tm=Math.max(4,Math.ceil(Math.max(s.TB,Math.min(s.TO,12))+0.5)),sm=32;
+  const cx=v=>L+v/tm*(W-L-R), cy=v=>H-Bm-v/sm*(H-T-Bm);
+  const fg=css('--fg'),mu=css('--muted'),ln=css('--line'),cb=css('--ball'),co=css('--opa');
+  cc.clearRect(0,0,W,H);
+  cc.font='26px "Source Sans 3",Arial';cc.lineWidth=1;
+  for(let v=0;v<=sm;v+=5){cc.strokeStyle=ln;cc.beginPath();cc.moveTo(L,cy(v));cc.lineTo(W-R,cy(v));cc.stroke();
+    cc.fillStyle=mu;cc.textAlign='right';cc.textBaseline='middle';cc.fillText(v,L-10,cy(v));}
+  for(let v=0;v<=tm;v++){cc.strokeStyle=ln;cc.beginPath();cc.moveTo(cx(v),T);cc.lineTo(cx(v),H-Bm);cc.stroke();
+    cc.fillStyle=mu;cc.textAlign='center';cc.textBaseline='top';cc.fillText(v,cx(v),H-Bm+8);}
+  cc.fillStyle=fg;cc.textAlign='center';cc.fillText('t in s',(L+W-R)/2,H-34);
+  cc.save();cc.translate(22,(T+H-Bm)/2);cc.rotate(-Math.PI/2);cc.textBaseline='middle';cc.fillText('s in m',0,0);cc.restore();
+  const seg=(v,S,T1,col)=>{cc.strokeStyle=col;cc.lineWidth=4;cc.beginPath();cc.moveTo(cx(0),cy(0));
+    const te=Math.min(T1,tm);cc.lineTo(cx(te),cy(v*te));cc.stroke();
+    if(T1<=tm){cc.beginPath();cc.arc(cx(T1),cy(S),8,0,7);cc.fillStyle=col;cc.fill();
+      cc.setLineDash([6,6]);cc.lineWidth=2;cc.beginPath();cc.moveTo(cx(T1),cy(S));cc.lineTo(cx(T1),cy(0));cc.stroke();cc.setLineDash([]);}};
+  seg(vB,SB,s.TB,cb);seg(vO,SO,s.TO,co);
+  if(t>0){cc.strokeStyle=fg;cc.globalAlpha=.5;cc.lineWidth=2;cc.beginPath();cc.moveTo(cx(Math.min(t,tm)),T);cc.lineTo(cx(Math.min(t,tm)),H-Bm);cc.stroke();cc.globalAlpha=1;}
+}
+
+function finish(){
+  running=false;done=true;$('play').textContent='Nochmal ▶';
+  const b=$('banner');b.hidden=false;
+  tries++;if(success())solved=true;appChanged();
+  if(success()){b.className='banner win';b.textContent='TOR! Opa Krawuttke trifft zum 1:0';$('score').textContent='1 : 0';}
+  else{const dt=tO()-tB();b.className='banner';b.textContent='Zu spät! Opa fehlen '+fmt(dt,2)+' s · Ball im Toraus';}
+}
+function loop(now){
+  if(!running)return;
+  const dt=Math.min((now-last)/1000,0.05);last=now;
+  t+=dt*($('slow').checked?0.25:1);
+  const te=endTime();
+  if(t>=te){t=te;draw();finish();return;}
+  draw();requestAnimationFrame(loop);
+}
+function reset(){running=false;done=false;t=0;$('banner').hidden=true;$('score').textContent='0 : 0';$('play').textContent='Anstoß ▶';draw();}
+$('play').onclick=()=>{
+  if(running){running=false;$('play').textContent='Weiter ▶';return;}
+  if(done)reset();
+  running=true;$('play').textContent='Pause ❚❚';last=performance.now();requestAnimationFrame(loop);
+};
+$('reset').onclick=reset;
+$('vo').oninput=e=>{vO=+e.target.value;$('vo-out').textContent=fmt(vO)+' m/s';reset();};
+$('vb').oninput=e=>{vB=+e.target.value;$('vb-out').textContent=(vB%1?fmt(vB):vB)+' m/s';reset();};
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',draw);
+new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+document.fonts?.ready.then(draw);
+draw();
+
+/* ===== Anbindung an die Klassen-App ===== */
+if(window.AppBridge)AppBridge.register({
+  getState(){
+    return{punkte:solved?10:0,stationen:['Opas Tempo finden'],erledigt:solved?['Opas Tempo finden']:[],
+      details:{'Opas Tempo finden':(solved?'Geschafft, Tor':'Noch kein Tor')+' · '+tries+' Versuch'+(tries===1?'':'e')},
+      daten:{tries,solved}};
+  },
+  setState(s){const d=s&&s.daten;if(!d)return;tries=d.tries||0;solved=!!d.solved;}
+});
+})();
+</script>
+
+</body></html>
