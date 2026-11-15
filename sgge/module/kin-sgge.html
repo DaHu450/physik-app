@@ -784,8 +784,8 @@ TOPICS.push({id:'einstein0',title:'Kleine Textaufgaben (Einstieg)',desc:'Kurz: G
 
 
 /* ---------- Begegnung aus der Gegenrichtung ---------- */
-TOPICS.push({id:'geg',title:'Begegnung: Aus der Gegenrichtung',desc:'Zwei kommen sich entgegen, einer startet später oder läuft zurück. Wann und wo treffen sie sich?',gen(){
-  const k=rnd(1,4);
+TOPICS.push({id:'geg',title:'Treffen und Einholen: Rechnen',desc:'Ohne Diagramm: Zwei kommen sich entgegen oder einer holt den anderen ein. Wann und wo treffen sie sich?',gen(){
+  const k=rnd(1,6);
   if(k===1){/* gleichzeitig, aufeinander zu */
     const v1=pick([2,3,4,5,6]),v2=pick([1,2,3,4]),T=pick([10,12,15,20,25,30]),d=(v1+v2)*T,pr=pick([['Anna','Ben','Schule','Sportplatz'],['Mira','Jonas','Bahnhof','Schwimmbad'],['Lea','Tim','Marktplatz','Park']]);
     return {title:'Gegenverkehr auf dem Weg',q:`<p>Der Weg von der <b>${pr[2]}</b> zum <b>${pr[3]}</b> ist <b>${d} m</b> lang. ${pr[0]} joggt an der ${pr[2]} los, ${pr[1]} gleichzeitig am ${pr[3]} in die Gegenrichtung, also ${pr[0]} entgegen. ${pr[0]} läuft mit <b>${v1} m/s</b>, ${pr[1]} mit <b>${v2} m/s</b>, beide gleichmäßig.</p><p>a) Nach wie vielen Sekunden treffen sie sich?<br>b) Wie weit ist der Treffpunkt von der ${pr[2]} entfernt?</p>`,
@@ -808,6 +808,21 @@ TOPICS.push({id:'geg',title:'Begegnung: Aus der Gegenrichtung',desc:'Zwei kommen
       wrong(x){if(x.t!=null&&Math.abs(x.t-d/(v1+v2))<.3)return 'So rechnest du, als würde '+pr[0]+' von der Wendemarke aus starten. Sie läuft aber erst bis zur Marke und dann zurück: Ihr Gesamtweg bis zum Treffen ist d + (d − s<sub>Treffpunkt</sub>).';return ''},
       hint:'Beim Treffen haben beide zusammen genau den Weg 2 · '+d+' m zurückgelegt: '+pr[0]+' hin und zurück, '+pr[1]+' nur ein Stück. Also (v₁ + v₂) · t = 2 · d.',
       expl:`<ol><li>Gemeinsamer Weg beim Treffen: ${pr[0]} läuft ${d} m hin und dann zurück, ${pr[1]} läuft in der Zeit von der Startlinie nach vorn. Zusammen: 2 · ${d} m = ${2*d} m.</li><li>Zusammen schaffen sie ${v1} + ${v2} = ${v1+v2} m/s.</li><li class="res">a) t = ${2*d} m : ${v1+v2} m/s = ${T} s</li><li>${pr[1]} ist bis dahin ${v2} m/s · ${T} s = ${sJ} m gelaufen.</li><li class="res">b) Abstand zur Wendemarke: ${d} m − ${sJ} m = ${aB} m</li></ol>`};}
+  if(k===5){/* Einholen, einer startet später (gleiche Richtung) */
+    let v1,v2,late,te,g=0;do{v2=pick([12,15,18]);v1=pick([18,20,24,27,30]);late=pick([10,15,20,30]);te=v2*late/(v1-v2)}while((g++<500)&&(v1<=v2+2||Math.abs(te-Math.round(te))>1e-9||te<5||te>60));
+    const S=v1*te/60,pr=pick([['Nico','Emma','Schule'],['Ole','Lina','Bahnhof'],['Paul','Mara','Marktplatz']]);
+    return {title:'Einholen auf dem Radweg',q:`<p>${pr[0]} fährt an der ${pr[2]} mit dem Rad los, gleichmäßig mit <b>${v2} km/h</b>. Genau <b>${late} Minuten später</b> startet ${pr[1]} am selben Ort, fährt hinterher und schafft <b>${v1} km/h</b>.</p><p>a) Nach wie vielen Minuten (ab ${pr[1]}s Start) holt ${pr[1]} ${pr[0]} ein?<br>b) Wie weit von der ${pr[2]} entfernt passiert das?</p>`,
+      inputs:[{label:'a) Einholen nach',unit:'min',ans:te,tol:.04*te+.5,id:'t'},{label:'b) Entfernung von der '+pr[2],unit:'km',ans:S,tol:rel(S,.04)+.1,id:'s'}],
+      wrong(x){if(x.t!=null&&Math.abs(x.t-late*v2/(v1+v2))<.6)return 'Hier fahren beide in dieselbe Richtung. Der Vorsprung schrumpft nur mit der Differenz v₂ − v₁, nicht mit der Summe.';return ''},
+      hint:'Erst den Vorsprung: Wie weit ist '+pr[0]+' gekommen, wenn '+pr[1]+' startet ('+late+' min = '+fmt(late/60,2)+' h)? Dieser Abstand schrumpft mit der Differenz '+v1+' − '+v2+' km/h.',
+      expl:`<ol><li>Vorsprung: ${v2} km/h · ${fmt(late/60,2)} h = ${fmt(v2*late/60,2)} km</li><li>Bei gleicher Richtung schrumpft der Abstand mit der Differenz: ${v1} − ${v2} = ${v1-v2} km/h.</li><li class="res">a) t = ${fmt(v2*late/60,2)} km : ${v1-v2} km/h = ${fmt(te/60,3)} h = ${te} min</li><li class="res">b) s = ${v1} km/h · ${fmt(te/60,3)} h = ${fmt(S,1)} km</li></ol>`};}
+  if(k===6){/* Einholen mit Vorsprung in m */
+    const v2=pick([1,2,3]),v1=v2+pick([1,2,3]),T=pick([20,30,40,50,60]),d0=(v1-v2)*T,pr=pick([['Ida','Leo'],['Zoe','Finn'],['Anna','Tim']]);
+    return {title:'Der Vorsprung wird kleiner',q:`<p>${pr[0]} geht mit <b>${v2} m/s</b> über den Schulhof. <b>${d0} m</b> hinter ihr merkt ${pr[1]}, dass er ihr noch etwas geben muss, und rennt mit <b>${v1} m/s</b> hinterher. Beide bewegen sich gleichmäßig in dieselbe Richtung.</p><p>a) Nach wie vielen Sekunden holt ${pr[1]} sie ein?<br>b) Wie weit läuft ${pr[1]} bis dahin?</p>`,
+      inputs:[{label:'a) Einholen nach',unit:'s',ans:T,tol:.04*T+.5,id:'t'},{label:'b) Weg von '+pr[1],unit:'m',ans:v1*T,tol:rel(v1*T,.04)+.5,id:'s'}],
+      wrong(x){if(x.t!=null&&Math.abs(x.t-d0/(v1+v2))<.4)return 'Beide laufen in dieselbe Richtung. Der Abstand schrumpft nur mit dem Unterschied der Geschwindigkeiten (v₁ − v₂), nicht mit der Summe.';return ''},
+      hint:'Der Abstand von '+d0+' m schrumpft mit '+v1+' − '+v2+' = '+(v1-v2)+' m/s. Dann t = Abstand : Differenz. Für b) s = v · t mit '+pr[1]+'s Tempo.',
+      expl:`<ol><li>Abstand ${d0} m, gleiche Richtung → er schrumpft mit ${v1} − ${v2} = ${v1-v2} m/s.</li><li class="res">a) t = ${d0} m : ${v1-v2} m/s = ${T} s</li><li class="res">b) s = ${v1} m/s · ${T} s = ${v1*T} m (${pr[0]} ist in der Zeit ${v2*T} m gegangen, ${v2*T} + ${d0} = ${v1*T} m)</li></ol>`};}
   /* k===4: unbekanntes Tempo */
   const v1=pick([3,4,5,6]),v2=pick([2,3,4,5]),T=pick([8,10,12,15,20]),d=(v1+v2)*T,pr=pick([['Zoe','Elias','Hauptstraße'],['Nina','Ole','Allee'],['Ida','Finn','Promenade']]);
   return {title:'Wie schnell ist der andere?',q:`<p>Die ${pr[2]} ist <b>${d} m</b> lang. ${pr[0]} läuft am einen Ende los, ${pr[1]} gleichzeitig am anderen Ende ihr entgegen. ${pr[0]} läuft mit <b>${v1} m/s</b>. Nach <b>${T} s</b> begegnen sich die beiden.</p><p>Wie schnell läuft ${pr[1]}?</p>`,
@@ -988,7 +1003,7 @@ function home(){
     ids.forEach(id=>{const t=TOPICS.find(x=>x.id===id);const s=stats[id]||{};h+=`<button class="topic ${n==='Textaufgaben'?'tx':''} ${ai>0&&!st1ok()?'lockd':''}" data-id="${id}" ${ai>0&&!st1ok()?'disabled':''}><b>${t.title}</b><span>${t.desc}</span><em>${s.n?('Richtig gelöst: '+(s.s||0)+' · im 1. Versuch: '+(s.r||0)):'noch nicht geübt'}</em></button>`});
     h+='</div>'});
   h+=`<button class="mix" id="mix">Bunte Mischung: Zufallsaufgabe</button>`;
-  h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>9 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 35 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
+  h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>10 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 40 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
   h+=`<div class="card selfcheck"><h3>Selbstcheck vor der Klassenarbeit</h3><p class="small" style="margin:0 0 6px">Geh die Liste durch. Wo du dir noch unsicher bist, tippe auf das Thema daneben und üb noch ein paar Aufgaben.</p><ul class="check">${CHECK.map(([t,ids])=>`<li><span>${t}</span><span class="go">${ids.map(id=>{const T=TOPICS.find(x=>x.id===id);return `<button class="chip" data-id="${id}">${T.title}</button>`}).join('')}</span></li>`).join('')}</ul></div>`;
   
   $('#app').innerHTML=h;
@@ -1006,7 +1021,7 @@ function bindPdf(){}
 /* ===== Abschluss-Challenge ===== */
 let EX=null,EXR=null;
 try{EXR=JSON.parse(localStorage.getItem('kin-sge-exr')||'null')}catch(e){EXR=null}
-const EXAM_IDS=['um','zz','v','dv','lesen','zuo','einstein','text','gz'];
+const EXAM_IDS=['um','zz','v','dv','lesen','zuo','einstein','text','gz','geg'];
 function examStart(){leave();Sim.stop();Opa.stop();
   EX={i:0,t0:Date.now(),items:EXAM_IDS.map(id=>{const T=TOPICS.find(x=>x.id===id);let tk=T.gen();let g=0;while(tk.draw&&g++<60)tk=T.gen();return {id,topic:T.title,task:tk,max:tk.choices?2:tk.inputs.length*2}})};
   examRender();}
