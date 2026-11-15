@@ -1,7 +1,7 @@
 /* Offline-Speicher der App.
    module.json kommt immer frisch aus dem Netz (sonst aus dem Speicher),
    alles andere aus dem Speicher und wird im Hintergrund aktualisiert. */
-const CACHE = 'sggeapp-v7';
+const CACHE = 'sggeapp-v8';
 const GRUND = ['./', 'index.html', 'gemeinsam.js', 'bridge.js', 'manifest.webmanifest', 'icons/sgge-180.png', 'icons/sgge-192.png', 'module/module.json', 'fonts/fonts.css', 'lib/jspdf.umd.min.js'];
 
 self.addEventListener('install', (e) => {

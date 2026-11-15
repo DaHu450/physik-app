@@ -1,3 +1,5 @@
+/* Ersatz für ältere iPads (vor iOS 16): CanvasRenderingContext2D.roundRect fehlt dort und würde das Modul-Skript abbrechen */
+(function(){var P=window.CanvasRenderingContext2D&&CanvasRenderingContext2D.prototype;if(P&&!P.roundRect){P.roundRect=function(x,y,w,h,r){r=Array.isArray(r)?(r[0]||0):(r||0);r=Math.min(r,Math.abs(w)/2,Math.abs(h)/2);this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()}}})();
 /* Brücke zwischen Modul (läuft im iframe) und der Klassen-App.
    Ein Modul ruft am Ende seines Skripts auf:
      AppBridge.register({
