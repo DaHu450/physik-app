@@ -29,18 +29,6 @@
    "icon": "auto"
   },
   {
-   "id": "ueberholspiel",
-   "titel": "Reicht das noch?",
-   "untertitel": "Das Überhol-Spiel",
-   "datei": "ueberholspiel.html",
-   "klassen": [
-    "41"
-   ],
-   "freigegeben": true,
-   "farbe": "#D2690A",
-   "icon": "spiel"
-  },
-  {
    "id": "besch",
    "titel": "Beschleunigte Bewegung",
    "untertitel": "Lernpfad zu Weg, Zeit und Geschwindigkeit",
