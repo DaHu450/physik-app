@@ -692,8 +692,41 @@ TOPICS.push({id:'einstein',title:'Geschichten aus Bad Einstein',desc:'Max die Sc
     expl:`<ol><li>Unnötig: Baujahr des Mofas.</li><li>Pfarrer: Gerade durch (0 | 0) und (10 min | ${fmt(v1/6,1)} km).</li><li>Frau Sauerampfer: Gerade durch (${t0} min | 0) und (${t0+10} min | ${fmt(v2/6,1)} km). Sie ist steiler.</li><li class="res">Schnittpunkt: nach ${fmt(T,0)} min, ${fmt(S,1)} km von Bad Einstein.</li><li>Bimmelstadt liegt bei ${fmt(B,1)} km: ${S<=B?'Sie holt ihn vorher ein, die Taufe ist gerettet.':'Der Pfarrer ist schon vorher in Bimmelstadt. Die Geraden schneiden sich erst oberhalb der Bimmelstadt-Linie.'}</li></ol>`};
 }});
 
+/* ---------- Gekrümmte Kurve: Geschwindigkeit pro Abschnitt ---------- */
+function smoothCurve(pts,per){/* monotone kubische Interpolation (Fritsch-Carlson) durch die Punkte */
+  const n=pts.length,h=[],d=[];for(let i=0;i<n-1;i++){h.push(pts[i+1][0]-pts[i][0]);d.push((pts[i+1][1]-pts[i][1])/h[i])}
+  const m=new Array(n);m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=(d[i-1]*d[i]<=0)?0:(d[i-1]+d[i])/2;
+  for(let i=0;i<n-1;i++){if(d[i]===0){m[i]=0;m[i+1]=0;continue}const a=m[i]/d[i],b=m[i+1]/d[i],r=a*a+b*b;if(r>9){const t=3/Math.sqrt(r);m[i]=t*a*d[i];m[i+1]=t*b*d[i]}}
+  const out=[];for(let i=0;i<n-1;i++){for(let j=0;j<per;j++){const u=j/per,t=pts[i][0]+u*h[i],u2=u*u,u3=u2*u;
+    out.push([t,(2*u3-3*u2+1)*pts[i][1]+(u3-2*u2+u)*h[i]*m[i]+(-2*u3+3*u2)*pts[i+1][1]+(u3-u2)*h[i]*m[i+1]])}}
+  out.push(pts[n-1].slice());return out}
+TOPICS.push({id:'kurve',title:'Gekrümmte Kurve: Geschwindigkeit pro Abschnitt',desc:'Erst langsam, dann schneller, am Ende wieder langsamer: Geschwindigkeit aus einer Kurve bestimmen',gen(){
+  let v;for(;;){v=[pick([1,2]),pick([3,4,5]),pick([6,7,8,9]),pick([1,2,3])];if(v[1]<v[2]&&v[0]!==v[3])break}
+  const sec=['I','II','III','IV'],pts=[[0,0]];v.forEach((x,i)=>pts.push([2*(i+1),pts[i][1]+2*x]));
+  const smax=pts[4][1],st=smax>30?5:(smax>16?2:1),ymax=Math.ceil(smax*1.05/st)*st;
+  const fig=chart({xmax:8,ymax,xlabel:'t in s',ylabel:'s in m',series:[{pts:smoothCurve(pts,24),color:BLUE}],secs:[[0,2,'I'],[2,4,'II'],[4,6,'III'],[6,8,'IV']],xstep:1,ystep:st});
+  const intro=pick(['Ein Spielzeugauto fährt langsam an, wird schneller und bremst gegen Ende wieder ab.','Eine Kugel rollt eine Bahn entlang: erst langsam, in der Mitte schneller und am Schluss wieder langsamer.','Ein Rennroller startet gemächlich, beschleunigt kräftig und rollt zum Schluss aus.']);
+  const lines=v.map((x,i)=>`<li>Abschnitt ${sec[i]} (t = ${2*i} s bis ${2*i+2} s): s von ${fmt(pts[i][1],0)} m auf ${fmt(pts[i+1][1],0)} m → ${fmt(2*x,0)} m in 2 s → v = ${fmt(x,0)} m/s</li>`).join('');
+  const note='<p>Die Linie ist <b>keine Gerade</b>, deshalb ändert sich die Geschwindigkeit ständig. Für einen Abschnitt bestimmst du die <b>Durchschnittsgeschwindigkeit</b>: v = Δs : Δt. Je steiler die Kurve in einem Abschnitt, desto schneller ist das Auto dort.</p>';
+  const hint='Lies für den Abschnitt den Weg am Anfang und am Ende ab. Dann v = (Weg am Ende − Weg am Anfang) : Zeit des Abschnitts. Je steiler die Kurve, desto schneller.';
+  const mode=pick(['fast','num','num','whole','slow']);
+  if(mode==='fast'||mode==='slow'){
+    const best=mode==='fast'?Math.max(...v):Math.min(...v),ci=v.indexOf(best);
+    return {title:'Kurve lesen: '+(mode==='fast'?'schnellster':'langsamster')+' Abschnitt',q:`<p>${intro} Das Diagramm zeigt den Weg. In welchem Abschnitt ist die Geschwindigkeit am <b>${mode==='fast'?'größten':'kleinsten'}</b>?</p>`,fig,
+      choices:sec.map((n,i)=>({html:'<b>Abschnitt '+n+'</b>',correct:i===ci})),cl:'c3',hint:'Vergleiche, wie viele Meter jeweils in 2 s dazukommen. '+(mode==='fast'?'Die steilste Stelle ist die schnellste.':'Die flachste Stelle ist die langsamste.'),
+      expl:`<ol>${lines}</ol><p class="res">Am ${mode==='fast'?'schnellsten':'langsamsten'} ist Abschnitt ${sec[ci]} (${fmt(best,0)} m/s).</p>${note}`};}
+  if(mode==='whole'){const va=smax/8;
+    return {title:'Kurve lesen: ganze Fahrt',q:`<p>${intro} Bestimme die <b>Durchschnittsgeschwindigkeit</b> für die ganze Fahrt von t = 0 s bis t = 8 s.</p>`,fig,inputs:[{label:'v (ganze Fahrt)',unit:'m/s',ans:va,tol:.4}],
+      hint:'Lies den Weg am Ende (t = 8 s) ab. Der Weg am Anfang ist 0. Dann v = Δs : Δt mit Δt = 8 s.',
+      expl:`<ol><li>Weg bei t = 8 s: ${fmt(smax,0)} m, bei t = 0 s: 0 m → Δs = ${fmt(smax,0)} m</li><li class="res">v = ${fmt(smax,0)} m : 8 s = ${fmt(va,2)} m/s</li></ol><p>Das ist ein Durchschnitt: Mal war das Auto langsamer, mal schneller.</p>`};}
+  const k=rnd(0,3),x=v[k];
+  return {title:'Kurve lesen: Abschnitt '+sec[k],q:`<p>${intro} Bestimme die Durchschnittsgeschwindigkeit im <b>Abschnitt ${sec[k]}</b> (t = ${2*k} s bis t = ${2*k+2} s).</p>`,fig,inputs:[{label:'v im Abschnitt '+sec[k],unit:'m/s',ans:x,tol:.6}],hint,
+    expl:`<ol><li>Weg bei t = ${2*k} s: ${fmt(pts[k][1],0)} m, bei t = ${2*k+2} s: ${fmt(pts[k+1][1],0)} m → Δs = ${fmt(2*x,0)} m</li><li>Δt = 2 s</li><li class="res">v = ${fmt(2*x,0)} m : 2 s = ${fmt(x,0)} m/s</li></ol>${note}`};
+}});
+
+
 /* Reihenfolge wie im Unterricht */
-(function(){const ord=['zz','um','v','mess','dv','lesen','sit','story','zuo','lauf','ueh2','ueh','einstein','gz','text','uetext','begr'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
+(function(){const ord=['zz','um','v','mess','dv','lesen','sit','story','zuo','lauf','kurve','ueh2','ueh','einstein','gz','text','uetext','begr'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
 
 /* ---------- App ---------- */
 let stats={},cur=null,task=null,state=null,mixMode=false;const LOG=[];
@@ -837,6 +870,7 @@ const CHECK=[
  ['Die Geschwindigkeit aus der Steigung im s(t)-Diagramm bestimmen',['lesen']],
  ['Situationen in s(t)-Diagramme übersetzen (Stehen, Zurückgehen, schneller)',['sit','story']],
  ['Zu einem s(t)-Diagramm das passende v(t)-Diagramm finden und umgekehrt',['zuo']],
+ ['Bei einer gekrümmten Kurve die Geschwindigkeit pro Abschnitt bestimmen',['kurve']],
  ['Treffen und Einholen im s(t)-Diagramm ablesen',['lauf','ueh2']],
  ['Einen Überholvorgang berechnen: Aufholstrecke, Δv, Überholdauer, Überholweg, freie Strecke',['ueh2','ueh']],
  ['Textaufgaben lösen: wichtige Angaben finden, unnötige weglassen, umrechnen, in zwei Schritten rechnen',['einstein','text','gz']],
@@ -844,29 +878,31 @@ const CHECK=[
  ['Fachbegriffe sicher verwenden',['begr']]
 ];
 const AREAS=[
- ['Grundlagen',['zz','um','v'],2],
+ ['Grundlagen',['zz','um','v'],3],
  ['Messen und Durchschnitt',['mess','dv'],2],
- ['Diagramme',['lesen','sit','story','zuo','lauf'],3],
+ ['Diagramme',['lesen','sit','story','zuo','lauf','kurve'],6],
  ['Überholen',['ueh2','ueh'],2],
- ['Textaufgaben',['einstein','gz','text','uetext'],4,{ids:['einstein','text'],k:2,txt:'davon mindestens 2 lange Textaufgaben (Bad Einstein oder Treffen und Einholen)'}],
- ['Begriffe',['begr'],2]
+ ['Textaufgaben',['einstein','gz','text','uetext'],4],
+ ['Begriffe',['begr'],1]
 ];
-function areaVal(a){const [n,ids,k,req]=a;const st=solved(ids);if(!req)return Math.min(st,k);const sr=Math.min(solved(req.ids),req.k);return Math.min(k,sr+Math.min(st-sr,k-req.k))}
+/* Balken: voll, wenn in jedem Thema des Bereichs mindestens eine Aufgabe selbst richtig gelöst wurde */
+function areaVal(a){const [n,ids,k]=a;return ids.filter(id=>solved([id])>0).length}
+function areaUnit(a,n){return n===1?'Thema':'Themen'}
 function solved(ids){return ids.reduce((a,id)=>a+((stats[id]&&stats[id].s)||0),0)}
-function unlocked(){try{if(localStorage.getItem('kin-ueb-open')==='1')return true}catch(e){}return AREAS.every(a=>areaVal(a)>=a[2])}
+function unlocked(){return true}
 function home(){
   leave();Sim.stop();Opa.stop();GK.stop();cur=null;mixMode=false;EX=null;
   const done=AREAS.filter(a=>areaVal(a)>=a[2]).length,open=unlocked();
-  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p><ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse dort Aufgaben. <b>Jede Aufgabe, die du selbst richtig löst, bringt 1 Punkt</b> für den Bereich. Welches Thema du im Bereich nimmst, ist egal. Mit „Lösung zeigen“ gibt es keinen Punkt.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen und sammelst weiter, bis der Balken voll ist.</li><li>Sind alle sechs Balken voll, öffnet sich ganz unten die <b>Abschluss-Challenge</b>.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
+  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p><ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse in jedem Thema eines Bereichs <b>mindestens eine Aufgabe selbst richtig</b>. Dann ist das Thema abgehakt (✓) und der Balken füllt sich. Mit „Lösung zeigen“ zählt es nicht.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen. So kannst du jedes Thema so oft üben, wie du willst.</li><li>Ganz unten wartet die <b>Abschluss-Challenge</b>. Du kannst sie jederzeit machen, auch wenn noch nicht alle Balken voll sind.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
   h+=`<details class="card form"><summary><h3>Formeln zum Nachschauen</h3></summary><div class="fr"><span class="f">v = <span class="frac"><span>s</span><span>t</span></span></span><span class="f">s = v · t</span><span class="f">t = <span class="frac"><span>s</span><span>v</span></span></span><span class="f">km/h <b>: 3,6</b> = m/s</span></div><div class="fr small"><span>Überholen: s<sub>auf</sub> = s<sub>A</sub> + l<sub>LKW</sub> + s<sub>A</sub> + l<sub>PKW</sub></span><span>Δv = v<sub>PKW</sub> − v<sub>LKW</sub></span><span>t<sub>ü</sub> = <span class="frac"><span>s<sub>auf</sub></span><span>Δv</span></span></span><span>s<sub>frei</sub> = s<sub>PKW</sub> + s<sub>Gegen</sub></span></div><div class="fr small"><span>Gleiche Richtung (Einholen): Abstand schrumpft mit v<sub>1</sub> − v<sub>2</sub></span><span>Aufeinander zu (Begegnen): mit v<sub>1</sub> + v<sub>2</sub></span></div></details>`;
-  AREAS.forEach((A,ai)=>{const [n,ids,k,req]=A;const v=areaVal(A);
-    h+=`<h2 class="ah" id="area-${ai}">${n} <small>${v>=k?'✓ geschafft':v+' von '+k+' Punkten · noch '+(k-v)}${req&&v<k?'<br><span class="req">'+req.txt+'</span>':''}</small></h2><div class="grid">`;
-    ids.forEach(id=>{const t=TOPICS.find(x=>x.id===id);const s=stats[id]||{};h+=`<button class="topic ${n==='Textaufgaben'?'tx':''}" data-id="${id}"><b>${t.title}</b><span>${t.desc}</span><em>${s.n?('Richtig gelöst: '+(s.s||0)+' · im 1. Versuch: '+(s.r||0)):'noch nicht geübt'}</em></button>`});
+  AREAS.forEach((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);
+    h+=`<h2 class="ah" id="area-${ai}">${n} <small>${v>=k?'✓ geschafft':v+' von '+k+' '+areaUnit(A,k)+' · noch '+(k-v)}</small></h2><div class="grid">`;
+    ids.forEach(id=>{const t=TOPICS.find(x=>x.id===id);const s=stats[id]||{};h+=`<button class="topic ${n==='Textaufgaben'?'tx':''}" data-id="${id}"><b>${t.title}</b><span>${t.desc}</span><em>${s.s?('✓ Richtig gelöst: '+s.s+' · im 1. Versuch: '+(s.r||0)):(s.n?'Noch keine Aufgabe selbst richtig gelöst':'noch nicht geübt')}</em></button>`});
     h+='</div>'});
   h+=`<button class="mix" id="mix">Bunte Mischung: Zufallsaufgabe</button>`;
   h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>10 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 45 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
   h+=`<div class="card selfcheck"><h3>Selbstcheck vor der Klassenarbeit</h3><p class="small" style="margin:0 0 6px">Geh die Liste durch. Wo du dir noch unsicher bist, tippe auf das Thema daneben und üb noch ein paar Aufgaben.</p><ul class="check">${CHECK.map(([t,ids])=>`<li><span>${t}</span><span class="go">${ids.map(id=>{const T=TOPICS.find(x=>x.id===id);return `<button class="chip" data-id="${id}">${T.title}</button>`}).join('')}</span></li>`).join('')}</ul></div>`;
-  h+=pdfCard()+`<p class="tlink"><button id="teach">Lehrkraft</button><span id="tbox" hidden> <input type="password" id="tcode" placeholder="Code" autocomplete="off" style="width:110px;font-size:15px;padding:6px 8px"> <button id="tok">Freischalten</button></span></p>`;
+  h+=pdfCard();
   $('#app').innerHTML=h;
   document.querySelectorAll('.topic,.chip').forEach(b=>b.onclick=()=>start(b.dataset.id));
   $('#mix').onclick=()=>{mixMode=true;start(pick(TOPICS).id,true)};
@@ -874,9 +910,6 @@ function home(){
   if(window._goArea!=null){const el=$('#area-'+window._goArea);window._goArea=null;if(el)setTimeout(()=>el.scrollIntoView({block:'start'}),30)}
   if($('#exam'))$('#exam').onclick=examStart;
   if($('#toCh'))$('#toCh').onclick=()=>document.querySelector('.chal').scrollIntoView({behavior:'smooth',block:'start'});
-  $('#teach').onclick=()=>{$('#tbox').hidden=false;$('#tcode').focus()};
-  const tryCode=()=>{if(hcode($('#tcode').value.trim().toLowerCase())===TCODE){try{localStorage.setItem('kin-ueb-open','1')}catch(e){}home()}else{$('#tcode').value='';$('#tcode').placeholder='falsch'}};
-  $('#tok').onclick=tryCode;$('#tcode').onkeydown=e=>{if(e.key==='Enter')tryCode()};
   bindPdf();updScore();
 }
 function pdfCard(){return `<div class="card" style="margin-top:16px"><h3>Meine Zusammenfassung als PDF</h3><p style="margin:0 0 8px">Bisher bearbeitet: <b>${LOG.length}</b> Aufgabe${LOG.length===1?'':'n'}${EXR?', dazu deine Abschluss-Challenge':''}. Trag deinen Namen ein und lade dir die Übersicht herunter: jede Aufgabe mit deiner Antwort, ob sie richtig war, und der Erklärung.</p><div class="row"><label for="nm">Name</label><input type="text" id="nm" style="width:260px" value="${(window._nm||'').replace(/"/g,'&quot;')}"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div></div>`}
@@ -989,14 +1022,14 @@ const TCODE=3975863653;
 /* ===== Bereichs-Anzeige in der Aufgabe ===== */
 function areaOf(id){return AREAS.findIndex(a=>a[1].includes(id))}
 function areaLine(){if(!cur)return '';const ai=areaOf(cur.id);if(ai<0)return '';const [n,ids,k,req]=AREAS[ai];const v=areaVal(AREAS[ai]);
-  return v>=k?`<b>Bereich ${n}:</b> geschafft ✓ (du kannst trotzdem weiterüben)`:`<b>Bereich ${n}:</b> ${v} von ${k} Punkten · noch ${k-v} richtig lösen${req?' ('+req.txt+')':''}`}
+  return v>=k?`<b>Bereich ${n}:</b> geschafft ✓ (du kannst trotzdem weiterüben)`:`<b>Bereich ${n}:</b> ${v} von ${k} ${areaUnit(AREAS[ai],k)} abgehakt · noch ${k-v}: ${ids.filter(i=>solved([i])===0).map(i=>TOPICS.find(x=>x.id===i).title).join(', ')}`}
 const _render=render;
 render=function(){_render();GK.stop();if(task&&task.gk&&!EX){const f=document.querySelector('#app .fig');if(f){f.insertAdjacentHTML('afterend','<div class="gkwrap"><button class="b alt" id="gkOpen">▶ Simulation anzeigen</button><div id="gkHost"></div></div>');$('#gkOpen').onclick=()=>{const h=$('#gkHost');if(h.innerHTML){h.innerHTML='';GK.stop();$('#gkOpen').textContent='▶ Simulation anzeigen'}else{GK.mount(h,task.gk);$('#gkOpen').textContent='Simulation ausblenden'}}}}if(state&&cur){const ai=areaOf(cur.id);state.preVal=ai<0?null:areaVal(AREAS[ai])}const bar=document.querySelector('#app .bar');if(bar&&!EX){const d=document.createElement('div');d.className='aline';d.id='aline';d.innerHTML=areaLine();if(d.innerHTML)bar.after(d)}};
 const _showExpl=showExpl;
 showExpl=function(){_showExpl();if(EX||!state||!state.solved||state.areaMsg)return;state.areaMsg=true;const ai=areaOf(cur.id);if(ai<0)return;
   const [n,ids,k,req]=AREAS[ai];const v=areaVal(AREAS[ai]);const al=$('#aline');if(al)al.innerHTML=areaLine();
-  let m;if(state.preVal!=null&&v===state.preVal&&v<k)m=`<div class="fb plus">Richtig! Dieser Punkt zählt aber nicht mehr für <b>${n}</b>: Dir fehlen noch lange Textaufgaben (Bad Einstein oder Treffen und Einholen).</div>`;
-  else if(v<k)m=`<div class="fb plus">+1 Punkt für <b>${n}</b>: ${v} von ${k}. Weiter mit „Neue Aufgabe“.</div>`;
+  let m;if(state.preVal!=null&&v===state.preVal&&v<k)m=`<div class="fb plus">Richtig! Dieses Thema hattest du für <b>${n}</b> schon abgehakt. Für den Balken fehlen noch: ${ids.filter(i=>solved([i])===0).map(i=>TOPICS.find(x=>x.id===i).title).join(', ')}.</div>`;
+  else if(v<k)m=`<div class="fb plus">✓ Thema abgehakt für <b>${n}</b>: ${v} von ${k} Themen. Weiter mit einem anderen Thema oder mit „Neue Aufgabe“.</div>`;
   else if(v===k&&state.preVal!==k){const nx=AREAS.findIndex(A=>areaVal(A)<A[2]);
     m=nx<0?`<div class="fb plus">🏁 Alle Bereiche geschafft! Die <b>Abschluss-Challenge</b> ist jetzt frei. <button class="b main" id="goCh">Zur Challenge</button></div>`
       :`<div class="fb plus">✓ Bereich <b>${n}</b> geschafft! Als Nächstes: <button class="b main" id="goNx">${AREAS[nx][0]}</button></div>`;
