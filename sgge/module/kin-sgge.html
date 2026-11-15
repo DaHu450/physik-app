@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kinematik-Übungsstudio</title>
+<title>Kinematik-Übungsstudio SGGE</title>
 <style>
 :root{--navy:#1F3A5F;--green:#3C7A4E;--blue:#2F7FC1;--orange:#E8833A;--bg:#F4F7FA;--card:#fff;--line:#D3DCE6;--ok:#2E7D4F;--okbg:#E4F3E9;--bad:#B3402F;--badbg:#FBE9E5;--gold:#FFF6D6;--goldbar:#E0A800;--txt:#1b2733}
 *{box-sizing:border-box}
@@ -147,7 +147,7 @@ ol.how li{margin:3px 0}
 </style>
 </head>
 <body>
-<header><div class="in"><h1>Kinematik-Übungsstudio<small>Vorbereitung auf die Klassenarbeit · üben, prüfen, Challenge freischalten</small></h1><div class="score" id="score">Richtig: 0 von 0</div></div></header>
+<header><div class="in"><h1>Kinematik-Übungsstudio<small>SGGE · Vorbereitung auf die Klassenarbeit · Schritt für Schritt üben</small></h1><div class="score" id="score">Richtig: 0 von 0</div></div></header>
 <main id="app"></main>
 <footer>Tipp: Rechne mit Zettel und Stift. Kommazahlen darfst du mit Komma oder Punkt eingeben. Die Einheit musst du nicht mit eintippen.</footer>
 
@@ -276,7 +276,7 @@ TOPICS.push({id:'um',title:'Umrechnen km/h ↔ m/s',desc:'km/h, m/s und m/min si
 /* 3 v = s : t */
 TOPICS.push({id:'v',title:'Geschwindigkeit berechnen',desc:'v = s : t, auch nach s oder t umstellen',gen(){
   const who=pick([['Lena','läuft'],['Ben','radelt'],['Tarek','fährt Skateboard'],['Mia','schwimmt'],['Der Roboter','rollt']]);
-  const v=pick([2,2.5,4,5,6,8,10,12,15]),t=pick([4,5,8,10,12,20,30]);const s=v*t;const m=rnd(1,3);
+  const v=pick([2,4,5,6,8,10,12]),t=pick([4,5,8,10,20]);const s=v*t;const m=rnd(1,3);
   const [n,vb]=who;
   if(m===1)return {title:'Geschwindigkeit berechnen',q:`<p>${n} ${vb} <b>${fmt(s,0)} m</b> in <b>${t} s</b> (gleichmäßig). Wie groß ist die Geschwindigkeit?</p>`,inputs:[{label:'v',unit:'m/s',ans:v,tol:.03}],hint:'v = s : t (Strecke geteilt durch Zeit).',expl:`<ol><li>Gegeben: s = ${fmt(s,0)} m, t = ${t} s</li><li>Formel: v = s : t</li><li class="res">v = ${fmt(s,0)} m : ${t} s = ${fmt(v,2)} m/s</li></ol>`};
   if(m===2)return {title:'Strecke berechnen',q:`<p>${n} ${vb} mit <b>${fmt(v,1)} m/s</b> gleichmäßig. Wie weit kommt das in <b>${t} s</b>?</p>`,inputs:[{label:'s',unit:'m',ans:s,tol:.3}],hint:'Stelle um: s = v · t.',expl:`<ol><li>Gegeben: v = ${fmt(v,1)} m/s, t = ${t} s</li><li>Aus v = s : t folgt s = v · t</li><li class="res">s = ${fmt(v,1)} m/s · ${t} s = ${fmt(s,1)} m</li></ol>`};
@@ -692,14 +692,104 @@ TOPICS.push({id:'einstein',title:'Geschichten aus Bad Einstein',desc:'Max die Sc
     expl:`<ol><li>Unnötig: Baujahr des Mofas.</li><li>Pfarrer: Gerade durch (0 | 0) und (10 min | ${fmt(v1/6,1)} km).</li><li>Frau Sauerampfer: Gerade durch (${t0} min | 0) und (${t0+10} min | ${fmt(v2/6,1)} km). Sie ist steiler.</li><li class="res">Schnittpunkt: nach ${fmt(T,0)} min, ${fmt(S,1)} km von Bad Einstein.</li><li>Bimmelstadt liegt bei ${fmt(B,1)} km: ${S<=B?'Sie holt ihn vorher ein, die Taufe ist gerettet.':'Der Pfarrer ist schon vorher in Bimmelstadt. Die Geraden schneiden sich erst oberhalb der Bimmelstadt-Linie.'}</li></ol>`};
 }});
 
+
+/* ================= SGGE: vereinfachte Fassung ================= */
+(function(){
+const KEEP_IDS=['um','zz','v','begr','mess','dv','lesen','sit','story','zuo','lauf','einstein','gz','text'];
+for(let i=TOPICS.length-1;i>=0;i--)if(!KEEP_IDS.includes(TOPICS[i].id))TOPICS.splice(i,1);
+const T=id=>TOPICS.find(x=>x.id===id);
+const rl=(a,p)=>Math.max(Math.abs(a)*(p||.03),.05);
+/* Begriffe: ohne Überholen */
+for(let i=BEGR.length-1;i>=0;i--)if(/Überhol|Gegenverkehr/.test(BEGR[i][0]))BEGR.splice(i,1);
+
+/* ---------- Station 1: Umrechnen ---------- */
+function umFig(){
+  const s=`<svg viewBox="0 0 460 150" width="460" role="img" xmlns="http://www.w3.org/2000/svg" font-family="Arial,Helvetica,sans-serif">
+  <rect x="4" y="4" width="452" height="142" rx="14" fill="#F4F7FA" stroke="#C9D6E5"/>
+  <rect x="24" y="30" width="110" height="38" rx="10" fill="#1F3A5F"/><text x="79" y="55" font-size="19" font-weight="700" fill="#fff" text-anchor="middle">km/h</text>
+  <rect x="326" y="30" width="110" height="38" rx="10" fill="#3C7A4E"/><text x="381" y="55" font-size="19" font-weight="700" fill="#fff" text-anchor="middle">m/s</text>
+  <line x1="140" y1="49" x2="318" y2="49" stroke="#1F3A5F" stroke-width="3"/><polygon points="320,49 308,42 308,56" fill="#1F3A5F"/>
+  <text x="230" y="40" font-size="18" font-weight="700" fill="#1F3A5F" text-anchor="middle">: 3,6</text>
+  <line x1="318" y1="100" x2="140" y2="100" stroke="#3C7A4E" stroke-width="3"/><polygon points="138,100 150,93 150,107" fill="#3C7A4E"/>
+  <text x="230" y="124" font-size="18" font-weight="700" fill="#3C7A4E" text-anchor="middle">· 3,6</text>
+  <text x="79" y="105" font-size="14" fill="#1F3A5F" text-anchor="middle">36 km/h</text><text x="381" y="105" font-size="14" fill="#3C7A4E" text-anchor="middle">10 m/s</text>
+  </svg>`;
+  return s;
+}
+T('um').title='Station 1: Umrechnen km/h ↔ m/s';
+T('um').desc='Pflicht-Station: Immer durch 3,6 oder mal 3,6';
+T('um').gen=function(){
+  const m=pick([1,1,2,2,3,4,5]);
+  const fig=umFig();
+  if(m===1){const k=pick([18,36,54,72,90,108]);const a=k/3.6;
+    return {title:'Umrechnen',fig,q:`<p>Rechne <b>${k} km/h</b> in <b>m/s</b> um.</p>`,inputs:[{label:'Ergebnis',unit:'m/s',ans:a,tol:.05}],
+      hint:'Von km/h zu m/s: durch 3,6 teilen (Pfeil oben im Bild).',
+      expl:`<ol><li>km/h → m/s: <b>durch 3,6</b></li><li class="res">${k} km/h : 3,6 = ${fmt(a,0)} m/s</li><li>Probe: ${fmt(a,0)} m/s · 3,6 = ${k} km/h ✓</li></ol>`};}
+  if(m===2){const k=pick([5,10,15,20,25,30]);const a=k*3.6;
+    return {title:'Umrechnen',fig,q:`<p>Rechne <b>${k} m/s</b> in <b>km/h</b> um.</p>`,inputs:[{label:'Ergebnis',unit:'km/h',ans:a,tol:.15}],
+      hint:'Von m/s zu km/h: mit 3,6 malnehmen (Pfeil unten im Bild).',
+      expl:`<ol><li>m/s → km/h: <b>mal 3,6</b></li><li class="res">${k} m/s · 3,6 = ${fmt(a,0)} km/h</li><li>Probe: ${fmt(a,0)} km/h : 3,6 = ${k} m/s ✓</li></ol>`};}
+  if(m===3){const toMs=Math.random()<.5;const k=toMs?pick([36,54,72,90,108]):pick([10,15,20,25]);
+    const ch=shuffle([{html:toMs?'<b>: 3,6</b> (durch 3,6 teilen)':'<b>· 3,6</b> (mit 3,6 malnehmen)',correct:true},{html:toMs?'<b>· 3,6</b> (mit 3,6 malnehmen)':'<b>: 3,6</b> (durch 3,6 teilen)',correct:false},{html:'<b>: 60</b> (durch 60 teilen)',correct:false}]);
+    return {title:'Welche Rechnung?',fig,q:toMs?`<p>Ein Auto fährt mit <b>${k} km/h</b>. Du willst die Geschwindigkeit in <b>m/s</b> angeben. Was musst du tun?</p>`:`<p>Ein Läufer schafft <b>${k} m/s</b>. Du willst die Geschwindigkeit in <b>km/h</b> angeben. Was musst du tun?</p>`,choices:ch,cl:'c1',
+      hint:'Schau auf den Pfeil im Bild: Welche Richtung brauchst du?',
+      expl:toMs?`<p>km/h → m/s: <b>durch 3,6 teilen</b>. Beispiel: ${k} km/h : 3,6 = ${fmt(k/3.6,0)} m/s. Merke: Die Zahl in m/s ist <b>kleiner</b> als die Zahl in km/h.</p>`:`<p>m/s → km/h: <b>mal 3,6</b>. Beispiel: ${k} m/s · 3,6 = ${fmt(k*3.6,0)} km/h. Merke: Die Zahl in km/h ist <b>größer</b> als die Zahl in m/s.</p>`};}
+  if(m===5){const k=pick([50,80,100,120,130]);const a=k/3.6;
+    return {title:'Umrechnen mit Runden',fig,q:`<p>Rechne <b>${k} km/h</b> in <b>m/s</b> um. Runde auf eine Nachkommastelle.</p>`,inputs:[{label:'Ergebnis',unit:'m/s',ans:a,tol:.12}],
+      hint:'Von km/h zu m/s: durch 3,6 teilen. Dann auf eine Stelle nach dem Komma runden.',
+      expl:`<ol><li>km/h → m/s: <b>durch 3,6</b></li><li class="res">${k} km/h : 3,6 = ${fmt(a,2)} m/s ≈ ${fmt(a,1)} m/s</li></ol>`};}
+  /* m===4: Wer ist schneller? */
+  const a=pick([10,15,20,25]),akm=a*3.6,bkm=akm+pick([-18,-10,10,18]);const aFast=akm>bkm;
+  const ch=shuffle([{html:`<b>Läufer</b> mit ${a} m/s`,correct:aFast},{html:`<b>Auto</b> mit ${bkm} km/h`,correct:!aFast}]);
+  return {title:'Wer ist schneller?',fig,q:`<p>Ein Läufer rennt mit <b>${a} m/s</b>. Ein Auto fährt mit <b>${bkm} km/h</b>. Wer ist schneller?</p><p class="small">Tipp: Erst auf dieselbe Einheit bringen.</p>`,choices:ch,cl:'c2',
+    hint:`Rechne ${a} m/s in km/h um (mal 3,6) und vergleiche mit ${bkm} km/h.`,
+    expl:`<ol><li>${a} m/s · 3,6 = ${fmt(akm,0)} km/h</li><li>Vergleich: ${fmt(akm,0)} km/h und ${bkm} km/h</li></ol><p class="res">${aFast?'Der Läufer':'Das Auto'} ist schneller.</p>`};
+};
+
+/* ---------- Fahrt mit Pause ---------- */
+TOPICS.push({id:'dv2',title:'Fahrt mit Pause (Einstieg)',desc:'Durchschnittsgeschwindigkeit: die Pause zählt mit',gen:function(){
+  const Tf=pick([2,4]),P=1,Tt=Tf+P,va=pick([40,50,60]),S=va*Tt,h=Tf/2;
+  const veh=pick([['Ein Reisebus','fährt'],['Familie Weber','fährt mit dem Auto'],['Ein Lieferwagen','fährt']]);
+  const pts=[[0,0],[h,S/2],[h+P,S/2],[Tt,S]];
+  const st=niceStep(S,5),ymax=Math.ceil(S*1.05/st)*st;
+  const fig=chart({xmax:Tt,ymax,xlabel:'t in h',ylabel:'s in km',series:[{pts,color:BLUE}],xstep:1,ystep:st});
+  return {title:'Fahrt mit Pause',fig,q:`<p>${veh[0]} ${veh[1]} insgesamt <b>${S} km</b> weit. Die reine Fahrzeit beträgt <b>${Tf} h</b>. In der Mitte macht er <b>${P} h</b> Pause (im Diagramm waagrecht).</p><p>Bestimme die <b>Durchschnittsgeschwindigkeit</b> für die ganze Fahrt von Abfahrt bis Ankunft. Wie schnell ist er <b>während der Pause</b>?</p>`,
+    inputs:[{label:'Durchschnitt',unit:'km/h',ans:va,tol:.6,id:'avg'},{label:'Momentan in der Pause',unit:'km/h',ans:0,tol:.01,id:'mom'}],
+    wrong(x){const a=x.avg;if(a==null)return '';if(Math.abs(a-S/Tf)<.6&&Math.abs(va-S/Tf)>1)return 'Du hast die Pause vergessen. Sie gehört zur Gesamtzeit dazu.';return ''},
+    hint:'Durchschnitt = Gesamtstrecke : Gesamtzeit. Die Pause gehört zur Gesamtzeit. Während der Pause steht das Fahrzeug still.',
+    expl:`<ol><li>Gegeben: s = ${S} km, Fahrzeit ${Tf} h, Pause ${P} h</li><li>Gesamtzeit: ${Tf} h + ${P} h = <b>${Tt} h</b></li><li class="res">v<sub>Durchschnitt</sub> = ${S} km : ${Tt} h = ${fmt(va,0)} km/h</li><li class="res">In der Pause: v = 0 km/h (Momentangeschwindigkeit)</li></ol>`};
+}});
+
+/* ---------- Kleine Textaufgaben ---------- */
+TOPICS.push({id:'einstein0',title:'Kleine Textaufgaben (Einstieg)',desc:'Kurz: Gegeben, Gesucht, Formel, Rechnung, Antwort',gen:function(){
+  const k=rnd(1,4);
+  if(k===1){const pr=pick([[20,10],[30,10],[30,15],[40,10],[40,20],[60,20]]);const [s,v]=pr,t=s/v;
+    return {title:'Elfmeter in Bad Einstein',q:`<p>Hubertus Blattschuß schießt den Ball mit <b>${v} m/s</b> in Richtung Tor. Das Tor ist <b>${s} m</b> entfernt und 7,32 m breit. Wie lange ist der Ball unterwegs?</p>`,inputs:[{label:'t',unit:'s',ans:t,tol:.03}],
+      hint:'Welche Angabe brauchst du nicht? Gesucht ist t: t = s : v.',
+      expl:`<ol><li>Unnötig: Breite des Tors (7,32 m).</li><li>Gegeben: s = ${s} m, v = ${v} m/s. Gesucht: t</li><li>Formel: t = s : v</li><li class="res">Rechnung: t = ${s} m : ${v} m/s = ${fmt(t,0)} s</li></ol><p>Antwort: Der Ball ist ${fmt(t,0)} s unterwegs.</p>`};}
+  if(k===2){const v=pick([.5,1,2,3]),t=pick([20,40,60]),s=v*t;
+    return {title:'Max kriecht zum Salat',q:`<p>Max, die Schnecke aus Bad Einstein, kriecht mit <b>${fmt(v,1)} cm/s</b> gleichmäßig. Er ist schon 3 Jahre alt. Wie weit kommt er in <b>${t} s</b>?</p>`,inputs:[{label:'s',unit:'cm',ans:s,tol:rl(s,.02)}],
+      hint:'Welche Angabe brauchst du nicht? Gesucht ist s: s = v · t.',
+      expl:`<ol><li>Unnötig: Alter von Max.</li><li>Gegeben: v = ${fmt(v,1)} cm/s, t = ${t} s. Gesucht: s</li><li>Formel: s = v · t</li><li class="res">Rechnung: s = ${fmt(v,1)} cm/s · ${t} s = ${fmt(s,0)} cm</li></ol><p>Antwort: Max kommt ${fmt(s,0)} cm weit.</p>`};}
+  if(k===3){const kk=pick([36,54,72,90,108]),t=pick([2,4,5,10]),ms=kk/3.6,s=ms*t;
+    return {title:'Das Auto in Bad Einstein',fig:'',q:`<p>Ein Auto fährt in Bad Einstein mit <b>${kk} km/h</b> gleichmäßig. Wie weit kommt es in <b>${t} s</b>? Gib die Strecke in <b>m</b> an.</p>`,inputs:[{label:'s',unit:'m',ans:s,tol:rl(s,.02)}],
+      hint:'Zwei Schritte: Erst km/h in m/s umrechnen (: 3,6). Dann s = v · t.',
+      expl:`<ol><li>Gegeben: v = ${kk} km/h, t = ${t} s. Gesucht: s in m</li><li>Umrechnen: ${kk} km/h : 3,6 = ${fmt(ms,0)} m/s</li><li>Formel: s = v · t</li><li class="res">Rechnung: s = ${fmt(ms,0)} m/s · ${t} s = ${fmt(s,0)} m</li></ol><p>Antwort: Das Auto kommt ${fmt(s,0)} m weit.</p>`};}
+  const v=pick([60,80,90,100]),t=pick([2,3,4]),s=v*t;
+  return {title:'Der Zug nach Bimmelstadt',q:`<p>Der Zug fährt mit <b>${v} km/h</b> gleichmäßig nach Bimmelstadt. Bimmelstadt ist <b>${s} km</b> entfernt. Wie lange braucht der Zug?</p>`,inputs:[{label:'t',unit:'h',ans:t,tol:.03}],
+    hint:'Gesucht ist t: t = s : v. Die Einheiten passen schon zusammen (km und km/h).',
+    expl:`<ol><li>Gegeben: s = ${s} km, v = ${v} km/h. Gesucht: t</li><li>Formel: t = s : v</li><li class="res">Rechnung: t = ${s} km : ${v} km/h = ${fmt(t,0)} h</li></ol><p>Antwort: Der Zug braucht ${fmt(t,0)} Stunden.</p>`};
+}});
+})();
+
 /* Reihenfolge wie im Unterricht */
-(function(){const ord=['zz','um','v','mess','dv','lesen','sit','story','zuo','lauf','ueh2','ueh','einstein','gz','text','uetext','begr'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
+(function(){const ord=['um','zz','v','begr','mess','dv2','dv','lesen','sit','story','zuo','lauf','einstein0','einstein','gz','text'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
 
 /* ---------- App ---------- */
 let stats={},cur=null,task=null,state=null,mixMode=false;const LOG=[];
-try{const x=localStorage.getItem('kin-ueb-v2');if(x)stats=JSON.parse(x)||{}}catch(e){}
+try{const x=localStorage.getItem('kin-sge-v2');if(x)stats=JSON.parse(x)||{}}catch(e){}
 var appLive=false;function appChanged(){if(window.AppBridge&&appLive)AppBridge.changed()}
-function saveStats(){try{localStorage.setItem('kin-ueb-v2',JSON.stringify(stats))}catch(e){}appChanged()}
+function saveStats(){try{localStorage.setItem('kin-sge-v2',JSON.stringify(stats))}catch(e){}appChanged()}
 function totals(){let r=0,n=0;Object.values(stats).forEach(s=>{r+=s.r||0;n+=s.n||0});return [r,n]}
 function updScore(){const [r,n]=totals();$('#score').textContent='Richtig im 1. Versuch: '+r+' von '+n}
 function start(id,keepMix){
@@ -829,42 +919,40 @@ const Sim=(function(){
 
 /* ===== Startseite mit Klassenarbeits-Check ===== */
 const CHECK=[
- ['Zeitpunkt oder Zeitraum: Momentan- und Durchschnittsgeschwindigkeit unterscheiden',['zz','dv']],
- ['km/h in m/s umrechnen und zurück',['um']],
+ ['km/h in m/s umrechnen und zurück (Station 1)',['um']],
+ ['Zeitpunkt oder Zeitraum: Momentan- und Durchschnittsgeschwindigkeit unterscheiden',['zz','dv2','dv']],
  ['v = s : t anwenden und nach s oder t umstellen (Gegeben, Gesucht, Formel, Rechnung, Antwort)',['v']],
  ['Eine Messreihe auswerten und erkennen, ob eine Bewegung gleichförmig ist',['mess']],
- ['Die Durchschnittsgeschwindigkeit einer Fahrt mit Pause berechnen',['dv']],
+ ['Die Durchschnittsgeschwindigkeit einer Fahrt mit Pause berechnen',['dv2','dv']],
  ['Die Geschwindigkeit aus der Steigung im s(t)-Diagramm bestimmen',['lesen']],
  ['Situationen in s(t)-Diagramme übersetzen (Stehen, Zurückgehen, schneller)',['sit','story']],
  ['Zu einem s(t)-Diagramm das passende v(t)-Diagramm finden und umgekehrt',['zuo']],
- ['Treffen und Einholen im s(t)-Diagramm ablesen',['lauf','ueh2']],
- ['Einen Überholvorgang berechnen: Aufholstrecke, Δv, Überholdauer, Überholweg, freie Strecke',['ueh2','ueh']],
- ['Textaufgaben lösen: wichtige Angaben finden, unnötige weglassen, umrechnen, in zwei Schritten rechnen',['einstein','text','gz']],
- ['Überholen verstehen: Wann zählt Δv, wann die Summe? Reicht die Sichtweite?',['uetext']],
+ ['Treffen und Einholen im s(t)-Diagramm ablesen und zeichnen',['lauf','text']],
+ ['Textaufgaben lösen: wichtige Angaben finden, unnötige weglassen, umrechnen, in zwei Schritten rechnen',['einstein0','einstein','text','gz']],
  ['Fachbegriffe sicher verwenden',['begr']]
 ];
 const AREAS=[
- ['Grundlagen',['zz','um','v'],2],
- ['Messen und Durchschnitt',['mess','dv'],2],
+ ['Station 1: Umrechnen',['um'],4],
+ ['Grundlagen',['zz','v','begr'],3],
+ ['Messen und Durchschnitt',['mess','dv2','dv'],2],
  ['Diagramme',['lesen','sit','story','zuo','lauf'],3],
- ['Überholen',['ueh2','ueh'],2],
- ['Textaufgaben',['einstein','gz','text','uetext'],4,{ids:['einstein','text'],k:2,txt:'davon mindestens 2 lange Textaufgaben (Bad Einstein oder Treffen und Einholen)'}],
- ['Begriffe',['begr'],2]
+ ['Textaufgaben',['einstein0','einstein','gz','text'],4,{ids:['einstein','text'],k:2,txt:'davon mindestens 2 lange Textaufgaben (Bad Einstein oder Treffen und Einholen)'}]
 ];
+function st1ok(){return areaVal(AREAS[0])>=AREAS[0][2]||unlocked()}
 function areaVal(a){const [n,ids,k,req]=a;const st=solved(ids);if(!req)return Math.min(st,k);const sr=Math.min(solved(req.ids),req.k);return Math.min(k,sr+Math.min(st-sr,k-req.k))}
 function solved(ids){return ids.reduce((a,id)=>a+((stats[id]&&stats[id].s)||0),0)}
-function unlocked(){try{if(localStorage.getItem('kin-ueb-open')==='1')return true}catch(e){}return AREAS.every(a=>areaVal(a)>=a[2])}
+function unlocked(){try{if(localStorage.getItem('kin-sge-open')==='1')return true}catch(e){}return AREAS.every(a=>areaVal(a)>=a[2])}
 function home(){
   leave();Sim.stop();Opa.stop();GK.stop();cur=null;mixMode=false;EX=null;
   const done=AREAS.filter(a=>areaVal(a)>=a[2]).length,open=unlocked();
-  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p><ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse dort Aufgaben. <b>Jede Aufgabe, die du selbst richtig löst, bringt 1 Punkt</b> für den Bereich. Welches Thema du im Bereich nimmst, ist egal. Mit „Lösung zeigen“ gibt es keinen Punkt.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen und sammelst weiter, bis der Balken voll ist.</li><li>Sind alle sechs Balken voll, öffnet sich ganz unten die <b>Abschluss-Challenge</b>.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
-  h+=`<details class="card form"><summary><h3>Formeln zum Nachschauen</h3></summary><div class="fr"><span class="f">v = <span class="frac"><span>s</span><span>t</span></span></span><span class="f">s = v · t</span><span class="f">t = <span class="frac"><span>s</span><span>v</span></span></span><span class="f">km/h <b>: 3,6</b> = m/s</span></div><div class="fr small"><span>Überholen: s<sub>auf</sub> = s<sub>A</sub> + l<sub>LKW</sub> + s<sub>A</sub> + l<sub>PKW</sub></span><span>Δv = v<sub>PKW</sub> − v<sub>LKW</sub></span><span>t<sub>ü</sub> = <span class="frac"><span>s<sub>auf</sub></span><span>Δv</span></span></span><span>s<sub>frei</sub> = s<sub>PKW</sub> + s<sub>Gegen</sub></span></div><div class="fr small"><span>Gleiche Richtung (Einholen): Abstand schrumpft mit v<sub>1</sub> − v<sub>2</sub></span><span>Aufeinander zu (Begegnen): mit v<sub>1</sub> + v<sub>2</sub></span></div></details>`;
+  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p>${st1ok()?'':'<div class="fb no" style="margin:0 0 10px"><b>Starte mit Station 1: Umrechnen.</b> Erst wenn du dort 4 Aufgaben selbst richtig gelöst hast, werden die anderen Bereiche frei.</div>'}<ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse dort Aufgaben. <b>Jede Aufgabe, die du selbst richtig löst, bringt 1 Punkt</b> für den Bereich. Welches Thema du im Bereich nimmst, ist egal. Mit „Lösung zeigen“ gibt es keinen Punkt.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen und sammelst weiter, bis der Balken voll ist.</li><li>Sind alle Balken voll, öffnet sich ganz unten die <b>Abschluss-Challenge</b>.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit. Schreibe wie dort: Gegeben, Gesucht, Formel, Rechnung, Antwort.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
+  h+=`<details class="card form"><summary><h3>Formeln zum Nachschauen</h3></summary><div class="fr"><span class="f">v = <span class="frac"><span>s</span><span>t</span></span></span><span class="f">s = v · t</span><span class="f">t = <span class="frac"><span>s</span><span>v</span></span></span><span class="f">km/h <b>: 3,6</b> = m/s</span></div><div class="umbox"><b>Umrechnen</b><div class="umrow"><span class="umk">km/h</span><span class="uma">: 3,6 →</span><span class="umk">m/s</span></div><div class="umrow"><span class="umk">m/s</span><span class="uma">· 3,6 →</span><span class="umk">km/h</span></div><div class="small">Beispiel: 36 km/h : 3,6 = 10 m/s &nbsp;|&nbsp; 10 m/s · 3,6 = 36 km/h</div></div><div class="fr small"><span>Gleiche Richtung (Einholen): Abstand schrumpft mit v<sub>1</sub> − v<sub>2</sub></span><span>Aufeinander zu (Begegnen): mit v<sub>1</sub> + v<sub>2</sub></span></div></details>`;
   AREAS.forEach((A,ai)=>{const [n,ids,k,req]=A;const v=areaVal(A);
     h+=`<h2 class="ah" id="area-${ai}">${n} <small>${v>=k?'✓ geschafft':v+' von '+k+' Punkten · noch '+(k-v)}${req&&v<k?'<br><span class="req">'+req.txt+'</span>':''}</small></h2><div class="grid">`;
-    ids.forEach(id=>{const t=TOPICS.find(x=>x.id===id);const s=stats[id]||{};h+=`<button class="topic ${n==='Textaufgaben'?'tx':''}" data-id="${id}"><b>${t.title}</b><span>${t.desc}</span><em>${s.n?('Richtig gelöst: '+(s.s||0)+' · im 1. Versuch: '+(s.r||0)):'noch nicht geübt'}</em></button>`});
+    ids.forEach(id=>{const t=TOPICS.find(x=>x.id===id);const s=stats[id]||{};h+=`<button class="topic ${n==='Textaufgaben'?'tx':''} ${ai>0&&!st1ok()?'lockd':''}" data-id="${id}" ${ai>0&&!st1ok()?'disabled':''}><b>${t.title}</b><span>${t.desc}</span><em>${s.n?('Richtig gelöst: '+(s.s||0)+' · im 1. Versuch: '+(s.r||0)):'noch nicht geübt'}</em></button>`});
     h+='</div>'});
   h+=`<button class="mix" id="mix">Bunte Mischung: Zufallsaufgabe</button>`;
-  h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>10 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 45 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
+  h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>9 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 35 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
   h+=`<div class="card selfcheck"><h3>Selbstcheck vor der Klassenarbeit</h3><p class="small" style="margin:0 0 6px">Geh die Liste durch. Wo du dir noch unsicher bist, tippe auf das Thema daneben und üb noch ein paar Aufgaben.</p><ul class="check">${CHECK.map(([t,ids])=>`<li><span>${t}</span><span class="go">${ids.map(id=>{const T=TOPICS.find(x=>x.id===id);return `<button class="chip" data-id="${id}">${T.title}</button>`}).join('')}</span></li>`).join('')}</ul></div>`;
   h+=pdfCard()+`<p class="tlink"><button id="teach">Lehrkraft</button><span id="tbox" hidden> <input type="password" id="tcode" placeholder="Code" autocomplete="off" style="width:110px;font-size:15px;padding:6px 8px"> <button id="tok">Freischalten</button></span></p>`;
   $('#app').innerHTML=h;
@@ -875,7 +963,7 @@ function home(){
   if($('#exam'))$('#exam').onclick=examStart;
   if($('#toCh'))$('#toCh').onclick=()=>document.querySelector('.chal').scrollIntoView({behavior:'smooth',block:'start'});
   $('#teach').onclick=()=>{$('#tbox').hidden=false;$('#tcode').focus()};
-  const tryCode=()=>{if(hcode($('#tcode').value.trim().toLowerCase())===TCODE){try{localStorage.setItem('kin-ueb-open','1')}catch(e){}home()}else{$('#tcode').value='';$('#tcode').placeholder='falsch'}};
+  const tryCode=()=>{if(hcode($('#tcode').value.trim().toLowerCase())===TCODE){try{localStorage.setItem('kin-sge-open','1')}catch(e){}home()}else{$('#tcode').value='';$('#tcode').placeholder='falsch'}};
   $('#tok').onclick=tryCode;$('#tcode').onkeydown=e=>{if(e.key==='Enter')tryCode()};
   bindPdf();updScore();
 }
@@ -884,8 +972,8 @@ function bindPdf(){$('#nm').oninput=e=>window._nm=e.target.value;$('#pdfBtn').on
 
 /* ===== Abschluss-Challenge ===== */
 let EX=null,EXR=null;
-try{EXR=JSON.parse(localStorage.getItem('kin-ueb-exr')||'null')}catch(e){EXR=null}
-const EXAM_IDS=['zz','v','dv','lesen','sit','zuo','einstein','text','uetext','ueh'];
+try{EXR=JSON.parse(localStorage.getItem('kin-sge-exr')||'null')}catch(e){EXR=null}
+const EXAM_IDS=['um','zz','v','dv','lesen','zuo','einstein','text','gz'];
 function examStart(){leave();Sim.stop();Opa.stop();
   EX={i:0,t0:Date.now(),items:EXAM_IDS.map(id=>{const T=TOPICS.find(x=>x.id===id);let tk=T.gen();let g=0;while(tk.draw&&g++<60)tk=T.gen();return {id,topic:T.title,task:tk,max:tk.choices?2:tk.inputs.length*2}})};
   examRender();}
@@ -922,7 +1010,7 @@ function examSave(){
 function examResult(){
   const P=EX.items.reduce((a,b)=>a+b.pts,0),M=EX.items.reduce((a,b)=>a+b.max,0),pc=Math.round(P/M*100),mins=Math.max(1,Math.round((Date.now()-EX.t0)/60000));
   EXR={P,M,pc,mins,items:EX.items.map(it=>({topic:it.topic,title:it.task.title,pts:it.pts,max:it.max,ans:it.ans,right:it.right})),when:new Date().toLocaleDateString('de-DE')};
-  try{localStorage.setItem('kin-ueb-exr',JSON.stringify(EXR))}catch(e){}appChanged();
+  try{localStorage.setItem('kin-sge-exr',JSON.stringify(EXR))}catch(e){}appChanged();
   let h=`<div class="card hero"><h2>Deine Abschluss-Challenge</h2><div class="res3"><div><b>${P}</b><span>von ${M} Punkten</span></div><div><b>${pc} %</b><span>richtig</span></div><div><b>${mins}</b><span>Minuten</span></div></div><p class="lead" style="margin-top:8px">Du hast <b>${pc} %</b> der Punkte geschafft. ${pc>=80?'Stark! Bleib dran und übe die Textaufgaben weiter.':pc>=50?'Gute Grundlage. Schau dir unten die Aufgaben an, die noch nicht geklappt haben.':'Da ist noch Luft nach oben. Übe die Bereiche unten noch einmal und starte die Challenge danach neu.'}</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du gerade stehst.</p></div>`;
   const weak=[...new Set(EX.items.filter(i=>i.pts<i.max).map(i=>i.id))];
   if(weak.length)h+=`<div class="card"><h3>Das solltest du noch üben</h3><div class="go">${weak.map(id=>`<button class="chip" data-id="${id}">${TOPICS.find(x=>x.id===id).title}</button>`).join('')}</div></div>`;
@@ -1092,10 +1180,13 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .drw .dclr{border:1.5px solid #9AA9BA;background:#fff;color:#33475E;border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;margin-left:auto}
 </style>`);
 
+/* ===== SGGE: Station 1 zuerst ===== */
+(function(){const s0=start;start=function(id,keepMix){if(id!=='um'&&!st1ok()){id='um';keepMix=false}s0(id,keepMix)};
+  const m0=document.createElement('style');m0.textContent='.topic.lockd{opacity:.45;cursor:not-allowed;border-left-color:#9AA9BA}.umbox{background:#EAF3FB;border:1.5px solid #C9D6E5;border-radius:12px;padding:10px 12px;margin-top:8px}.umrow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:18px}.umk{background:#1F3A5F;color:#fff;border-radius:8px;padding:3px 10px;font-weight:700}.umrow:nth-of-type(2) .umk:last-child{background:#3C7A4E}.uma{font-weight:700;color:#1F3A5F}';document.head.appendChild(m0)})();
 /* ===== Zwischenspeichern: Liste der Aufgaben und laufende Challenge ===== */
 const KEEP=(function(){
-  const K='kin-ueb-keep';let ok=true;
-  try{localStorage.setItem('kin-ueb-test','1');ok=localStorage.getItem('kin-ueb-test')==='1';localStorage.removeItem('kin-ueb-test')}catch(e){ok=false}
+  const K='kin-sge-keep';let ok=true;
+  try{localStorage.setItem('kin-sge-test','1');ok=localStorage.getItem('kin-sge-test')==='1';localStorage.removeItem('kin-sge-test')}catch(e){ok=false}
   function save(){if(!ok)return;try{
     const ex=(EX&&EX.items&&!EX.done)?{i:EX.i,t0:EX.t0,items:EX.items.map(it=>({id:it.id,topic:it.topic,max:it.max,pts:it.pts,ans:it.ans,right:it.right,task:{title:it.task.title,q:it.task.q,fig:it.task.fig,inputs:it.task.inputs,choices:it.task.choices,expl:it.task.expl}}))}:null;
     localStorage.setItem(K,JSON.stringify({log:LOG,ex,nm:window._nm||''}))}catch(e){}}
@@ -1181,7 +1272,7 @@ const Opa=(function(){
 })();
 home();
 
-/* ===== Anbindung an die Klassen-App (ohne Namen und ohne Lehrer-Code!) ===== */
+/* ===== BRIDGE ===== */
 if(window.AppBridge){
   setTimeout(()=>{appLive=true},1500);
   AppBridge.register({
@@ -1194,7 +1285,7 @@ if(window.AppBridge){
     },
     setState(s){const d=s&&s.daten;if(!d||!d.stats)return;
       stats=d.stats;LOG.length=0;(d.log||[]).forEach(e=>LOG.push(e));
-      if(d.exr){EXR=d.exr;try{localStorage.setItem('kin-ueb-exr',JSON.stringify(EXR))}catch(e){}}
+      if(d.exr){EXR=d.exr;try{localStorage.setItem('kin-sge-exr',JSON.stringify(EXR))}catch(e){}}
       appLive=true;saveStats();try{updScore()}catch(e){}home();}
   });
 }
