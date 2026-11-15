@@ -211,7 +211,7 @@ function end(){
 /* Eingabe */
 const active=new Set();
 function isGame(){return screen==='drive'&&G&&G.phase==='drive'&&!G.over;}
-window.addEventListener('pointerdown',e=>{if(!isGame())return;e.preventDefault();active.add(e.pointerId);pressed=active.size;});
+window.addEventListener('pointerdown',e=>{if(!(screen==='drive'&&G&&!G.over))return;e.preventDefault();active.add(e.pointerId);pressed=active.size;});
 ['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,e=>{active.delete(e.pointerId);pressed=active.size;}));
 window.addEventListener('blur',()=>{active.clear();pressed=0;});
 window.addEventListener('contextmenu',e=>e.preventDefault());
