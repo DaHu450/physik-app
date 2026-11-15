@@ -1,57 +1,57 @@
 {
- "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen.",
- "klassen": {
-  "51": "SGGE"
- },
- "module": [
-  {
-   "id": "bad-einstein",
-   "titel": "1:0 für Bad Einstein",
-   "untertitel": "Wie schnell war Opa wirklich?",
-   "datei": "bad-einstein.html",
-   "klassen": [
-    "51"
-   ],
-   "freigegeben": true,
-   "farbe": "#C0562F",
-   "icon": "fussball"
+  "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen.",
+  "klassen": {
+    "51": "SGGE"
   },
-  {
-   "id": "blatt6",
-   "titel": "s(t)- und v(t)-Diagramme",
-   "untertitel": "Aufgaben zum Selbstkontrollieren",
-   "datei": "blatt6.html",
-   "klassen": [
-    "51"
-   ],
-   "freigegeben": true,
-   "farbe": "#C77B0A",
-   "icon": "diagramm"
-  },
-  {
-   "id": "kin",
-   "titel": "Kinematik-Training",
-   "untertitel": "Übungsstudio für die Klassenarbeit",
-   "datei": "kin.html",
-   "klassen": [
-    "51"
-   ],
-   "freigegeben": true,
-   "farbe": "#A0476E",
-   "icon": "uhr"
-  },
-  {
-   "id": "ueberholvorgang",
-   "titel": "Der Überholvorgang",
-   "untertitel": "Simulation: PKW überholt LKW",
-   "datei": "ueberholvorgang.html",
-   "klassen": [
-    "51"
-   ],
-   "freigegeben": true,
-   "farbe": "#8E3B46",
-   "icon": "auto",
-   "gesperrt": true
-  }
- ]
+  "module": [
+    {
+      "id": "bad-einstein",
+      "titel": "1:0 für Bad Einstein",
+      "untertitel": "Wie schnell war Opa wirklich?",
+      "datei": "bad-einstein.html",
+      "klassen": [
+        "51"
+      ],
+      "freigegeben": true,
+      "farbe": "#C0562F",
+      "icon": "fussball"
+    },
+    {
+      "id": "blatt6",
+      "titel": "s(t)- und v(t)-Diagramme",
+      "untertitel": "Aufgaben zum Selbstkontrollieren",
+      "datei": "blatt6.html",
+      "klassen": [
+        "51"
+      ],
+      "freigegeben": true,
+      "farbe": "#C77B0A",
+      "icon": "diagramm"
+    },
+    {
+      "id": "kin-sgge",
+      "titel": "Kinematik-Übungsstudio",
+      "untertitel": "Vorbereitung auf die Klassenarbeit",
+      "datei": "kin-sgge.html",
+      "klassen": [
+        "51"
+      ],
+      "freigegeben": true,
+      "farbe": "#A0476E",
+      "icon": "uhr"
+    },
+    {
+      "id": "ueberholvorgang",
+      "titel": "Der Überholvorgang",
+      "untertitel": "Simulation: PKW überholt LKW",
+      "datei": "ueberholvorgang.html",
+      "klassen": [
+        "51"
+      ],
+      "freigegeben": true,
+      "farbe": "#8E3B46",
+      "icon": "auto",
+      "gesperrt": true
+    }
+  ]
 }
