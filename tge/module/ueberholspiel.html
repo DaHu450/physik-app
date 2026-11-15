@@ -211,9 +211,17 @@ function end(){
 /* Eingabe */
 const active=new Set();
 function isGame(){return screen==='drive'&&G&&G.phase==='drive'&&!G.over;}
-window.addEventListener('pointerdown',e=>{if(!(screen==='drive'&&G&&!G.over))return;e.preventDefault();active.add(e.pointerId);pressed=active.size;});
-['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,e=>{active.delete(e.pointerId);pressed=active.size;}));
-window.addEventListener('blur',()=>{active.clear();pressed=0;});
+const gameOn=()=>screen==='drive'&&G&&!G.over;
+const setP=()=>{pressed=active.size;};
+/* Touch (iPad/Safari): eigene Touch-Ereignisse, zählt die Finger auf dem Bildschirm */
+const onTouch=e=>{if(!gameOn()){if(active.has('t')){active.delete('t');setP();}return;}
+  if(e.cancelable)e.preventDefault();
+  if(e.touches&&e.touches.length>0)active.add('t');else active.delete('t');setP();};
+['touchstart','touchmove','touchend','touchcancel'].forEach(t=>window.addEventListener(t,onTouch,{passive:false,capture:true}));
+/* Maus und Stift: Zeigerereignisse (Touch läuft über die Touch-Ereignisse) */
+window.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||!gameOn())return;e.preventDefault();active.add(e.pointerId);setP();},true);
+['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,e=>{if(e.pointerType==='touch')return;active.delete(e.pointerId);setP();},true));
+document.addEventListener('visibilitychange',()=>{if(document.hidden){active.clear();pressed=0;}});
 window.addEventListener('contextmenu',e=>e.preventDefault());
 let keyDown=false;
 window.addEventListener('keydown',e=>{
