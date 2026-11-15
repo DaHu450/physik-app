@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s(t)- und v(t)-Diagramme</title>
+<style>
+:root{--navy:#1F3A5F;--green:#3C7A4E;--blue:#2F7FC1;--orange:#E8833A;--purple:#7B5EA7;--bg:#F4F7FA;--line:#D3DCE6;--ok:#2E7D4F;--okbg:#E4F3E9;--bad:#B3402F;--badbg:#FBE9E5;--txt:#1b2733}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:18px;line-height:1.5}
+header{background:var(--navy);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:5}
+header .in{max-width:880px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{margin:0;font-size:20px}header small{display:block;font-weight:400;opacity:.85;font-size:14px}
+.prog{min-width:180px}.prog .t{font-size:14px;text-align:right}.prog .b{height:8px;background:rgba(255,255,255,.25);border-radius:9px;overflow:hidden;margin-top:4px}.prog .b i{display:block;height:100%;width:0;background:#7BC48F;transition:width .3s}
+main{max-width:880px;margin:0 auto;padding:16px}
+.lead{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+section{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.lab{display:inline-block;color:#fff;font-weight:700;border-radius:6px;padding:2px 10px;margin-right:8px;font-size:16px}
+h2{margin:0 0 10px;color:var(--navy);font-size:20px}
+.task{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.task:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.q{margin:0 0 8px}.q b.nr{color:var(--green);margin-right:4px}
+.info{background:#E3F0FA;border-left:6px solid var(--blue);border-radius:10px;padding:10px 12px;margin:8px 0}
+.fig{text-align:center;margin:8px 0}.fig svg{max-width:100%;height:auto}
+table.t{border-collapse:collapse;width:100%;margin:8px 0;font-size:16px}
+table.t th{background:#E8EEF5;color:var(--navy);text-align:left;padding:6px 8px;border:1px solid var(--line)}
+table.t td{padding:6px 8px;border:1px solid var(--line);vertical-align:middle}
+.tog{display:inline-flex;gap:6px;flex-wrap:wrap}
+.opt{font:inherit;font-size:16px;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;color:var(--txt);min-height:44px;text-align:left}
+.opt.sel{border-color:var(--navy);background:#EAF0F8;font-weight:600}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}.opt.no{border-color:var(--bad);background:var(--badbg)}
+.mc{display:grid;gap:8px;margin:6px 0}
+.mc.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.opt svg{width:100%;height:auto;display:block}
+input.n{font:inherit;font-size:19px;width:110px;padding:8px 10px;border:2px solid var(--navy);border-radius:10px;color:var(--txt);background:#fff}
+input.n.ok,select.ok{border-color:var(--ok);background:var(--okbg)}input.n.no,select.no{border-color:var(--bad);background:var(--badbg)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+.row label{font-weight:600;color:var(--navy);min-width:120px}
+select{font:inherit;font-size:16px;padding:6px 8px;border:2px solid var(--navy);border-radius:8px;background:#fff;color:var(--txt);max-width:100%}
+.gap{line-height:2.4}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.b{font:inherit;font-weight:700;border-radius:10px;padding:9px 16px;cursor:pointer;min-height:44px;border:2px solid var(--navy)}
+.b.main{background:var(--navy);color:#fff}.b.alt{background:#fff;color:var(--navy)}.b[disabled]{opacity:.4;cursor:default}
+.fb{margin-top:10px;border-radius:10px;padding:10px 12px;font-weight:600}
+.fb.ok{background:var(--okbg);border-left:6px solid var(--ok);color:#16502f}.fb.no{background:var(--badbg);border-left:6px solid var(--bad);color:#7a2417}
+.ex{margin-top:8px;background:#FFF6D6;border-left:6px solid #E0A800;border-radius:10px;padding:10px 12px}
+.ex b.h{color:var(--navy)}
+.done{text-align:center;background:var(--okbg);border:2px solid var(--ok);border-radius:14px;padding:16px;font-size:19px}
+@media(max-width:520px){body{font-size:17px}.row label{min-width:100%}}
+</style>
+</head>
+<body>
+<header><div class="in"><h1>s(t)- und v(t)-Diagramme<small>Physik · Blatt 6 zum Selbstkontrollieren</small></h1><div class="prog"><div class="t" id="pt">0 von 0 Aufgaben gelöst</div><div class="b"><i id="pb"></i></div></div></div></header>
+<main>
+<div class="lead"><b>So geht's:</b> Bearbeite die Aufgaben der Reihe nach, mit Zettel und Stift für die Rechnungen. Diagramme zeichnest du hier, indem du Werte in die Tabellen einträgst: Das Diagramm erscheint sofort. Mit <b>Prüfen</b> siehst du, ob du richtig liegst, mit <b>Lösung</b> bekommst du die Lösung mit Erklärung. Kommazahlen darfst du mit Komma oder Punkt eingeben, negative Werte mit Minus.
+<div class="btns"><a class="b alt" href="blatt6_AB_st_und_vt_Diagramme.pdf" download style="text-decoration:none;display:inline-flex;align-items:center">Arbeitsblatt als PDF herunterladen</a></div></div>
+
+<section>
+<h2><span class="lab" style="background:#E8833A">Warm-up</span>Diagramm-Paare</h2>
+<div class="fig" id="wfig"></div>
+<div class="task" data-id="w1">
+ <p class="q"><b class="nr">a)</b><b>Bestimme</b> in den s(t)-Diagrammen ① bis ③ die Geschwindigkeit in jedem Abschnitt.</p>
+ <table class="t" id="w1t"></table>
+</div>
+<div class="task" data-id="w2">
+ <p class="q"><b class="nr">b)</b><b>Ordne</b> jedem s(t)-Diagramm das passende v(t)-Diagramm zu.</p>
+ <div class="row"><label>① gehört zu</label><span class="tog" data-tog="p1"></span></div>
+ <div class="row"><label>② gehört zu</label><span class="tog" data-tog="p2"></span></div>
+ <div class="row"><label>③ gehört zu</label><span class="tog" data-tog="p3"></span></div>
+</div>
+<div class="task" data-id="w3">
+ <p class="q"><b class="nr">c)</b>Ein s(t)- und ein v(t)-Diagramm bleiben übrig. <b>Zeichne</b> das fehlende v(t)-Diagramm <b>Ⓓ</b> zu s(t) ②: Trage die Geschwindigkeit in jedem Abschnitt ein.</p>
+ <table class="t" id="w3t"></table><div class="fig" id="w3f"></div>
+</div>
+<div class="task" data-id="w4">
+ <p class="q"><b class="nr">c)</b>Und umgekehrt: <b>Zeichne</b> das fehlende s(t)-Diagramm <b>④</b> zum v(t)-Diagramm B. Trage ein, wo der Körper zu jeder Zeit ist (Start bei 0 m).</p>
+ <table class="t" id="w4t"></table><div class="fig" id="w4f"></div>
+</div>
+</section>
+
+<section>
+<h2><span class="lab" style="background:#3C7A4E">Aufgabe 1</span>Gleichförmig oder nicht?</h2>
+<div class="task" data-id="a1">
+ <p class="q"><b class="nr">a)</b><b>Entscheide</b>, ob die Bewegungen gleichförmig sind.</p>
+ <div class="fig" id="a1f"></div>
+ <table class="t" id="a1t"></table>
+</div>
+<div class="task" data-id="a2">
+ <p class="q"><b class="nr">b)</b>Wie sieht das s(t)-Diagramm typischerweise aus?</p>
+ <p class="q"><b>gleichförmig:</b></p><div class="mc g3" data-mc="a2a"></div>
+ <p class="q"><b>nicht gleichförmig:</b></p><div class="mc g3" data-mc="a2b"></div>
+ <div class="row"><label>Mein Beispiel (gleichförmig)</label><input class="n" style="width:min(420px,100%)" id="a2x"></div>
+ <div class="row"><label>Mein Beispiel (nicht gleichf.)</label><input class="n" style="width:min(420px,100%)" id="a2y"></div>
+ <p style="font-size:14px;color:#4a5a69;margin:0">Deine Beispiele werden nicht automatisch geprüft, sie kommen aber in dein PDF.</p>
+</div>
+</section>
+
+<section>
+<h2><span class="lab" style="background:#E0A800">Merke</span>Die gleichförmige Bewegung</h2>
+<div class="task" data-id="m1"><div class="gap" id="m1t"></div></div>
+</section>
+
+<section>
+<h2><span class="lab" style="background:#3C7A4E">Aufgabe 2</span>Tina am Zebrastreifen</h2>
+<div class="info">Tina läuft die ersten 4 s mit konstant 1 m/s, bis sie einen Zebrastreifen erreicht. Dort muss sie 3 s warten. Dann läuft sie zügig mit 1,5 m/s über die 4,5 m breite Straße. Auf der anderen Seite bleibt sie 4 s stehen, um sich zu orientieren.</div>
+<div class="task" data-id="t0">
+ <p class="q"><b class="nr">a)</b>Wie lange braucht Tina für die Straße?</p>
+ <div class="row"><label>t</label><input class="n" inputmode="decimal" id="t0i"> s</div>
+</div>
+<div class="task" data-id="t1">
+ <p class="q"><b class="nr">a)</b><b>Zeichne</b> das s(t)-Diagramm: Wo ist Tina zu diesen Zeitpunkten?</p>
+ <table class="t" id="t1t"></table><div class="fig" id="t1f"></div>
+</div>
+<div class="task" data-id="t2">
+ <p class="q"><b class="nr">b)</b><b>Zeichne</b> das passende v(t)-Diagramm: Trage die Geschwindigkeit in jedem Abschnitt ein.</p>
+ <table class="t" id="t2t"></table><div class="fig" id="t2f"></div>
+</div>
+</section>
+
+<section>
+<h2><span class="lab" style="background:#3C7A4E">Aufgabe 3</span>Antonia hat es eilig</h2>
+<div class="info">Antonia rennt 30 s lang mit 3 m/s auf eine Ampel zu. Die Ampel ist rot, sie muss 20 s warten. Dann geht sie mit 1,5 m/s über die 12 m breite Straße. Auf der anderen Seite joggt sie noch 10 s mit 3 m/s weiter.</div>
+<div class="task" data-id="n1">
+ <p class="q"><b class="nr">a)</b><b>Ergänze</b> die Tabelle. Die Diagramme b) und c) entstehen dabei automatisch aus deinen Werten.</p>
+ <div style="overflow-x:auto"><table class="t" id="n1t"></table></div>
+ <div class="fig" id="n1v"></div><div class="fig" id="n1s"></div>
+</div>
+</section>
+
+<section>
+<h2><span class="lab" style="background:#3C7A4E">Aufgabe 4</span>Notarzt und Krankenwagen</h2>
+<div class="info">Ein Krankenwagen mit einem Verletzten, aber ohne Arzt, fährt los zum 30 km entfernten Krankenhaus. Gleichzeitig startet am Krankenhaus ein Notarzt und fährt dem Krankenwagen entgegen. Der Krankenwagen fährt im Mittel 60 km/h, der Notarzt 90 km/h.</div>
+<div class="task" data-id="k1">
+ <p class="q"><b class="nr">a)</b> und <b class="nr">b)</b><b>Berechne</b> die Fahrzeiten in Minuten.</p>
+ <div class="row"><label>Krankenwagen</label><input class="n" inputmode="decimal" id="k1a"> min</div>
+ <div class="row"><label>Notarzt</label><input class="n" inputmode="decimal" id="k1b"> min</div>
+ <div class="fig" id="kf"></div>
+ <p style="font-size:14px;color:#4a5a69;margin:0">c) Das s(t)-Diagramm zeichnet sich aus deinen Zeiten (Krankenhaus bei 0 km).</p>
+</div>
+<div class="task" data-id="k2">
+ <p class="q"><b class="nr">d)</b><b>Bestimme</b> mit dem Diagramm, wann und wo sich die beiden treffen.</p>
+ <div class="row"><label>nach</label><input class="n" inputmode="decimal" id="k2a"> min</div>
+ <div class="row"><label>Entfernung vom Krankenhaus</label><input class="n" inputmode="decimal" id="k2b"> km</div>
+</div>
+</section>
+
+<section>
+<h2><span class="lab" style="background:#7B5EA7">Für Schnelle</span>Diagramm-Diktat</h2>
+<p class="q"><b>Mit Partner:</b> Zeichne heimlich ein s(t)-Diagramm mit drei Abschnitten auf Papier. Beschreibe die Bewegung nur mit Worten. Dein Partner zeichnet daraus das v(t)-Diagramm. Passt es?</p>
+<p class="q"><b>Allein:</b> Hier bekommst du immer neue s(t)-Diagramme. Bestimme die Geschwindigkeit in jedem Abschnitt.</p>
+<div class="task" data-id="f1">
+ <div class="fig" id="f1f"></div><table class="t" id="f1t"></table>
+ <div class="btns" style="margin-top:4px"><button class="b alt" id="fNew">Neues Diagramm</button></div>
+</div>
+</section>
+
+<div id="fin"></div>
+<section id="pdfbox"><h2><span class="lab" style="background:#1F3A5F">Zum Schluss</span>Meine Zusammenfassung als PDF</h2>
+<p class="q">Trag deinen Namen ein und lade dir eine Übersicht über deine Antworten herunter: bei jeder Aufgabe deine Antwort, ob sie richtig war, und die Erklärung.</p>
+<div class="row"><label for="nm">Name</label><input id="nm" class="n" style="width:260px" autocomplete="name"></div>
+<div class="btns"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div>
+<p style="font-size:14px;color:#4a5a69">Achtung: Wenn du die Seite neu lädst, sind deine eingetragenen Werte weg. Gespeichert wird nur, welche Aufgaben du schon gelöst hast. Lade das PDF also vorher herunter.</p></section>
+</main>
+
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const fmt=(x,d=1)=>Number(x.toFixed(d)).toString().replace('.',',');
+const num=v=>{const m=String(v||'').replace(',','.').replace(/\s/g,'').match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):null};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const NAV='#1F3A5F',BLUE='#2F7FC1',ORG='#E8833A',GRN='#3C7A4E',GRID='#D6DEE8';
+
+/* --- Aufgaben-Gerüst --- */
+const ITEMS={};let solved=new Set();const REC={};
+let appLive=false;function appChanged(){if(window.AppBridge&&appLive)AppBridge.changed()}
+function updProg(){appChanged();const n=Object.keys(ITEMS).length,k=solved.size;$('#pt').textContent=`${k} von ${n} Aufgaben gelöst`;$('#pb').style.width=(100*k/n)+'%';
+  if(k===n)$('#fin').innerHTML='<div class="done"><b>Geschafft!</b> Du hast alle Aufgaben bearbeitet. Lies dir den Merke-Kasten noch einmal durch, dann bist du fit für die nächste Stunde.</div>'}
+function item(id,o){
+  ITEMS[id]=o;const box=$(`.task[data-id="${id}"]`);
+  box.insertAdjacentHTML('beforeend',`<div class="btns chk"><button class="b main">Prüfen</button><button class="b alt">Lösung</button></div><div class="fbx"></div>`);
+  const [bc,bs]=box.querySelectorAll('.btns.chk button');const fbx=box.querySelector('.fbx');let tries=0;REC[id]={tries:0,status:'offen',ans:''};
+  const finish=(ok,txt)=>{fbx.innerHTML=`<div class="fb ${ok?'ok':'no'}">${txt}</div><div class="ex"><b class="h">Erklärung:</b> ${o.expl}</div>`;bc.disabled=true;bs.disabled=true;solved.add(id);updProg();o.lock&&o.lock()};
+  bc.onclick=()=>{const snap=snapshot(box);const r=o.check();if(r!==null){REC[id].ans=snap;REC[id].tries=tries+1;REC[id].status=r===true?'richtig':'noch falsch';appChanged()}if(r===null){fbx.innerHTML='<div class="fb no">Fülle zuerst alles aus bzw. wähle etwas aus.</div>';return}
+    tries++;if(r===true)finish(true,tries===1?'Richtig!':'Richtig, beim '+tries+'. Versuch.');
+    else fbx.innerHTML=`<div class="fb no">${typeof r==='string'?r:'Noch nicht ganz.'} ${tries>=2?'Schau dir die Lösung an, wenn du nicht weiterkommst.':'Prüf deine Rechnung und versuch es noch einmal.'}</div>`};
+  bs.onclick=()=>{const snap=snapshot(box);if(snap.replace(/[–\s|:]/g,''))REC[id].ans=snap;REC[id].status='Lösung angesehen';REC[id].tries=tries;o.show();finish(false,'Hier ist die Lösung. Vergleiche sie mit deinem Weg.')};
+}
+function snapshot(box){
+  const parts=[];
+  box.querySelectorAll('input.n').forEach(e=>{const l=e.dataset.l||e.closest('.row')?.querySelector('label')?.textContent||e.closest('table')?.querySelectorAll('th')[e.closest('td').cellIndex]?.textContent||'';const u=(e.nextSibling&&e.nextSibling.nodeType===3)?e.nextSibling.textContent.trim():'';parts.push((l?l.trim()+': ':'')+(e.value.trim()?e.value.trim()+(u?' '+u:''):'–'))});
+  box.querySelectorAll('[data-tog]').forEach(el=>{const k=el.dataset.tog,t=TG[k];const l=el.closest('.row')?.querySelector('label')?.textContent||el.closest('tr')?.cells[0]?.textContent||'';parts.push((l?l.trim()+': ':'')+(t.sel==null?'–':el.querySelectorAll('.opt')[t.sel].textContent))});
+  box.querySelectorAll('[data-mc]').forEach(el=>{const m=MC[el.dataset.mc];if(m.sel==null){parts.push('–');return}const b=el.querySelectorAll('.opt')[m.sel];parts.push(b.querySelector('svg')?('Diagramm Nr. '+(m.sel+1)):b.textContent.trim())});
+  box.querySelectorAll('select').forEach(e=>parts.push(e.value||'–'));
+  return parts.join(' | ');
+}
+function mark(el,ok){el.classList.remove('ok','no');el.classList.add(ok?'ok':'no')}
+function numCheck(ids){let all=true,okAll=true;ids.forEach(([id,ans,tol])=>{const e=$('#'+id),v=num(e.value);if(v==null){all=false;return}const ok=Math.abs(v-ans)<=tol;mark(e,ok);if(!ok)okAll=false});return all?okAll:null}
+function numShow(ids){ids.forEach(([id,ans,tol,txt])=>{const e=$('#'+id);e.value=txt||fmt(ans,2);mark(e,true)})}
+/* Multiple Choice */
+const MC={};
+function mc(key,opts,shuf=true){const el=$(`[data-mc="${key}"]`);const list=shuf?shuffle(opts):opts;MC[key]={sel:null,list};
+  el.innerHTML=list.map((o,i)=>`<button class="opt" data-i="${i}">${o.t}</button>`).join('');
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(b.disabled)return;el.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','ok','no'));b.classList.add('sel');MC[key].sel=+b.dataset.i})}
+function mcCheck(key){const m=MC[key];if(m.sel==null)return null;const el=$(`[data-mc="${key}"]`);const b=el.querySelectorAll('.opt')[m.sel];const ok=!!m.list[m.sel].ok;b.classList.remove('sel');mark(b,ok);return ok}
+function mcShow(key){const el=$(`[data-mc="${key}"]`);MC[key].list.forEach((o,i)=>{const b=el.querySelectorAll('.opt')[i];b.classList.remove('sel','no');if(o.ok)b.classList.add('ok')})}
+function mcLock(key){$$(`[data-mc="${key}"] .opt`).forEach(b=>b.disabled=true)}
+/* Umschalter */
+const TG={};
+function tog(key,labels,ans){const el=$(`[data-tog="${key}"]`);TG[key]={sel:null,ans};el.innerHTML=labels.map((l,i)=>`<button class="opt" data-i="${i}">${l}</button>`).join('');
+  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(b.disabled)return;el.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','ok','no'));b.classList.add('sel');TG[key].sel=+b.dataset.i})}
+function togCheck(keys){if(keys.some(k=>TG[k].sel==null))return null;let ok=true;keys.forEach(k=>{const b=$$(`[data-tog="${k}"] .opt`)[TG[k].sel];b.classList.remove('sel');const g=TG[k].sel===TG[k].ans;mark(b,g);if(!g)ok=false});return ok}
+function togShow(keys){keys.forEach(k=>{$$(`[data-tog="${k}"] .opt`).forEach((b,i)=>{b.classList.remove('sel','no','ok');if(i===TG[k].ans)b.classList.add('ok')})})}
+function togLock(keys){keys.forEach(k=>$$(`[data-tog="${k}"] .opt`).forEach(b=>b.disabled=true))}
+
+/* --- Diagramm --- */
+function chart(o){
+  const W=o.w||460,H=o.h||280,L=o.L||48,R=14,T=20,B=o.B||38,pw=W-L-R,ph=H-T-B;
+  const x0=o.xmin||0,y0=o.ymin||0;
+  const X=x=>L+(x-x0)/(o.xmax-x0)*pw,Y=y=>T+ph-(y-y0)/(o.ymax-y0)*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" xmlns="http://www.w3.org/2000/svg" font-family="Arial,Helvetica,sans-serif"><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#fff"/>`;
+  const st=(a,b,d)=>{const r=[];for(let v=Math.ceil(a/d-1e-9)*d;v<=b+1e-9;v+=d)r.push(+v.toFixed(6));return r};
+  st(x0,o.xmax,o.xs).forEach(x=>s+=`<line x1="${X(x)}" y1="${T}" x2="${X(x)}" y2="${T+ph}" stroke="${GRID}"/>`+(o.nonum?'':`<text x="${X(x)}" y="${T+ph+15}" font-size="12" text-anchor="middle" fill="${NAV}">${fmt(x,2)}</text>`));
+  st(y0,o.ymax,o.ys).forEach(y=>s+=`<line x1="${L}" y1="${Y(y)}" x2="${L+pw}" y2="${Y(y)}" stroke="${GRID}"/>`+(o.nonum?'':`<text x="${L-6}" y="${Y(y)+4}" font-size="12" text-anchor="end" fill="${NAV}">${fmt(y,2)}</text>`));
+  s+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="${NAV}" stroke-width="1.6"/>`;
+  const yA=y0<0?Y(0):T+ph;s+=`<line x1="${L}" y1="${yA}" x2="${L+pw}" y2="${yA}" stroke="${NAV}" stroke-width="1.6"/>`;
+  (o.series||[]).forEach(se=>{
+    if(se.segs)se.segs.forEach(([a,b,v])=>{if(v==null||isNaN(v))return;s+=`<line x1="${X(a)}" y1="${Y(v)}" x2="${X(b)}" y2="${Y(v)}" stroke="${se.c}" stroke-width="3.6" stroke-linecap="round"/>`});
+    else if(se.pts&&se.pts.length){s+=`<polyline fill="none" stroke="${se.c}" stroke-width="${se.w||3}" ${se.dash?'stroke-dasharray="'+se.dash+'"':''} stroke-linejoin="round" stroke-linecap="round" points="${se.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}"/>`;
+      if(se.dots)se.pts.forEach(p=>s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3.8" fill="${se.c}"/>`)}
+    if(se.label)s+=`<text x="${X(se.label[0])}" y="${Y(se.label[1])}" font-size="13" font-weight="700" fill="${se.c}" text-anchor="middle">${se.label[2]}</text>`});
+  if(o.tag)s+=`<circle cx="${L+pw-12}" cy="${T+12}" r="11" fill="${o.tagc||NAV}"/><text x="${L+pw-12}" y="${T+16.5}" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">${o.tag}</text>`;
+  s+=`<text x="${L+pw}" y="${H-3}" font-size="12" font-weight="700" fill="${NAV}" text-anchor="end">${o.xlab||''}</text><text x="${L}" y="13" font-size="12" font-weight="700" fill="${NAV}">${o.ylab||''}</text>`;
+  return s+'</svg>';
+}
+const RED='#B3402F';
+const vt=(segs,o={})=>chart({w:o.w||300,h:o.h||200,L:36,B:32,xmax:o.xmax||5,ymin:o.ymin??-1.5,ymax:o.ymax??2.5,xs:o.xs||1,ys:o.ys||0.5,xlab:'t in s',ylab:'v in m/s',series:[{segs,c:o.c||ORG}],tag:o.tag,tagc:o.tagc});
+const stc=(pts,o={})=>chart({w:o.w||300,h:o.h||200,L:36,B:32,xmax:o.xmax||5,ymax:o.ymax||3,xs:1,ys:o.ys||0.5,xlab:'t in s',ylab:'s in m',series:[{pts,c:o.c||BLUE,dots:o.dots}],tag:o.tag,tagc:o.tagc});
+/* Tabellen mit Eingaben */
+function inTable(el,head,rows){ /* rows: [label,[ [id,given|null,dataLabel] ...]] */
+  $(el).innerHTML='<tr>'+head.map(h=>`<th>${h}</th>`).join('')+'</tr>'+rows.map(([lab,cells])=>`<tr><td><b>${lab}</b></td>`+cells.map(([id,g,dl])=>`<td>${g!=null?`<span style="font-weight:600;color:#4a5a69">${g}</span>`:`<input class="n" style="width:78px" inputmode="decimal" id="${id}" data-l="${dl}">`}</td>`).join('')+'</tr>').join('');
+}
+const V=id=>{const e=$('#'+id);return e?num(e.value):null};
+const live=(ids,fn)=>{ids.forEach(id=>{const e=$('#'+id);if(e)e.addEventListener('input',fn)});fn()};
+const lockIds=ids=>ids.forEach(id=>{const e=$('#'+id);if(e)e.disabled=true});
+
+/* ===== Warm-up ===== */
+const S1=[[0,0],[1,2],[5,2]],S2=[[0,0],[1,1],[3,1],[5,2]],S3=[[0,0],[1,2],[3,2],[5,0]];
+const VA=[[0,1,2],[1,3,0],[3,5,-1]],VB=[[0,2,1],[2,4,0],[4,5,-1]],VC=[[0,1,2],[1,5,0]];
+$('#wfig').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px">'+
+ [stc(S1,{tag:'1',tagc:GRN}),stc(S2,{tag:'2',tagc:GRN}),stc(S3,{tag:'3',tagc:GRN}),vt(VA,{tag:'A',tagc:ORG}),vt(VB,{tag:'B',tagc:ORG}),vt(VC,{tag:'C',tagc:ORG})].join('')+'</div>';
+const W1=[['① ',[['w1_0',null,'① 0–1 s'],['w1_1',null,'① 1–5 s'],[null,'–']]],['②',[['w1_2',null,'② 0–1 s'],['w1_3',null,'② 1–3 s'],['w1_4',null,'② 3–5 s']]],['③',[['w1_5',null,'③ 0–1 s'],['w1_6',null,'③ 1–3 s'],['w1_7',null,'③ 3–5 s']]]];
+inTable('#w1t',['Diagramm','1. Abschnitt','2. Abschnitt','3. Abschnitt'],W1);
+$('#w1t').insertAdjacentHTML('afterend','<p style="font-size:14px;color:#4a5a69;margin:4px 0 0">Alle Werte in m/s. Bei ① gibt es nur zwei Abschnitte (0–1 s und 1–5 s), bei ② und ③: 0–1 s, 1–3 s und 3–5 s.</p>');
+const w1a=[2,0,1,0,0.5,2,0,-1];const w1ids=w1a.map((a,i)=>['w1_'+i,a,0.06]);
+item('w1',{check:()=>{const r=numCheck(w1ids);if(r===false&&Math.abs((V('w1_7')||0)-1)<0.01)return 'Schau dir ③ hinten noch mal an: Die Linie fällt. Dann ist v negativ.';return r},show:()=>numShow(w1ids.map(([i,a])=>[i,a,0,fmt(a,1)])),lock:()=>lockIds(w1ids.map(x=>x[0])),
+ expl:'v = Δs : Δt in jedem Abschnitt. ①: 2 m in 1 s = <b>2 m/s</b>, dann waagrecht = <b>0 m/s</b>. ②: <b>1 m/s</b>, <b>0 m/s</b>, dann 1 m in 2 s = <b>0,5 m/s</b>. ③: <b>2 m/s</b>, <b>0 m/s</b>, dann geht es 2 m in 2 s zurück: <b>−1 m/s</b> (fallende Linie = negative Geschwindigkeit).'});
+const PO=['A','B','C','keins'];tog('p1',PO,2);tog('p2',PO,3);tog('p3',PO,0);
+item('w2',{check:()=>togCheck(['p1','p2','p3']),show:()=>togShow(['p1','p2','p3']),lock:()=>togLock(['p1','p2','p3']),
+ expl:'Vergleiche die Geschwindigkeiten aus a) mit den v(t)-Diagrammen. ① (2 / 0) passt zu <b>C</b>. ③ (2 / 0 / −1) passt zu <b>A</b>. Für ② (1 / 0 / 0,5) gibt es <b>keins</b>, und B bleibt übrig. Das sind die beiden Diagramme, die du in c) ergänzt.'});
+inTable('#w3t',['','0–1 s','1–3 s','3–5 s'],[['v in m/s',[['w3_0',null,'Ⓓ 0–1 s'],['w3_1',null,'Ⓓ 1–3 s'],['w3_2',null,'Ⓓ 3–5 s']]]]);
+live(['w3_0','w3_1','w3_2'],()=>$('#w3f').innerHTML=vt([[0,1,V('w3_0')],[1,3,V('w3_1')],[3,5,V('w3_2')]],{w:420,h:250,tag:'D',tagc:ORG}));
+const w3ids=[['w3_0',1,0.06],['w3_1',0,0.06],['w3_2',0.5,0.06]];
+item('w3',{check:()=>numCheck(w3ids),show:()=>{numShow(w3ids.map(([i,a])=>[i,a,0,fmt(a,1)]));$('#w3_0').dispatchEvent(new Event('input'))},lock:()=>lockIds(w3ids.map(x=>x[0])),
+ expl:'Die Geschwindigkeiten aus ② sind 1 m/s, 0 m/s und 0,5 m/s. Im v(t)-Diagramm werden daraus drei <b>waagrechte Striche</b> auf der Höhe 1, auf der t-Achse (0) und auf 0,5.'});
+inTable('#w4t',['','t = 0 s','t = 2 s','t = 4 s','t = 5 s'],[['s in m',[[null,'0'],['w4_0',null,'④ s bei 2 s'],['w4_1',null,'④ s bei 4 s'],['w4_2',null,'④ s bei 5 s']]]]);
+live(['w4_0','w4_1','w4_2'],()=>{const p=[[0,0]];[[2,'w4_0'],[4,'w4_1'],[5,'w4_2']].forEach(([t,id])=>{const v=V(id);if(v!=null)p.push([t,Math.max(0,Math.min(3,v))])});$('#w4f').innerHTML=stc(p,{w:420,h:250,dots:true,tag:'4',tagc:GRN})});
+const w4ids=[['w4_0',2,0.06],['w4_1',2,0.06],['w4_2',1,0.06]];
+item('w4',{check:()=>numCheck(w4ids),show:()=>{numShow(w4ids.map(([i,a])=>[i,a,0,fmt(a,1)]));$('#w4_0').dispatchEvent(new Event('input'))},lock:()=>lockIds(w4ids.map(x=>x[0])),
+ expl:'B: 2 s lang 1 m/s → nach 2 s bei <b>2 m</b>. Dann 2 s Stillstand → bei 4 s immer noch <b>2 m</b>. Dann 1 s lang −1 m/s → 1 m zurück, bei 5 s also <b>1 m</b>. Im s(t)-Diagramm: steigen, waagrecht, fallen.'});
+
+/* ===== Aufgabe 1 ===== */
+const curve=[...Array(21).keys()].map(i=>{const t=i/4;return [t,0.12*t*t]});
+$('#a1f').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px">'+chart({w:280,h:180,L:30,B:26,xmax:5,ymax:3,xs:1,ys:1,nonum:true,xlab:'t',ylab:'s',series:[{pts:[...Array(21).keys()].map(i=>{const t=i/4;return [t,3*(1-Math.exp(-t/1.6))]}),c:BLUE}],tag:'5',tagc:GRN})+chart({w:280,h:180,L:30,B:26,xmax:5,ymax:3,xs:1,ys:1,nonum:true,xlab:'t',ylab:'s',series:[{pts:[[0,0],[5,2.6]],c:BLUE}],tag:'6',tagc:GRN})+'</div>';
+const A1=[['(1) Ein Stein fällt von einer Brücke.',1],['(2) Ein Auto fährt mit 50 km/h geradeaus durch den Ort.',0],['(3) Schlittenfahren am Hang.',1],['(4) Achim joggt mit konstanter Geschwindigkeit über ein ebenes Feld.',0],['(5) Diagramm 5',1],['(6) Diagramm 6',0]];
+$('#a1t').innerHTML='<tr><th>Bewegung</th><th>gleichförmig?</th></tr>'+A1.map((a,i)=>`<tr><td>${a[0]}</td><td><span class="tog" data-tog="a1_${i}"></span></td></tr>`).join('');
+A1.forEach((a,i)=>tog('a1_'+i,['gleichförmig','nicht gleichförmig'],a[1]));const a1k=A1.map((_,i)=>'a1_'+i);
+item('a1',{check:()=>togCheck(a1k),show:()=>togShow(a1k),lock:()=>togLock(a1k),
+ expl:'Gleichförmig heißt: <b>gleich schnell und geradeaus</b>, also konstante Geschwindigkeit. Das gilt für (2), (4) und (6) (Gerade im s(t)-Diagramm). Der fallende Stein (1) und der Schlitten (3) werden immer schneller, (5) wird immer langsamer (Kurve): <b>nicht gleichförmig</b>.'});
+const sh={line:chart({w:240,h:150,L:24,B:22,xmax:5,ymax:3,xs:1,ys:1,nonum:true,xlab:'t',ylab:'s',series:[{pts:[[0,0],[5,2.7]],c:RED}]}),
+ curve:chart({w:240,h:150,L:24,B:22,xmax:5,ymax:3,xs:1,ys:1,nonum:true,xlab:'t',ylab:'s',series:[{pts:curve,c:RED}]}),
+ flat:chart({w:240,h:150,L:24,B:22,xmax:5,ymax:3,xs:1,ys:1,nonum:true,xlab:'t',ylab:'s',series:[{pts:[[0,1.5],[5,1.5]],c:RED}]})};
+mc('a2a',[{t:sh.line,ok:true},{t:sh.curve},{t:sh.flat}]);mc('a2b',[{t:sh.line},{t:sh.curve,ok:true},{t:sh.flat}]);
+item('a2',{check:()=>{const a=mcCheck('a2a'),b=mcCheck('a2b');if(a===null||b===null)return null;return a&&b},show:()=>{mcShow('a2a');mcShow('a2b')},lock:()=>{mcLock('a2a');mcLock('a2b');lockIds(['a2x','a2y'])},
+ expl:'Gleichförmig: Im s(t)-Diagramm eine <b>schräge Gerade</b>, in jeder Sekunde kommt gleich viel Weg dazu. Nicht gleichförmig: eine <b>Kurve</b>, die steiler (schneller werden) oder flacher (langsamer werden) wird. Die waagrechte Linie ist Stillstand. Beispiele gleichförmig: Rolltreppe, Förderband, Auto mit Tempomat. Nicht gleichförmig: anfahrendes Auto, bremsendes Fahrrad, Kugel auf einer Rampe.'});
+
+/* ===== Merke ===== */
+const WL=['Geraden','waagrechte','konstanter','t','Geschwindigkeit'];
+const sel=id=>`<select id="${id}"><option value="">– wählen –</option>${WL.map(w=>`<option>${w}</option>`).join('')}</select>`;
+$('#m1t').innerHTML=`Bewegt sich ein Körper mit ${sel('m_0')} ${sel('m_1')}, nennt man die Bewegung gleichförmig. Im s(t)-Diagramm ist das Schaubild einer gleichförmigen Bewegung eine ${sel('m_2')}. Im v(t)-Diagramm ergibt sich eine ${sel('m_3')} Linie. Steht der Körper still, liegt diese Linie auf der ${sel('m_4')}-Achse.`;
+const MA=['konstanter','Geschwindigkeit','Geraden','waagrechte','t'];
+item('m1',{check:()=>{if(MA.some((_,i)=>!$('#m_'+i).value))return null;let ok=true;MA.forEach((a,i)=>{const g=$('#m_'+i).value===a;mark($('#m_'+i),g);if(!g)ok=false});return ok},
+ show:()=>MA.forEach((a,i)=>{$('#m_'+i).value=a;mark($('#m_'+i),true)}),lock:()=>MA.forEach((_,i)=>$('#m_'+i).disabled=true),
+ expl:'Gleichförmig = <b>konstante Geschwindigkeit</b>. s(t): eine <b>Gerade</b>. v(t): eine <b>waagrechte</b> Linie. Stillstand: v = 0, die Linie liegt auf der <b>t-Achse</b>.'});
+
+/* ===== Tina ===== */
+item('t0',{check:()=>numCheck([['t0i',3,0.05]]),show:()=>numShow([['t0i',3,0,'3']]),lock:()=>lockIds(['t0i']),expl:'t = s : v = 4,5 m : 1,5 m/s = <b>3 s</b>.'});
+const TT=[4,7,10,14],TS=[4,4,8.5,8.5];
+inTable('#t1t',['','t = 0 s','t = 4 s','t = 7 s','t = 10 s','t = 14 s'],[['s in m',[[null,'0'],...TT.map((t,i)=>['t1_'+i,null,'s bei '+t+' s'])]]]);
+live(TT.map((_,i)=>'t1_'+i),()=>{const p=[[0,0]];TT.forEach((t,i)=>{const v=V('t1_'+i);if(v!=null)p.push([t,Math.max(0,Math.min(10,v))])});$('#t1f').innerHTML=stc(p,{w:460,h:270,xmax:14,ymax:10,ys:1,dots:true})});
+const t1ids=TT.map((t,i)=>['t1_'+i,TS[i],0.06]);
+item('t1',{check:()=>{const r=numCheck(t1ids);if(r===false&&Math.abs((V('t1_2')||0)-4.5)<0.01)return 'Bei t = 10 s ist Tina schon 4 m + 4,5 m vom Start entfernt. Im s(t)-Diagramm steht immer der <b>gesamte</b> Weg.';return r},
+ show:()=>{numShow(t1ids.map(([i,a])=>[i,a,0,fmt(a,1)]));$('#t1_0').dispatchEvent(new Event('input'))},lock:()=>lockIds(t1ids.map(x=>x[0])),
+ expl:'Bis 4 s: 1 m/s · 4 s = <b>4 m</b>. Warten bis 7 s: Ort bleibt <b>4 m</b> (waagrecht). Straße 3 s: 4 m + 4,5 m = <b>8,5 m</b> bei 10 s. Stehen bis 14 s: <b>8,5 m</b>.'});
+const TV=[[0,4],[4,7],[7,10],[10,14]],TVa=[1,0,1.5,0];
+inTable('#t2t',['','0–4 s','4–7 s','7–10 s','10–14 s'],[['v in m/s',TV.map((s,i)=>['t2_'+i,null,'v '+s[0]+'–'+s[1]+' s'])]]);
+live(TV.map((_,i)=>'t2_'+i),()=>$('#t2f').innerHTML=vt(TV.map((s,i)=>[s[0],s[1],V('t2_'+i)]),{w:460,h:240,xmax:14,ymin:-0.5,ymax:2,ys:0.5}));
+const t2ids=TV.map((_,i)=>['t2_'+i,TVa[i],0.06]);
+item('t2',{check:()=>numCheck(t2ids),show:()=>{numShow(t2ids.map(([i,a])=>[i,a,0,fmt(a,1)]));$('#t2_0').dispatchEvent(new Event('input'))},lock:()=>lockIds(t2ids.map(x=>x[0])),
+ expl:'Vier waagrechte Striche: <b>1 m/s</b> (0–4 s), <b>0</b> beim Warten (4–7 s), <b>1,5 m/s</b> auf der Straße (7–10 s), <b>0</b> beim Stehen (10–14 s). Beim Warten und Stehen liegt die Linie auf der t-Achse.'});
+
+/* ===== Antonia ===== */
+const NR=['I Rennen','II Warten','III Straße','IV Joggen'],NA=[[30,3,90,90],[20,0,0,90],[8,1.5,12,102],[10,3,30,132]],NC=['Dauer in s','v in m/s','Strecke in m','Ort am Ende in m'];
+inTable('#n1t',['Abschnitt',...NC],NR.map((r,i)=>[r,NC.map((c,j)=>['n_'+i+'_'+j,null,r+': '+c])]));
+const nIds=[];NR.forEach((_,i)=>NC.forEach((_,j)=>nIds.push('n_'+i+'_'+j)));
+live(nIds,()=>{let t=0;const sg=[],sp=[[0,0]];NR.forEach((_,i)=>{const d=V('n_'+i+'_0'),v=V('n_'+i+'_1'),o=V('n_'+i+'_3');if(d==null)return;sg.push([t,t+d,v]);t+=d;if(o!=null)sp.push([t,o])});
+  $('#n1v').innerHTML=vt(sg,{w:480,h:220,xmax:70,xs:10,ymin:-0.5,ymax:3.5,ys:0.5});
+  $('#n1s').innerHTML=chart({w:480,h:270,xmax:70,ymax:140,xs:10,ys:20,xlab:'t in s',ylab:'s in m',series:[{pts:sp.map(p=>[Math.min(p[0],70),Math.max(0,Math.min(140,p[1]))]),c:BLUE,dots:true}]})});
+const n1ids=[];NR.forEach((_,i)=>NC.forEach((_,j)=>n1ids.push(['n_'+i+'_'+j,NA[i][j],0.06])));
+item('n1',{check:()=>{const r=numCheck(n1ids);if(r===false&&Math.abs((V('n_2_3')||0)-12)<0.01)return 'Der <b>Ort am Ende</b> ist der gesamte Weg ab dem Start, nicht nur die Strecke des Abschnitts.';return r},
+ show:()=>{numShow(n1ids.map(([i,a])=>[i,a,0,fmt(a,1)]));$('#n_0_0').dispatchEvent(new Event('input'))},lock:()=>lockIds(n1ids.map(x=>x[0])),
+ expl:'I: 30 s · 3 m/s = 90 m, Ort 90 m. II: Warten, v = 0, Strecke 0, Ort bleibt 90 m. III: Dauer t = 12 m : 1,5 m/s = <b>8 s</b>, Ort 102 m. IV: 10 s · 3 m/s = 30 m, Ort <b>132 m</b>. Im v(t)-Diagramm: vier waagrechte Striche (3 / 0 / 1,5 / 3). Im s(t)-Diagramm: steigen, waagrecht, flacher steigen, steiler steigen.'});
+
+/* ===== Notarzt ===== */
+live(['k1a','k1b'],()=>{const a=V('k1a'),b=V('k1b');const se=[];if(b!=null&&b>0)se.push({pts:[[0,0],[Math.min(b,40),30*Math.min(b,40)/b]],c:BLUE,label:[Math.min(b,40)*0.55,30*0.55+3,'Notarzt']});if(a!=null&&a>0)se.push({pts:[[0,30],[Math.min(a,40),30-30*Math.min(a,40)/a]],c:ORG,dash:'8 4',label:[Math.min(a,40)*0.7,30-30*0.7-2,'Krankenwagen']});
+  $('#kf').innerHTML=chart({w:460,h:290,xmax:40,ymax:30,xs:5,ys:5,xlab:'t in min',ylab:'s in km (0 = Krankenhaus)',series:se})});
+item('k1',{check:()=>numCheck([['k1a',30,0.3],['k1b',20,0.3]]),show:()=>{numShow([['k1a',30,0,'30'],['k1b',20,0,'20']]);$('#k1a').dispatchEvent(new Event('input'))},lock:()=>lockIds(['k1a','k1b']),
+ expl:'Krankenwagen: t = 30 km : 60 km/h = 0,5 h = <b>30 min</b>. Notarzt: t = 30 km : 90 km/h = 1/3 h = <b>20 min</b>. Im Diagramm startet der Krankenwagen bei 30 km und fährt auf 0 km zu (fallende Linie), der Notarzt startet bei 0 km.'});
+item('k2',{check:()=>numCheck([['k2a',12,1.1],['k2b',18,1.1]]),show:()=>numShow([['k2a',12,0,'12'],['k2b',18,0,'18']]),lock:()=>lockIds(['k2a','k2b']),
+ expl:'Die Linien schneiden sich bei <b>12 min</b> und <b>18 km</b> vom Krankenhaus (also 12 km vom Unfallort). Kontrolle: Notarzt 90 km/h · 0,2 h = 18 km, Krankenwagen 60 km/h · 0,2 h = 12 km. 18 km + 12 km = 30 km.'});
+
+/* ===== Für Schnelle: Zufallsdiagramme ===== */
+let F=null;
+function fGen(){let segs;for(;;){segs=[0,1,2].map(()=>({d:[2,3,4][Math.floor(Math.random()*3)],v:[0,0.5,1,1.5,2,-1][Math.floor(Math.random()*6)]}));
+  if(segs[0].v===segs[1].v||segs[1].v===segs[2].v)continue;let s=0,ok=true;segs.forEach(g=>{s+=g.v*g.d;if(s<0)ok=false});if(ok)break}
+  let t=0,s=0;const pts=[[0,0]];segs.forEach(g=>{t+=g.d;s+=g.v*g.d;pts.push([t,s])});F={segs,pts,T:t};
+  const ym=Math.max(2,Math.ceil(Math.max(...pts.map(p=>p[1]))+0.5));
+  $('#f1f').innerHTML=chart({w:460,h:270,xmax:t,ymax:ym,xs:1,ys:ym>6?1:0.5,xlab:'t in s',ylab:'s in m',series:[{pts,c:BLUE,dots:true}]});
+  let a=0;inTable('#f1t',['',...segs.map(g=>{const r=`${a}–${a+g.d} s`;a+=g.d;return r})],[['v in m/s',segs.map((g,i)=>['f_'+i,null,'Abschnitt '+(i+1)])]]);
+}
+fGen();
+item('f1',{check:()=>numCheck(F.segs.map((g,i)=>['f_'+i,g.v,0.06])),show:()=>numShow(F.segs.map((g,i)=>['f_'+i,g.v,0,fmt(g.v,1)])),lock:()=>lockIds(F.segs.map((_,i)=>'f_'+i)),
+ get expl(){return 'v = Δs : Δt pro Abschnitt: '+F.segs.map((g,i)=>`${i+1}. ${fmt(g.v*g.d,1)} m in ${g.d} s = <b>${fmt(g.v,1)} m/s</b>`).join(' · ')+'. Waagrecht heißt 0, fallend heißt negativ. Danach: „Neues Diagramm“.'}});
+$('#fNew').onclick=()=>{fGen();const box=$('.task[data-id="f1"]');box.querySelector('.fbx').innerHTML='';box.querySelectorAll('.btns.chk button').forEach(b=>b.disabled=false);solved.delete('f1');updProg()};
+
+/* ===== PDF-Zusammenfassung ===== */
+function plain(h){const d=document.createElement('div');d.innerHTML=String(h).replace(/<\/(li|p|h4|div)>|<br\s*\/?>/g,' $&');d.querySelectorAll('svg').forEach(x=>x.remove());return d.textContent.replace(/\s+/g,' ').trim()}
+function safe(t){const m={'①':'(1)','②':'(2)','③':'(3)','④':'(4)','Ⓓ':'(D)','Δ':'','→':'->','↔':'<->','≈':'ca.','–':'-','—':'-','−':'-','„':'"','“':'"','”':'"','✓':''};return String(t).replace(/[①②③④ⒹΔ→↔≈–—−„“”✓]/g,c=>m[c]).replace(/[^\x00-\xFF·]/g,'')}
+function taskTitle(id){const box=$(`.task[data-id="${id}"]`),h=box.closest('section').querySelector('h2');const lab=h.querySelector('.lab').textContent;const tt=h.textContent.replace(lab,'');const nr=box.querySelector('.nr');return lab+' – '+tt+(nr?' '+nr.textContent:'')}
+function makePDF(){
+  if(!window.jspdf){window.print();return}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const M=18,Wd=210-2*M;let y=20;
+  const NAVc=[31,58,95],GRc=[60,122,78],RDc=[179,64,47],GYc=[90,100,110];
+  const need=h=>{if(y+h>282){doc.addPage();y=20}};
+  const txt=(t,size,col,bold,ind=0)=>{doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...col);const lines=doc.splitTextToSize(safe(t),Wd-ind);lines.forEach(l=>{need(size*0.45);doc.text(l,M+ind,y);y+=size*0.45})};
+  const name=$('#nm').value.trim()||'(ohne Namen)';const d=new Date();
+  txt('Physik · Kinematik · Blatt 6',10,GRc,true);y+=1;
+  txt('s(t)- und v(t)-Diagramme',16,NAVc,true);y+=1;
+  txt('Name: '+name+'     Datum: '+d.toLocaleDateString('de-DE'),11,[30,30,30],false);
+  const ids=Object.keys(ITEMS);const r1=ids.filter(i=>REC[i].status==='richtig'&&REC[i].tries===1).length,rr=ids.filter(i=>REC[i].status==='richtig').length,ls=ids.filter(i=>REC[i].status==='Lösung angesehen').length,of=ids.length-rr-ls;
+  txt(`Ergebnis: ${rr} von ${ids.length} Aufgaben richtig (davon ${r1} gleich im ersten Versuch), ${ls} mit Lösung angesehen, ${of} noch offen.`,11,[30,30,30],false);
+  y+=2;doc.setDrawColor(...GRc);doc.setLineWidth(0.6);doc.line(M,y,210-M,y);y+=6;
+  ids.forEach(id=>{const R=REC[id];need(22);
+    txt(taskTitle(id),12,NAVc,true);y+=0.5;
+    let st,col;if(R.status==='richtig'){st=R.tries===1?'Richtig im ersten Versuch':'Richtig im '+R.tries+'. Versuch';col=GRc}else if(R.status==='Lösung angesehen'){st='Lösung angesehen'+(R.tries?' (nach '+R.tries+' Versuch'+(R.tries>1?'en':'')+')':'');col=RDc}else if(R.status==='noch falsch'){st='Noch nicht richtig ('+R.tries+' Versuch'+(R.tries>1?'e':'')+')';col=RDc}else{st='Noch nicht bearbeitet';col=GYc}
+    txt('Status: '+st,10,col,true,2);
+    txt('Meine Antwort: '+(R.ans||'–'),10,[30,30,30],false,2);
+    const ex=ITEMS[id].expl;txt('Erklärung: '+plain(ex),9.5,GYc,false,2);y+=4});
+  need(10);txt('Tipp: Lies dir zum Schluss den Merke-Kasten noch einmal durch.',10,GRc,true);
+  const fn='Blatt6_Zusammenfassung_'+(name==='(ohne Namen)'?'':name.replace(/[^A-Za-z0-9ÄÖÜäöüß_-]+/g,'_')+'_')+d.toISOString().slice(0,10)+'.pdf';
+  doc.save(fn);
+  $('#pdfMsg').innerHTML='<div class="fb ok">Das PDF wurde erstellt. Auf dem iPad findest du es unter „Dateien“ → „Downloads“ oder es öffnet sich direkt. Dann über „Teilen“ speichern.</div>';
+}
+$('#pdfBtn').onclick=makePDF;
+/* ===== Anbindung an die Klassen-App (ohne Namen) ===== */
+if(window.AppBridge){
+  setTimeout(()=>{appLive=true},1500);
+  const ids=()=>Object.keys(ITEMS);
+  AppBridge.register({
+    getState(){
+      const st=ids().map((id,i)=>(i+1)+'. '+taskTitle(id)),erl=[],details={};
+      ids().forEach((id,i)=>{const R=REC[id];details[st[i]]=R.status==='richtig'?(R.tries===1?'richtig im 1. Versuch':'richtig im '+R.tries+'. Versuch'):R.status==='Lösung angesehen'?'Lösung angesehen':R.status==='noch falsch'?'noch falsch ('+R.tries+' Versuche)':'offen';if(R.status==='richtig'||R.status==='Lösung angesehen')erl.push(st[i])});
+      const rr=ids().filter(i=>REC[i].status==='richtig').length;
+      return{punkte:rr*10,stationen:st,erledigt:erl,details,daten:{rec:JSON.parse(JSON.stringify(REC))}};
+    },
+    setState(s){const d=s&&s.daten&&s.daten.rec;if(!d)return;
+      ids().forEach(id=>{const R=d[id];if(!R)return;REC[id]={tries:R.tries||0,status:R.status||'offen',ans:R.ans||''};
+        if(R.status==='richtig'||R.status==='Lösung angesehen'){
+          const box=$(`.task[data-id="${id}"]`);if(!box)return;
+          box.querySelector('.fbx').innerHTML=`<div class="fb ${R.status==='richtig'?'ok':'no'}">Gespeicherter Stand: ${R.status==='richtig'?(R.tries===1?'Richtig im ersten Versuch':'Richtig im '+R.tries+'. Versuch'):'Lösung angesehen'}.${R.ans?' Deine Antwort: '+R.ans:''}</div><div class="ex"><b class="h">Erklärung:</b> ${ITEMS[id].expl}</div>`;
+          box.querySelectorAll('.btns.chk button').forEach(b=>b.disabled=true);solved.add(id);}
+      });
+      appLive=true;updProg();}
+  });
+}
+
+updProg();
+</script>
+<script src="../lib/jspdf.umd.min.js"></script>
+</body>
+</html>

@@ -40,6 +40,18 @@
    "freigegeben": true,
    "farbe": "#A0476E",
    "icon": "uhr"
+  },
+  {
+   "id": "blatt6",
+   "titel": "Blatt 6: s(t)- und v(t)-Diagramme",
+   "untertitel": "Aufgaben zum Selbstkontrollieren",
+   "datei": "blatt6.html",
+   "klassen": [
+    "51"
+   ],
+   "freigegeben": true,
+   "farbe": "#C77B0A",
+   "icon": "diagramm"
   }
  ]
 }
