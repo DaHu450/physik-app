@@ -782,8 +782,43 @@ TOPICS.push({id:'einstein0',title:'Kleine Textaufgaben (Einstieg)',desc:'Kurz: G
 }});
 })();
 
+
+/* ---------- Begegnung aus der Gegenrichtung ---------- */
+TOPICS.push({id:'geg',title:'Begegnung: Aus der Gegenrichtung',desc:'Zwei kommen sich entgegen, einer startet später oder läuft zurück. Wann und wo treffen sie sich?',gen(){
+  const k=rnd(1,4);
+  if(k===1){/* gleichzeitig, aufeinander zu */
+    const v1=pick([2,3,4,5,6]),v2=pick([1,2,3,4]),T=pick([10,12,15,20,25,30]),d=(v1+v2)*T,pr=pick([['Anna','Ben','Schule','Sportplatz'],['Mira','Jonas','Bahnhof','Schwimmbad'],['Lea','Tim','Marktplatz','Park']]);
+    return {title:'Gegenverkehr auf dem Weg',q:`<p>Der Weg von der <b>${pr[2]}</b> zum <b>${pr[3]}</b> ist <b>${d} m</b> lang. ${pr[0]} joggt an der ${pr[2]} los, ${pr[1]} gleichzeitig am ${pr[3]} in die Gegenrichtung, also ${pr[0]} entgegen. ${pr[0]} läuft mit <b>${v1} m/s</b>, ${pr[1]} mit <b>${v2} m/s</b>, beide gleichmäßig.</p><p>a) Nach wie vielen Sekunden treffen sie sich?<br>b) Wie weit ist der Treffpunkt von der ${pr[2]} entfernt?</p>`,
+      inputs:[{label:'a) Treffen nach',unit:'s',ans:T,tol:.03*T+.2,id:'t'},{label:'b) Entfernung von der '+pr[2],unit:'m',ans:v1*T,tol:rel(v1*T,.03),id:'s'}],
+      wrong(x){if(x.t!=null&&Math.abs(x.t-d/v1)<.3&&Math.abs(T-d/v1)>.5)return 'Du hast nur eine Geschwindigkeit benutzt. Beide laufen aufeinander zu: Der Abstand schrumpft mit v₁ + v₂.';return ''},
+      hint:'Wenn zwei aufeinander zulaufen, schrumpft der Abstand mit v₁ + v₂. Dann t = Abstand : (v₁ + v₂). Für b) rechnest du s = v · t mit dem Tempo von '+pr[0]+'.',
+      expl:`<ol><li>Gegeben: Abstand ${d} m, v<sub>1</sub> = ${v1} m/s, v<sub>2</sub> = ${v2} m/s (Gegenrichtung)</li><li>Der Abstand schrumpft mit ${v1} + ${v2} = ${v1+v2} m/s.</li><li class="res">a) t = ${d} m : ${v1+v2} m/s = ${T} s</li><li class="res">b) s = ${v1} m/s · ${T} s = ${v1*T} m von der ${pr[2]} (von ${pr[3]} aus wären es ${d-v1*T} m)</li></ol>`};}
+  if(k===2){/* zweiter startet später */
+    let v1,v2,late,T,d,g=0;do{v1=pick([12,15,18,20,24]);v2=pick([10,12,15,18]);late=pick([10,15,20]);T=pick([30,35,40,45,50,60]);d=(v1*T+v2*(T-late))/60}while((g++<500)&&(Math.abs(d*2-Math.round(d*2))>1e-9||d<8||d>30||T<=late+5));
+    const S=v1*T/60,pr=pick([['Lena','Tom','Weinheim','Heidelberg'],['Mia','Paul','Mannheim','Worms'],['Nele','Jan','Bensheim','Heppenheim']]);
+    return {title:'Radtour: Einer startet später',q:`<p>Zwischen <b>${pr[2]}</b> und <b>${pr[3]}</b> sind es <b>${fmt(d,1)} km</b>. Um 14:00 Uhr fährt ${pr[0]} in ${pr[2]} los, mit <b>${v1} km/h</b>. ${pr[1]} startet erst <b>${late} Minuten später</b> in ${pr[3]} und fährt ${pr[0]} auf demselben Weg entgegen, mit <b>${v2} km/h</b>. Beide fahren gleichmäßig.</p><p>a) Nach wie vielen Minuten (von 14:00 Uhr an) treffen sie sich?<br>b) Wie weit ist der Treffpunkt von ${pr[2]} entfernt?</p>`,
+      inputs:[{label:'a) Treffen nach',unit:'min',ans:T,tol:2.1,id:'t'},{label:'b) Entfernung von '+pr[2],unit:'km',ans:S,tol:.5,id:'s'}],
+      hint:'Rechne zuerst: Wie weit ist '+pr[0]+' schon gekommen, wenn '+pr[1]+' startet ('+late+' min = '+fmt(late/60,2)+' h)? Der Rest ist der Abstand, der dann mit v₁ + v₂ schrumpft.',
+      expl:`<ol><li>Vorsprung: ${pr[0]} fährt ${late} min = ${fmt(late/60,2)} h allein: ${v1} km/h · ${fmt(late/60,2)} h = ${fmt(v1*late/60,2)} km.</li><li>Restabstand beim Start von ${pr[1]}: ${fmt(d,1)} km − ${fmt(v1*late/60,2)} km = ${fmt(d-v1*late/60,2)} km.</li><li>Er schrumpft mit ${v1} + ${v2} = ${v1+v2} km/h → ${fmt((d-v1*late/60)/(v1+v2)*60,0)} min.</li><li class="res">a) Treffen nach ${late} + ${fmt((d-v1*late/60)/(v1+v2)*60,0)} = ${T} min (um 14:${String(T).padStart(2,'0')} Uhr)</li><li class="res">b) s = ${v1} km/h · ${fmt(T/60,2)} h ≈ ${fmt(S,1)} km von ${pr[2]}</li></ol>`};}
+  if(k===3){/* einer läuft hin und zurück */
+    let v1,v2,T,d,g=0;do{v1=pick([4,5,6]);v2=pick([2,3,4]);T=pick([20,24,30,36,40,60]);d=(v1+v2)*T/2}while((g++<300)&&(v2>=v1||d%1!==0||d/v1>=T));
+    const pr=pick([['Mia','Jonas'],['Sara','Leon'],['Hanna','Max']]),sJ=v2*T,aB=d-sJ;
+    return {title:'Hin und gleich wieder zurück',q:`<p>Auf dem Sportplatz startet ${pr[0]} an der Startlinie und läuft mit <b>${v1} m/s</b> bis zur Wendemarke, die <b>${d} m</b> entfernt ist. Dort dreht sie sofort um und läuft mit gleichem Tempo zurück. ${pr[1]} startet gleichzeitig an der Startlinie und läuft mit <b>${v2} m/s</b> geradeaus in Richtung Wendemarke. Irgendwo kommt ${pr[0]} auf ihrem Rückweg an ${pr[1]} vorbei.</p><p>a) Nach wie vielen Sekunden treffen sich die beiden?<br>b) Wie weit ist der Treffpunkt von der Wendemarke entfernt?</p>`,
+      inputs:[{label:'a) Treffen nach',unit:'s',ans:T,tol:.03*T+.3,id:'t'},{label:'b) Entfernung von der Wendemarke',unit:'m',ans:aB,tol:rel(aB,.04)+.3,id:'s'}],
+      wrong(x){if(x.t!=null&&Math.abs(x.t-d/(v1+v2))<.3)return 'So rechnest du, als würde '+pr[0]+' von der Wendemarke aus starten. Sie läuft aber erst bis zur Marke und dann zurück: Ihr Gesamtweg bis zum Treffen ist d + (d − s<sub>Treffpunkt</sub>).';return ''},
+      hint:'Beim Treffen haben beide zusammen genau den Weg 2 · '+d+' m zurückgelegt: '+pr[0]+' hin und zurück, '+pr[1]+' nur ein Stück. Also (v₁ + v₂) · t = 2 · d.',
+      expl:`<ol><li>Gemeinsamer Weg beim Treffen: ${pr[0]} läuft ${d} m hin und dann zurück, ${pr[1]} läuft in der Zeit von der Startlinie nach vorn. Zusammen: 2 · ${d} m = ${2*d} m.</li><li>Zusammen schaffen sie ${v1} + ${v2} = ${v1+v2} m/s.</li><li class="res">a) t = ${2*d} m : ${v1+v2} m/s = ${T} s</li><li>${pr[1]} ist bis dahin ${v2} m/s · ${T} s = ${sJ} m gelaufen.</li><li class="res">b) Abstand zur Wendemarke: ${d} m − ${sJ} m = ${aB} m</li></ol>`};}
+  /* k===4: unbekanntes Tempo */
+  const v1=pick([3,4,5,6]),v2=pick([2,3,4,5]),T=pick([8,10,12,15,20]),d=(v1+v2)*T,pr=pick([['Zoe','Elias','Hauptstraße'],['Nina','Ole','Allee'],['Ida','Finn','Promenade']]);
+  return {title:'Wie schnell ist der andere?',q:`<p>Die ${pr[2]} ist <b>${d} m</b> lang. ${pr[0]} läuft am einen Ende los, ${pr[1]} gleichzeitig am anderen Ende ihr entgegen. ${pr[0]} läuft mit <b>${v1} m/s</b>. Nach <b>${T} s</b> begegnen sich die beiden.</p><p>Wie schnell läuft ${pr[1]}?</p>`,
+    inputs:[{label:'v von '+pr[1],unit:'m/s',ans:v2,tol:.12,id:'v'}],
+    wrong(x){if(x.v!=null&&Math.abs(x.v-d/T)<.12)return d/T+' m/s ist die Geschwindigkeit, mit der der Abstand schrumpft. Davon musst du noch das Tempo von '+pr[0]+' abziehen.';return ''},
+    hint:'Der Abstand schrumpft mit v₁ + v₂ = d : t. Davon ziehst du das Tempo von '+pr[0]+' ab.',
+    expl:`<ol><li>Der Abstand schrumpft mit v<sub>1</sub> + v<sub>2</sub> = ${d} m : ${T} s = ${d/T} m/s.</li><li class="res">v<sub>2</sub> = ${d/T} m/s − ${v1} m/s = ${v2} m/s (= ${fmt(v2*3.6,1)} km/h)</li></ol>`};
+}});
+
 /* Reihenfolge wie im Unterricht */
-(function(){const ord=['um','zz','v','begr','mess','dv2','dv','lesen','sit','story','zuo','lauf','einstein0','einstein','gz','text'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
+(function(){const ord=['um','zz','v','begr','mess','dv2','dv','lesen','sit','story','zuo','lauf','einstein0','einstein','gz','text','geg'];TOPICS.sort((a,b)=>ord.indexOf(a.id)-ord.indexOf(b.id));})();
 
 /* ---------- App ---------- */
 let stats={},cur=null,task=null,state=null,mixMode=false;const LOG=[];
@@ -928,7 +963,8 @@ const CHECK=[
  ['Situationen in s(t)-Diagramme übersetzen (Stehen, Zurückgehen, schneller)',['sit','story']],
  ['Zu einem s(t)-Diagramm das passende v(t)-Diagramm finden und umgekehrt',['zuo']],
  ['Treffen und Einholen im s(t)-Diagramm ablesen und zeichnen',['lauf','text']],
- ['Textaufgaben lösen: wichtige Angaben finden, unnötige weglassen, umrechnen, in zwei Schritten rechnen',['einstein0','einstein','text','gz']],
+ ['Begegnung aus der Gegenrichtung rechnen (auch wenn einer später startet oder zurückläuft)',['geg']],
+ ['Textaufgaben lösen: wichtige Angaben finden, unnötige weglassen, umrechnen, in zwei Schritten rechnen',['einstein0','einstein','text','gz','geg']],
  ['Fachbegriffe sicher verwenden',['begr']]
 ];
 const AREAS=[
@@ -936,7 +972,7 @@ const AREAS=[
  ['Grundlagen',['zz','v','begr'],3],
  ['Messen und Durchschnitt',['mess','dv2','dv'],2],
  ['Diagramme',['lesen','sit','story','zuo','lauf'],3],
- ['Textaufgaben',['einstein0','einstein','gz','text'],4,{ids:['einstein','text'],k:2,txt:'davon mindestens 2 lange Textaufgaben (Bad Einstein oder Treffen und Einholen)'}]
+ ['Textaufgaben',['einstein0','einstein','gz','text','geg'],4,{ids:['einstein','text','geg'],k:2,txt:'davon mindestens 2 lange Textaufgaben (Bad Einstein, Treffen und Einholen oder Gegenrichtung)'}]
 ];
 function st1ok(){return areaVal(AREAS[0])>=AREAS[0][2]||unlocked()}
 function areaVal(a){const [n,ids,k,req]=a;const st=solved(ids);if(!req)return Math.min(st,k);const sr=Math.min(solved(req.ids),req.k);return Math.min(k,sr+Math.min(st-sr,k-req.k))}
