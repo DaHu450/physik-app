@@ -29,18 +29,6 @@
    "icon": "auto"
   },
   {
-   "id": "ueberholspiel",
-   "titel": "Reicht das noch?",
-   "untertitel": "Das Überhol-Spiel",
-   "datei": "ueberholspiel.html",
-   "klassen": [
-    "51"
-   ],
-   "freigegeben": true,
-   "farbe": "#C77B0A",
-   "icon": "spiel"
-  },
-  {
    "id": "kin",
    "titel": "Kinematik-Training",
    "untertitel": "Übungsstudio für die Klassenarbeit",
