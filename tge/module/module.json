@@ -38,7 +38,8 @@
    ],
    "freigegeben": true,
    "farbe": "#6A3DC4",
-   "icon": "tacho"
+   "icon": "tacho",
+   "gesperrt": true
   },
   {
    "id": "kin",

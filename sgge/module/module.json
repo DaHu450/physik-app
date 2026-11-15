@@ -26,7 +26,8 @@
    ],
    "freigegeben": true,
    "farbe": "#8E3B46",
-   "icon": "auto"
+   "icon": "auto",
+   "gesperrt": true
   },
   {
    "id": "kin",
