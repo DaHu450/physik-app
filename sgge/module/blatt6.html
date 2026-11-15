@@ -31,7 +31,7 @@ table.t td{padding:6px 8px;border:1px solid var(--line);vertical-align:middle}
 .opt.ok{border-color:var(--ok);background:var(--okbg)}.opt.no{border-color:var(--bad);background:var(--badbg)}
 .mc{display:grid;gap:8px;margin:6px 0}
 .mc.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.opt svg{width:100%;height:auto;display:block}
+.opt svg{width:100%;height:auto;display:block}.opt svg,.opt svg *{pointer-events:none}.opt,.tog button,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 input.n{font:inherit;font-size:19px;width:110px;padding:8px 10px;border:2px solid var(--navy);border-radius:10px;color:var(--txt);background:#fff}
 input.n.ok,select.ok{border-color:var(--ok);background:var(--okbg)}input.n.no,select.no{border-color:var(--bad);background:var(--badbg)}
 .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
