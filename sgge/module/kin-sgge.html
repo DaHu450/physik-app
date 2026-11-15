@@ -941,11 +941,11 @@ const AREAS=[
 function st1ok(){return areaVal(AREAS[0])>=AREAS[0][2]||unlocked()}
 function areaVal(a){const [n,ids,k,req]=a;const st=solved(ids);if(!req)return Math.min(st,k);const sr=Math.min(solved(req.ids),req.k);return Math.min(k,sr+Math.min(st-sr,k-req.k))}
 function solved(ids){return ids.reduce((a,id)=>a+((stats[id]&&stats[id].s)||0),0)}
-function unlocked(){try{if(localStorage.getItem('kin-sge-open')==='1')return true}catch(e){}return AREAS.every(a=>areaVal(a)>=a[2])}
+function unlocked(){return true}
 function home(){
   leave();Sim.stop();Opa.stop();GK.stop();cur=null;mixMode=false;EX=null;
   const done=AREAS.filter(a=>areaVal(a)>=a[2]).length,open=unlocked();
-  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p>${st1ok()?'':'<div class="fb no" style="margin:0 0 10px"><b>Starte mit Station 1: Umrechnen.</b> Erst wenn du dort 4 Aufgaben selbst richtig gelöst hast, werden die anderen Bereiche frei.</div>'}<ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse dort Aufgaben. <b>Jede Aufgabe, die du selbst richtig löst, bringt 1 Punkt</b> für den Bereich. Welches Thema du im Bereich nimmst, ist egal. Mit „Lösung zeigen“ gibt es keinen Punkt.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen und sammelst weiter, bis der Balken voll ist.</li><li>Sind alle Balken voll, öffnet sich ganz unten die <b>Abschluss-Challenge</b>.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit. Schreibe wie dort: Gegeben, Gesucht, Formel, Rechnung, Antwort.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
+  let h=`<div class="card hero"><h2>Fit für die Klassenarbeit</h2><p class="lead">So geht's:</p>${st1ok()?'':'<div class="fb no" style="margin:0 0 10px"><b>Starte mit Station 1: Umrechnen.</b> Erst wenn du dort 4 Aufgaben selbst richtig gelöst hast, werden die anderen Bereiche frei.</div>'}<ol class="how"><li>Tippe auf einen Balken. Du springst zu den Themen dieses Bereichs.</li><li>Löse dort Aufgaben. <b>Jede Aufgabe, die du selbst richtig löst, bringt 1 Punkt</b> für den Bereich. Welches Thema du im Bereich nimmst, ist egal. Mit „Lösung zeigen“ gibt es keinen Punkt.</li><li>Mit „Neue Aufgabe“ bekommst du neue Zahlen und sammelst weiter, bis der Balken voll ist.</li><li>Ganz unten wartet die <b>Abschluss-Challenge</b>. Du kannst sie jederzeit machen, auch wenn noch nicht alle Balken voll sind.</li></ol><p class="small">Tipp: Die Textaufgaben sind am nächsten an der Klassenarbeit. Schreibe wie dort: Gegeben, Gesucht, Formel, Rechnung, Antwort.</p>${open?`<button class="b main tocha" id="toCh">🏁 Zur Abschluss-Challenge ↓</button>`:''}<div class="areas">${AREAS.map((A,ai)=>{const [n,ids,k]=A;const v=areaVal(A);return `<button class="ar ${v>=k?'full':''}" data-a="${ai}"><span>${n}</span><div class="bar2"><i style="width:${v/k*100}%"></i></div><em>${v>=k?'✓':v+' / '+k}</em></button>`}).join('')}</div></div>`;
   h+=`<details class="card form"><summary><h3>Formeln zum Nachschauen</h3></summary><div class="fr"><span class="f">v = <span class="frac"><span>s</span><span>t</span></span></span><span class="f">s = v · t</span><span class="f">t = <span class="frac"><span>s</span><span>v</span></span></span><span class="f">km/h <b>: 3,6</b> = m/s</span></div><div class="umbox"><b>Umrechnen</b><div class="umrow"><span class="umk">km/h</span><span class="uma">: 3,6 →</span><span class="umk">m/s</span></div><div class="umrow"><span class="umk">m/s</span><span class="uma">· 3,6 →</span><span class="umk">km/h</span></div><div class="small">Beispiel: 36 km/h : 3,6 = 10 m/s &nbsp;|&nbsp; 10 m/s · 3,6 = 36 km/h</div></div><div class="fr small"><span>Gleiche Richtung (Einholen): Abstand schrumpft mit v<sub>1</sub> − v<sub>2</sub></span><span>Aufeinander zu (Begegnen): mit v<sub>1</sub> + v<sub>2</sub></span></div></details>`;
   AREAS.forEach((A,ai)=>{const [n,ids,k,req]=A;const v=areaVal(A);
     h+=`<h2 class="ah" id="area-${ai}">${n} <small>${v>=k?'✓ geschafft':v+' von '+k+' Punkten · noch '+(k-v)}${req&&v<k?'<br><span class="req">'+req.txt+'</span>':''}</small></h2><div class="grid">`;
@@ -954,7 +954,7 @@ function home(){
   h+=`<button class="mix" id="mix">Bunte Mischung: Zufallsaufgabe</button>`;
   h+=`<div class="card chal ${open?'':'locked'}"><h3>${open?'🏁':'🔒'} Abschluss-Challenge</h3>${open?`<p>9 Aufgaben quer durch alle Bereiche, darunter mehrere Textaufgaben. Ohne Tipps, ohne Lösung zwischendurch. Am Ende siehst du deine Punkte und alle Lösungen. Plane etwa 35 Minuten ein.</p><p class="small">Die Klassenarbeit hat andere Aufgaben. Die Challenge zeigt dir, wo du stehst, nicht welche Note du bekommst.</p>${EXR?`<div class="lastres">Dein letztes Ergebnis${EXR.when?' ('+EXR.when+')':''}: <b>${EXR.P} von ${EXR.M} Punkten</b> · ${EXR.pc} % · ${EXR.mins} min. Du kannst die Challenge jederzeit neu starten, mit neuen Aufgaben.</div>`:''}<button class="mix exam" id="exam">${EXR?'Neue Challenge starten':'Abschluss-Challenge starten'}</button>`:`<p>Noch gesperrt: Füll erst in allen Bereichen oben die Balken (${done} von ${AREAS.length} geschafft). Zählt nur, was du selbst gelöst hast, nicht „Lösung zeigen“.</p>`}</div>`;
   h+=`<div class="card selfcheck"><h3>Selbstcheck vor der Klassenarbeit</h3><p class="small" style="margin:0 0 6px">Geh die Liste durch. Wo du dir noch unsicher bist, tippe auf das Thema daneben und üb noch ein paar Aufgaben.</p><ul class="check">${CHECK.map(([t,ids])=>`<li><span>${t}</span><span class="go">${ids.map(id=>{const T=TOPICS.find(x=>x.id===id);return `<button class="chip" data-id="${id}">${T.title}</button>`}).join('')}</span></li>`).join('')}</ul></div>`;
-  h+=pdfCard()+`<p class="tlink"><button id="teach">Lehrkraft</button><span id="tbox" hidden> <input type="password" id="tcode" placeholder="Code" autocomplete="off" style="width:110px;font-size:15px;padding:6px 8px"> <button id="tok">Freischalten</button></span></p>`;
+  
   $('#app').innerHTML=h;
   document.querySelectorAll('.topic,.chip').forEach(b=>b.onclick=()=>start(b.dataset.id));
   $('#mix').onclick=()=>{mixMode=true;start(pick(TOPICS).id,true)};
@@ -962,13 +962,10 @@ function home(){
   if(window._goArea!=null){const el=$('#area-'+window._goArea);window._goArea=null;if(el)setTimeout(()=>el.scrollIntoView({block:'start'}),30)}
   if($('#exam'))$('#exam').onclick=examStart;
   if($('#toCh'))$('#toCh').onclick=()=>document.querySelector('.chal').scrollIntoView({behavior:'smooth',block:'start'});
-  $('#teach').onclick=()=>{$('#tbox').hidden=false;$('#tcode').focus()};
-  const tryCode=()=>{if(hcode($('#tcode').value.trim().toLowerCase())===TCODE){try{localStorage.setItem('kin-sge-open','1')}catch(e){}home()}else{$('#tcode').value='';$('#tcode').placeholder='falsch'}};
-  $('#tok').onclick=tryCode;$('#tcode').onkeydown=e=>{if(e.key==='Enter')tryCode()};
   bindPdf();updScore();
 }
-function pdfCard(){return `<div class="card" style="margin-top:16px"><h3>Meine Zusammenfassung als PDF</h3><p style="margin:0 0 8px">Bisher bearbeitet: <b>${LOG.length}</b> Aufgabe${LOG.length===1?'':'n'}${EXR?', dazu deine Abschluss-Challenge':''}. Trag deinen Namen ein und lade dir die Übersicht herunter: jede Aufgabe mit deiner Antwort, ob sie richtig war, und der Erklärung.</p><div class="row"><label for="nm">Name</label><input type="text" id="nm" style="width:260px" value="${(window._nm||'').replace(/"/g,'&quot;')}"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div></div>`}
-function bindPdf(){$('#nm').oninput=e=>window._nm=e.target.value;$('#pdfBtn').onclick=makePDF}
+function pdfCard(){return '';/* PDF entfällt: Speichern und Abgeben macht die Klassen-App */return `<div class="card" style="margin-top:16px"><h3>Meine Zusammenfassung als PDF</h3><p style="margin:0 0 8px">Bisher bearbeitet: <b>${LOG.length}</b> Aufgabe${LOG.length===1?'':'n'}${EXR?', dazu deine Abschluss-Challenge':''}. Trag deinen Namen ein und lade dir die Übersicht herunter: jede Aufgabe mit deiner Antwort, ob sie richtig war, und der Erklärung.</p><div class="row"><label for="nm">Name</label><input type="text" id="nm" style="width:260px" value="${(window._nm||'').replace(/"/g,'&quot;')}"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div></div>`}
+function bindPdf(){}
 
 /* ===== Abschluss-Challenge ===== */
 let EX=null,EXR=null;
@@ -1290,6 +1287,5 @@ if(window.AppBridge){
   });
 }
 </script>
-<script src="../lib/jspdf.umd.min.js"></script>
 </body>
 </html>
