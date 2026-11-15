@@ -912,8 +912,8 @@ function home(){
   if($('#toCh'))$('#toCh').onclick=()=>document.querySelector('.chal').scrollIntoView({behavior:'smooth',block:'start'});
   bindPdf();updScore();
 }
-function pdfCard(){return `<div class="card" style="margin-top:16px"><h3>Meine Zusammenfassung als PDF</h3><p style="margin:0 0 8px">Bisher bearbeitet: <b>${LOG.length}</b> Aufgabe${LOG.length===1?'':'n'}${EXR?', dazu deine Abschluss-Challenge':''}. Trag deinen Namen ein und lade dir die Übersicht herunter: jede Aufgabe mit deiner Antwort, ob sie richtig war, und der Erklärung.</p><div class="row"><label for="nm">Name</label><input type="text" id="nm" style="width:260px" value="${(window._nm||'').replace(/"/g,'&quot;')}"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div></div>`}
-function bindPdf(){$('#nm').oninput=e=>window._nm=e.target.value;$('#pdfBtn').onclick=makePDF}
+function pdfCard(){return '';/* PDF entfällt: Speichern und Abgeben macht die Klassen-App */return `<div class="card" style="margin-top:16px"><h3>Meine Zusammenfassung als PDF</h3><p style="margin:0 0 8px">Bisher bearbeitet: <b>${LOG.length}</b> Aufgabe${LOG.length===1?'':'n'}${EXR?', dazu deine Abschluss-Challenge':''}. Trag deinen Namen ein und lade dir die Übersicht herunter: jede Aufgabe mit deiner Antwort, ob sie richtig war, und der Erklärung.</p><div class="row"><label for="nm">Name</label><input type="text" id="nm" style="width:260px" value="${(window._nm||'').replace(/"/g,'&quot;')}"><button class="b main" id="pdfBtn">PDF herunterladen</button></div><div id="pdfMsg"></div></div>`}
+function bindPdf(){}
 
 /* ===== Abschluss-Challenge ===== */
 let EX=null,EXR=null;
@@ -1232,6 +1232,5 @@ if(window.AppBridge){
   });
 }
 </script>
-<script src="../lib/jspdf.umd.min.js"></script>
 </body>
 </html>
