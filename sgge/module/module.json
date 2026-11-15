@@ -17,17 +17,16 @@
    "icon": "fussball"
   },
   {
-   "id": "ueberholvorgang",
-   "titel": "Der Überholvorgang",
-   "untertitel": "Simulation: PKW überholt LKW",
-   "datei": "ueberholvorgang.html",
+   "id": "blatt6",
+   "titel": "s(t)- und v(t)-Diagramme",
+   "untertitel": "Aufgaben zum Selbstkontrollieren",
+   "datei": "blatt6.html",
    "klassen": [
     "51"
    ],
    "freigegeben": true,
-   "farbe": "#8E3B46",
-   "icon": "auto",
-   "gesperrt": true
+   "farbe": "#C77B0A",
+   "icon": "diagramm"
   },
   {
    "id": "kin",
@@ -42,16 +41,17 @@
    "icon": "uhr"
   },
   {
-   "id": "blatt6",
-   "titel": "Blatt 6: s(t)- und v(t)-Diagramme",
-   "untertitel": "Aufgaben zum Selbstkontrollieren",
-   "datei": "blatt6.html",
+   "id": "ueberholvorgang",
+   "titel": "Der Überholvorgang",
+   "untertitel": "Simulation: PKW überholt LKW",
+   "datei": "ueberholvorgang.html",
    "klassen": [
     "51"
    ],
    "freigegeben": true,
-   "farbe": "#C77B0A",
-   "icon": "diagramm"
+   "farbe": "#8E3B46",
+   "icon": "auto",
+   "gesperrt": true
   }
  ]
 }
