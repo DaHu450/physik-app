@@ -201,14 +201,14 @@ function numShow(ids){ids.forEach(([id,ans,tol,txt])=>{const e=$('#'+id);e.value
 const MC={};
 function mc(key,opts,shuf=true){const el=$(`[data-mc="${key}"]`);const list=shuf?shuffle(opts):opts;MC[key]={sel:null,list};
   el.innerHTML=list.map((o,i)=>`<button class="opt" data-i="${i}">${o.t}</button>`).join('');
-  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(b.disabled)return;el.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','ok','no'));b.classList.add('sel');MC[key].sel=+b.dataset.i})}
+  el.querySelectorAll('.opt').forEach(b=>{b.addEventListener('pointerup',e=>{if(e.pointerType==='touch'&&!b.disabled)b.click()});b.onclick=()=>{if(b.disabled)return;el.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','ok','no'));b.classList.add('sel');MC[key].sel=+b.dataset.i}})}
 function mcCheck(key){const m=MC[key];if(m.sel==null)return null;const el=$(`[data-mc="${key}"]`);const b=el.querySelectorAll('.opt')[m.sel];const ok=!!m.list[m.sel].ok;b.classList.remove('sel');mark(b,ok);return ok}
 function mcShow(key){const el=$(`[data-mc="${key}"]`);MC[key].list.forEach((o,i)=>{const b=el.querySelectorAll('.opt')[i];b.classList.remove('sel','no');if(o.ok)b.classList.add('ok')})}
 function mcLock(key){$$(`[data-mc="${key}"] .opt`).forEach(b=>b.disabled=true)}
 /* Umschalter */
 const TG={};
 function tog(key,labels,ans){const el=$(`[data-tog="${key}"]`);TG[key]={sel:null,ans};el.innerHTML=labels.map((l,i)=>`<button class="opt" data-i="${i}">${l}</button>`).join('');
-  el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(b.disabled)return;el.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','ok','no'));b.classList.add('sel');TG[key].sel=+b.dataset.i})}
+  el.querySelectorAll('.opt').forEach(b=>{b.addEventListener('pointerup',e=>{if(e.pointerType==='touch'&&!b.disabled)b.click()});b.onclick=()=>{if(b.disabled)return;el.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','ok','no'));b.classList.add('sel');TG[key].sel=+b.dataset.i}})}
 function togCheck(keys){if(keys.some(k=>TG[k].sel==null))return null;let ok=true;keys.forEach(k=>{const b=$$(`[data-tog="${k}"] .opt`)[TG[k].sel];b.classList.remove('sel');const g=TG[k].sel===TG[k].ans;mark(b,g);if(!g)ok=false});return ok}
 function togShow(keys){keys.forEach(k=>{$$(`[data-tog="${k}"] .opt`).forEach((b,i)=>{b.classList.remove('sel','no','ok');if(i===TG[k].ans)b.classList.add('ok')})})}
 function togLock(keys){keys.forEach(k=>$$(`[data-tog="${k}"] .opt`).forEach(b=>b.disabled=true))}
