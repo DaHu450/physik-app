@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quanten 3 · Wesenszüge</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: Kopf mit Punktestand, Stationen-Tabs (Reihenfolge = Unterrichtsgang), je Station Bühne (Simulation) + Schritte mit Sofort-Feedback; stapelt im Hochformat */
+
+/* Layout: Kopf mit Punktestand, Stationen-Tabs (Reihenfolge = Unterrichtsgang), je Station Bühne (Simulation) + Aufträge mit Sofort-Feedback; stapelt im Hochformat */
+:root{
+  --bg:#F2F5F8; --panel:#FFFFFF; --ink:#15253A; --muted:#58697C; --line:#D3DCE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E2F0E5; --navySoft:#E3EAF3;
+  --orange:#C2571A; --blue:#2F6FB5; --bad:#B3261E; --badSoft:#FBE6E4; --warnSoft:#FFF3D6;
+  --f-display:"Bricolage Grotesque",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --orange:#F09A5E; --blue:#7FB2EE; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:18px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,44px);line-height:1.05;margin:0;color:var(--navy);letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--muted);letter-spacing:0;margin-top:6px}
+.score{font-family:var(--f-mono);font-size:15px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap}
+.score b{color:var(--green);font-size:20px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:thin}
+nav button{flex:0 0 auto;font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer;display:flex;gap:8px;align-items:center}
+nav button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button[aria-selected="true"] .n{color:var(--bg);opacity:.75}
+nav button .done{color:var(--green);font-weight:700}
+nav button[aria-selected="true"] .done{color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+section.st{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:start}
+section.st.single{grid-template-columns:minmax(0,1fr);max-width:820px}
+@media (max-width:900px){section.st{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:901px){.stage{position:sticky;top:10px}}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:23px;margin:0 0 6px;color:var(--navy);text-wrap:balance}
+.card h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:22px 0 4px;color:var(--navy)}
+.lead{color:var(--muted);margin:0 0 12px}
+canvas{display:block;width:100%;max-width:100%;border-radius:10px;background:var(--bg)}
+canvas.dark{background:#060A10}
+canvas.tap{cursor:crosshair}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:16px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:var(--bg);padding:10px 16px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:inline-flex;border:1.5px solid var(--navy);border-radius:10px;overflow:hidden}
+.seg button{font:inherit;font-size:15px;border:0;background:transparent;color:var(--navy);padding:9px 14px;min-height:44px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+.task{border:2px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.task.solved{border-color:var(--green)}
+.task p{margin:0 0 10px}
+.task .q{font-weight:700}
+.given{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin:0 0 10px;line-height:1.7}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-size:16px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer}
+.opts button.ok{border-color:var(--green);background:var(--greenSoft)}
+.opts button.no{border-color:var(--bad);background:var(--badSoft)}
+.opts button:disabled{cursor:default;opacity:1}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.ans label{font-weight:700;font-family:var(--f-mono)}
+.ans input{font:inherit;font-family:var(--f-mono);font-size:18px;width:8em;max-width:100%;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+.ans input.ok{border-color:var(--green);background:var(--greenSoft)}
+.ans input.no{border-color:var(--bad);background:var(--badSoft)}
+.unit{font-family:var(--f-mono);font-size:16px;color:var(--muted)}
+.feedback{border-radius:10px;padding:10px 14px;margin-top:10px}
+.feedback.ok{background:var(--greenSoft);border:1.5px solid var(--green)}
+.feedback.no{background:var(--badSoft);border:1.5px solid var(--bad)}
+.feedback.info{background:var(--navySoft);border:1.5px solid var(--line)}
+.feedback.warn{background:var(--warnSoft);border:1.5px solid var(--line)}
+.steps{font-family:var(--f-mono);font-size:14.5px;line-height:1.8;white-space:pre-wrap;margin:6px 0 0}
+.slider{display:grid;grid-template-columns:auto minmax(0,1fr) 7.2em;gap:10px;align-items:center;margin-top:10px}
+.slider label{font-weight:700}
+.slider output{font-family:var(--f-mono);font-size:15px;text-align:right;white-space:nowrap}
+input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--navy)}
+.read{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.7;min-height:2.6em}
+.merk{border-left:5px solid var(--green);background:var(--greenSoft);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:14px}
+.merk b{color:var(--green)}
+.formel{font-family:var(--f-mono);font-size:17px}.formel i{font-style:normal;white-space:nowrap;display:inline-block}
+table.ord{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:14.5px;margin-top:10px}
+table.ord th,table.ord td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:right}
+table.ord th{color:var(--muted);font-weight:500}
+.small{font-size:14.5px;color:var(--muted)}
+.bets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.bets{grid-template-columns:minmax(0,1fr)}}
+.bets button{font:inherit;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px;cursor:pointer}
+.bets button[aria-pressed="true"]{border-color:var(--navy);background:var(--navySoft)}
+.bets canvas{height:54px;margin-bottom:8px}
+.meter{height:22px;border-radius:999px;background:var(--bg);border:1.5px solid var(--line);overflow:hidden;margin-top:10px}
+.meter i{display:block;height:100%;background:var(--green);width:0}
+.next{margin-top:16px;display:flex;justify-content:flex-end}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.two{grid-template-columns:minmax(0,1fr)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{font:inherit;font-size:15px;border:1.5px solid var(--navy);background:transparent;color:var(--navy);border-radius:999px;padding:8px 14px;min-height:44px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+table.mess{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:14.5px;margin-top:10px}
+table.mess th,table.mess td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:right}
+table.mess th{color:var(--muted);font-weight:500}
+.count{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.count div{flex:1 1 90px;background:var(--navySoft);border-radius:10px;padding:8px 12px;font-family:var(--f-mono);font-size:14px}
+.count b{display:block;font-size:22px;color:var(--navy)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Quanten 3 · Wesenszüge<small>TG2 · Unbestimmtheit, Strahlteiler, Mach-Zehnder-Interferometer, Verschränkung</small></h1>
+  <div class="score" aria-live="polite">Punkte: <b id="pts">0</b> / <span id="ptsMax">0</span></div>
+</header>
+<nav id="tabs" role="tablist"></nav>
+<section class="st single" id="s0"><div class="card">
+  <h2>Deine Wette</h2>
+  <p class="lead">Ein Laserstrahl geht durch einen einzelnen, schmalen Spalt und trifft auf einen Schirm. Jetzt wird der Spalt noch enger gemacht. Was passiert mit dem Lichtfleck auf dem Schirm?</p>
+  <div class="bets" id="bets"></div>
+  <div class="feedback info" id="betFb" hidden></div>
+</div></section>
+
+<section class="st" id="s1" hidden>
+  <div class="card stage">
+    <h2>Einzelspalt: Ort und Impuls</h2>
+    <canvas id="c1" class="dark" height="330"></canvas>
+    <div class="count"><div>Treffer<b id="u1N">0</b></div></div>
+    <div class="slider"><label for="uB">Spaltbreite</label><input type="range" id="uB" min="0.5" max="5" step="0.1" value="3"><output id="uBO"></output></div>
+    <div class="row" style="margin-top:8px"><button class="btn green" type="button" id="uRun">Dauerfeuer an</button><button class="btn" type="button" id="u100">300 Photonen</button><button class="btn ghost" type="button" id="uReset">Zurücksetzen</button></div>
+    <div class="read" id="uRead"></div>
+  </div>
+  <div class="card" id="t1"></div>
+</section>
+
+<section class="st" id="s2" hidden>
+  <div class="card stage">
+    <h2>Ein Photon am Strahlteiler</h2>
+    <p class="lead">Ein Strahlteiler ist ein halbdurchlässiger Spiegel: Er lässt die Hälfte des Lichts durch und reflektiert die andere Hälfte.</p>
+    <canvas id="c2" height="230"></canvas>
+    <div class="count"><div>D1 (durchgelassen)<b id="bs1">0</b></div><div>D2 (reflektiert)<b id="bs2">0</b></div><div>beide gleichzeitig<b id="bs12">0</b></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" id="bsA">1 Photon</button><button class="btn" type="button" id="bsB">100 Photonen</button><button class="btn ghost" type="button" id="bsR">Zurücksetzen</button></div>
+  </div>
+  <div class="card" id="t2"></div>
+</section>
+
+<section class="st" id="s3" hidden>
+  <div class="card stage">
+    <h2>Mach-Zehnder-Interferometer</h2>
+    <canvas id="c3" height="280"></canvas>
+    <div class="chips" id="mzMode"><button type="button" data-m="open" aria-pressed="true">beide Wege offen</button><button type="button" data-m="block" aria-pressed="false">unterer Weg blockiert</button><button type="button" data-m="mark" aria-pressed="false">Wege markiert</button></div>
+    <div class="row" style="margin-top:8px"><div class="seg" id="mzBS"><button type="button" data-m="1" aria-pressed="true">mit 2. Strahlteiler</button><button type="button" data-m="0" aria-pressed="false">ohne 2. Strahlteiler</button></div></div>
+    <div class="count"><div>D1<b id="mz1">0</b></div><div>D2<b id="mz2">0</b></div><div>im Hindernis<b id="mz0">0</b></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" id="mzA">1 Photon</button><button class="btn" type="button" id="mzB">100 Photonen</button><button class="btn ghost" type="button" id="mzR">Zurücksetzen</button></div>
+    <p class="small" style="margin:8px 0 0">„Wege markiert“: In jedem Weg steht ein Polarisationsfilter, einer waagerecht, einer senkrecht. An der Polarisation könnte man danach erkennen, welchen Weg ein Photon genommen hat.</p>
+  </div>
+  <div class="card" id="t3"></div>
+</section>
+
+<section class="st single" id="s4" hidden><div class="card" id="t4"></div></section>
+
+<section class="st" id="s5" hidden>
+  <div class="card stage">
+    <h2>Verschränkte Photonen</h2>
+    <p class="lead">Eine Quelle erzeugt Photonenpaare. Ein Photon fliegt zu Alice, das andere zu Bob. Beide haben einen Polarisationsfilter mit Detektor: 1 = durchgelassen, 0 = nicht durchgelassen.</p>
+    <canvas id="c5" height="150"></canvas>
+    <div class="two" style="margin-top:10px">
+      <div><b>Alice</b><div class="seg" id="enA" style="margin-top:4px"><button type="button" data-m="0" aria-pressed="true">0°</button><button type="button" data-m="45" aria-pressed="false">45°</button></div></div>
+      <div><b>Bob</b><div class="seg" id="enB" style="margin-top:4px"><button type="button" data-m="0" aria-pressed="true">0°</button><button type="button" data-m="45" aria-pressed="false">45°</button></div></div>
+    </div>
+    <div class="read" id="enLog"></div>
+    <div class="count"><div>Paare<b id="enN">0</b></div><div>gleiches Ergebnis<b id="enS">–</b></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" id="enOne">1 Paar</button><button class="btn" type="button" id="enHun">100 Paare</button><button class="btn ghost" type="button" id="enR">Zurücksetzen</button></div>
+  </div>
+  <div class="card" id="t5"></div>
+</section>
+
+<section class="st single" id="s6" hidden><div class="card">
+  <h2>Training</h2>
+  <p class="lead">Neue Zahlen bei jeder Aufgabe. Fünf gelöste Aufgaben, dann ist die Station geschafft. Konstanten: h = 6,626·10⁻³⁴ Js, m<sub>e</sub> = 9,109·10⁻³¹ kg.</p>
+  <div class="read" id="trStat"></div><div id="trBox"></div>
+</div></section>
+
+<section class="st single" id="s7" hidden><div class="card">
+  <h2>Exit-Check</h2>
+  <p class="lead">Acht kurze Fragen quer durch alle Stationen. Du kannst so viele Runden spielen, wie du willst.</p>
+  <div id="qzBox"></div>
+</div></section>
+
+</div>
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+/* ===================== Helfer ===================== */
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmt = (x, d = 1) => Number(x).toFixed(d).replace('.', ',').replace('-', '−');
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+const sci = (x, d = 2) => { if (!x) return '0'; let e = Math.floor(Math.log10(Math.abs(x))), m = x / Math.pow(10, e); if (Math.abs(+m.toFixed(d)) >= 10) { m /= 10; e++; } return fmt(m, d) + '·10' + String(e).split('').map(c => SUP[c]).join(''); };
+const auto = (x, d) => (Math.abs(x) < .01 || Math.abs(x) >= 1e5) && x !== 0 ? sci(x, 2) : fmt(x, d == null ? 1 : d);
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const rnd = (a, b, st) => +(Math.round((a + Math.random() * (b - a)) / st) * st).toFixed(6);
+function parse(v) {
+  v = String(v).trim().replace(/\s/g, '').replace(/,/g, '.').replace(/[−–]/g, '-').replace(/[·*x×]10\^?/i, 'e');
+  if (v === '') return NaN; const n = Number(v); return isFinite(n) ? n : NaN;
+}
+function fit(c) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth; if (!c._h) c._h = +c.getAttribute('height') || 200;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(c._h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(c._h * dpr); c.style.height = c._h + 'px'; }
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, c._h); return [x, w, c._h];
+}
+function rr(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
+function rgb(l) { // Wellenlänge in nm → Farbe; außerhalb des Sichtbaren grau-violett bzw. dunkelrot
+  if (l < 380) return [.55, .45, .85]; if (l > 750) return [.45, .12, .1];
+  let r = 0, g = 0, b = 0;
+  if (l < 440) { r = (440 - l) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = (510 - l) / 20; }
+  else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = (645 - l) / 65; } else { r = 1; }
+  let f = 1; if (l < 420) f = .35 + .65 * (l - 380) / 40; else if (l > 680) f = .35 + .65 * (750 - l) / 70;
+  return [r * f, g * f, b * f];
+}
+const css = (c, i = 1) => { const k = Math.pow(Math.max(0, Math.min(1, i)), .55); return `rgb(${Math.round(255 * c[0] * k)},${Math.round(255 * c[1] * k)},${Math.round(255 * c[2] * k)})`; };
+const farbe = l => l < 380 ? 'ultraviolett' : l < 430 ? 'violett' : l < 490 ? 'blau' : l < 520 ? 'blaugrün' : l < 565 ? 'grün' : l < 590 ? 'gelb' : l < 625 ? 'orange' : l <= 750 ? 'rot' : 'infrarot';
+/* Naturkonstanten */
+const H = 6.626e-34, C = 2.998e8, QE = 1.602e-19, ME = 9.109e-31, HC = H * C / QE * 1e9; // HC in eV·nm ≈ 1240
+
+/* ===================== Stand ===================== */
+let S = { sol: {}, p: {}, bet: null, tr: { n: 0, streak: 0, best: 0 }, quiz: [], x: {} };
+let appLive = false, CFG = null, active = null, cur = null;
+const appChanged = () => { if (window.AppBridge && appLive) AppBridge.changed(); };
+const MAXP = {}, REQ = {};
+function need(id, p, optional) { MAXP[id] = p; if (!optional) (REQ[cur] = REQ[cur] || []).push(id); }
+function solve(id, p) { if (id in S.sol) return; S.sol[id] = 1; S.p[id] = p; refresh(); appChanged(); }
+const points = () => Object.values(S.p).reduce((a, b) => a + b, 0);
+const kind = sid => (CFG.tabs.find(t => t[1] === sid) || [])[2];
+const isDone = sid => kind(sid) === 'bet' ? !!S.bet : kind(sid) === 'train' ? S.tr.n >= 5 : kind(sid) === 'quiz' ? S.quiz.length > 0 : (REQ[sid] || []).length > 0 && REQ[sid].every(id => id in S.sol);
+function renderTabs() {
+  const t = $('#tabs'); t.innerHTML = '';
+  CFG.tabs.forEach(([name, id], i) => {
+    const b = el('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', id === active);
+    b.innerHTML = `<span class="n">${i}</span>${name}${isDone(id) ? ' <span class="done">✓</span>' : ''}`; b.onclick = () => show(id); t.appendChild(b);
+  });
+}
+function refresh() { $('#pts').textContent = points(); $('#ptsMax').textContent = Object.values(MAXP).reduce((a, b) => a + b, 0); renderTabs(); }
+function show(id, keep) {
+  active = id; CFG.tabs.forEach(([, s]) => $('#' + s).hidden = s !== id); renderTabs(); drawActive();
+  if (!keep) { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); appChanged(); }
+}
+function drawActive() { if (kind(active) === 'bet') drawBets(); if (CFG.draw) CFG.draw(active); }
+function nextBtn(host, label) { const i = CFG.tabs.findIndex(t => t[1] === cur), nx = CFG.tabs[i + 1]; if (!nx) return; const d = el('div', 'next'); const b = el('button', 'btn green', label || `Weiter: ${nx[0]} →`); b.type = 'button'; b.onclick = () => show(nx[1]); d.appendChild(b); host.appendChild(d); }
+
+/* ===================== Aufgaben-Bausteine ===================== */
+function mc(host, o) { // {id,q,opts,correct,fb,ok,p}
+  const p = o.p == null ? 1 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'), bs = []; let tries = 0;
+  d.innerHTML = `<p class="q">${o.q}</p>`; const box = el('div', 'opts'), fb = el('div', 'feedback'); fb.hidden = true;
+  const fin = () => { d.classList.add('solved'); bs.forEach((b, i) => { b.disabled = true; if (i === o.correct) b.classList.add('ok'); }); fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Richtig.</b> ' + (o.ok || ''); };
+  o.opts.forEach((t, i) => {
+    const b = el('button', '', t); b.type = 'button'; bs.push(b); box.appendChild(b);
+    b.onclick = () => { tries++; if (i === o.correct) { fin(); solve(o.id, tries === 1 ? p : 0); } else { b.classList.add('no'); b.disabled = true; fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = (o.fb && o.fb[i]) || 'Das passt noch nicht. Überleg noch einmal oder probier es an der Simulation aus.'; } };
+  });
+  d.append(box, fb); host.appendChild(d); if (o.id in S.sol) fin(); return d;
+}
+const NUMS = []; // für den Selbsttest
+function numCore(d, o, onRight, onShown, restored) { // gemeinsame Logik für feste Aufgaben und Training
+  d.innerHTML = `<p class="q">${o.q}</p>${o.given ? `<div class="given">${o.given}</div>` : ''}<div class="ans"><label>${o.label}</label><input type="text" inputmode="decimal" autocomplete="off" aria-label="${o.label.replace(/<[^>]+>/g, '')}"><span class="unit">${o.unit}</span><button class="btn" type="button">Prüfen</button><button class="btn ghost" type="button" hidden>Lösungsweg zeigen</button></div><div class="feedback" hidden></div>`;
+  const inp = d.querySelector('input'), [bt, bs] = d.querySelectorAll('button'), fb = d.querySelector('.feedback'); let tries = 0;
+  const val = () => typeof o.value === 'function' ? o.value() : o.value;
+  const fin = self => { d.classList.add('solved'); inp.disabled = bt.disabled = true; bs.hidden = true; if (!self || !inp.value) inp.value = auto(val(), o.d); inp.className = self ? 'ok' : ''; fb.hidden = false; fb.className = 'feedback ' + (self ? 'ok' : 'info'); fb.innerHTML = (self ? '<b>Richtig.</b>' : '<b>Lösungsweg:</b>') + (o.sol ? `<div class="steps">${o.sol}</div>` : ''); };
+  const check = () => {
+    const x = parse(inp.value), v = val(); if (isNaN(x)) { fb.hidden = false; fb.className = 'feedback warn'; fb.textContent = 'Gib eine Zahl ein, zum Beispiel 6,3 oder 6,3e-19 (für 6,3·10⁻¹⁹).'; return; }
+    tries++;
+    if (Math.abs(x - v) <= (o.abs != null ? o.abs : Math.abs(v) * (o.tol || .03))) { fin(true); onRight(tries); return; }
+    inp.className = 'no'; fb.hidden = false; fb.className = 'feedback no';
+    const q = Math.log10(Math.abs(x / v)), zehner = Math.abs(q - Math.round(q)) < .02 && Math.round(q) !== 0;
+    fb.innerHTML = zehner ? `Die Ziffern stimmen, aber die Zehnerpotenz nicht. Gefragt ist das Ergebnis in <b>${o.unit || 'der angegebenen Einheit'}</b>.` : (x < 0 !== v < 0 && Math.abs(Math.abs(x) - Math.abs(v)) <= Math.abs(v) * .03 ? 'Der Betrag stimmt, das Vorzeichen nicht.' : (o.hint || 'Noch nicht. Prüf Einheiten und Formel, dann noch einmal.'));
+    if (tries >= 2) bs.hidden = false; if (o.onWrong) o.onWrong();
+  };
+  bt.onclick = check; inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+  bs.onclick = () => { fin(false); onShown(); };
+  if (restored != null) fin(restored);
+}
+function num(host, o) { // {id,q,given,label,unit,value,tol,abs,d,sol,p,hint}
+  const p = o.p == null ? 2 : o.p; need(o.id, p, o.optional); NUMS.push(o);
+  const d = el('div', 'task'); host.appendChild(d);
+  numCore(d, o, tries => solve(o.id, tries <= 2 ? p : Math.ceil(p / 2)), () => solve(o.id, 0), o.id in S.sol ? S.p[o.id] > 0 : null); return d;
+}
+function act(host, o) { // Auftrag an der Simulation: {id,q,btn,test:()=>true|'Hinweis',ok,p}
+  const p = o.p == null ? 1 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'); d.innerHTML = `<p class="q">${o.q}</p><button class="btn" type="button">${o.btn || 'Prüfen'}</button><div class="feedback" hidden></div>`;
+  const b = d.querySelector('button'), fb = d.querySelector('.feedback');
+  const fin = () => { d.classList.add('solved'); b.disabled = true; fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Geschafft.</b> ' + (o.ok || ''); };
+  b.onclick = () => { const r = o.test(); if (r === true) { fin(); solve(o.id, p); } else { fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = r; } };
+  host.appendChild(d); if (o.id in S.sol) fin(); return d;
+}
+const merk = (host, h) => host.appendChild(el('div', 'merk', h));
+const h3 = (host, t) => host.appendChild(el('h3', '', t));
+const txt = (host, t) => host.appendChild(el('p', 'lead', t));
+const info = (host, t) => host.appendChild(el('div', 'feedback info', t));
+function begin(sid, title) { cur = sid; const t = $('#t' + sid.slice(1)); t.innerHTML = `<h2>${title || 'Schritt für Schritt'}</h2>`; return t; }
+const bind = (id, fn) => $(id).addEventListener('input', e => fn(+e.target.value));
+const seg = (id, fn) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); fn(b.dataset.m); });
+
+/* ===================== Wette ===================== */
+function drawBets() { if (CFG.bet.draw) document.querySelectorAll('#bets canvas').forEach(c => CFG.bet.draw(c, c._k)); }
+function buildBets() {
+  const B = CFG.bet, box = $('#bets'); box.innerHTML = '';
+  B.opts.forEach((t, k) => {
+    const L = 'ABCD'[k], b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', S.bet === L);
+    if (B.draw) { const c = el('canvas'); c.setAttribute('height', 54); c._k = k; b.appendChild(c); }
+    b.appendChild(el('div', '', `<b>${L}</b> · ${t}`)); b.onclick = () => { S.bet = L; buildBets(); refresh(); appChanged(); }; box.appendChild(b);
+  });
+  const fb = $('#betFb'); fb.hidden = !S.bet;
+  fb.innerHTML = S.bet ? `Gemerkt: <b>${S.bet}</b>. ${B.later} <div class="next"><button class="btn green" type="button" id="betGo">Weiter: ${CFG.tabs[1][0]} →</button></div>` : '';
+  if (S.bet) $('#betGo').onclick = () => show(CFG.tabs[1][1]);
+  if (kind(active) === 'bet') drawBets();
+}
+function betReveal(host) { const B = CFG.bet, L = 'ABCD'[B.correct]; if (S.bet) host.appendChild(el('div', 'feedback ' + (S.bet === L ? 'ok' : 'warn'), `<b>Auflösung deiner Wette (${S.bet}):</b> ${S.bet === L ? 'Volltreffer.' : 'Es ist ' + L + '.'} ${B.reveal}`)); }
+
+/* ===================== Training ===================== */
+let trLast = -1;
+function trNew() {
+  const G = CFG.gen; let i; do { i = Math.floor(Math.random() * G.length); } while (i === trLast && G.length > 1); trLast = i;
+  const o = G[i](), box = $('#trBox'); box.innerHTML = ''; const d = el('div', 'task'); box.appendChild(d);
+  const nx = () => { const n = el('div', 'next'), b = el('button', 'btn green', 'Nächste Aufgabe →'); b.type = 'button'; b.onclick = trNew; n.appendChild(b); d.appendChild(n); trStat(); refresh(); appChanged(); };
+  o.onWrong = () => { S.tr.streak = 0; trStat(); };
+  numCore(d, o, tries => { S.tr.n++; S.tr.streak++; S.tr.best = Math.max(S.tr.best, S.tr.streak); if (tries <= 2) { const k = Object.keys(S.p).filter(k => k.startsWith('tr')).length; if (k < 8) S.p['tr' + k] = 1; } nx(); }, () => { S.tr.streak = 0; nx(); }, null);
+}
+function trStat() { $('#trStat').innerHTML = `Gelöst: <b>${S.tr.n}</b> · Serie: ${S.tr.streak} · beste Serie: ${S.tr.best}${S.tr.n >= 5 ? ' · Station geschafft ✓' : ''}`; }
+
+/* ===================== Exit-Check (richtige Antwort steht in den Daten immer an erster Stelle) ===================== */
+function quizStart() {
+  const box = $('#qzBox'); box.innerHTML = '';
+  if (S.quiz.length) box.appendChild(el('div', 'read', 'Bisherige Runden: ' + S.quiz.map(r => r + '/8').join(', ')));
+  const b = el('button', 'btn green', S.quiz.length ? 'Neue Runde starten' : 'Runde starten'); b.type = 'button'; b.style.marginTop = '12px'; b.onclick = quizRun; box.appendChild(b);
+}
+function quizRun() {
+  const Q = CFG.quiz, order = Q.map((_, i) => i).sort(() => Math.random() - .5).slice(0, 8), box = $('#qzBox'); let n = 0, right = 0;
+  const step = () => {
+    box.innerHTML = '';
+    if (n >= order.length) { S.quiz.push(right); if (S.quiz.length > 12) S.quiz.shift(); box.appendChild(el('div', 'feedback ' + (right >= 6 ? 'ok' : 'warn'), `<b>${right} von 8 richtig.</b> ${right === 8 ? 'Stark, das sitzt.' : right >= 6 ? 'Gut. Schau dir die Stationen zu den falschen Antworten noch einmal an.' : 'Geh die Stationen noch einmal durch, dann klappt es.'}`)); refresh(); appChanged(); const b = el('button', 'btn green', 'Noch eine Runde'); b.type = 'button'; b.style.marginTop = '12px'; b.onclick = quizRun; box.appendChild(b); return; }
+    const qi = order[n], q = Q[qi], idx = q.o.map((_, i) => i).sort(() => Math.random() - .5), d = el('div', 'task');
+    d.innerHTML = `<p class="small" style="margin:0 0 4px">Frage ${n + 1} von 8</p><p class="q">${q.q}</p>`; const ob = el('div', 'opts'), fb = el('div', 'feedback'); fb.hidden = true; const bs = [];
+    idx.forEach(i => { const b = el('button', '', q.o[i]); b.type = 'button'; bs.push([b, i]); ob.appendChild(b);
+      b.onclick = () => { bs.forEach(([x, j]) => { x.disabled = true; if (j === 0) x.classList.add('ok'); }); const ok = i === 0; if (ok) { right++; if (!('qz' + qi in S.p)) S.p['qz' + qi] = 1; } else b.classList.add('no'); fb.hidden = false; fb.className = 'feedback ' + (ok ? 'ok' : 'no'); fb.innerHTML = (ok ? 'Richtig. ' : 'Leider nicht. Die richtige Antwort ist grün markiert. ') + (q.e || ''); const nb = el('button', 'btn', n === 7 ? 'Auswertung' : 'Weiter'); nb.type = 'button'; nb.style.marginTop = '10px'; nb.onclick = () => { n++; step(); }; d.appendChild(nb); refresh(); }; });
+    d.append(ob, fb); box.appendChild(d);
+  };
+  step();
+}
+
+/* ===================== Start und Anbindung an die Klassen-App (ohne Namen) ===================== */
+function buildAll() { Object.keys(REQ).forEach(k => delete REQ[k]); CFG.build(); buildBets(); trStat(); trNew(); quizStart(); refresh(); drawActive(); }
+function start(cfg) {
+  CFG = cfg; active = cfg.tabs[0][1]; for (let i = 0; i < 8; i++) MAXP['tr' + i] = 1; cfg.quiz.forEach((_, i) => MAXP['qz' + i] = 1);
+  if (cfg.x) S.x = JSON.parse(JSON.stringify(cfg.x));
+  let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawActive, 120); });
+  buildAll(); show(active, true);
+  if (!window.AppBridge) return;
+  setTimeout(() => { appLive = true; }, 1500);
+  const cnt = sid => { const r = REQ[sid] || []; return r.filter(id => id in S.sol).length + ' von ' + r.length + ' Aufträgen'; };
+  AppBridge.register({
+    getState() {
+      const details = {}; CFG.tabs.forEach(([name, id, k]) => { details[name] = k === 'bet' ? (S.bet ? S.bet + (S.bet === 'ABCD'[CFG.bet.correct] ? ' (richtig)' : ' (falsch)') : '–') : k === 'train' ? S.tr.n + ' gelöst, beste Serie ' + S.tr.best : k === 'quiz' ? (S.quiz.length ? 'Runden: ' + S.quiz.map(r => r + '/8').join(', ') : 'noch keine Runde') : cnt(id) + (CFG.detail && CFG.detail[id] ? ', ' + CFG.detail[id]() : ''); });
+      details['Ohne Punkte gelöst'] = Object.keys(S.sol).filter(k => !S.p[k]).length + ' (Lösungsweg angesehen oder mehrere Versuche)';
+      return { punkte: points(), stationen: CFG.tabs.map(t => t[0]), erledigt: CFG.tabs.filter(t => isDone(t[1])).map(t => t[0]), details, daten: { v: 1, S, tab: active } };
+    },
+    setState(s) {
+      const d = s && s.daten; if (!d || !d.S) return;
+      S = Object.assign({ sol: {}, p: {}, bet: null, tr: { n: 0, streak: 0, best: 0 }, quiz: [], x: {} }, d.S); S.x = Object.assign(JSON.parse(JSON.stringify(CFG.x || {})), S.x || {});
+      if (CFG.onRestore) CFG.onRestore(); buildAll(); show(CFG.tabs.some(t => t[1] === d.tab) ? d.tab : CFG.tabs[0][1], true); appLive = true;
+    }
+  });
+}
+
+/* ===================== Modul ===================== */
+const sinc2 = u => Math.abs(u) < 1e-6 ? 1 : Math.pow(Math.sin(u) / u, 2);
+const HB = H / (4 * Math.PI);                                  // h/(4π)
+
+/* ---------- 1 Einzelspalt ---------- */
+const U1 = { b: 3, hits: [], bins: new Array(64).fill(0), n: 0, run: false, acc: 0 };
+const uP = x => sinc2(Math.PI * x * U1.b * 1.15);
+function uAdd(k) { for (let i = 0; i < k; i++) { let x; do { x = Math.random() * 2 - 1; } while (Math.random() > uP(x)); if (U1.hits.length < 7000) U1.hits.push([x, Math.random()]); U1.bins[Math.min(63, Math.floor((x + 1) * 32))]++; } U1.n += k; $('#u1N').textContent = U1.n;
+  const key = U1.b >= 4 ? 'wide' : U1.b <= 1 ? 'narrow' : null; if (key && U1.n >= 500 && !S.x[key]) { S.x[key] = 1; appChanged(); } }
+function uReset() { U1.hits = []; U1.bins.fill(0); U1.n = 0; $('#u1N').textContent = 0; uDraw(); }
+function uDraw() {
+  $('#uBO').textContent = fmt(U1.b) + ' µm'; const dp = H / (U1.b * 1e-6);
+  $('#uRead').innerHTML = `Ort am Spalt festgelegt auf Δx = ${fmt(U1.b)} µm<br>Streuung des Querimpulses: Δp<sub>x</sub> ≈ ${sci(dp)} kg·m/s<br>Produkt Δx · Δp<sub>x</sub> ≈ <b>${sci(U1.b * 1e-6 * dp)} Js</b>`;
+  const c = $('#c1'); if (active !== 's1' || !c.clientWidth) return; const [x, w, h] = fit(c), sy = 76, sh = 110, px = u => 10 + (u + 1) / 2 * (w - 20), bw = U1.b * 5;
+  x.fillStyle = '#060A10'; x.fillRect(0, 0, w, h); x.font = '12px ' + cv('--f-mono');
+  x.fillStyle = '#C9D3DF'; x.fillRect(10, 30, w / 2 - bw - 10, 8); x.fillRect(w / 2 + bw, 30, w / 2 - bw - 10, 8);
+  x.strokeStyle = '#FF5A3C'; x.lineWidth = 2; for (let i = -1; i <= 1; i++) { x.beginPath(); x.moveTo(w / 2 + i * bw * .6, 4); x.lineTo(w / 2 + i * bw * .6, 30); x.stroke(); }
+  const half = Math.min(w / 2 - 14, (w - 20) / 2 / (U1.b * 1.15)); x.fillStyle = 'rgba(255,90,60,.16)'; x.beginPath(); x.moveTo(w / 2 - bw, 38); x.lineTo(w / 2 + bw, 38); x.lineTo(w / 2 + half, sy); x.lineTo(w / 2 - half, sy); x.fill();
+  x.fillStyle = '#9BABBD'; x.fillText('Spalt: Δx = ' + fmt(U1.b) + ' µm', 14, 22); x.strokeStyle = '#2A3A4F'; x.strokeRect(10, sy, w - 20, sh);
+  x.fillStyle = '#FF5A3C'; U1.hits.forEach(p => x.fillRect(px(p[0]) - 1, sy + 2 + p[1] * (sh - 4), 2.2, 2.2));
+  const top = sy + sh + 26, B = h - 8, mx = Math.max(6, ...U1.bins), wb = (w - 20) / 64; x.fillStyle = '#9BABBD'; x.fillText('Schirm, darunter Trefferzahl je Abschnitt', 14, top - 8);
+  x.fillStyle = '#FF5A3C'; x.globalAlpha = .8; U1.bins.forEach((v, i) => x.fillRect(10 + i * wb + 1, B - v / mx * (B - top), wb - 2, v / mx * (B - top))); x.globalAlpha = 1;
+}
+
+/* ---------- 2 Strahlteiler ---------- */
+const BS = { n1: 0, n2: 0, flash: 0, t: 0 };
+function bsAdd(k) { for (let i = 0; i < k; i++) { if (Math.random() < .5) { BS.n1++; BS.flash = 1; } else { BS.n2++; BS.flash = 2; } } BS.t = performance.now(); S.x.bs = Math.max(S.x.bs || 0, BS.n1 + BS.n2); const n = BS.n1 + BS.n2; if (n === 20 || (n >= 1000 && n - k < 1000)) appChanged(); bsDraw(); }
+function det(x, X, Y, name, on) { x.fillStyle = on ? '#F5B83D' : cv('--navy'); x.beginPath(); x.arc(X, Y, 15, 0, 7); x.fill(); x.fillStyle = cv('--ink'); x.fillText(name, X - 8, Y + 32); if (on) { x.strokeStyle = '#F5B83D'; x.lineWidth = 2; x.beginPath(); x.arc(X, Y, 21, 0, 7); x.stroke(); } }
+function bsDraw() {
+  $('#bs1').textContent = BS.n1; $('#bs2').textContent = BS.n2; if (active !== 's2') return;
+  const [x, w, h] = fit($('#c2')), ink = cv('--ink'), bx = w * .5, by = h * .62, on = performance.now() - BS.t < 500 ? BS.flash : 0; x.font = '13px ' + cv('--f-mono');
+  x.strokeStyle = '#E0331F'; x.lineWidth = 2; x.beginPath(); x.moveTo(60, by); x.lineTo(bx, by); x.stroke();
+  x.setLineDash([5, 5]); x.beginPath(); x.moveTo(bx, by); x.lineTo(w - 60, by); x.moveTo(bx, by); x.lineTo(bx, 40); x.stroke(); x.setLineDash([]);
+  x.fillStyle = cv('--navy'); x.fillRect(10, by - 14, 50, 28); x.fillStyle = cv('--bg'); x.fillText('Quelle', 12, by + 5);
+  x.strokeStyle = cv('--blue'); x.lineWidth = 5; x.beginPath(); x.moveTo(bx - 20, by + 20); x.lineTo(bx + 20, by - 20); x.stroke(); x.fillStyle = ink; x.fillText('Strahlteiler', bx - 40, by + 44);
+  det(x, w - 44, by, 'D1', on === 1); det(x, bx, 26, 'D2', on === 2);
+}
+
+/* ---------- 3 Mach-Zehnder ---------- */
+const MZ = { mode: 'open', bs2: true, n1: 0, n2: 0, n0: 0, flash: 0, t: 0 };
+const mzKey = () => (MZ.bs2 ? '' : 'x') + MZ.mode;
+function mzAdd(k) {
+  for (let i = 0; i < k; i++) {
+    let r;
+    if (MZ.mode === 'block' && Math.random() < .5) r = 0;
+    else if (!MZ.bs2) r = MZ.mode === 'block' ? 1 : (Math.random() < .5 ? 1 : 2);
+    else if (MZ.mode === 'open') r = 1;
+    else r = Math.random() < .5 ? 1 : 2;
+    r === 0 ? MZ.n0++ : r === 1 ? MZ.n1++ : MZ.n2++; MZ.flash = r;
+  }
+  MZ.t = performance.now(); const key = mzKey(), tot = MZ.n0 + MZ.n1 + MZ.n2, b = S.x.mz[key] || 0; if (tot > b) { S.x.mz[key] = tot; if (b < 100 && tot >= 100) appChanged(); } mzDraw();
+}
+function mzReset() { MZ.n0 = MZ.n1 = MZ.n2 = 0; MZ.flash = 0; mzDraw(); }
+function mzDraw() {
+  $('#mz1').textContent = MZ.n1; $('#mz2').textContent = MZ.n2; $('#mz0').textContent = MZ.n0; if (active !== 's3') return;
+  const [x, w, h] = fit($('#c3')), ink = cv('--ink'), x1 = Math.max(110, w * .26), x2 = w - Math.max(120, w * .27), yb = h - 62, yt = 92, on = performance.now() - MZ.t < 500 ? MZ.flash : -1;
+  x.font = '13px ' + cv('--f-mono'); const red = '#E0331F';
+  x.strokeStyle = red; x.lineWidth = 2; x.beginPath(); x.moveTo(60, yb); x.lineTo(x1, yb); x.stroke();
+  x.strokeStyle = cv('--orange'); x.beginPath(); x.moveTo(x1, yb); x.lineTo(x1, yt); x.lineTo(x2, yt); x.stroke();                                   // oberer Weg
+  x.strokeStyle = cv('--green'); x.beginPath(); x.moveTo(x1, yb); x.lineTo(MZ.mode === 'block' ? (x1 + x2) / 2 : x2, yb); if (MZ.mode !== 'block') x.lineTo(x2, yt); x.stroke(); // unterer Weg
+  x.strokeStyle = red; x.setLineDash([5, 5]); x.beginPath(); x.moveTo(x2, yt); x.lineTo(w - 58, yt); x.moveTo(x2, yt); x.lineTo(x2, 40); x.stroke(); x.setLineDash([]);
+  x.fillStyle = cv('--navy'); x.fillRect(10, yb - 14, 50, 28); x.fillStyle = cv('--bg'); x.fillText('Quelle', 12, yb + 5);
+  const bs = (X, Y, t, show, dx, dy) => { if (show) { x.strokeStyle = cv('--blue'); x.lineWidth = 5; x.beginPath(); x.moveTo(X - 18, Y + 18); x.lineTo(X + 18, Y - 18); x.stroke(); } x.fillStyle = ink; x.fillText(t, X + dx, Y + dy); };
+  const mir = (X, Y, t, dx) => { x.strokeStyle = ink; x.lineWidth = 5; x.beginPath(); x.moveTo(X - 18, Y + 18); x.lineTo(X + 18, Y - 18); x.stroke(); x.fillStyle = ink; x.fillText(t, X + dx, Y - 18); };
+  bs(x1, yb, 'Strahlteiler 1', true, 18, -12); bs(x2, yt, MZ.bs2 ? 'Strahlteiler 2' : '(kein Strahlteiler)', MZ.bs2, MZ.bs2 ? -128 : -160, 28); mir(x1, yt, 'Spiegel', -64); mir(x2, yb, 'Spiegel', 24);
+  x.fillStyle = ink; x.fillText('oberer Weg', (x1 + x2) / 2 - 36, yt - 10); x.fillText('unterer Weg', (x1 + x2) / 2 - 40, yb + 22);
+  if (MZ.mode === 'block') { x.fillStyle = ink; x.fillRect((x1 + x2) / 2 - 4, yb - 18, 9, 36); }
+  if (MZ.mode === 'mark') { x.fillStyle = 'rgba(47,111,181,.55)'; x.fillRect((x1 + x2) / 2 + 50, yt - 16, 7, 32); x.fillRect((x1 + x2) / 2 + 56, yb - 16, 7, 32); x.fillStyle = ink; x.fillText('↔', (x1 + x2) / 2 + 46, yt + 32); x.fillText('↕', (x1 + x2) / 2 + 54, yb - 22); }
+  det(x, w - 40, yt, 'D1', on === 1); det(x, x2, 24, 'D2', on === 2);
+}
+
+/* ---------- 5 Verschränkung ---------- */
+const EN = { a: 0, b: 0, n: 0, same: 0, log: [] };
+function enAdd(k) { for (let i = 0; i < k; i++) { const ra = Math.random() < .5 ? 1 : 0, rb = EN.a === EN.b ? ra : (Math.random() < .5 ? 1 : 0); EN.n++; if (ra === rb) EN.same++; EN.log.push([ra, rb]); } if (EN.log.length > 16) EN.log = EN.log.slice(-16);
+  const key = EN.a === EN.b ? 'eq' : 'ne', b = S.x.en[key] || 0; if (EN.n > b) { S.x.en[key] = EN.n; if (b < 100 && EN.n >= 100) appChanged(); } enDraw(); }
+function enReset() { EN.n = EN.same = 0; EN.log = []; enDraw(); }
+function enDraw() {
+  $('#enN').textContent = EN.n; $('#enS').textContent = EN.n ? Math.round(100 * EN.same / EN.n) + ' %' : '–';
+  $('#enLog').innerHTML = EN.log.length ? `Alice: ${EN.log.map(p => p[0]).join(' ')}<br>Bob:&nbsp;&nbsp; ${EN.log.map(p => p[1]).join(' ')}` : 'Noch keine Paare gemessen.';
+  if (active !== 's5') return; const [x, w, h] = fit($('#c5')), ink = cv('--ink'), my = 64, last = EN.log[EN.log.length - 1]; x.font = '13px ' + cv('--f-mono');
+  x.strokeStyle = '#E0331F'; x.lineWidth = 2; x.setLineDash([6, 5]); x.beginPath(); x.moveTo(70, my); x.lineTo(w - 70, my); x.stroke(); x.setLineDash([]);
+  x.fillStyle = cv('--navy'); rr(x, w / 2 - 34, my - 16, 68, 32, 6); x.fill(); x.fillStyle = cv('--bg'); x.fillText('Quelle', w / 2 - 24, my + 5);
+  [[EN.a, 96, 'Alice', 0], [EN.b, w - 96, 'Bob', 1]].forEach(([ang, X, name, i]) => { x.save(); x.translate(X, my); x.rotate(rad(-ang)); x.fillStyle = 'rgba(47,111,181,.5)'; x.fillRect(-4, -24, 8, 48); x.restore();
+    const DX = i ? w - 40 : 40; x.fillStyle = last && last[i] ? '#F5B83D' : cv('--navy'); x.beginPath(); x.arc(DX, my, 15, 0, 7); x.fill(); x.fillStyle = last && last[i] ? '#15253A' : cv('--bg'); x.fillText(last ? last[i] : '', DX - 4, my + 5);
+    x.fillStyle = ink; x.fillText(name + ' (' + ang + '°)', i ? w - 110 : 20, my + 46); });
+}
+
+/* ---------- Aufgaben ---------- */
+const WZ = ['Statistisches Verhalten', 'Fähigkeit zur Interferenz', 'Eindeutige Messergebnisse', 'Komplementarität'];
+const dp10 = HB / 1e-10, dv10 = dp10 / ME, dvS = HB / (1e-6 * 1e-9);
+function build() {
+  let t = begin('s1'); betReveal(t);
+  txt(t, 'Photonen fliegen einzeln durch einen Spalt. Der Spalt legt fest, wo das Photon in Querrichtung (x-Richtung) ist: irgendwo innerhalb der Spaltbreite. Diese Ortsunschärfe nennen wir <b>Δx</b>.');
+  act(t, { id: 'u_beide', q: 'Sammle je mindestens 500 Treffer, einmal bei einem breiten Spalt (ab 4 µm) und einmal bei einem schmalen Spalt (höchstens 1 µm). Vorher jeweils zurücksetzen.', test: () => S.x.wide && S.x.narrow ? true : `Es fehlt noch: ${[!S.x.wide && 'breiter Spalt', !S.x.narrow && 'schmaler Spalt'].filter(Boolean).join(' und ')}.`, ok: 'Je enger der Spalt, desto breiter die Verteilung auf dem Schirm.' });
+  mc(t, { id: 'u_enger', q: 'Was passiert auf dem Schirm, wenn der Spalt enger wird?', opts: ['Die Treffer verteilen sich über einen breiteren Bereich.', 'Die Treffer liegen enger beieinander.', 'Es ändert sich nur die Zahl der Treffer.'], correct: 0, ok: 'Mit geraden Bahnen ist das nicht zu erklären. Ein enger Spalt würde dann einen schmaleren Fleck liefern.' });
+  txt(t, 'Dass ein Photon weit außen landet, bedeutet: Es hat hinter dem Spalt einen Impuls quer zur Flugrichtung. Wie breit die Treffer streuen, zeigt also die <b>Impulsunschärfe Δp<sub>x</sub></b>.');
+  mc(t, { id: 'u_je', q: 'Wie hängen Δx und Δp<sub>x</sub> zusammen?', opts: ['Je kleiner Δx, desto größer Δp<sub>x</sub>.', 'Je kleiner Δx, desto kleiner Δp<sub>x</sub>.', 'Sie haben nichts miteinander zu tun.'], correct: 0 });
+  mc(t, { id: 'u_prod', q: 'Beobachte links das Produkt Δx · Δp<sub>x</sub>, während du die Spaltbreite änderst.', opts: ['Es bleibt gleich und ist etwa so groß wie h.', 'Es wächst mit der Spaltbreite.', 'Es wird null, wenn der Spalt sehr eng ist.'], correct: 0, ok: 'Man kann Δx oder Δp<sub>x</sub> klein machen, aber nicht beide zugleich.' });
+  info(t, '<b>Heisenberg’sche Unbestimmtheitsrelation (1927):</b> <span class="formel">Δx · Δp<sub>x</sub> ≥ h / (4π)</span><br>Ort und Impuls eines Quantenobjekts sind nie gleichzeitig beliebig genau bestimmt.');
+  mc(t, { id: 'u_bed', q: 'Was bedeutet diese Relation?', opts: ['Sie ist eine grundsätzliche Eigenschaft von Quantenobjekten: Ein Quantenobjekt <i>hat</i> nicht gleichzeitig einen genauen Ort und einen genauen Impuls.', 'Unsere Messgeräte sind noch zu ungenau. Mit besserer Technik fällt die Grenze weg.', 'Sie gilt nur für Photonen am Spalt.'], correct: 0, ok: 'Deshalb kann man Quantenobjekten keine Bahn zuschreiben. Für eine Bahn müsste man zu jedem Zeitpunkt Ort <i>und</i> Geschwindigkeit kennen.' });
+  num(t, { id: 'u_dp', q: 'Ein Elektron ist in einem Atom auf Δx = 1,0·10⁻¹⁰ m eingesperrt. Wie groß ist seine Impulsunschärfe mindestens?', label: 'Δp<sub>x</sub> =', unit: 'kg·m/s', value: dp10, tol: .03, sol: `Δp_x ≥ h / (4π · Δx) = 6,626·10⁻³⁴ Js / (4π · 1,0·10⁻¹⁰ m) = ${sci(dp10)} kg·m/s` });
+  num(t, { id: 'u_dv', q: 'Welcher Geschwindigkeitsunschärfe entspricht das beim Elektron?', label: 'Δv =', unit: 'm/s', value: dv10, tol: .03, sol: `Δv = Δp_x / m = ${sci(dp10)} kg·m/s / 9,109·10⁻³¹ kg = ${sci(dv10)} m/s\nDas sind fast 600 km pro Sekunde. Von einer „Bahn“ im Atom kann keine Rede sein.` });
+  num(t, { id: 'u_staub', q: 'Zum Vergleich: ein Staubkorn (m = 1,0·10⁻⁹ kg), dessen Ort auf 1,0 µm genau bekannt ist. Wie groß ist Δv mindestens?', label: 'Δv =', unit: 'm/s', value: dvS, tol: .03, sol: `Δv ≥ h / (4π · Δx · m) = 6,626·10⁻³⁴ Js / (4π · 1,0·10⁻⁶ m · 1,0·10⁻⁹ kg) = ${sci(dvS)} m/s\nVöllig unmessbar. Im Alltag merkt man von der Unbestimmtheit nichts.` });
+  nextBtn(t);
+
+  t = begin('s2');
+  txt(t, 'Was macht ein <i>einzelnes</i> Photon an einem halbdurchlässigen Spiegel? Teilt es sich?');
+  act(t, { id: 'b_20', q: 'Schick einzeln mindestens 20 Photonen auf den Strahlteiler und beobachte die Detektoren.', test: () => (S.x.bs || 0) >= 20 ? true : 'Noch zu wenige Photonen.', ok: 'Es klickt immer genau ein Detektor.' });
+  mc(t, { id: 'b_teil', q: 'Was zeigt der Zähler „beide gleichzeitig“?', opts: ['Immer null. Ein Photon wird als Ganzes in D1 <i>oder</i> in D2 nachgewiesen, nie zur Hälfte in beiden.', 'Etwa die Hälfte der Photonen löst beide Detektoren aus.', 'Jedes Photon löst beide Detektoren aus.'], correct: 0, ok: 'Eine klassische Welle würde sich teilen, und beide Detektoren würden gleichzeitig ansprechen. Photonen sind unteilbar. Diese Prüfung heißt <b>Koinzidenzmethode</b>.' });
+  mc(t, { id: 'b_zufall', q: 'Kannst du vorhersagen, welcher Detektor beim nächsten Photon klickt?', opts: ['Nein. Man kann nur die Wahrscheinlichkeit angeben: je 50 %.', 'Ja, die Detektoren wechseln sich ab.', 'Ja, wenn man die Quelle genau genug kennt.'], correct: 0 });
+  act(t, { id: 'b_1000', q: 'Schick jetzt mindestens 1000 Photonen los.', test: () => (S.x.bs || 0) >= 1000 ? true : `Bisher höchstens ${S.x.bs || 0} Photonen.`, ok: 'Ungefähr die Hälfte landet in jedem Detektor, aber fast nie genau die Hälfte.' });
+  mc(t, { id: 'b_stat', q: 'Welche Aussage passt zu deinen Zählerständen?', opts: ['Das Einzelereignis ist zufällig. Bei vielen Photonen stellt sich die Verteilung 50 : 50 immer besser ein.', 'Bei 1000 Photonen sind es immer genau 500 und 500.', 'Die Verteilung ist bei jedem Durchgang völlig anders.'], correct: 0, ok: 'Das ist der Wesenszug <b>statistisches Verhalten</b>.' });
+  nextBtn(t);
+
+  t = begin('s3');
+  txt(t, 'Jetzt kommen hinter den Strahlteiler zwei Spiegel und ein zweiter Strahlteiler. Die beiden Wege sind genau gleich lang. So ein Aufbau heißt <b>Mach-Zehnder-Interferometer</b>.');
+  mc(t, { id: 'mz_tipp', q: 'Stell dir das Photon als Kügelchen vor, das am ersten Strahlteiler zufällig einen Weg nimmt. Was würdest du an D1 und D2 erwarten?', opts: ['Je 50 %, denn am zweiten Strahlteiler geht es wieder zufällig weiter.', 'Alle in D1.', 'Alle in D2.'], correct: 0, ok: 'Das wäre die Vorhersage für Kügelchen. Jetzt das Experiment.' });
+  act(t, { id: 'mz_open', q: 'Beide Wege offen, mit 2. Strahlteiler: Schick mindestens 100 Photonen einzeln durch.', test: () => (S.x.mz.open || 0) >= 100 ? true : 'Noch zu wenige Photonen in dieser Einstellung.', ok: 'Alle Photonen landen in D1, keines in D2.' });
+  mc(t, { id: 'mz_inter', q: 'Wie lässt sich das erklären?', opts: ['Interferenz: Die Beiträge der beiden Wege verstärken sich in Richtung D1 und löschen sich in Richtung D2 aus. Für jedes einzelne Photon zählen beide Wege.', 'Der zweite Strahlteiler ist kaputt.', 'Die Photonen stoßen sich gegenseitig in Richtung D1.'], correct: 0, ok: 'Die Photonen sind einzeln unterwegs. Trotzdem zeigt sich Interferenz: Wesenszug <b>Fähigkeit zur Interferenz</b>.' });
+  act(t, { id: 'mz_block', q: 'Blockiere den unteren Weg, setz zurück und schick wieder mindestens 100 Photonen los.', test: () => (S.x.mz.block || 0) >= 100 ? true : 'Noch zu wenige Photonen mit blockiertem Weg.', ok: 'Die Hälfte bleibt im Hindernis stecken. Der Rest verteilt sich auf D1 und D2.' });
+  mc(t, { id: 'mz_selt', q: 'Was ist daran merkwürdig?', opts: ['Man <i>schließt</i> einen Weg, und plötzlich kommen Photonen in D2 an, wo vorher nie eines ankam.', 'Dass überhaupt Photonen absorbiert werden.', 'Nichts. Genau das erwartet man für Kügelchen.'], correct: 0, ok: 'Jetzt gibt es nur noch einen möglichen Weg. Ohne zweiten Weg keine Interferenz, also keine Auslöschung bei D2.' });
+  act(t, { id: 'mz_mark', q: 'Öffne wieder beide Wege, aber markiere sie mit den Polarisationsfiltern. Schick mindestens 100 Photonen los.', test: () => (S.x.mz.mark || 0) >= 100 ? true : 'Noch zu wenige Photonen mit markierten Wegen.', ok: 'Obwohl beide Wege offen sind: wieder etwa 50 : 50.' });
+  mc(t, { id: 'mz_kompl', q: 'Warum verschwindet die Interferenz, obwohl kein Weg versperrt ist?', opts: ['Durch die Markierung liegt Welcher-Weg-Information vor. Weg-Information und Interferenz schließen sich aus.', 'Die Filter schlucken die Hälfte der Photonen.', 'Polarisiertes Licht kann nie interferieren.'], correct: 0, ok: 'Das ist der Wesenszug <b>Komplementarität</b>. Es reicht, dass man den Weg herausfinden <i>könnte</i>.' });
+  act(t, { id: 'mz_ohne', q: 'Nimm die Markierung wieder weg, entferne aber den 2. Strahlteiler. Schick mindestens 100 Photonen los.', test: () => (S.x.mz.xopen || 0) >= 100 ? true : 'Stell „beide Wege offen“ und „ohne 2. Strahlteiler“ ein und schick 100 Photonen los.', ok: 'Wieder 50 : 50. Jetzt verrät der Detektor den Weg: D1 heißt oberer Weg, D2 unterer Weg.' });
+  mc(t, { id: 'mz_delayed', q: 'Man kann den 2. Strahlteiler sogar erst dann einsetzen oder entfernen, wenn das Photon den 1. Strahlteiler längst passiert hat (Delayed Choice). Das Ergebnis ist dasselbe wie oben. Was zeigt das?', opts: ['Das Photon „entscheidet“ sich nicht am 1. Strahlteiler für einen Weg oder für beide. Erst der gesamte Aufbau bis zur Messung legt fest, was man beobachtet.', 'Das Photon weiß vorher, was der Experimentator tun wird.', 'Information läuft schneller als das Licht zurück zum 1. Strahlteiler.'], correct: 0, ok: 'Die Frage „Welchen Weg hat das Photon <i>wirklich</i> genommen?“ hat ohne Messung keine Antwort.' });
+  nextBtn(t);
+
+  cur = 's4'; t = $('#t4'); t.innerHTML = '<h2>Die vier Wesenszüge der Quantenphysik</h2>';
+  info(t, `<b>1 · ${WZ[0]}:</b> Einzelereignisse sind nicht vorhersagbar. Für viele Wiederholungen ergibt sich eine feste Verteilung.<br><b>2 · ${WZ[1]}:</b> Auch einzelne Quantenobjekte tragen zu einem Interferenzmuster bei, wenn es mehrere Möglichkeiten (Wege) gibt.<br><b>3 · ${WZ[2]}:</b> Jede Messung liefert ein eindeutiges Ergebnis, auch wenn es vorher nicht festlag: ein Ort, ein Detektor, die ganze Energie.<br><b>4 · ${WZ[3]}:</b> Welcher-Weg-Information und Interferenzmuster schließen sich aus.`);
+  txt(t, 'Ordne zu: Welcher Wesenszug zeigt sich in der Beobachtung am deutlichsten?');
+  [['wz1', 'Hinter dem Doppelspalt entsteht aus Tausenden Einzeltreffern ein Streifenmuster, obwohl immer nur ein Elektron unterwegs war.', 1],
+   ['wz2', 'Niemand kann sagen, wo das nächste Photon auf dem Schirm landet. Nach 10 000 Photonen sieht das Bild aber immer gleich aus.', 0],
+   ['wz3', 'Ein Photon trifft auf einen Strahlteiler. Es klickt immer genau ein Detektor, nie beide.', 2],
+   ['wz4', 'Am Doppelspalt wird registriert, durch welchen Spalt jedes Elektron geht. Die Streifen verschwinden.', 3],
+   ['wz5', 'Im Mach-Zehnder-Interferometer mit zwei offenen, gleich langen Wegen kommt kein einziges Photon bei D2 an.', 1],
+   ['wz6', 'Beim Photoeffekt gibt ein Photon seine ganze Energie an genau ein Elektron ab.', 2],
+   ['wz7', 'Im Interferometer stehen gekreuzte Polarisationsfilter in den beiden Wegen. Die Detektoren zeigen 50 : 50.', 3]
+  ].forEach(([id, q, c]) => mc(t, { id, q, opts: WZ, correct: c, fb: { 0: 'Überleg, was genau die Beobachtung zeigt.', 1: 'Überleg, was genau die Beobachtung zeigt.', 2: 'Überleg, was genau die Beobachtung zeigt.', 3: 'Überleg, was genau die Beobachtung zeigt.' } }));
+  nextBtn(t);
+
+  t = begin('s5');
+  txt(t, 'Zum Schluss ein Phänomen, das Einstein „spukhafte Fernwirkung“ nannte. Zwei Photonen können so erzeugt werden, dass sie nur gemeinsam beschrieben werden können. Man nennt sie <b>verschränkt</b>.');
+  act(t, { id: 'en_eq', q: 'Stell bei Alice und Bob denselben Winkel ein und miss mindestens 100 Paare.', test: () => (S.x.en.eq || 0) >= 100 ? true : 'Noch zu wenige Paare bei gleicher Einstellung.', ok: 'Alice und Bob bekommen immer dasselbe Ergebnis.' });
+  mc(t, { id: 'en_einzel', q: 'Schau nur auf die Zahlenreihe von Alice. Was siehst du?', opts: ['Eine völlig zufällige Folge aus 0 und 1.', 'Ein regelmäßiges Muster.', 'Immer 1.'], correct: 0, ok: 'Jede Reihe für sich ist reiner Zufall. Erst beim Vergleich zeigt sich der Zusammenhang.' });
+  act(t, { id: 'en_ne', q: 'Stell jetzt verschiedene Winkel ein (einer 0°, einer 45°), setz zurück und miss wieder 100 Paare.', test: () => (S.x.en.ne || 0) >= 100 ? true : 'Noch zu wenige Paare bei verschiedener Einstellung.', ok: 'Jetzt stimmen die Ergebnisse nur noch in etwa der Hälfte der Fälle überein.' });
+  mc(t, { id: 'en_bell', q: 'Naheliegende Idee: Die Photonen haben die Ergebnisse schon an der Quelle „abgesprochen“. Was sagen die Experimente?', opts: ['Solche vorher festgelegten Ergebnisse können die Messungen bei verschiedenen Winkeln nicht erklären (Tests der Bell’schen Ungleichung, Nobelpreis 2022).', 'Genau so ist es. Verschränkung ist nur eine Absprache.', 'Das lässt sich nicht überprüfen.'], correct: 0, ok: 'Die Ergebnisse stehen vor der Messung nicht fest, und trotzdem passen sie zusammen, egal wie weit Alice und Bob auseinander sind.' });
+  mc(t, { id: 'en_msg', q: 'Kann Alice auf diese Weise eine Nachricht schneller als das Licht zu Bob schicken?', opts: ['Nein. Bob sieht nur eine Zufallsfolge. Alice kann nicht steuern, ob bei ihr 0 oder 1 herauskommt.', 'Ja, sofort und über beliebige Entfernungen.', 'Ja, aber nur mit halber Lichtgeschwindigkeit.'], correct: 0 });
+  mc(t, { id: 'en_anw', q: 'Wofür nutzt man verschränkte Photonen?', opts: ['Für abhörsichere Schlüssel in der Quantenkryptografie: Ein Lauscher würde die Übereinstimmung stören und auffallen.', 'Für schnellere Internetleitungen ohne Glasfaser.', 'Für hellere Laser.'], correct: 0 });
+  nextBtn(t, 'Weiter zum Training →');
+}
+
+/* ---------- Training ---------- */
+const GEN = [
+  () => { const dx = pick([5e-11, 1e-10, 2e-10, 5e-10, 1e-9, 1e-8]), v = HB / dx; return { q: 'Unbestimmtheitsrelation: Wie groß ist die Impulsunschärfe mindestens?', given: `Δx = ${sci(dx, 1)} m`, label: 'Δp<sub>x</sub> =', unit: 'kg·m/s', value: v, tol: .03, sol: `Δp_x ≥ h / (4π · Δx) = 6,626·10⁻³⁴ Js / (4π · ${sci(dx, 1)} m) = ${sci(v)} kg·m/s` }; },
+  () => { const dx = pick([5e-11, 1e-10, 3e-10, 1e-9, 5e-9]), v = HB / dx / ME; return { q: 'Ein Elektron ist auf den Bereich Δx eingesperrt. Wie groß ist seine Geschwindigkeitsunschärfe mindestens?', given: `Δx = ${sci(dx, 1)} m · m<sub>e</sub> = 9,109·10⁻³¹ kg`, label: 'Δv =', unit: 'm/s', value: v, tol: .03, sol: `Δp_x ≥ h / (4π · Δx) = ${sci(HB / dx)} kg·m/s\nΔv = Δp_x / m = ${sci(v)} m/s` }; },
+  () => { const dv = pick([1e3, 5e3, 1e4, 1e5, 5e5]), v = HB / (ME * dv); return { q: 'Die Geschwindigkeit eines Elektrons ist auf Δv genau bekannt. Wie genau kann sein Ort höchstens bestimmt sein?', given: `Δv = ${sci(dv, 1)} m/s · m<sub>e</sub> = 9,109·10⁻³¹ kg`, label: 'Δx =', unit: 'nm', value: v * 1e9, tol: .03, d: 2, sol: `Δp_x = m · Δv = ${sci(ME * dv)} kg·m/s\nΔx ≥ h / (4π · Δp_x) = ${sci(v)} m = ${auto(v * 1e9, 2)} nm` }; },
+  () => { const dx = pick([1e-15, 2e-15, 5e-15]), v = HB / dx / 1.673e-27; return { q: 'Ein Proton (m = 1,673·10⁻²⁷ kg) ist im Atomkern auf Δx eingesperrt. Wie groß ist Δv mindestens?', given: `Δx = ${sci(dx, 1)} m`, label: 'Δv =', unit: 'm/s', value: v, tol: .03, sol: `Δv ≥ h / (4π · Δx · m) = 6,626·10⁻³⁴ Js / (4π · ${sci(dx, 1)} m · 1,673·10⁻²⁷ kg) = ${sci(v)} m/s` }; },
+  () => { const N = pick([400, 800, 1200, 2000, 6000]); return { q: 'Mach-Zehnder-Interferometer, ein Weg ist blockiert. Wie viele Photonen erwartest du (im Mittel) im Detektor D2?', given: `${N} Photonen werden einzeln losgeschickt`, label: 'N(D2) =', unit: '', value: N / 4, abs: N * .02, d: 0, sol: `Am 1. Strahlteiler: die Hälfte (${N / 2}) nimmt den blockierten Weg und wird absorbiert.\nDie andere Hälfte erreicht den 2. Strahlteiler und teilt sich 50 : 50 auf.\nN(D2) ≈ ${N} · ½ · ½ = ${N / 4}` }; },
+  () => { const N = pick([500, 900, 1600, 4000]), m = pick([['beide Wege offen und gleich lang', 0, 'Interferenz: Auslöschung in Richtung D2. Alle Photonen landen in D1.'], ['beide Wege offen, aber mit gekreuzten Polarisationsfiltern markiert', N / 2, 'Welcher-Weg-Information → keine Interferenz → 50 : 50.']]); return { q: 'Mach-Zehnder-Interferometer: Wie viele Photonen erwartest du (im Mittel) im Detektor D2?', given: `${N} Photonen · ${m[0]}`, label: 'N(D2) =', unit: '', value: m[1], abs: N * .02 + .5, d: 0, sol: `${m[2]}\nN(D2) ≈ ${m[1]}` }; }
+];
+const QUIZ = [
+  { q: 'Wie lautet die Unbestimmtheitsrelation?', o: ['Δx · Δp<sub>x</sub> ≥ h / (4π)', 'Δx · Δp<sub>x</sub> = 0', 'Δx / Δp<sub>x</sub> ≥ h', 'Δx + Δp<sub>x</sub> ≥ h'] },
+  { q: 'Ein Spalt wird enger gemacht. Was passiert mit der Verteilung der Photonen auf dem Schirm?', o: ['Sie wird breiter.', 'Sie wird schmaler.', 'Sie bleibt gleich.'] },
+  { q: 'Warum kann man einem Elektron im Atom keine Bahn zuschreiben?', o: ['Ort und Impuls sind nicht gleichzeitig scharf bestimmt.', 'Es ist zu schnell für unsere Kameras.', 'Es ist zu klein für das Mikroskop.'] },
+  { q: 'Ein einzelnes Photon trifft auf einen Strahlteiler mit zwei Detektoren. Was passiert?', o: ['Genau ein Detektor spricht an, zufällig welcher.', 'Beide Detektoren sprechen mit halber Energie an.', 'Kein Detektor spricht an.'] },
+  { q: 'Mach-Zehnder-Interferometer, beide Wege offen und gleich lang:', o: ['Alle Photonen landen in einem Detektor.', 'Die Photonen verteilen sich 50 : 50.', 'Die Hälfte der Photonen geht verloren.'] },
+  { q: 'Im Interferometer werden die Wege durch gekreuzte Polarisationsfilter markiert. Dann …', o: ['verschwindet die Interferenz (50 : 50).', 'bleibt die Interferenz erhalten.', 'kommt kein Photon mehr durch.'] },
+  { q: 'Welcher Wesenszug steckt in dem Satz „Weg-Information und Interferenz schließen sich aus“?', o: ['Komplementarität', 'Statistisches Verhalten', 'Eindeutige Messergebnisse'] },
+  { q: 'Welcher Wesenszug zeigt sich, wenn bei jedem Photon genau ein Detektor klickt?', o: ['Eindeutige Messergebnisse', 'Fähigkeit zur Interferenz', 'Komplementarität'] },
+  { q: 'Verschränkte Photonen bei gleicher Filtereinstellung:', o: ['Jede Einzelmessung ist zufällig, aber beide Ergebnisse stimmen überein.', 'Beide Ergebnisse sind vorhersagbar.', 'Die Ergebnisse haben nichts miteinander zu tun.'] },
+  { q: 'Kann man mit Verschränkung Nachrichten schneller als Licht senden?', o: ['Nein, jede Seite sieht für sich nur Zufall.', 'Ja, sofort.', 'Ja, aber nur innerhalb eines Labors.'] }
+];
+
+/* ---------- Regler und Start ---------- */
+bind('#uB', v => { U1.b = v; uReset(); });
+$('#uRun').onclick = e => { U1.run = !U1.run; e.target.textContent = U1.run ? 'Dauerfeuer aus' : 'Dauerfeuer an'; };
+$('#u100').onclick = () => { uAdd(300); uDraw(); }; $('#uReset').onclick = uReset;
+$('#bsA').onclick = () => bsAdd(1); $('#bsB').onclick = () => bsAdd(100); $('#bsR').onclick = () => { BS.n1 = BS.n2 = 0; BS.flash = 0; bsDraw(); };
+seg('#mzMode', m => { MZ.mode = m; mzReset(); }); seg('#mzBS', m => { MZ.bs2 = m === '1'; mzReset(); });
+$('#mzA').onclick = () => mzAdd(1); $('#mzB').onclick = () => mzAdd(100); $('#mzR').onclick = mzReset;
+seg('#enA', m => { EN.a = +m; enReset(); }); seg('#enB', m => { EN.b = +m; enReset(); });
+$('#enOne').onclick = () => enAdd(1); $('#enHun').onclick = () => enAdd(100); $('#enR').onclick = enReset;
+let last = 0, fl = 0;
+function loop(ts) { const dt = Math.min(.05, (ts - last) / 1000 || 0); last = ts;
+  if (active === 's1' && U1.run) { U1.acc += 250 * dt; const k = Math.floor(U1.acc); if (k) { U1.acc -= k; uAdd(k); uDraw(); } }
+  if (ts - fl > 520) { fl = ts; if (active === 's2') bsDraw(); if (active === 's3') mzDraw(); }
+  requestAnimationFrame(loop); }
+function betDraw(c, k) { const [x, w, h] = fit(c); x.fillStyle = '#060A10'; x.fillRect(0, 0, w, h); const s = [.05, .28, .12][k], a = [1, .8, .35][k]; for (let i = 0; i < w; i++) { const u = (i - w / 2) / w; x.fillStyle = css([1, .15, .08], a * Math.exp(-Math.pow(u / s, 2))); x.fillRect(i, 8, 1, h - 16); } }
+start({
+  tabs: [['Wette', 's0', 'bet'], ['Unbestimmtheit', 's1'], ['Strahlteiler', 's2'], ['Interferometer', 's3'], ['Wesenszüge', 's4'], ['Verschränkung', 's5'], ['Training', 's6', 'train'], ['Exit-Check', 's7', 'quiz']],
+  bet: { opts: ['Er wird schmaler.', 'Er wird breiter.', 'Er bleibt gleich breit und wird nur dunkler.'], correct: 1, draw: betDraw, later: 'Gleich siehst du, was einzelne Photonen hinter einem Spalt machen.', reveal: 'Je enger der Spalt, desto breiter wird der Fleck auf dem Schirm.' },
+  x: { wide: 0, narrow: 0, bs: 0, mz: {}, en: {} }, build, gen: GEN, quiz: QUIZ,
+  draw: a => { if (a === 's1') uDraw(); if (a === 's2') bsDraw(); if (a === 's3') mzDraw(); if (a === 's5') enDraw(); },
+  detail: { s2: () => 'max. ' + (S.x.bs || 0) + ' Photonen' }
+});
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>

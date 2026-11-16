@@ -63,6 +63,90 @@
    "freigegeben": true,
    "farbe": "#D2690A",
    "icon": "abi"
+  },
+  {
+   "id": "interferenz-labor",
+   "titel": "Interferenz-Labor",
+   "untertitel": "Doppelspalt, Gitter und Spektren zum Ausprobieren",
+   "datei": "interferenz-labor.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#B3261E",
+   "icon": "doppelspalt"
+  },
+  {
+   "id": "abi-trainer-interferenz",
+   "titel": "Abi-Trainer Interferenz",
+   "untertitel": "Aufgaben im Abi-Stil zu Doppelspalt und Gitter",
+   "datei": "abi-trainer-interferenz.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#D2690A",
+   "icon": "abi"
+  },
+  {
+   "id": "quanten-photoeffekt",
+   "titel": "Quanten 1 · Photoeffekt",
+   "untertitel": "Hallwachs, Photozelle, Einstein-Gleichung, Photonen",
+   "datei": "quanten-photoeffekt.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#7A4FB5",
+   "icon": "atom"
+  },
+  {
+   "id": "quanten-doppelspalt",
+   "titel": "Quanten 2 · Quantenobjekte",
+   "untertitel": "Einzelne Photonen und Elektronen am Doppelspalt",
+   "datei": "quanten-doppelspalt.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#0B7F8C",
+   "icon": "atom"
+  },
+  {
+   "id": "quanten-wesenszuege",
+   "titel": "Quanten 3 · Wesenszüge",
+   "untertitel": "Unbestimmtheit, Interferometer, Verschränkung",
+   "datei": "quanten-wesenszuege.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#1F3A5F",
+   "icon": "atom"
+  },
+  {
+   "id": "quanten-atom",
+   "titel": "Quanten 4 · Atome",
+   "untertitel": "Spektren, Energieniveaus, Potentialtopf, Röntgen",
+   "datei": "quanten-atom.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#3C7A4E",
+   "icon": "atom"
+  },
+  {
+   "id": "abi-trainer-quanten",
+   "titel": "Abi-Trainer Quantenphysik",
+   "untertitel": "Aufgaben im Abi-Stil zur Quantenphysik",
+   "datei": "abi-trainer-quanten.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#D2690A",
+   "icon": "abi"
   }
  ]
 }

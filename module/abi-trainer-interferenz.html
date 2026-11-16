@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abi-Trainer Interferenz</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: Kopf mit BE-Stand, Tabs je Aufgabe, je Teilaufgabe eine Karte mit Antwortfeldern, Hilfe-Treppe und Lösung; letzter Tab = Auswertung */
+:root{
+  --bg:#F2F5F8; --panel:#FFFFFF; --ink:#15253A; --muted:#58697C; --line:#D3DCE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E2F0E5; --navySoft:#E3EAF3;
+  --orange:#C2571A; --blue:#2F6FB5; --blueSoft:#E1ECF8; --bad:#B3261E; --badSoft:#FBE6E4; --warnSoft:#FFF3D6;
+  --f-display:"Bricolage Grotesque",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --orange:#F09A5E; --blue:#7FB2EE; --blueSoft:#1A2C44; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-block:18px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:0;color:var(--navy);text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--muted);margin-top:6px}
+.score{font-family:var(--f-mono);font-size:15px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap}
+.score b{color:var(--green);font-size:20px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:thin}
+nav button{flex:0 0 auto;font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
+nav button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:6px}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button[aria-selected="true"] .n{color:var(--bg);opacity:.8}
+button:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;min-width:0;margin-bottom:16px}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:23px;margin:0 0 4px;color:var(--navy);text-wrap:balance}
+.src{font-size:14px;color:var(--green);margin:0 0 10px}
+.lead{margin:0 0 10px}
+.task{border:2px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;background:var(--panel)}
+.task.solo{border-color:var(--green)} .task.help{border-color:var(--blue)} .task.shown,.task.err{border-color:var(--orange)}
+.thead{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.tnr{font-family:var(--f-mono);font-weight:700;color:var(--green);margin-right:8px}
+.be{font-family:var(--f-mono);font-size:14px;color:var(--muted);white-space:nowrap}
+.status{font-size:13.5px;border-radius:999px;padding:2px 10px;background:var(--navySoft);white-space:nowrap}
+.status.solo{background:var(--greenSoft)} .status.help{background:var(--blueSoft)} .status.shown,.status.err{background:var(--warnSoft)}
+.qtext{margin:8px 0 10px}
+.qtext b{color:var(--navy)}
+.mat{border-left:4px solid var(--green);padding:6px 0 6px 12px;margin:10px 0}
+.mat .mh{font-weight:700;color:var(--green);font-size:15px;margin-bottom:6px}
+canvas{display:block;width:100%;max-width:100%;border-radius:10px;background:var(--bg)}
+.comp{margin-top:12px}
+.comp .cq{font-weight:700;margin:0 0 6px}
+.ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.ansrow label{font-weight:700;font-family:var(--f-mono);min-width:4.2em}
+.ansrow input{font:inherit;font-family:var(--f-mono);font-size:18px;width:8em;max-width:100%;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+.unit{font-family:var(--f-mono);color:var(--muted);min-width:2.4em}
+.ok{border-color:var(--green)!important;background:var(--greenSoft)!important}
+.no{border-color:var(--bad)!important;background:var(--badSoft)!important}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-size:16px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer}
+.opts button:disabled{cursor:default;opacity:1}
+.btn{font:inherit;font-size:16px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:var(--bg);padding:9px 16px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.blue{background:transparent;border-color:var(--blue);color:var(--blue)}
+.btn.orange{background:transparent;border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.45;cursor:default}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.fb{border-radius:10px;padding:9px 13px;margin-top:8px;font-size:16px}
+.fb.good{background:var(--greenSoft);border:1.5px solid var(--green)}
+.fb.bad{background:var(--badSoft);border:1.5px solid var(--bad)}
+.fb.tip{background:var(--blueSoft);border:1.5px solid var(--blue)}
+.fb.sol{background:var(--warnSoft);border:1.5px solid var(--orange)}
+.mono{font-family:var(--f-mono);font-size:14.5px;line-height:1.8;white-space:pre-wrap}
+.small{font-size:14.5px;color:var(--muted)}
+table.aus{border-collapse:collapse;width:100%;font-size:15.5px}
+table.aus th,table.aus td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+table.aus td.r,table.aus th.r{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Abi-Trainer Interferenz<small>TG2 · Aufgaben im Abi-Stil zu Doppelspalt und Gitter · Formelzeichen wie in der IQB-Formelsammlung</small></h1>
+  <div class="score" aria-live="polite">BE: <b id="scoreNow">0</b> / <span id="scoreMax">0</span></div>
+</header>
+<nav id="tabs" role="tablist"></nav>
+<main id="main"></main>
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmt = (x, d = 1) => Number(x).toFixed(d).replace('.', ',');
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function parse(v) { v = String(v).trim().replace(/\s/g, '').replace(/,/g, '.').replace(/−/g, '-').replace(/[·*x×]10\^?/i, 'e'); if (v === '') return NaN; const n = Number(v); return isFinite(n) ? n : NaN; }
+function fit(c, h) { const dpr = Math.min(devicePixelRatio || 1, 2), w = c.clientWidth; c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + 'px'; const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h); return [x, w, h]; }
+
+/* ===================== Material-Zeichnungen ===================== */
+function setup(c, o) { // Schemazeichnung: Quelle – Blende – Schirm (nicht maßstäblich)
+  const [x, w, h] = fit(c, 170), ink = cv('--ink'), mu = cv('--muted'), xs = Math.min(190, w * .32), xe = w - 70, my = 76, col = o.col || '#E0331F';
+  x.font = '13px ' + cv('--f-mono'); x.lineWidth = 2;
+  x.fillStyle = cv('--navy'); x.fillRect(8, my - 13, 64, 26); x.fillStyle = cv('--bg'); x.fillText(o.src || 'Laser', 14, my + 5);
+  x.strokeStyle = col; x.beginPath(); x.moveTo(72, my); x.lineTo(xs, my); x.stroke();
+  x.fillStyle = ink; x.fillRect(xs - 3, 10, 6, my - 10 - 9); x.fillRect(xs - 3, my - 4, 6, 8); x.fillRect(xs - 3, my + 9, 6, 136 - my - 9); x.fillRect(xe - 2, 6, 4, 132);
+  x.strokeStyle = mu; x.lineWidth = 1; x.setLineDash([5, 5]); x.beginPath(); x.moveTo(xs, my); x.lineTo(xe, my); x.stroke(); x.setLineDash([]);
+  const ya = my - 46; x.strokeStyle = col; x.lineWidth = 2; x.beginPath(); x.moveTo(xs, my); x.lineTo(xe, ya); x.stroke(); x.fillStyle = col; x.beginPath(); x.arc(xe, ya, 5, 0, 7); x.fill(); x.beginPath(); x.arc(xe, my, 5, 0, 7); x.fill();
+  x.fillStyle = ink; x.fillText(o.mid || 'Doppelspalt', xs - 42, 156); x.fillText(o.end || 'Schirm', xe - 24, 156); x.fillText('α', xs + 50, my - 5);
+  x.fillText('k = 0', xe + 10, my + 4); x.fillText(o.k || 'k = 1', xe + 10, ya + 4);
+  x.strokeStyle = cv('--orange'); x.beginPath(); x.moveTo(xe - 14, my); x.lineTo(xe - 14, ya); x.stroke(); x.fillStyle = cv('--orange'); x.fillText(o.a || 'a₁', xe - 38, (my + ya) / 2 + 4);
+  x.strokeStyle = mu; x.lineWidth = 1; x.beginPath(); x.moveTo(xs + 8, 128); x.lineTo(xe - 8, 128); x.stroke(); x.fillStyle = mu; x.fillText(o.e || 'e', (xs + xe) / 2 - 10, 123);
+}
+const MW = { g: 9, lam: 3.152 };
+function messkurve(c) { // Mikrowellen: Empfängerspannung über dem Winkel
+  const [x, w, h] = fit(c, 250), mu = cv('--muted'), L = 44, B = h - 34, px = a => L + (a + 70) / 140 * (w - L - 12), py = v => B - v / 5 * (B - 14);
+  x.font = '12px ' + cv('--f-mono'); x.textAlign = 'center';
+  for (let a = -70; a <= 70; a += 5) { x.strokeStyle = cv('--line'); x.lineWidth = a % 10 ? .6 : 1.2; x.beginPath(); x.moveTo(px(a), 14); x.lineTo(px(a), B); x.stroke(); if (a % 10 === 0 && (w > 520 || a % 20 === 0)) { x.fillStyle = mu; x.fillText(a, px(a), B + 15); } }
+  x.textAlign = 'right'; for (let v = 0; v <= 5; v++) { x.strokeStyle = cv('--line'); x.lineWidth = 1; x.beginPath(); x.moveTo(L, py(v)); x.lineTo(w - 12, py(v)); x.stroke(); x.fillStyle = mu; x.fillText(v, L - 6, py(v) + 4); }
+  x.textAlign = 'start'; x.fillStyle = mu; x.fillText('U in V', L + 8, 12); x.textAlign = 'right'; x.fillText('α in °', w - 12, h - 4); x.textAlign = 'start';
+  x.strokeStyle = cv('--green'); x.lineWidth = 2.4; x.beginPath();
+  for (let a = -70; a <= 70; a += .25) { const s = Math.sin(rad(a)), v = 4.6 * Math.pow(Math.cos(Math.PI * MW.g * s / MW.lam), 2) * Math.pow(Math.cos(rad(a)), 1.3) + .08; a === -70 ? x.moveTo(px(a), py(v)) : x.lineTo(px(a), py(v)); }
+  x.stroke();
+}
+function cdbild(c) {
+  const [x, w, h] = fit(c, 180), ink = cv('--ink'), mu = cv('--muted'), xc = Math.min(120, w * .22), xw = w - 80, my = 96;
+  x.font = '13px ' + cv('--f-mono');
+  x.fillStyle = ink; x.fillRect(xw - 2, 8, 4, 150); x.fillStyle = cv('--navy'); x.fillRect(xw + 6, my - 12, 62, 24); x.fillStyle = cv('--bg'); x.fillText('Laser', xw + 14, my + 5);
+  const gr = x.createLinearGradient(0, my - 44, 0, my + 44); gr.addColorStop(0, '#B9C6D6'); gr.addColorStop(.5, '#E9EEF4'); gr.addColorStop(1, '#B9C6D6'); x.fillStyle = gr; x.fillRect(xc - 5, my - 44, 10, 88);
+  x.strokeStyle = '#E0331F'; x.lineWidth = 2; x.beginPath(); x.moveTo(xw + 6, my); x.lineTo(xc + 5, my); x.stroke();
+  [[-1, 'k = 1'], [1, 'k = 1']].forEach(([sg, t]) => { const ya = my + sg * 62; x.beginPath(); x.moveTo(xc + 5, my); x.lineTo(xw - 2, ya); x.stroke(); x.fillStyle = '#E0331F'; x.beginPath(); x.arc(xw - 2, ya, 5, 0, 7); x.fill(); x.fillStyle = ink; if (sg < 0) x.fillText(t, xw - 62, ya - 4); });
+  x.fillStyle = ink; x.fillText('CD', xc - 10, 172); x.fillText('Wand mit Loch', xw - 108, 174); x.fillText('α₁', xc + 46, my - 8);
+  x.strokeStyle = cv('--orange'); x.beginPath(); x.moveTo(xw - 16, my); x.lineTo(xw - 16, my - 62); x.stroke(); x.fillStyle = cv('--orange'); x.fillText('a₁', xw - 40, my - 26);
+  x.strokeStyle = mu; x.lineWidth = 1; x.beginPath(); x.moveTo(xc + 10, 150); x.lineTo(xw - 10, 150); x.stroke(); x.fillStyle = mu; x.fillText('e = 30 cm', (xc + xw) / 2 - 36, 145);
+}
+
+/* ===================== Aufgaben (selbst erstellt, im Stil der Abiturprüfung) ===================== */
+const a2 = Math.asin(2 * 532e-9 / 4e-6), av = Math.asin(.1), ar = Math.asin(.175), acd = Math.asin(650 / 1600), advd = Math.atan(55 / 30);
+const TASKS = [
+{ id: 'A1', tab: 'Laser', title: 'Aufgabe 1 · Roter Laser am Doppelspalt', mat: c => setup(c, { e: 'e = 4,00 m', a: 'a₃', k: 'k = 3' }), matT: 'Versuchsaufbau (nicht maßstäblich)',
+  intro: 'Das Licht eines roten Lasers fällt senkrecht auf einen Doppelspalt mit dem Spaltabstand g = 0,25 mm. Auf einem Schirm im Abstand e = 4,00 m beobachtet man helle Punkte in gleichen Abständen. Die beiden Maxima 3. Ordnung (links und rechts der Mitte) sind 6,1 cm voneinander entfernt.',
+  parts: [
+    { nr: '1.1', afb: 'I', q: '<b>Erkläre</b>, wie die hellen und dunklen Stellen auf dem Schirm entstehen.',
+      comps: [
+        { kind: 'choice', be: 1, q: 'Was passiert an den beiden Spalten?', opts: ['Von jedem Spalt geht eine Elementarwelle aus. Beide Wellen überlagern sich hinter dem Doppelspalt.', 'Das Licht wird an den Spalten gebrochen und in Farben zerlegt.', 'Die Spalte werfen zwei Schatten, dazwischen bleibt es hell.'], correct: 0 },
+        { kind: 'choice', be: 1, q: 'Wann ist eine Stelle auf dem Schirm hell?', opts: ['Wenn der Gangunterschied der beiden Wellen ein ganzzahliges Vielfaches von λ ist (Δs = k · λ).', 'Wenn der Gangunterschied ein ungeradzahliges Vielfaches von λ/2 ist.', 'Wenn die Stelle genau hinter einem der Spalte liegt.'], correct: 0, fb: { 1: 'Das ist die Bedingung für Auslöschung, also für die dunklen Stellen.' } },
+        { kind: 'choice', be: 1, q: 'Wann ist eine Stelle dunkel?', opts: ['Bei Δs = (2k − 1) · λ/2: Wellenberg trifft auf Wellental, die Wellen löschen sich aus.', 'Bei Δs = k · λ.', 'Wenn dort gar kein Licht ankommt, weil die Blende es abschattet.'], correct: 0 }],
+      help: ['Denk an die Wellenwanne mit zwei Öffnungen (Huygens: jeder Spalt ist Ausgangspunkt einer Elementarwelle).', 'Entscheidend ist der Gangunterschied Δs: der Unterschied der beiden Wege bis zum Schirmpunkt.'],
+      solution: 'Jeder Spalt ist Ausgangspunkt einer Elementarwelle. Die beiden Wellen sind kohärent und überlagern sich hinter dem Doppelspalt (Interferenz). Wo der Gangunterschied Δs = k · λ beträgt, verstärken sie sich (hell). Wo Δs = (2k − 1) · λ/2 beträgt, löschen sie sich aus (dunkel).' },
+    { nr: '1.2', afb: 'II', q: '<b>Berechne</b> die Wellenlänge des Laserlichts.',
+      comps: [{ kind: 'num', be: 1, label: 'a₃ =', unit: 'cm', value: 3.05, tol: .005, d: 2 }, { kind: 'num', be: 3, label: 'λ =', unit: 'nm', value: .0305 * .25e-3 / 12 * 1e9, tol: .02, d: 0 }],
+      help: ['Die 6,1 cm sind der Abstand von Maximum zu Maximum 3. Ordnung. a₃ ist der Abstand von der <i>Mitte</i> bis zum Maximum 3. Ordnung, also die Hälfte.', 'Die Winkel sind sehr klein. Dann gilt sin α ≈ tan α und damit k · λ / g = a<sub>k</sub> / e.', 'Umgestellt: λ = a₃ · g / (3 · e). Alles in Metern einsetzen: a₃ = 0,0305 m, g = 0,25·10⁻³ m.'],
+      solution: '<div class="mono">a₃ = 6,1 cm / 2 = 3,05 cm\nkleine Winkel: sin α₃ ≈ tan α₃  ⇒  3 · λ / g = a₃ / e\nλ = a₃ · g / (3 · e) = 0,0305 m · 0,25·10⁻³ m / (3 · 4,00 m)\nλ = 6,35·10⁻⁷ m ≈ 635 nm</div>' },
+    { nr: '1.3', afb: 'II', q: '<b>Berechne</b>, wie weit das 2. Minimum von der Mitte des Schirms entfernt ist. Rechne mit λ = 635 nm.',
+      comps: [{ kind: 'num', be: 3, label: 'a =', unit: 'mm', value: 1.5 * 635e-9 * 4 / .25e-3 * 1e3, tol: .02 }],
+      help: ['Minima: Δs = (2k − 1) · λ/2. Für das 2. Minimum ist k = 2, also Δs = 3 · λ/2 = 1,5 · λ.', 'Das 2. Minimum liegt genau zwischen dem 1. und dem 2. Maximum.', 'a = 1,5 · λ · e / g'],
+      solution: '<div class="mono">2. Minimum: Δs = (2·2 − 1) · λ/2 = 1,5 · λ\na = 1,5 · λ · e / g = 1,5 · 635·10⁻⁹ m · 4,00 m / 0,25·10⁻³ m\na = 1,52·10⁻² m ≈ 15,2 mm</div>' },
+    { nr: '1.4', afb: 'II', q: 'Der rote Laser wird durch einen grünen Laser (λ = 532 nm) ersetzt. <b>Beschreibe</b>, wie sich das Bild auf dem Schirm ändert, und <b>berechne</b> den neuen Abstand benachbarter Maxima.',
+      comps: [{ kind: 'choice', be: 1, q: 'Änderung:', opts: ['Die Punkte sind grün und liegen weiter auseinander.', 'Die Punkte sind grün und rücken enger zusammen.', 'Nur die Farbe ändert sich, die Abstände bleiben gleich.'], correct: 1 }, { kind: 'num', be: 2, label: 'Δa =', unit: 'mm', value: 532e-9 * 4 / .25e-3 * 1e3, tol: .02 }],
+      help: ['a<sub>k</sub> = k · λ · e / g: Die Abstände sind proportional zu λ.', 'Benachbarte Maxima: Δa = a₁ − a₀ = λ · e / g.'],
+      solution: '<div class="mono">Δa ~ λ: kleinere Wellenlänge → Maxima rücken zusammen.\nΔa = λ · e / g = 532·10⁻⁹ m · 4,00 m / 0,25·10⁻³ m = 8,5·10⁻³ m = 8,5 mm\n(vorher mit Rot: 10,2 mm)</div>' },
+    { nr: '1.5', afb: 'III', q: 'Einer der beiden Spalte wird abgedeckt. <b>Entscheide begründet</b>, was man jetzt auf dem Schirm sieht.',
+      comps: [{ kind: 'choice', be: 1, q: 'Beobachtung:', opts: ['Dasselbe Muster, nur halb so hell.', 'Die eng liegenden Punkte verschwinden. Es bleibt ein breiter heller Fleck.', 'Der Schirm bleibt völlig dunkel.'], correct: 1 }, { kind: 'choice', be: 2, q: 'Begründung:', opts: ['Durch einen Spalt kommt nur halb so viel Licht.', 'Es gibt nur noch eine Elementarwelle. Ohne zweite Welle kann es keine Interferenz zweier Spalte geben.', 'Ein einzelner Spalt lässt kein Laserlicht durch.'], correct: 1 }],
+      help: ['Für das Punktmuster braucht man zwei Wellen mit einem Gangunterschied.'],
+      solution: 'Die vielen eng liegenden Maxima verschwinden. Man sieht nur noch einen breiten hellen Fleck (das Beugungsbild des einzelnen Spalts). Begründung: Das Punktmuster entsteht durch die Überlagerung der Wellen aus <i>beiden</i> Spalten. Fehlt eine davon, gibt es keinen Gangunterschied zwischen zwei Spalten mehr.' }
+  ] },
+{ id: 'A2', tab: 'Gitter', title: 'Aufgabe 2 · Gitter und weißes Licht', mat: c => setup(c, { mid: 'Gitter', e: 'e = 1,20 m', a: 'a₂', k: 'k = 2', col: '#2FA84F' }), matT: 'Versuchsaufbau (nicht maßstäblich)',
+  intro: 'Ein optisches Gitter hat 250 Striche pro Millimeter. Der Schirm steht im Abstand e = 1,20 m hinter dem Gitter.',
+  parts: [
+    { nr: '2.1', afb: 'I', q: '<b>Berechne</b> die Gitterkonstante g.', comps: [{ kind: 'num', be: 2, label: 'g =', unit: 'µm', value: 4, tol: .01 }],
+      help: ['Die Gitterkonstante ist der Abstand zweier benachbarter Spalte: 1 mm geteilt durch die Zahl der Striche.'], solution: '<div class="mono">g = 1 mm / 250 = 0,004 mm = 4,0 µm = 4,0·10⁻⁶ m</div>' },
+    { nr: '2.2', afb: 'II', q: 'Das Gitter wird mit einem grünen Laser (λ = 532 nm) beleuchtet. <b>Berechne</b> den Winkel α₂, unter dem das Maximum 2. Ordnung erscheint, und seinen Abstand a₂ von der Mitte des Schirms.',
+      comps: [{ kind: 'num', be: 2, label: 'α₂ =', unit: '°', value: deg(a2), abs: .25 }, { kind: 'num', be: 2, label: 'a₂ =', unit: 'cm', value: 120 * Math.tan(a2), tol: .02 }],
+      help: ['Beim Gitter sind die Winkel groß. Die Kleinwinkelnäherung ist nicht erlaubt.', 'Erst der Winkel: sin α₂ = 2 · λ / g. Taschenrechner auf Grad (DEG).', 'Dann der Schirm: tan α₂ = a₂ / e, also a₂ = e · tan α₂.'],
+      solution: '<div class="mono">sin α₂ = 2 · λ / g = 2 · 532·10⁻⁹ m / 4,0·10⁻⁶ m = 0,266  ⇒  α₂ = 15,4°\na₂ = e · tan α₂ = 1,20 m · tan 15,4° = 0,331 m = 33,1 cm</div>' },
+    { nr: '2.3', afb: 'II', q: '<b>Bestimme</b> die höchste Ordnung, die mit dem grünen Laser auftreten kann, und die Gesamtzahl der Maxima.',
+      comps: [{ kind: 'num', be: 2, label: 'k_max =', unit: '', value: 7, abs: 0, d: 0 }, { kind: 'num', be: 1, label: 'Anzahl =', unit: '', value: 15, abs: 0, d: 0 }],
+      help: ['Der Sinus eines Winkels kann höchstens 1 sein: sin α<sub>k</sub> = k · λ / g ≤ 1.', 'Also k ≤ g / λ. Das Ergebnis immer abrunden.', 'Gesamtzahl: links k_max Maxima, rechts k_max Maxima und das in der Mitte.'],
+      solution: '<div class="mono">sin α_k = k · λ / g ≤ 1  ⇒  k ≤ g / λ = 4,0·10⁻⁶ m / 532·10⁻⁹ m = 7,5\nk_max = 7\nAnzahl der Maxima: 2 · 7 + 1 = 15</div>' },
+    { nr: '2.4', afb: 'II', q: 'Statt des Lasers wird eine Glühlampe verwendet (sichtbares Licht von 400 nm bis 700 nm). <b>Berechne</b> die Breite des Spektrums 1. Ordnung auf dem Schirm.',
+      comps: [{ kind: 'num', be: 1, label: 'a_violett =', unit: 'cm', value: 120 * Math.tan(av), tol: .02 }, { kind: 'num', be: 1, label: 'a_rot =', unit: 'cm', value: 120 * Math.tan(ar), tol: .02 }, { kind: 'num', be: 2, label: 'Breite =', unit: 'cm', value: 120 * (Math.tan(ar) - Math.tan(av)), tol: .03 }],
+      help: ['Rechne den Ort des Maximums 1. Ordnung zweimal aus: einmal für 400 nm, einmal für 700 nm.', 'Jeweils: sin α₁ = λ / g, dann a₁ = e · tan α₁.', 'Die Breite ist die Differenz der beiden Abstände.'],
+      solution: '<div class="mono">violett: sin α = 400 nm / 4000 nm = 0,100 → α = 5,74°  → a = 1,20 m · tan α = 12,1 cm\nrot:     sin α = 700 nm / 4000 nm = 0,175 → α = 10,08° → a = 21,3 cm\nBreite = 21,3 cm − 12,1 cm = 9,3 cm</div>' },
+    { nr: '2.5', afb: 'III', q: '<b>Zeige</b>, dass sich die Spektren 2. und 3. Ordnung überlappen.',
+      comps: [{ kind: 'num', be: 1, label: 'α₂,rot =', unit: '°', value: deg(Math.asin(.35)), abs: .3 }, { kind: 'num', be: 1, label: 'α₃,violett =', unit: '°', value: deg(Math.asin(.3)), abs: .3 }, { kind: 'choice', be: 1, q: 'Folgerung:', opts: ['Das rote Ende der 2. Ordnung liegt weiter außen als das violette Ende der 3. Ordnung. Die Spektren überlappen sich.', 'Das violette Ende der 3. Ordnung liegt weiter außen. Die Spektren sind getrennt.', 'Beide Winkel sind gleich. Die Spektren berühren sich gerade.'], correct: 0 }],
+      help: ['Vergleiche das äußere Ende der 2. Ordnung (rot, 700 nm) mit dem inneren Ende der 3. Ordnung (violett, 400 nm).', 'sin α = k · λ / g: einmal mit k = 2 und 700 nm, einmal mit k = 3 und 400 nm.'],
+      solution: '<div class="mono">Rot, 2. Ordnung:     sin α = 2 · 700 nm / 4000 nm = 0,350 → α = 20,5°\nViolett, 3. Ordnung: sin α = 3 · 400 nm / 4000 nm = 0,300 → α = 17,5°\n20,5° > 17,5°: Das Violett der 3. Ordnung beginnt schon innerhalb des Spektrums 2. Ordnung.</div>Das gilt bei jedem Gitter, denn 2 · 700 nm > 3 · 400 nm.' },
+    { nr: '2.6', afb: 'II', q: '<b>Nenne</b> den Vorteil eines Gitters gegenüber einem Doppelspalt, wenn man Wellenlängen messen will.',
+      comps: [{ kind: 'choice', be: 2, q: 'Vorteil:', opts: ['Beim Gitter braucht man die Formel sin α<sub>k</sub> = k · λ / g nicht.', 'Die Maxima sind viel schärfer und heller und liegen weiter auseinander. Man kann sie genauer ausmessen.', 'Ein Gitter funktioniert auch ohne Wellen.'], correct: 1 }],
+      help: ['Denk an das Schirmbild bei 2 Spalten und bei 50 Spalten.'], solution: 'Viele Spalte liefern sehr scharfe und helle Maxima. Wegen der kleinen Gitterkonstante sind außerdem die Winkel groß. Beides macht die Messung von a<sub>k</sub> und damit von λ genauer.' }
+  ] },
+{ id: 'A3', tab: 'Mikrowellen', title: 'Aufgabe 3 · Mikrowellen am Doppelspalt', mat: messkurve, matT: 'Material: Messkurve des Empfängers',
+  intro: 'Ein Mikrowellensender strahlt senkrecht auf einen Doppelspalt aus Metallplatten. Die Spaltmitten haben den Abstand g = 9,0 cm. Ein Empfänger wird auf einem Kreisbogen um den Doppelspalt bewegt. Das Material zeigt die Empfängerspannung U in Abhängigkeit vom Winkel α.',
+  parts: [
+    { nr: '3.1', afb: 'I', q: '<b>Lies</b> aus der Messkurve die Winkel der Maxima 1. und 2. Ordnung <b>ab</b>.',
+      comps: [{ kind: 'num', be: 1, label: 'α₁ =', unit: '°', value: 20.5, abs: 1.3 }, { kind: 'num', be: 1, label: 'α₂ =', unit: '°', value: 44.5, abs: 1.8 }],
+      help: ['Das Maximum 0. Ordnung liegt bei 0°. Das nächste Maximum daneben ist die 1. Ordnung.', 'Das Gitternetz hat eine Linie alle 5°.'], solution: 'α₁ ≈ 20,5° und α₂ ≈ 44,5° (links und rechts symmetrisch).' },
+    { nr: '3.2', afb: 'II', q: '<b>Bestimme</b> die Wellenlänge der Mikrowellen aus beiden Maxima und bilde den Mittelwert. Rechne mit α₁ = 20,5° und α₂ = 44,5°.',
+      comps: [{ kind: 'num', be: 4, label: 'λ =', unit: 'cm', value: 3.153, tol: .02, d: 2 }],
+      help: ['sin α<sub>k</sub> = k · λ / g, also λ = g · sin α<sub>k</sub> / k.', 'Aus der 1. Ordnung: λ = 9,0 cm · sin 20,5°.', 'Aus der 2. Ordnung: λ = 9,0 cm · sin 44,5° / 2. Beide Werte sollten fast gleich sein.'],
+      solution: '<div class="mono">λ = g · sin α_k / k\n1. Ordnung: λ = 9,0 cm · sin 20,5° = 3,15 cm\n2. Ordnung: λ = 9,0 cm · sin 44,5° / 2 = 3,15 cm\nMittelwert: λ ≈ 3,15 cm</div>' },
+    { nr: '3.3', afb: 'II', q: '<b>Berechne</b> die Frequenz des Senders (c = 3,0·10⁸ m/s).', comps: [{ kind: 'num', be: 2, label: 'f =', unit: 'GHz', value: 3e8 / .0315 / 1e9, tol: .03 }],
+      help: ['c = λ · f', 'λ in Metern einsetzen: 3,15 cm = 0,0315 m. 1 GHz = 10⁹ Hz.'], solution: '<div class="mono">f = c / λ = 3,0·10⁸ m/s / 0,0315 m = 9,5·10⁹ Hz = 9,5 GHz</div>' },
+    { nr: '3.4', afb: 'II', q: '<b>Begründe</b> durch eine Rechnung, dass es kein Maximum 3. Ordnung gibt.',
+      comps: [{ kind: 'num', be: 2, label: '3·λ/g =', unit: '', value: 1.05, abs: .02, d: 2 }, { kind: 'choice', be: 1, q: 'Folgerung:', opts: ['Der Wert ist größer als 1. Es gibt keinen Winkel mit diesem Sinus, also kein Maximum 3. Ordnung.', 'Der Wert ist größer als 1, also liegt das Maximum bei α > 90° hinter dem Sender.', 'Der Empfänger ist für die 3. Ordnung zu unempfindlich.'], correct: 0 }],
+      help: ['Setz k = 3 in sin α<sub>k</sub> = k · λ / g ein.', 'Welche Werte kann ein Sinus annehmen?'], solution: '<div class="mono">sin α₃ = 3 · λ / g = 3 · 3,15 cm / 9,0 cm = 1,05 > 1</div>Einen Sinus größer als 1 gibt es nicht. Der Gangunterschied kann höchstens g = 9,0 cm werden, für die 3. Ordnung wären aber 3 · λ = 9,45 cm nötig.' },
+    { nr: '3.5', afb: 'III', q: 'Beim Doppelspalt mit Laserlicht rechnet man oft mit a<sub>k</sub> = k · λ · e / g. <b>Beurteile</b>, ob eine solche Näherung auch bei diesem Versuch sinnvoll wäre.',
+      comps: [{ kind: 'choice', be: 3, q: 'Urteil:', opts: ['Ja. Die Näherung gilt für jeden Doppelspalt.', 'Nein. Sie setzt kleine Winkel voraus (sin α ≈ tan α). Hier ist zum Beispiel sin 44,5° = 0,70, aber tan 44,5° = 0,98.', 'Nein, weil Mikrowellen keine Lichtwellen sind.'], correct: 1 }],
+      help: ['Die Näherung benutzt sin α ≈ tan α. Vergleiche beide Werte für α₂.'], solution: 'Nicht sinnvoll. Die Näherung sin α ≈ tan α gilt nur für kleine Winkel (wenige Grad). Hier ist die Wellenlänge fast so groß wie der Spaltabstand, deshalb sind die Winkel groß: sin 44,5° = 0,70, tan 44,5° = 0,98. Der Fehler wäre riesig.' },
+    { nr: '3.6', afb: 'II', q: 'Der Empfänger ist ein Dipol. <b>Berechne</b> die Länge, bei der er am besten empfängt, und <b>gib an</b>, was passiert, wenn man ihn um 90° um die Ausbreitungsrichtung dreht.',
+      comps: [{ kind: 'num', be: 2, label: 'ℓ =', unit: 'cm', value: 1.575, tol: .03, d: 2 }, { kind: 'choice', be: 1, q: 'Nach der Drehung:', opts: ['Der Empfang wird stärker.', 'Es ändert sich nichts.', 'Der Empfang verschwindet (fast), weil das elektrische Feld jetzt senkrecht zum Dipol schwingt.'], correct: 2 }],
+      help: ['Hertz\'scher Dipol: Die Grundschwingung passt, wenn die Dipollänge eine halbe Wellenlänge ist.', 'Die Welle des Sendedipols ist linear polarisiert.'], solution: '<div class="mono">ℓ = λ / 2 = 3,15 cm / 2 ≈ 1,6 cm</div>Nach der Drehung steht der Empfangsdipol senkrecht zum elektrischen Feld der Welle. Die Elektronen im Dipol werden nicht mehr längs des Stabes angetrieben, der Empfang bricht zusammen (Polarisation).' }
+  ] },
+{ id: 'A4', tab: 'CD', title: 'Aufgabe 4 · Die CD als Gitter', mat: cdbild, matT: 'Versuchsaufbau (nicht maßstäblich)',
+  intro: 'Auf einer CD liegen die Datenspuren sehr dicht nebeneinander. Der Abstand benachbarter Spuren beträgt 1,6 µm. Für Licht wirkt die CD deshalb wie ein Gitter, das in Reflexion arbeitet. Ein roter Laser (λ = 650 nm) leuchtet durch ein Loch in einer Wand senkrecht auf die CD. Die Wand steht im Abstand e = 30 cm parallel zur CD und dient als Schirm.',
+  parts: [
+    { nr: '4.1', afb: 'I', q: '<b>Berechne</b>, wie vielen „Strichen pro Millimeter“ der Spurabstand entspricht.', comps: [{ kind: 'num', be: 2, label: 'n =', unit: '/mm', value: 625, tol: .01, d: 0 }],
+      help: ['Wie oft passt 1,6 µm in 1 mm? 1 mm = 1000 µm.'], solution: '<div class="mono">n = 1 mm / 1,6 µm = 1000 µm / 1,6 µm = 625 pro mm</div>' },
+    { nr: '4.2', afb: 'II', q: '<b>Berechne</b> den Winkel α₁ und den Abstand a₁ des Maximums 1. Ordnung von der Mitte (vom Loch).',
+      comps: [{ kind: 'num', be: 2, label: 'α₁ =', unit: '°', value: deg(acd), abs: .3 }, { kind: 'num', be: 2, label: 'a₁ =', unit: 'cm', value: 30 * Math.tan(acd), tol: .02 }],
+      help: ['Gleiche Formeln wie beim Gitter: sin α₁ = λ / g mit g = 1,6 µm = 1600 nm.', 'a₁ = e · tan α₁. Keine Kleinwinkelnäherung.'],
+      solution: '<div class="mono">sin α₁ = λ / g = 650 nm / 1600 nm = 0,406  ⇒  α₁ = 24,0°\na₁ = e · tan α₁ = 30 cm · tan 24,0° = 13,3 cm</div>' },
+    { nr: '4.3', afb: 'II', q: '<b>Bestimme</b>, bis zu welcher Ordnung Maxima auftreten.', comps: [{ kind: 'num', be: 3, label: 'k_max =', unit: '', value: 2, abs: 0, d: 0 }],
+      help: ['k · λ / g ≤ 1', 'k ≤ g / λ = 1600 nm / 650 nm, dann abrunden.'], solution: '<div class="mono">k ≤ g / λ = 1600 nm / 650 nm = 2,46  ⇒  k_max = 2</div>' },
+    { nr: '4.4', afb: 'III', q: 'Die CD wird gegen eine unbekannte Scheibe getauscht. Jetzt liegt das Maximum 1. Ordnung 55 cm von der Mitte entfernt (e = 30 cm). <b>Bestimme</b> den Spurabstand dieser Scheibe und <b>vergleiche</b> mit der CD.',
+      comps: [{ kind: 'num', be: 2, label: 'α₁ =', unit: '°', value: deg(advd), abs: .4 }, { kind: 'num', be: 2, label: 'g =', unit: 'µm', value: .65 / Math.sin(advd), tol: .02, d: 2 }, { kind: 'choice', be: 1, q: 'Vergleich:', opts: ['Die Spuren liegen weiter auseinander als bei der CD. Es passen weniger Daten auf die Scheibe.', 'Die Spuren liegen enger als bei der CD. Es passen mehr Daten auf die Scheibe (zum Beispiel eine DVD).', 'Der Spurabstand ist derselbe wie bei der CD.'], correct: 1 }],
+      help: ['Jetzt rückwärts: Erst den Winkel aus der Geometrie, tan α₁ = a₁ / e.', 'Dann g = λ / sin α₁.'],
+      solution: '<div class="mono">tan α₁ = a₁ / e = 55 cm / 30 cm = 1,83  ⇒  α₁ = 61,4°\ng = λ / sin α₁ = 650 nm / sin 61,4° = 740 nm = 0,74 µm</div>Der Spurabstand ist weniger als halb so groß wie bei der CD (1,6 µm). Die Spuren liegen enger, es passen mehr Daten darauf. 0,74 µm ist der Spurabstand einer DVD.' },
+    { nr: '4.5', afb: 'II', q: 'Hält man eine CD ins Sonnenlicht, schillert sie in allen Farben. <b>Erkläre</b> das.',
+      comps: [{ kind: 'choice', be: 2, q: 'Erklärung:', opts: ['Die Kunststoffschicht der CD ist bunt eingefärbt.', 'Die Maxima liegen für jede Wellenlänge unter einem anderen Winkel (sin α ~ λ). Weißes Licht wird so in seine Farben aufgefächert.', 'Das Licht wird in der CD wie in einem Prisma gebrochen.'], correct: 1 }],
+      help: ['Was passiert mit weißem Licht an einem Gitter?'], solution: 'Die Spuren wirken als Gitter. Wegen sin α<sub>k</sub> = k · λ / g wird jede Wellenlänge in eine andere Richtung verstärkt: Rot stärker abgelenkt als Violett. Aus dem weißen Sonnenlicht entstehen so Spektren, je nach Blickwinkel sieht man eine andere Farbe.' }
+  ] }
+];
+
+/* ===================== Stand ===================== */
+let ST = { parts: {}, tab: 0 };
+let appLive = false;
+const changed = () => { if (window.AppBridge && appLive) AppBridge.changed(); };
+const PARTS = []; TASKS.forEach(t => t.parts.forEach(p => { p.id = p.nr; p.task = t; p.be = p.comps.reduce((a, c) => a + c.be, 0); PARTS.push(p); }));
+const ps = id => ST.parts[id] || (ST.parts[id] = { hints: 0, shown: false, comp: {} });
+const earned = p => { const s = ST.parts[p.id]; return s ? p.comps.reduce((a, c, i) => a + ((s.comp[i] && s.comp[i].be) || 0), 0) : 0; };
+const NAMES = { solo: 'selbst geschafft', help: 'mit Hilfe geschafft', err: 'bearbeitet, mit Fehlern', shown: 'Lösung angesehen', part: 'angefangen', '': 'offen' };
+function status(p) {
+  const s = ST.parts[p.id]; if (!s) return '';
+  if (s.shown) return 'shown';
+  const done = p.comps.every((c, i) => s.comp[i] && s.comp[i].ok), full = earned(p) === p.be;
+  if (done) return !full ? 'err' : s.hints ? 'help' : 'solo';
+  return (s.hints || Object.keys(s.comp).length) ? 'part' : '';
+}
+const closed = p => ['solo', 'help', 'err', 'shown'].includes(status(p));
+function score() {
+  let now = 0, max = 0; PARTS.forEach(p => { now += earned(p); max += p.be; }); $('#scoreNow').textContent = now; $('#scoreMax').textContent = max;
+  document.querySelectorAll('nav button[data-i]').forEach(b => { const t = TASKS[+b.dataset.i]; b.querySelector('.n').textContent = t.parts.reduce((a, p) => a + earned(p), 0) + '/' + t.parts.reduce((a, p) => a + p.be, 0); });
+}
+
+/* ===================== Anzeige ===================== */
+function tabs() {
+  const n = $('#tabs'); n.innerHTML = '';
+  TASKS.forEach((t, i) => { const b = el('button', '', `${t.tab}<span class="n"></span>`); b.type = 'button'; b.dataset.i = i; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', ST.tab === i); b.onclick = () => show(i); n.appendChild(b); });
+  const b = el('button', '', 'Auswertung'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', ST.tab === TASKS.length); b.onclick = () => show(TASKS.length); n.appendChild(b);
+}
+function show(i, quiet) {
+  ST.tab = i; tabs(); const m = $('#main'); m.innerHTML = '';
+  if (i >= TASKS.length) auswertung(m); else aufgabe(m, TASKS[i]);
+  score(); if (!quiet) { window.scrollTo({ top: 0 }); changed(); }
+}
+let redraw = null;
+function aufgabe(m, t) {
+  const c = el('div', 'card'); c.innerHTML = `<h2>${t.title}</h2><p class="src">Aufgabe im Abi-Stil · Hilfsmittel: Taschenrechner, IQB-Formelsammlung</p><p class="lead">${t.intro}</p>`;
+  redraw = null;
+  if (t.mat) { const mt = el('div', 'mat', `<div class="mh">${t.matT}</div>`), cvs = el('canvas'); mt.appendChild(cvs); c.appendChild(mt); redraw = () => t.mat(cvs); }
+  m.appendChild(c); if (redraw) redraw();
+  t.parts.forEach(p => m.appendChild(teil(p)));
+}
+function teil(p) {
+  const s = ps(p.id), d = el('div', 'task');
+  d.innerHTML = `<div class="thead"><div><span class="tnr">${p.nr}</span><span class="be">${p.be} BE · AFB ${p.afb}</span></div><span class="status"></span></div><p class="qtext">${p.q}</p>`;
+  const stat = d.querySelector('.status'), upd = () => { const st = status(p); d.className = 'task ' + (st === 'part' ? '' : st); stat.className = 'status ' + (st === 'part' ? '' : st); stat.textContent = NAMES[st] + (closed(p) ? ` · ${earned(p)}/${p.be} BE` : ''); bh.disabled = s.shown || s.hints >= p.help.length; bh.textContent = s.hints >= p.help.length ? 'Alle Hilfen offen' : `Hilfe ${s.hints + 1} von ${p.help.length}`; bl.disabled = s.shown || !!sb.firstChild; if (!bl.disabled && closed(p)) bl.textContent = 'Musterlösung ansehen'; score(); };
+  const lock = [];
+  p.comps.forEach((c, i) => {
+    const box = el('div', 'comp'), fb = el('div', 'fb'); fb.hidden = true;
+    if (c.kind === 'num') {
+      box.innerHTML = `<div class="ansrow"><label>${c.label}</label><input type="text" inputmode="decimal" autocomplete="off" aria-label="${c.label}"><span class="unit">${c.unit}</span><button class="btn" type="button">Prüfen</button></div>`;
+      const inp = box.querySelector('input'), bt = box.querySelector('button');
+      const fin = () => { inp.disabled = bt.disabled = true; inp.classList.remove('no'); inp.classList.add('ok'); };
+      const check = () => {
+        const x = parse(inp.value); if (isNaN(x)) { fb.hidden = false; fb.className = 'fb tip'; fb.textContent = 'Gib eine Zahl ein, zum Beispiel 6,35 oder 6,35e-7.'; return; }
+        if (Math.abs(x - c.value) <= (c.abs != null ? c.abs : Math.abs(c.value) * c.tol)) { s.comp[i] = { ok: true, be: c.be, v: inp.value }; fin(); fb.hidden = false; fb.className = 'fb good'; fb.textContent = 'Richtig.'; }
+        else { s.comp[i] = { ok: false, be: 0, v: inp.value, n: ((s.comp[i] && s.comp[i].n) || 0) + 1 }; inp.classList.add('no'); fb.hidden = false; fb.className = 'fb bad'; const q = Math.log10(Math.abs(x / c.value)); fb.innerHTML = Math.abs(q - Math.round(q)) < .02 && Math.round(q) ? `Die Ziffern stimmen, die Zehnerpotenz nicht. Gefragt ist das Ergebnis in <b>${c.unit || 'der Grundeinheit'}</b>.` : 'Das stimmt noch nicht. Rechne noch einmal nach oder nimm eine Hilfe.'; }
+        upd(); changed();
+      };
+      bt.onclick = check; inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+      if (s.comp[i]) { inp.value = s.comp[i].v || ''; if (s.comp[i].ok) fin(); }
+      lock.push(() => { inp.disabled = bt.disabled = true; if (!(s.comp[i] && s.comp[i].ok)) inp.value = (inp.value ? inp.value + '  →  ' : '') + fmt(c.value, c.d == null ? 1 : c.d); });
+    } else {
+      box.innerHTML = `<p class="cq">${c.q}</p>`; const ob = el('div', 'opts'), bs = [];
+      const fin = pick => bs.forEach(([b, k]) => { b.disabled = true; if (k === c.correct) b.classList.add('ok'); else if (k === pick) b.classList.add('no'); });
+      c.opts.map((_, k) => k).sort(() => Math.random() - .5).forEach(k => {
+        const b = el('button', '', c.opts[k]); b.type = 'button'; bs.push([b, k]); ob.appendChild(b);
+        b.onclick = () => { const ok = k === c.correct; s.comp[i] = { ok: true, be: ok ? c.be : 0, v: k }; fin(k); fb.hidden = false; fb.className = 'fb ' + (ok ? 'good' : 'bad'); fb.innerHTML = ok ? 'Richtig.' : ((c.fb && c.fb[k]) || 'Das war nicht richtig. Die richtige Antwort ist grün markiert.'); upd(); changed(); };
+      });
+      box.appendChild(ob); if (s.comp[i]) fin(s.comp[i].v); lock.push(() => fin(s.comp[i] ? s.comp[i].v : -1));
+    }
+    box.appendChild(fb); d.appendChild(box);
+  });
+  const tools = el('div', 'tools'), bh = el('button', 'btn blue'), bl = el('button', 'btn orange', 'Lösung zeigen'), hb = el('div'), sb = el('div'); bh.type = bl.type = 'button';
+  const tips = () => { hb.innerHTML = ''; p.help.slice(0, s.hints).forEach((t, k) => hb.appendChild(el('div', 'fb tip', `<b>Hilfe ${k + 1}:</b> ${t}`))); };
+  const sol = () => { sb.innerHTML = ''; sb.appendChild(el('div', 'fb sol', `<b>Lösung:</b> ${p.solution}`)); lock.forEach(f => f()); };
+  bh.onclick = () => { s.hints++; tips(); upd(); changed(); };
+  bl.onclick = () => { if (closed(p)) { sb.appendChild(el('div', 'fb sol', `<b>Lösung:</b> ${p.solution}`)); upd(); return; } if (!confirmSol(bl)) return; s.shown = true; sol(); upd(); changed(); };
+  tools.append(bh, bl); d.append(tools, hb, sb); tips(); if (s.shown) sol();
+  upd(); return d;
+}
+function confirmSol(b) { // zweimal tippen statt Dialogfenster
+  if (b.dataset.arm) return true; b.dataset.arm = 1; b.textContent = 'Wirklich? Dann gibt es hier keine BE mehr.'; setTimeout(() => { if (!b.disabled) { delete b.dataset.arm; b.textContent = 'Lösung zeigen'; } }, 4000); return false;
+}
+function auswertung(m) {
+  redraw = null; const c = el('div', 'card'); let now = 0, max = 0, rows = '';
+  TASKS.forEach(t => { const e = t.parts.reduce((a, p) => a + earned(p), 0), mx = t.parts.reduce((a, p) => a + p.be, 0); now += e; max += mx;
+    rows += `<tr><td><b>${t.title}</b><div class="legend">${t.parts.map(p => `<span class="status ${status(p) === 'part' ? '' : status(p)}">${p.nr} ${NAMES[status(p)]}</span>`).join('')}</div></td><td class="r">${e} / ${mx}</td></tr>`; });
+  const offen = PARTS.filter(p => !closed(p)).length, pr = max ? Math.round(100 * now / max) : 0;
+  c.innerHTML = `<h2>Auswertung</h2><p class="lead">Du hast <b>${now} von ${max} BE</b> (${pr} %). ${offen ? `Noch ${offen} Teilaufgaben offen.` : 'Alle Teilaufgaben bearbeitet.'}</p><table class="aus"><tr><th>Aufgabe</th><th class="r">BE</th></tr>${rows}</table>
+  <p class="small" style="margin-top:14px">So wird gezählt: Rechenergebnisse darfst du beliebig oft prüfen. Bei Auswahlfragen zählt nur der erste Versuch. Hilfen kosten keine BE, werden aber im Status vermerkt. Nach „Lösung zeigen“ gibt es für offene Felder keine BE mehr.<br>Im echten Abi zählen außerdem Ansatz, Rechenweg und Einheiten. Schreib deine Lösungen deshalb immer vollständig auf Papier und vergleiche am Ende mit der Musterlösung.</p>`;
+  m.appendChild(c);
+}
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => redraw && redraw(), 120); });
+show(0, true);
+
+/* ===================== Anbindung an die Klassen-App (ohne Namen) ===================== */
+if (window.AppBridge) {
+  setTimeout(() => { appLive = true; }, 1500);
+  const name = t => t.id + ' · ' + t.tab;
+  AppBridge.register({
+    getState() {
+      const details = {}; let punkte = 0;
+      TASKS.forEach(t => { const e = t.parts.reduce((a, p) => a + earned(p), 0), m = t.parts.reduce((a, p) => a + p.be, 0); punkte += e;
+        details[name(t)] = `${e} von ${m} BE · ` + t.parts.map(p => p.nr + ' ' + NAMES[status(p)] + (ST.parts[p.id] && ST.parts[p.id].hints ? ` (${ST.parts[p.id].hints} Hilfen)` : '')).join(', '); });
+      return { punkte, stationen: TASKS.map(name), erledigt: TASKS.filter(t => t.parts.every(closed)).map(name), details, daten: { v: 1, ST } };
+    },
+    setState(s) { const d = s && s.daten; if (!d || !d.ST) return; ST = Object.assign({ parts: {}, tab: 0 }, d.ST); appLive = true; show(Math.min(ST.tab || 0, TASKS.length), true); }
+  });
+}
+</script>
+</body>
+</html>

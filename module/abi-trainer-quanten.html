@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abi-Trainer Quantenphysik</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: Kopf mit BE-Stand, Tabs je Aufgabe, je Teilaufgabe eine Karte mit Antwortfeldern, Hilfe-Treppe und Lösung; letzter Tab = Auswertung */
+:root{
+  --bg:#F2F5F8; --panel:#FFFFFF; --ink:#15253A; --muted:#58697C; --line:#D3DCE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E2F0E5; --navySoft:#E3EAF3;
+  --orange:#C2571A; --blue:#2F6FB5; --blueSoft:#E1ECF8; --bad:#B3261E; --badSoft:#FBE6E4; --warnSoft:#FFF3D6;
+  --f-display:"Bricolage Grotesque",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --orange:#F09A5E; --blue:#7FB2EE; --blueSoft:#1A2C44; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-block:18px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:0;color:var(--navy);text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--muted);margin-top:6px}
+.score{font-family:var(--f-mono);font-size:15px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap}
+.score b{color:var(--green);font-size:20px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:thin}
+nav button{flex:0 0 auto;font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
+nav button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:6px}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button[aria-selected="true"] .n{color:var(--bg);opacity:.8}
+button:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;min-width:0;margin-bottom:16px}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:23px;margin:0 0 4px;color:var(--navy);text-wrap:balance}
+.src{font-size:14px;color:var(--green);margin:0 0 10px}
+.lead{margin:0 0 10px}
+.task{border:2px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;background:var(--panel)}
+.task.solo{border-color:var(--green)} .task.help{border-color:var(--blue)} .task.shown,.task.err{border-color:var(--orange)}
+.thead{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.tnr{font-family:var(--f-mono);font-weight:700;color:var(--green);margin-right:8px}
+.be{font-family:var(--f-mono);font-size:14px;color:var(--muted);white-space:nowrap}
+.status{font-size:13.5px;border-radius:999px;padding:2px 10px;background:var(--navySoft);white-space:nowrap}
+.status.solo{background:var(--greenSoft)} .status.help{background:var(--blueSoft)} .status.shown,.status.err{background:var(--warnSoft)}
+.qtext{margin:8px 0 10px}
+.qtext b{color:var(--navy)}
+.mat{border-left:4px solid var(--green);padding:6px 0 6px 12px;margin:10px 0}
+.mat .mh{font-weight:700;color:var(--green);font-size:15px;margin-bottom:6px}
+canvas{display:block;width:100%;max-width:100%;border-radius:10px;background:var(--bg)}
+.comp{margin-top:12px}
+.comp .cq{font-weight:700;margin:0 0 6px}
+.ansrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.ansrow label{font-weight:700;font-family:var(--f-mono);min-width:4.2em}
+.ansrow input{font:inherit;font-family:var(--f-mono);font-size:18px;width:8em;max-width:100%;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+.unit{font-family:var(--f-mono);color:var(--muted);min-width:2.4em}
+.ok{border-color:var(--green)!important;background:var(--greenSoft)!important}
+.no{border-color:var(--bad)!important;background:var(--badSoft)!important}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-size:16px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer}
+.opts button:disabled{cursor:default;opacity:1}
+.btn{font:inherit;font-size:16px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:var(--bg);padding:9px 16px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.blue{background:transparent;border-color:var(--blue);color:var(--blue)}
+.btn.orange{background:transparent;border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.45;cursor:default}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.fb{border-radius:10px;padding:9px 13px;margin-top:8px;font-size:16px}
+.fb.good{background:var(--greenSoft);border:1.5px solid var(--green)}
+.fb.bad{background:var(--badSoft);border:1.5px solid var(--bad)}
+.fb.tip{background:var(--blueSoft);border:1.5px solid var(--blue)}
+.fb.sol{background:var(--warnSoft);border:1.5px solid var(--orange)}
+.mono{font-family:var(--f-mono);font-size:14.5px;line-height:1.8;white-space:pre-wrap}
+.small{font-size:14.5px;color:var(--muted)}
+table.aus{border-collapse:collapse;width:100%;font-size:15.5px}
+table.aus th,table.aus td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+table.aus td.r,table.aus th.r{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Abi-Trainer Quantenphysik<small>TG2 · Aufgaben im Abi-Stil zu Photoeffekt, Quantenobjekten und Atomphysik</small></h1>
+  <div class="score" aria-live="polite">BE: <b id="scoreNow">0</b> / <span id="scoreMax">0</span></div>
+</header>
+<nav id="tabs" role="tablist"></nav>
+<main id="main"></main>
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmt = (x, d = 1) => Number(x).toFixed(d).replace('.', ',');
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function parse(v) { v = String(v).trim().replace(/\s/g, '').replace(/,/g, '.').replace(/−/g, '-').replace(/[·*x×]10\^?/i, 'e'); if (v === '') return NaN; const n = Number(v); return isFinite(n) ? n : NaN; }
+function fit(c, h) { const dpr = Math.min(devicePixelRatio || 1, 2), w = c.clientWidth; c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + 'px'; const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h); return [x, w, h]; }
+
+/* ===================== Material-Zeichnungen ===================== */
+const H = 6.626e-34, C = 2.998e8, QE = 1.602e-19, ME = 9.109e-31, HC = H * C / QE * 1e9;
+const sci = (x, d = 2) => { let e = Math.floor(Math.log10(Math.abs(x))), m = x / Math.pow(10, e); const S = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' }; return fmt(m, d) + '·10' + String(e).split('').map(c => S[c]).join(''); };
+const PE = [[6.0, .23], [6.9, .60], [7.4, .81], [8.2, 1.14]];
+function peDiagramm(c) {
+  const [x, w, h] = fit(c, 380), mu = cv('--muted'), L = 46, px = f => L + f / 10 * (w - L - 14), py = E => 16 + (1.6 - E) / 4.2 * (h - 40);
+  x.font = '12px ' + cv('--f-mono'); x.textAlign = 'center'; x.fillStyle = mu;
+  for (let f = 0; f <= 10; f += .5) { x.strokeStyle = cv('--line'); x.lineWidth = f % 1 ? .5 : 1.1; x.beginPath(); x.moveTo(px(f), 16); x.lineTo(px(f), h - 22); x.stroke(); if (f % 1 === 0 && f > 0) x.fillText(f, px(f), py(0) + 15); }
+  x.textAlign = 'right'; for (let k = -13; k <= 8; k++) { const E = k / 5, m = k % 5 === 0; x.strokeStyle = cv('--line'); x.lineWidth = m ? 1.1 : .5; x.beginPath(); x.moveTo(L, py(E)); x.lineTo(w - 14, py(E)); x.stroke(); if (m) x.fillText(fmt(E, 0), L - 6, py(E) + 4); }
+  x.strokeStyle = mu; x.lineWidth = 1.5; x.beginPath(); x.moveTo(L, py(0)); x.lineTo(w - 14, py(0)); x.moveTo(L, 16); x.lineTo(L, h - 22); x.stroke();
+  x.textAlign = 'start'; x.fillText('E_kin,max in eV', L + 6, 12); x.textAlign = 'right'; x.fillText('f in 10¹⁴ Hz', w - 16, py(0) - 8); x.textAlign = 'start';
+  x.strokeStyle = cv('--green'); x.lineWidth = 1.6; x.setLineDash([6, 4]); x.beginPath(); x.moveTo(px(0), py(-2.25)); x.lineTo(px(9.4), py(H * 9.4e14 / QE - 2.25)); x.stroke(); x.setLineDash([]);
+  x.fillStyle = cv('--green'); PE.forEach(p => { x.beginPath(); x.arc(px(p[0]), py(p[1]), 5, 0, 7); x.fill(); });
+}
+function trefferbild(c) {
+  const [x, w, h] = fit(c, 150), n = [30, 300, 3000], pw = (w - 20) / 3; let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647, P = u => Math.pow(Math.sin(Math.PI * u * 1.08 + 1e-9) / (Math.PI * u * 1.08 + 1e-9), 2) * Math.pow(Math.cos(Math.PI * u * 4.5), 2);
+  x.font = '12px ' + cv('--f-mono');
+  n.forEach((N, k) => { const x0 = 5 + k * (pw + 5); x.fillStyle = '#060A10'; x.fillRect(x0, 4, pw, 118); x.fillStyle = '#58C9F2'; for (let i = 0; i < N; i++) { let u; do { u = r() * 2 - 1; } while (r() > P(u)); x.fillRect(x0 + pw / 2 + u * (pw / 2 - 4), 8 + r() * 110, 1.8, 1.8); } x.fillStyle = cv('--ink'); x.fillText(N + ' Elektronen', x0 + 4, 140); });
+}
+function hSchema(c) {
+  const [x, w, h] = fit(c, 240), ink = cv('--ink'), mu = cv('--muted'), Y = [0, 214, 112, 66, 44, 30], x1 = 76, x2 = w - 110; x.font = '13px ' + cv('--f-mono');
+  for (let n = 1; n <= 5; n++) { x.strokeStyle = ink; x.lineWidth = 2; x.beginPath(); x.moveTo(x1, Y[n]); x.lineTo(x2, Y[n]); x.stroke(); x.fillStyle = ink; if (n <= 4) x.fillText('n = ' + n, 10, Y[n] + 4); }
+  x.fillText('−13,6 eV', x2 + 8, Y[1] + 4); x.fillText('−3,40 eV', x2 + 8, Y[2] + 4); x.fillText('E₃', x2 + 8, Y[3] + 4); x.fillText('E₄', x2 + 8, Y[4] + 4);
+  x.setLineDash([5, 4]); x.strokeStyle = mu; x.beginPath(); x.moveTo(x1, 12); x.lineTo(x2, 12); x.stroke(); x.setLineDash([]); x.fillText('0 eV', x2 + 8, 16); x.fillStyle = mu; x.fillText('(nicht maßstäblich)', x1, 236);
+}
+function roentgen(c) {
+  const [x, w, h] = fit(c, 260), mu = cv('--muted'), L = 40, B = h - 30, px = l => L + l / 120 * (w - L - 12), py = v => B - v / 1.45 * (B - 14), lm = 35.4;
+  x.font = '12px ' + cv('--f-mono'); x.fillStyle = mu; x.textAlign = 'center';
+  for (let l = 0; l <= 120; l += 2) { x.strokeStyle = cv('--line'); x.lineWidth = l % 10 ? .4 : 1.1; x.beginPath(); x.moveTo(px(l), 14); x.lineTo(px(l), B); x.stroke(); if (l % 10 === 0) x.fillText(l, px(l), h - 12); }
+  x.textAlign = 'start'; x.fillText('Intensität', 8, 12); x.textAlign = 'right'; x.fillText('λ in pm', w - 12, h - 1); x.textAlign = 'start'; x.strokeStyle = mu; x.lineWidth = 1.2; x.beginPath(); x.moveTo(L, 14); x.lineTo(L, B); x.lineTo(w - 12, B); x.stroke();
+  x.strokeStyle = cv('--blue'); x.lineWidth = 2.4; x.beginPath(); for (let i = 0; i <= 600; i++) { const l = i / 5; let v = l <= lm ? 0 : (l / lm - 1) / Math.pow(l / lm, 3) / .1481 * .7; v += .55 * Math.exp(-Math.pow((l - 71.1) / .9, 2)) + .26 * Math.exp(-Math.pow((l - 63.2) / .9, 2)); i ? x.lineTo(px(l), py(v)) : x.moveTo(px(l), py(v)); } x.stroke();
+}
+
+/* ===================== Aufgaben (selbst erstellt, im Stil der Abiturprüfung) ===================== */
+const hFit = QE * (1.14 - .23) / 2.2e14 * 1e34, ek450 = HC / 450 - 2.25, v450 = Math.sqrt(2 * ek450 * QE / ME);
+const v15 = Math.sqrt(2 * QE * 1500 / ME), l15 = H / (ME * v15), da15 = l15 * .8 / 500e-9;
+const E1t = H * H / (8 * ME * 25e-20) / QE, dvA = H / (4 * Math.PI * 1e-10 * ME);
+const TASKS = [
+{ id: 'Q1', tab: 'Photoeffekt', title: 'Aufgabe 1 · Photoeffekt mit der Gegenfeldmethode', mat: peDiagramm, matT: 'Material: Messergebnisse für eine Photozelle (mit Ausgleichsgerade)',
+  intro: 'Die Kathode einer Vakuum-Photozelle wird nacheinander mit Licht verschiedener Frequenzen beleuchtet. Zu jeder Frequenz wird mit der Gegenfeldmethode die maximale kinetische Energie der ausgelösten Elektronen bestimmt. Das Material zeigt die Messpunkte.',
+  parts: [
+    { nr: '1.1', afb: 'I', q: '<b>Beschreibe</b>, wie man mit der Gegenfeldmethode die maximale kinetische Energie der Elektronen bestimmt.',
+      comps: [{ kind: 'choice', be: 1, q: 'Vorgehen:', opts: ['Man erhöht die Gegenspannung zwischen Kathode und Anode, bis der Photostrom gerade null wird.', 'Man erhöht die Lichtintensität, bis der Photostrom nicht weiter steigt.', 'Man misst die Zeit, die die Elektronen bis zur Anode brauchen.'], correct: 0 }, { kind: 'choice', be: 1, q: 'Auswertung:', opts: ['E<sub>kin,max</sub> = e · U₀', 'E<sub>kin,max</sub> = U₀ / e', 'E<sub>kin,max</sub> = h · U₀'], correct: 0 }],
+      help: ['Die Elektronen müssen gegen ein elektrisches Feld anlaufen.', 'Auch die schnellsten Elektronen schaffen es gerade nicht mehr, wenn ihre gesamte kinetische Energie in elektrische Energie e · U₀ umgewandelt ist.'],
+      solution: 'Zwischen Kathode und Anode wird eine Gegenspannung angelegt, die die Elektronen bremst. Man erhöht sie, bis der Photostrom gerade null ist (U₀). Dann gilt für die schnellsten Elektronen E<sub>kin,max</sub> = e · U₀.' },
+    { nr: '1.2', afb: 'II', q: '<b>Bestimme</b> aus dem Diagramm die Grenzfrequenz und die Austrittsarbeit des Kathodenmaterials.',
+      comps: [{ kind: 'num', be: 2, label: 'f_g =', unit: '·10¹⁴ Hz', value: 2.25 * QE / H / 1e14, abs: .25, d: 1 }, { kind: 'num', be: 2, label: 'W_A =', unit: 'eV', value: 2.25, abs: .12, d: 2 }],
+      help: ['Die Grenzfrequenz ist die Frequenz, bei der die Elektronen gerade keine kinetische Energie mehr haben: Schnittpunkt der Geraden mit der Rechtsachse.', 'E<sub>kin,max</sub> = h · f − W<sub>A</sub>: Für f = 0 liest man −W<sub>A</sub> ab (Schnittpunkt mit der Hochachse).'],
+      solution: '<div class="mono">Schnittpunkt mit der f-Achse: f_g ≈ 5,4·10¹⁴ Hz\nSchnittpunkt mit der Hochachse: −2,25 eV  ⇒  W_A ≈ 2,25 eV\nKontrolle: W_A = h · f_g = 6,626·10⁻³⁴ Js · 5,4·10¹⁴ Hz = 3,6·10⁻¹⁹ J = 2,2 eV</div>' },
+    { nr: '1.3', afb: 'II', q: '<b>Bestimme</b> aus den Messpunkten (6,0 | 0,23) und (8,2 | 1,14) das Planck’sche Wirkungsquantum.',
+      comps: [{ kind: 'num', be: 3, label: 'h =', unit: '·10⁻³⁴ Js', value: hFit, tol: .04, d: 2 }],
+      help: ['h ist die Steigung der Geraden: h = ΔE / Δf.', 'ΔE = 1,14 eV − 0,23 eV = 0,91 eV. In Joule umrechnen: mal 1,602·10⁻¹⁹.', 'Δf = (8,2 − 6,0)·10¹⁴ Hz = 2,2·10¹⁴ Hz'],
+      solution: `<div class="mono">h = ΔE / Δf = 0,91 eV / 2,2·10¹⁴ Hz\nh = 0,91 · 1,602·10⁻¹⁹ J / 2,2·10¹⁴ Hz = ${fmt(hFit, 2)}·10⁻³⁴ Js</div>` },
+    { nr: '1.4', afb: 'II', q: 'Die Kathode wird mit blauem Licht der Wellenlänge 450 nm beleuchtet. <b>Berechne</b> die maximale kinetische Energie und die maximale Geschwindigkeit der Elektronen (W<sub>A</sub> = 2,25 eV).',
+      comps: [{ kind: 'num', be: 2, label: 'E_kin =', unit: 'eV', value: ek450, tol: .04, d: 2 }, { kind: 'num', be: 2, label: 'v_max =', unit: 'm/s', value: v450, tol: .04 }],
+      help: ['Photonenenergie: E = h · c / λ. Praktisch: 1240 eV·nm / 450 nm.', 'E<sub>kin,max</sub> = h · f − W<sub>A</sub>', 'Für die Geschwindigkeit E<sub>kin</sub> in Joule umrechnen, dann v = √(2 · E<sub>kin</sub> / m).'],
+      solution: `<div class="mono">E_Photon = h · c / λ = ${fmt(HC / 450, 2)} eV\nE_kin,max = ${fmt(HC / 450, 2)} eV − 2,25 eV = ${fmt(ek450, 2)} eV = ${sci(ek450 * QE)} J\nv_max = √(2 · E_kin / m) = √(2 · ${sci(ek450 * QE)} J / 9,109·10⁻³¹ kg) = ${sci(v450)} m/s</div>` },
+    { nr: '1.5', afb: 'III', q: '<b>Erläutere</b>, warum die Ergebnisse des Versuchs nicht mit dem Wellenmodell des Lichts erklärt werden können.',
+      comps: [{ kind: 'choice', be: 3, q: 'Widerspruch zum Wellenmodell:', opts: ['Nach dem Wellenmodell müsste auch helles Licht kleiner Frequenz nach einiger Zeit Elektronen auslösen. Tatsächlich gibt es unterhalb von f<sub>g</sub> nie Elektronen, und die Energie der Elektronen hängt nicht von der Intensität ab.', 'Nach dem Wellenmodell dürfte Licht gar keine Energie übertragen.', 'Nach dem Wellenmodell müsste die Energie der Elektronen mit der Frequenz sinken.'], correct: 0 }],
+      help: ['Bei einer Welle bestimmt die Intensität (Amplitude) die übertragene Energie.'],
+      solution: 'Im Wellenmodell wird die Energie gleichmäßig und umso schneller übertragen, je größer die Intensität ist. Dann müssten (1) helleres Licht schnellere Elektronen liefern und (2) auch Licht kleiner Frequenz bei genügend Intensität oder Wartezeit Elektronen auslösen. Beobachtet wird: E<sub>kin,max</sub> hängt nur von f ab, unterhalb von f<sub>g</sub> passiert nichts, und der Effekt setzt sofort ein. Erklärung mit Photonen: Ein Photon der Energie h · f gibt seine Energie an genau ein Elektron ab.' },
+    { nr: '1.6', afb: 'II', q: 'Die Intensität des Lichts wird bei gleicher Frequenz verdoppelt. <b>Gib an</b>, wie sich Photostrom und Gegenspannung U₀ ändern.',
+      comps: [{ kind: 'choice', be: 2, q: 'Änderung:', opts: ['Photostrom verdoppelt sich, U₀ bleibt gleich.', 'Photostrom und U₀ verdoppeln sich.', 'Photostrom bleibt gleich, U₀ verdoppelt sich.'], correct: 0 }],
+      help: ['Doppelte Intensität bedeutet doppelt so viele Photonen pro Sekunde, jedes mit derselben Energie.'], solution: 'Doppelt so viele Photonen lösen doppelt so viele Elektronen aus: Der Photostrom verdoppelt sich. Die Energie jedes Photons und damit E<sub>kin,max</sub> = e · U₀ bleibt gleich.' }
+  ] },
+{ id: 'Q2', tab: 'Elektronen', title: 'Aufgabe 2 · Elektronen am Doppelspalt', mat: trefferbild, matT: 'Material: Detektorbild nach verschieden vielen Elektronen',
+  intro: 'Elektronen werden mit der Spannung U = 1,5 kV beschleunigt und treffen einzeln auf einen Doppelspalt mit dem Spaltabstand g = 500 nm. Im Abstand e = 0,80 m registriert ein Detektor jeden Treffer. Das Material zeigt das Detektorbild nach 30, 300 und 3000 Elektronen.',
+  parts: [
+    { nr: '2.1', afb: 'I', q: '<b>Beschreibe</b>, was das Material zeigt.',
+      comps: [{ kind: 'choice', be: 2, q: 'Beschreibung:', opts: ['Jedes Elektron erzeugt einen punktförmigen Treffer an einer nicht vorhersagbaren Stelle. Aus vielen Treffern entsteht ein Streifenmuster.', 'Jedes Elektron erzeugt ein schwaches Streifenmuster. Die Muster addieren sich.', 'Die Elektronen treffen nur hinter den beiden Spalten auf.'], correct: 0 }],
+      help: ['Vergleiche das linke Bild (wenige Elektronen) mit dem rechten.'], solution: 'Bei wenigen Elektronen sieht man einzelne, scheinbar regellos verteilte Punkte. Mit wachsender Zahl bilden sich Streifen heraus: Stellen mit vielen Treffern wechseln sich mit Stellen ohne Treffer ab (Interferenzmuster).' },
+    { nr: '2.2', afb: 'II', q: '<b>Berechne</b> die Geschwindigkeit und die de-Broglie-Wellenlänge der Elektronen (nicht relativistisch).',
+      comps: [{ kind: 'num', be: 2, label: 'v =', unit: 'm/s', value: v15, tol: .03 }, { kind: 'num', be: 3, label: 'λ =', unit: 'pm', value: l15 * 1e12, tol: .03 }],
+      help: ['Energieerhaltung: e · U = ½ · m · v²', 'v = √(2 · e · U / m)', 'de Broglie: λ = h / (m · v)'],
+      solution: `<div class="mono">v = √(2 · e · U / m) = √(2 · 1,602·10⁻¹⁹ C · 1500 V / 9,109·10⁻³¹ kg) = ${sci(v15)} m/s\nλ = h / (m · v) = 6,626·10⁻³⁴ Js / (9,109·10⁻³¹ kg · ${sci(v15)} m/s) = ${sci(l15)} m = ${fmt(l15 * 1e12)} pm</div>` },
+    { nr: '2.3', afb: 'II', q: '<b>Berechne</b> den Abstand benachbarter Maxima auf dem Detektor.',
+      comps: [{ kind: 'num', be: 3, label: 'Δa =', unit: 'µm', value: da15 * 1e6, tol: .04 }],
+      help: ['Für Materiewellen gelten dieselben Formeln wie für Licht am Doppelspalt.', 'Die Winkel sind winzig: Δa = λ · e / g.'],
+      solution: `<div class="mono">kleine Winkel: Δa = λ · e / g = ${fmt(l15 * 1e12)}·10⁻¹² m · 0,80 m / 500·10⁻⁹ m = ${sci(da15)} m ≈ ${fmt(da15 * 1e6, 0)} µm</div>` },
+    { nr: '2.4', afb: 'II', q: 'Die Beschleunigungsspannung wird vervierfacht. <b>Gib an</b>, wie sich der Abstand der Maxima ändert.',
+      comps: [{ kind: 'choice', be: 2, q: 'Änderung:', opts: ['Er halbiert sich, weil λ ~ 1/√U.', 'Er wird ein Viertel so groß.', 'Er verdoppelt sich.', 'Er bleibt gleich.'], correct: 0 }],
+      help: ['λ = h / √(2 · m · e · U)'], solution: 'λ = h / √(2 · m · e · U): Bei vierfacher Spannung halbiert sich die Wellenlänge. Wegen Δa = λ · e / g halbiert sich auch der Abstand der Maxima.' },
+    { nr: '2.5', afb: 'III', q: 'An den Spalten wird ein Messgerät angebracht, das für jedes Elektron feststellt, durch welchen Spalt es geht. <b>Erläutere</b> die Folgen für das Detektorbild und nenne den zugehörigen Wesenszug.',
+      comps: [{ kind: 'choice', be: 2, q: 'Folge:', opts: ['Das Streifenmuster verschwindet. Es bleibt eine breite Verteilung ohne Minima.', 'Das Streifenmuster wird schärfer.', 'Es ändert sich nichts.'], correct: 0 }, { kind: 'choice', be: 2, q: 'Wesenszug:', opts: ['Komplementarität', 'Statistisches Verhalten', 'Eindeutige Messergebnisse'], correct: 0 }],
+      help: ['Interferenz gibt es nur, wenn für das Quantenobjekt mehrere Wege möglich sind und nicht feststeht, welcher genommen wurde.'], solution: 'Sobald Welcher-Weg-Information vorliegt, gibt es keine Interferenz mehr: Das Streifenmuster verschwindet, es bleibt eine breite Verteilung. Welcher-Weg-Information und Interferenzmuster schließen sich aus (Komplementarität).' },
+    { nr: '2.6', afb: 'II', q: '<b>Ordne</b> dem Material einen weiteren Wesenszug der Quantenphysik <b>zu</b>.',
+      comps: [{ kind: 'choice', be: 2, q: 'Der einzelne Treffer ist nicht vorhersagbar, die Verteilung vieler Treffer schon:', opts: ['Statistisches Verhalten', 'Komplementarität', 'Unbestimmtheit von Energie'], correct: 0 }],
+      help: ['Was kann man über ein einzelnes Elektron vorhersagen, was über sehr viele?'], solution: 'Statistisches Verhalten: Für das Einzelereignis lässt sich nur eine Wahrscheinlichkeit angeben. Erst bei vielen Wiederholungen ergibt sich eine reproduzierbare Verteilung. (Außerdem: Fähigkeit zur Interferenz, auch bei einzelnen Elektronen.)' }
+  ] },
+{ id: 'Q3', tab: 'Atom', title: 'Aufgabe 3 · Wasserstoffatom und Potentialtopf', mat: hSchema, matT: 'Material: Energieniveauschema des Wasserstoffatoms',
+  intro: 'Für die Energieniveaus des Wasserstoffatoms gilt E<sub>n</sub> = −13,6 eV · 1/n².',
+  parts: [
+    { nr: '3.1', afb: 'I', q: '<b>Berechne</b> die im Material fehlenden Energien E₃ und E₄.',
+      comps: [{ kind: 'num', be: 1, label: 'E₃ =', unit: 'eV', value: -13.6 / 9, abs: .02, d: 2 }, { kind: 'num', be: 1, label: 'E₄ =', unit: 'eV', value: -13.6 / 16, abs: .02, d: 2 }],
+      help: ['n einsetzen: E₃ = −13,6 eV / 3². Das Vorzeichen gehört dazu.'], solution: '<div class="mono">E₃ = −13,6 eV / 9 = −1,51 eV\nE₄ = −13,6 eV / 16 = −0,85 eV</div>' },
+    { nr: '3.2', afb: 'II', q: 'Ein Atom geht vom Zustand n = 4 in den Zustand n = 2 über. <b>Berechne</b> Energie und Wellenlänge des ausgesandten Photons.',
+      comps: [{ kind: 'num', be: 1, label: 'ΔE =', unit: 'eV', value: 13.6 * (1 / 4 - 1 / 16), tol: .02, d: 2 }, { kind: 'num', be: 2, label: 'λ =', unit: 'nm', value: HC / (13.6 * (1 / 4 - 1 / 16)), tol: .02, d: 0 }],
+      help: ['ΔE = E₄ − E₂ = −0,85 eV − (−3,40 eV)', 'λ = h · c / ΔE. Praktisch: h · c = 1240 eV·nm.'],
+      solution: `<div class="mono">ΔE = E₄ − E₂ = −0,85 eV − (−3,40 eV) = 2,55 eV\nλ = h · c / ΔE = 1240 eV·nm / 2,55 eV = ${fmt(HC / 2.55, 0)} nm (blaugrün)</div>` },
+    { nr: '3.3', afb: 'II', q: 'Wasserstoffatome im Grundzustand werden mit Photonen der Energie 12,1 eV bestrahlt. <b>Bestimme</b>, in welchen Zustand sie angeregt werden, und wie viele verschiedene Spektrallinien die Atome anschließend aussenden können.',
+      comps: [{ kind: 'num', be: 2, label: 'n =', unit: '', value: 3, abs: 0, d: 0 }, { kind: 'num', be: 2, label: 'Linien:', unit: '', value: 3, abs: 0, d: 0 }],
+      help: ['Gesucht ist das Niveau mit E<sub>n</sub> = −13,6 eV + 12,1 eV.', 'Von n = 3 aus kann das Atom direkt oder in Stufen in den Grundzustand zurückkehren.'],
+      solution: '<div class="mono">E = −13,6 eV + 12,1 eV = −1,5 eV  ⇒  n = 3\nMögliche Übergänge: 3 → 2, 2 → 1 und 3 → 1: drei Linien</div>(eine rote Linie und zwei UV-Linien)' },
+    { nr: '3.4', afb: 'II', q: 'Als einfaches Modell für ein gebundenes Elektron dient der lineare Potentialtopf mit E<sub>n</sub> = h² · n² / (8 · m · L²). <b>Berechne</b> für L = 0,50 nm die Energie E₁ und die Wellenlänge des Photons, das beim Übergang von n = 2 nach n = 1 entsteht.',
+      comps: [{ kind: 'num', be: 2, label: 'E₁ =', unit: 'eV', value: E1t, tol: .03, d: 2 }, { kind: 'num', be: 2, label: 'λ =', unit: 'nm', value: HC / (3 * E1t), tol: .03, d: 0 }],
+      help: ['L in Metern einsetzen: 0,50·10⁻⁹ m. Ergebnis in Joule durch 1,602·10⁻¹⁹ teilen.', 'E₂ = 4 · E₁, also ΔE = 3 · E₁.', 'λ = 1240 eV·nm / ΔE'],
+      solution: `<div class="mono">E₁ = (6,626·10⁻³⁴ Js)² / (8 · 9,109·10⁻³¹ kg · (0,50·10⁻⁹ m)²) = ${sci(E1t * QE)} J = ${fmt(E1t, 2)} eV\nΔE = E₂ − E₁ = 3 · E₁ = ${fmt(3 * E1t, 2)} eV\nλ = 1240 eV·nm / ${fmt(3 * E1t, 2)} eV = ${fmt(HC / (3 * E1t), 0)} nm (ultraviolett)</div>` },
+    { nr: '3.5', afb: 'III', q: '<b>Vergleiche</b> das Potentialtopf-Modell mit dem Wasserstoffatom.',
+      comps: [{ kind: 'choice', be: 2, q: 'Gemeinsamkeit:', opts: ['In beiden Fällen sind nur bestimmte Energien möglich, weil das Elektron eingesperrt ist.', 'In beiden Fällen wachsen die Abstände der Niveaus nach oben.', 'In beiden Fällen ist die tiefste Energie null.'], correct: 0 }, { kind: 'choice', be: 2, q: 'Unterschied:', opts: ['Im Topf wachsen die Energien mit n², die Niveaus rücken auseinander. Im Wasserstoffatom rücken sie nach oben immer enger zusammen.', 'Im Topf gibt es unendlich viele Niveaus, im Wasserstoffatom nur vier.', 'Im Topf sind die Energien negativ.'], correct: 0 }],
+      help: ['Vergleiche E ~ n² mit E ~ −1/n².'], solution: 'Gemeinsam: Ein gebundenes (eingesperrtes) Elektron kann nur bestimmte Energien annehmen, zu ihm gehören stehende Wellen. Unterschied: Im Topf gilt E ~ n², die Abstände der Niveaus wachsen. Im Wasserstoffatom gilt E ~ −1/n², die Niveaus rücken nach oben zusammen und häufen sich bei 0 eV (Ionisierungsgrenze). Das Atom ist kein Kasten mit festen Wänden.' }
+  ] },
+{ id: 'Q4', tab: 'Röntgen', title: 'Aufgabe 4 · Röntgenstrahlung, Franck-Hertz und Unbestimmtheit', mat: roentgen, matT: 'Material: Spektrum einer Röntgenröhre mit Molybdän-Anode',
+  intro: 'Das Material zeigt das Spektrum der Strahlung einer Röntgenröhre.',
+  parts: [
+    { nr: '4.1', afb: 'I', q: '<b>Lies</b> aus dem Material die kurzwellige Grenze λ<sub>min</sub> und die Wellenlängen der beiden charakteristischen Linien <b>ab</b>.',
+      comps: [{ kind: 'num', be: 1, label: 'λ_min =', unit: 'pm', value: 35.4, abs: 2 }, { kind: 'num', be: 1, label: 'Linie 1 =', unit: 'pm', value: 63.2, abs: 1.6 }, { kind: 'num', be: 1, label: 'Linie 2 =', unit: 'pm', value: 71.1, abs: 1.6 }],
+      help: ['Das feine Gitter hat eine Linie alle 2 pm.', 'λ<sub>min</sub> ist die Stelle, an der die Kurve von null aus ansteigt. Linie 1 ist die kleinere der beiden Spitzen.'], solution: 'λ<sub>min</sub> ≈ 35 pm · charakteristische Linien bei etwa 63 pm und 71 pm.' },
+    { nr: '4.2', afb: 'II', q: '<b>Bestimme</b> die Spannung, mit der die Röhre betrieben wird. Rechne mit λ<sub>min</sub> = 35,4 pm.',
+      comps: [{ kind: 'num', be: 3, label: 'U =', unit: 'kV', value: HC / 35.4, tol: .03 }],
+      help: ['Ein Elektron gibt im Extremfall seine ganze Energie e · U an ein Photon ab.', 'e · U = h · c / λ<sub>min</sub>'],
+      solution: `<div class="mono">e · U = h · c / λ_min\nU = h · c / (e · λ_min) = 6,626·10⁻³⁴ Js · 2,998·10⁸ m/s / (1,602·10⁻¹⁹ C · 35,4·10⁻¹² m) = ${fmt(HC / 35.4)} kV</div>` },
+    { nr: '4.3', afb: 'II', q: '<b>Berechne</b> die Energie eines Photons der Linie bei 71,1 pm in Kiloelektronenvolt.',
+      comps: [{ kind: 'num', be: 2, label: 'E =', unit: 'keV', value: HC / 71.1, tol: .02 }],
+      help: ['E = h · c / λ mit h · c = 1240 eV·nm und λ = 0,0711 nm'], solution: `<div class="mono">E = h · c / λ = 1240 eV·nm / 0,0711 nm = ${fmt(HC / .0711, 0)} eV ≈ ${fmt(HC / 71.1)} keV</div>` },
+    { nr: '4.4', afb: 'II', q: 'Die Röhrenspannung wird auf 50 kV erhöht. <b>Beschreibe</b>, wie sich das Spektrum ändert.',
+      comps: [{ kind: 'choice', be: 2, q: 'Änderung:', opts: ['λ<sub>min</sub> wird kleiner. Die charakteristischen Linien bleiben an ihrer Stelle.', 'λ<sub>min</sub> und die Linien wandern zu kleineren Wellenlängen.', 'λ<sub>min</sub> bleibt gleich, die Linien wandern.'], correct: 0 }],
+      help: ['λ<sub>min</sub> hängt von der Energie der Elektronen ab, die Linien vom Anodenmaterial.'], solution: 'λ<sub>min</sub> = h · c / (e · U) wird kleiner (bei 50 kV etwa 25 pm), das Bremsspektrum wird insgesamt intensiver. Die charakteristischen Linien entstehen durch Übergänge in den Anodenatomen. Ihre Lage hängt nur vom Material ab und bleibt gleich.' },
+    { nr: '4.5', afb: 'II', q: 'Beim Franck-Hertz-Versuch mit Quecksilberdampf folgen die Maxima der Stromstärke im Abstand von 4,9 V aufeinander. <b>Deute</b> das und <b>berechne</b> die Wellenlänge der Strahlung, die der Dampf aussendet.',
+      comps: [{ kind: 'choice', be: 2, q: 'Deutung:', opts: ['Quecksilberatome können durch Elektronenstoß genau 4,9 eV aufnehmen. Elektronen mit weniger Energie stoßen nur elastisch.', 'Quecksilberatome nehmen jede beliebige Energie auf.', 'Bei 4,9 V wird das Quecksilber ionisiert.'], correct: 0 }, { kind: 'num', be: 2, label: 'λ =', unit: 'nm', value: HC / 4.9, tol: .02, d: 0 }],
+      help: ['Der Abstand der Maxima entspricht einer Anregungsenergie des Atoms.', 'Das angeregte Atom gibt die 4,9 eV als Photon ab: λ = 1240 eV·nm / 4,9 eV.'], solution: `Die Atome nehmen bei Stößen Energie nur in Portionen von 4,9 eV auf: Das Quecksilberatom hat ein Energieniveau 4,9 eV über dem Grundzustand.<div class="mono">λ = h · c / ΔE = 1240 eV·nm / 4,9 eV = ${fmt(HC / 4.9, 0)} nm (ultraviolett)</div>` },
+    { nr: '4.6', afb: 'III', q: 'Ein Elektron ist in einem Atom auf einen Bereich von Δx = 1,0·10⁻¹⁰ m beschränkt. <b>Berechne</b> die Mindest-Unschärfe seiner Geschwindigkeit und <b>beurteile</b> damit die Vorstellung von Elektronenbahnen.',
+      comps: [{ kind: 'num', be: 2, label: 'Δv =', unit: 'm/s', value: dvA, tol: .04 }, { kind: 'choice', be: 2, q: 'Beurteilung:', opts: ['Die Geschwindigkeit ist so unbestimmt, dass man von einer Bahn nicht sprechen kann.', 'Die Unschärfe ist vernachlässigbar. Das Bahnmodell passt.', 'Die Unschärfe zeigt, dass das Elektron ruht.'], correct: 0 }],
+      help: ['Δx · Δp<sub>x</sub> ≥ h / (4π)', 'Δp<sub>x</sub> = m · Δv, also Δv ≥ h / (4π · m · Δx)'],
+      solution: `<div class="mono">Δv ≥ h / (4π · m · Δx) = 6,626·10⁻³⁴ Js / (4π · 9,109·10⁻³¹ kg · 1,0·10⁻¹⁰ m) = ${sci(dvA)} m/s</div>Das ist von derselben Größenordnung wie die Geschwindigkeit, die man einem Elektron im Atom überhaupt zuschreiben würde. Ort und Geschwindigkeit sind nicht gleichzeitig festgelegt, eine Bahn gibt es nicht. Sinnvoll sind nur Aussagen über Aufenthaltswahrscheinlichkeiten.` }
+  ] }
+];
+
+/* ===================== Stand ===================== */
+let ST = { parts: {}, tab: 0 };
+let appLive = false;
+const changed = () => { if (window.AppBridge && appLive) AppBridge.changed(); };
+const PARTS = []; TASKS.forEach(t => t.parts.forEach(p => { p.id = p.nr; p.task = t; p.be = p.comps.reduce((a, c) => a + c.be, 0); PARTS.push(p); }));
+const ps = id => ST.parts[id] || (ST.parts[id] = { hints: 0, shown: false, comp: {} });
+const earned = p => { const s = ST.parts[p.id]; return s ? p.comps.reduce((a, c, i) => a + ((s.comp[i] && s.comp[i].be) || 0), 0) : 0; };
+const NAMES = { solo: 'selbst geschafft', help: 'mit Hilfe geschafft', err: 'bearbeitet, mit Fehlern', shown: 'Lösung angesehen', part: 'angefangen', '': 'offen' };
+function status(p) {
+  const s = ST.parts[p.id]; if (!s) return '';
+  if (s.shown) return 'shown';
+  const done = p.comps.every((c, i) => s.comp[i] && s.comp[i].ok), full = earned(p) === p.be;
+  if (done) return !full ? 'err' : s.hints ? 'help' : 'solo';
+  return (s.hints || Object.keys(s.comp).length) ? 'part' : '';
+}
+const closed = p => ['solo', 'help', 'err', 'shown'].includes(status(p));
+function score() {
+  let now = 0, max = 0; PARTS.forEach(p => { now += earned(p); max += p.be; }); $('#scoreNow').textContent = now; $('#scoreMax').textContent = max;
+  document.querySelectorAll('nav button[data-i]').forEach(b => { const t = TASKS[+b.dataset.i]; b.querySelector('.n').textContent = t.parts.reduce((a, p) => a + earned(p), 0) + '/' + t.parts.reduce((a, p) => a + p.be, 0); });
+}
+
+/* ===================== Anzeige ===================== */
+function tabs() {
+  const n = $('#tabs'); n.innerHTML = '';
+  TASKS.forEach((t, i) => { const b = el('button', '', `${t.tab}<span class="n"></span>`); b.type = 'button'; b.dataset.i = i; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', ST.tab === i); b.onclick = () => show(i); n.appendChild(b); });
+  const b = el('button', '', 'Auswertung'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', ST.tab === TASKS.length); b.onclick = () => show(TASKS.length); n.appendChild(b);
+}
+function show(i, quiet) {
+  ST.tab = i; tabs(); const m = $('#main'); m.innerHTML = '';
+  if (i >= TASKS.length) auswertung(m); else aufgabe(m, TASKS[i]);
+  score(); if (!quiet) { window.scrollTo({ top: 0 }); changed(); }
+}
+let redraw = null;
+function aufgabe(m, t) {
+  const c = el('div', 'card'); c.innerHTML = `<h2>${t.title}</h2><p class="src">Aufgabe im Abi-Stil · Hilfsmittel: Taschenrechner, IQB-Formelsammlung · h = 6,626·10⁻³⁴ Js, c = 2,998·10⁸ m/s, e = 1,602·10⁻¹⁹ C, m<sub>e</sub> = 9,109·10⁻³¹ kg</p><p class="lead">${t.intro}</p>`;
+  redraw = null;
+  if (t.mat) { const mt = el('div', 'mat', `<div class="mh">${t.matT}</div>`), cvs = el('canvas'); mt.appendChild(cvs); c.appendChild(mt); redraw = () => t.mat(cvs); }
+  m.appendChild(c); if (redraw) redraw();
+  t.parts.forEach(p => m.appendChild(teil(p)));
+}
+function teil(p) {
+  const s = ps(p.id), d = el('div', 'task');
+  d.innerHTML = `<div class="thead"><div><span class="tnr">${p.nr}</span><span class="be">${p.be} BE · AFB ${p.afb}</span></div><span class="status"></span></div><p class="qtext">${p.q}</p>`;
+  const stat = d.querySelector('.status'), upd = () => { const st = status(p); d.className = 'task ' + (st === 'part' ? '' : st); stat.className = 'status ' + (st === 'part' ? '' : st); stat.textContent = NAMES[st] + (closed(p) ? ` · ${earned(p)}/${p.be} BE` : ''); bh.disabled = s.shown || s.hints >= p.help.length; bh.textContent = s.hints >= p.help.length ? 'Alle Hilfen offen' : `Hilfe ${s.hints + 1} von ${p.help.length}`; bl.disabled = s.shown || !!sb.firstChild; if (!bl.disabled && closed(p)) bl.textContent = 'Musterlösung ansehen'; score(); };
+  const lock = [];
+  p.comps.forEach((c, i) => {
+    const box = el('div', 'comp'), fb = el('div', 'fb'); fb.hidden = true;
+    if (c.kind === 'num') {
+      box.innerHTML = `<div class="ansrow"><label>${c.label}</label><input type="text" inputmode="decimal" autocomplete="off" aria-label="${c.label}"><span class="unit">${c.unit}</span><button class="btn" type="button">Prüfen</button></div>`;
+      const inp = box.querySelector('input'), bt = box.querySelector('button');
+      const fin = () => { inp.disabled = bt.disabled = true; inp.classList.remove('no'); inp.classList.add('ok'); };
+      const check = () => {
+        const x = parse(inp.value); if (isNaN(x)) { fb.hidden = false; fb.className = 'fb tip'; fb.textContent = 'Gib eine Zahl ein, zum Beispiel 6,35 oder 6,35e-7.'; return; }
+        if (Math.abs(x - c.value) <= (c.abs != null ? c.abs : Math.abs(c.value) * c.tol)) { s.comp[i] = { ok: true, be: c.be, v: inp.value }; fin(); fb.hidden = false; fb.className = 'fb good'; fb.textContent = 'Richtig.'; }
+        else { s.comp[i] = { ok: false, be: 0, v: inp.value, n: ((s.comp[i] && s.comp[i].n) || 0) + 1 }; inp.classList.add('no'); fb.hidden = false; fb.className = 'fb bad'; const q = Math.log10(Math.abs(x / c.value)); fb.innerHTML = Math.abs(q - Math.round(q)) < .02 && Math.round(q) ? `Die Ziffern stimmen, die Zehnerpotenz nicht. Gefragt ist das Ergebnis in <b>${c.unit || 'der Grundeinheit'}</b>.` : 'Das stimmt noch nicht. Rechne noch einmal nach oder nimm eine Hilfe.'; }
+        upd(); changed();
+      };
+      bt.onclick = check; inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+      if (s.comp[i]) { inp.value = s.comp[i].v || ''; if (s.comp[i].ok) fin(); }
+      lock.push(() => { inp.disabled = bt.disabled = true; if (!(s.comp[i] && s.comp[i].ok)) inp.value = (inp.value ? inp.value + '  →  ' : '') + (Math.abs(c.value) >= 1e5 ? sci(c.value) : fmt(c.value, c.d == null ? 1 : c.d)); });
+    } else {
+      box.innerHTML = `<p class="cq">${c.q}</p>`; const ob = el('div', 'opts'), bs = [];
+      const fin = pick => bs.forEach(([b, k]) => { b.disabled = true; if (k === c.correct) b.classList.add('ok'); else if (k === pick) b.classList.add('no'); });
+      c.opts.map((_, k) => k).sort(() => Math.random() - .5).forEach(k => {
+        const b = el('button', '', c.opts[k]); b.type = 'button'; bs.push([b, k]); ob.appendChild(b);
+        b.onclick = () => { const ok = k === c.correct; s.comp[i] = { ok: true, be: ok ? c.be : 0, v: k }; fin(k); fb.hidden = false; fb.className = 'fb ' + (ok ? 'good' : 'bad'); fb.innerHTML = ok ? 'Richtig.' : ((c.fb && c.fb[k]) || 'Das war nicht richtig. Die richtige Antwort ist grün markiert.'); upd(); changed(); };
+      });
+      box.appendChild(ob); if (s.comp[i]) fin(s.comp[i].v); lock.push(() => fin(s.comp[i] ? s.comp[i].v : -1));
+    }
+    box.appendChild(fb); d.appendChild(box);
+  });
+  const tools = el('div', 'tools'), bh = el('button', 'btn blue'), bl = el('button', 'btn orange', 'Lösung zeigen'), hb = el('div'), sb = el('div'); bh.type = bl.type = 'button';
+  const tips = () => { hb.innerHTML = ''; p.help.slice(0, s.hints).forEach((t, k) => hb.appendChild(el('div', 'fb tip', `<b>Hilfe ${k + 1}:</b> ${t}`))); };
+  const sol = () => { sb.innerHTML = ''; sb.appendChild(el('div', 'fb sol', `<b>Lösung:</b> ${p.solution}`)); lock.forEach(f => f()); };
+  bh.onclick = () => { s.hints++; tips(); upd(); changed(); };
+  bl.onclick = () => { if (closed(p)) { sb.appendChild(el('div', 'fb sol', `<b>Lösung:</b> ${p.solution}`)); upd(); return; } if (!confirmSol(bl)) return; s.shown = true; sol(); upd(); changed(); };
+  tools.append(bh, bl); d.append(tools, hb, sb); tips(); if (s.shown) sol();
+  upd(); return d;
+}
+function confirmSol(b) { // zweimal tippen statt Dialogfenster
+  if (b.dataset.arm) return true; b.dataset.arm = 1; b.textContent = 'Wirklich? Dann gibt es hier keine BE mehr.'; setTimeout(() => { if (!b.disabled) { delete b.dataset.arm; b.textContent = 'Lösung zeigen'; } }, 4000); return false;
+}
+function auswertung(m) {
+  redraw = null; const c = el('div', 'card'); let now = 0, max = 0, rows = '';
+  TASKS.forEach(t => { const e = t.parts.reduce((a, p) => a + earned(p), 0), mx = t.parts.reduce((a, p) => a + p.be, 0); now += e; max += mx;
+    rows += `<tr><td><b>${t.title}</b><div class="legend">${t.parts.map(p => `<span class="status ${status(p) === 'part' ? '' : status(p)}">${p.nr} ${NAMES[status(p)]}</span>`).join('')}</div></td><td class="r">${e} / ${mx}</td></tr>`; });
+  const offen = PARTS.filter(p => !closed(p)).length, pr = max ? Math.round(100 * now / max) : 0;
+  c.innerHTML = `<h2>Auswertung</h2><p class="lead">Du hast <b>${now} von ${max} BE</b> (${pr} %). ${offen ? `Noch ${offen} Teilaufgaben offen.` : 'Alle Teilaufgaben bearbeitet.'}</p><table class="aus"><tr><th>Aufgabe</th><th class="r">BE</th></tr>${rows}</table>
+  <p class="small" style="margin-top:14px">So wird gezählt: Rechenergebnisse darfst du beliebig oft prüfen. Bei Auswahlfragen zählt nur der erste Versuch. Hilfen kosten keine BE, werden aber im Status vermerkt. Nach „Lösung zeigen“ gibt es für offene Felder keine BE mehr.<br>Im echten Abi zählen außerdem Ansatz, Rechenweg und Einheiten. Schreib deine Lösungen deshalb immer vollständig auf Papier und vergleiche am Ende mit der Musterlösung.</p>`;
+  m.appendChild(c);
+}
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => redraw && redraw(), 120); });
+show(0, true);
+
+/* ===================== Anbindung an die Klassen-App (ohne Namen) ===================== */
+if (window.AppBridge) {
+  setTimeout(() => { appLive = true; }, 1500);
+  const name = t => t.id + ' · ' + t.tab;
+  AppBridge.register({
+    getState() {
+      const details = {}; let punkte = 0;
+      TASKS.forEach(t => { const e = t.parts.reduce((a, p) => a + earned(p), 0), m = t.parts.reduce((a, p) => a + p.be, 0); punkte += e;
+        details[name(t)] = `${e} von ${m} BE · ` + t.parts.map(p => p.nr + ' ' + NAMES[status(p)] + (ST.parts[p.id] && ST.parts[p.id].hints ? ` (${ST.parts[p.id].hints} Hilfen)` : '')).join(', '); });
+      return { punkte, stationen: TASKS.map(name), erledigt: TASKS.filter(t => t.parts.every(closed)).map(name), details, daten: { v: 1, ST } };
+    },
+    setState(s) { const d = s && s.daten; if (!d || !d.ST) return; ST = Object.assign({ parts: {}, tab: 0 }, d.ST); appLive = true; show(Math.min(ST.tab || 0, TASKS.length), true); }
+  });
+}
+</script>
+</body>
+</html>
