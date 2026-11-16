@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quanten 2 · Quantenobjekte</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: Kopf mit Punktestand, Stationen-Tabs (Reihenfolge = Unterrichtsgang), je Station Bühne (Simulation) + Schritte mit Sofort-Feedback; stapelt im Hochformat */
+
+/* Layout: Kopf mit Punktestand, Stationen-Tabs (Reihenfolge = Unterrichtsgang), je Station Bühne (Simulation) + Aufträge mit Sofort-Feedback; stapelt im Hochformat */
+:root{
+  --bg:#F2F5F8; --panel:#FFFFFF; --ink:#15253A; --muted:#58697C; --line:#D3DCE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E2F0E5; --navySoft:#E3EAF3;
+  --orange:#C2571A; --blue:#2F6FB5; --bad:#B3261E; --badSoft:#FBE6E4; --warnSoft:#FFF3D6;
+  --f-display:"Bricolage Grotesque",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --orange:#F09A5E; --blue:#7FB2EE; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:18px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,44px);line-height:1.05;margin:0;color:var(--navy);letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--muted);letter-spacing:0;margin-top:6px}
+.score{font-family:var(--f-mono);font-size:15px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap}
+.score b{color:var(--green);font-size:20px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:thin}
+nav button{flex:0 0 auto;font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer;display:flex;gap:8px;align-items:center}
+nav button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button[aria-selected="true"] .n{color:var(--bg);opacity:.75}
+nav button .done{color:var(--green);font-weight:700}
+nav button[aria-selected="true"] .done{color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+section.st{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:start}
+section.st.single{grid-template-columns:minmax(0,1fr);max-width:820px}
+@media (max-width:900px){section.st{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:901px){.stage{position:sticky;top:10px}}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:23px;margin:0 0 6px;color:var(--navy);text-wrap:balance}
+.card h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:22px 0 4px;color:var(--navy)}
+.lead{color:var(--muted);margin:0 0 12px}
+canvas{display:block;width:100%;max-width:100%;border-radius:10px;background:var(--bg)}
+canvas.dark{background:#060A10}
+canvas.tap{cursor:crosshair}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:16px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:var(--bg);padding:10px 16px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:inline-flex;border:1.5px solid var(--navy);border-radius:10px;overflow:hidden}
+.seg button{font:inherit;font-size:15px;border:0;background:transparent;color:var(--navy);padding:9px 14px;min-height:44px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+.task{border:2px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.task.solved{border-color:var(--green)}
+.task p{margin:0 0 10px}
+.task .q{font-weight:700}
+.given{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin:0 0 10px;line-height:1.7}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-size:16px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer}
+.opts button.ok{border-color:var(--green);background:var(--greenSoft)}
+.opts button.no{border-color:var(--bad);background:var(--badSoft)}
+.opts button:disabled{cursor:default;opacity:1}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.ans label{font-weight:700;font-family:var(--f-mono)}
+.ans input{font:inherit;font-family:var(--f-mono);font-size:18px;width:8em;max-width:100%;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+.ans input.ok{border-color:var(--green);background:var(--greenSoft)}
+.ans input.no{border-color:var(--bad);background:var(--badSoft)}
+.unit{font-family:var(--f-mono);font-size:16px;color:var(--muted)}
+.feedback{border-radius:10px;padding:10px 14px;margin-top:10px}
+.feedback.ok{background:var(--greenSoft);border:1.5px solid var(--green)}
+.feedback.no{background:var(--badSoft);border:1.5px solid var(--bad)}
+.feedback.info{background:var(--navySoft);border:1.5px solid var(--line)}
+.feedback.warn{background:var(--warnSoft);border:1.5px solid var(--line)}
+.steps{font-family:var(--f-mono);font-size:14.5px;line-height:1.8;white-space:pre-wrap;margin:6px 0 0}
+.slider{display:grid;grid-template-columns:auto minmax(0,1fr) 7.2em;gap:10px;align-items:center;margin-top:10px}
+.slider label{font-weight:700}
+.slider output{font-family:var(--f-mono);font-size:15px;text-align:right;white-space:nowrap}
+input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--navy)}
+.read{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.7;min-height:2.6em}
+.merk{border-left:5px solid var(--green);background:var(--greenSoft);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:14px}
+.merk b{color:var(--green)}
+.formel{font-family:var(--f-mono);font-size:17px}.formel i{font-style:normal;white-space:nowrap;display:inline-block}
+table.ord{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:14.5px;margin-top:10px}
+table.ord th,table.ord td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:right}
+table.ord th{color:var(--muted);font-weight:500}
+.small{font-size:14.5px;color:var(--muted)}
+.bets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.bets{grid-template-columns:minmax(0,1fr)}}
+.bets button{font:inherit;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px;cursor:pointer}
+.bets button[aria-pressed="true"]{border-color:var(--navy);background:var(--navySoft)}
+.bets canvas{height:54px;margin-bottom:8px}
+.meter{height:22px;border-radius:999px;background:var(--bg);border:1.5px solid var(--line);overflow:hidden;margin-top:10px}
+.meter i{display:block;height:100%;background:var(--green);width:0}
+.next{margin-top:16px;display:flex;justify-content:flex-end}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.two{grid-template-columns:minmax(0,1fr)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{font:inherit;font-size:15px;border:1.5px solid var(--navy);background:transparent;color:var(--navy);border-radius:999px;padding:8px 14px;min-height:44px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+table.mess{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:14.5px;margin-top:10px}
+table.mess th,table.mess td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:right}
+table.mess th{color:var(--muted);font-weight:500}
+.count{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.count div{flex:1 1 90px;background:var(--navySoft);border-radius:10px;padding:8px 12px;font-family:var(--f-mono);font-size:14px}
+.count b{display:block;font-size:22px;color:var(--navy)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Quanten 2 · Quantenobjekte<small>TG2 · einzelne Photonen am Doppelspalt, Elektronen als Wellen, Welcher-Weg-Information</small></h1>
+  <div class="score" aria-live="polite">Punkte: <b id="pts">0</b> / <span id="ptsMax">0</span></div>
+</header>
+<nav id="tabs" role="tablist"></nav>
+<section class="st single" id="s0"><div class="card">
+  <h2>Deine Wette</h2>
+  <p class="lead">Eine Lichtquelle wird so stark abgedunkelt, dass immer nur ein einzelnes Photon unterwegs ist. Die Photonen treffen nacheinander auf einen Doppelspalt. Dahinter registriert ein Schirm jeden Treffer. Was zeigt der Schirm nach sehr vielen Photonen?</p>
+  <div class="bets" id="bets"></div>
+  <div class="feedback info" id="betFb" hidden></div>
+</div></section>
+
+<section class="st" id="s1" hidden>
+  <div class="card stage">
+    <h2>Photon für Photon</h2>
+    <canvas id="c1" class="dark" height="330"></canvas>
+    <div class="count"><div>Treffer<b id="h1N">0</b></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" id="h1a">1 Photon</button><button class="btn" type="button" id="h1b">10 Photonen</button><button class="btn green" type="button" id="h1run">Dauerfeuer an</button><button class="btn ghost" type="button" id="h1reset">Zurücksetzen</button></div>
+    <div class="slider"><label for="h1rate">Tempo</label><input type="range" id="h1rate" min="1" max="4" step="1" value="2"><output id="h1rateO"></output></div>
+    <div class="row" style="margin-top:6px"><div class="seg" id="h1curve"><button type="button" data-m="0" aria-pressed="true">nur Treffer</button><button type="button" data-m="1" aria-pressed="false">mit Wellenrechnung</button></div></div>
+  </div>
+  <div class="card" id="t1"></div>
+</section>
+
+<section class="st" id="s2" hidden>
+  <div class="card stage">
+    <h2>Elektronenbeugungsröhre</h2>
+    <p class="lead">Elektronen werden mit der Spannung U beschleunigt und fliegen durch eine dünne Graphitfolie. Auf dem Leuchtschirm sieht man, wo sie ankommen.</p>
+    <canvas id="c2" class="dark" height="260"></canvas>
+    <div class="slider"><label for="ebU">U</label><input type="range" id="ebU" min="1" max="10" step="0.1" value="5"><output id="ebUO"></output></div>
+    <div class="read" id="ebRead"></div>
+  </div>
+  <div class="card" id="t2"></div>
+</section>
+
+<section class="st" id="s3" hidden>
+  <div class="card stage">
+    <h2>Elektronen am Doppelspalt</h2>
+    <canvas id="c3" class="dark" height="330"></canvas>
+    <div class="count"><div>Treffer<b id="h3N">0</b></div></div>
+    <div class="chips" id="h3mode"><button type="button" data-m="both" aria-pressed="true">beide Spalte offen</button><button type="button" data-m="left" aria-pressed="false">nur linker Spalt</button><button type="button" data-m="right" aria-pressed="false">nur rechter Spalt</button></div>
+    <div class="row" style="margin-top:8px"><div class="seg" id="h3det"><button type="button" data-m="0" aria-pressed="true">ohne Spalt-Detektor</button><button type="button" data-m="1" aria-pressed="false">mit Spalt-Detektor</button></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn" type="button" id="h3b">10 Elektronen</button><button class="btn green" type="button" id="h3run">Dauerfeuer an</button><button class="btn ghost" type="button" id="h3reset">Zurücksetzen</button></div>
+    <p class="small" style="margin:8px 0 0">Der Spalt-Detektor registriert bei jedem Elektron, durch welchen Spalt es gegangen ist.</p>
+  </div>
+  <div class="card" id="t3"></div>
+</section>
+
+<section class="st" id="s4" hidden>
+  <div class="card stage">
+    <h2>Wie groß ist die Wellenlänge?</h2>
+    <div class="chips" id="obj"></div>
+    <div class="slider"><label for="obV">v</label><input type="range" id="obV" min="0" max="7" step="0.05" value="6"><output id="obVO"></output></div>
+    <canvas id="c4" height="150" style="margin-top:10px"></canvas>
+    <div class="read" id="obRead"></div>
+  </div>
+  <div class="card" id="t4"></div>
+</section>
+
+<section class="st single" id="s5" hidden><div class="card">
+  <h2>Training</h2>
+  <p class="lead">Neue Zahlen bei jeder Aufgabe. Fünf gelöste Aufgaben, dann ist die Station geschafft. Konstanten: h = 6,626·10⁻³⁴ Js, m<sub>e</sub> = 9,109·10⁻³¹ kg, e = 1,602·10⁻¹⁹ C.</p>
+  <div class="read" id="trStat"></div><div id="trBox"></div>
+</div></section>
+
+<section class="st single" id="s6" hidden><div class="card">
+  <h2>Exit-Check</h2>
+  <p class="lead">Acht kurze Fragen quer durch alle Stationen. Du kannst so viele Runden spielen, wie du willst.</p>
+  <div id="qzBox"></div>
+</div></section>
+
+</div>
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+/* ===================== Helfer ===================== */
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmt = (x, d = 1) => Number(x).toFixed(d).replace('.', ',').replace('-', '−');
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+const sci = (x, d = 2) => { if (!x) return '0'; let e = Math.floor(Math.log10(Math.abs(x))), m = x / Math.pow(10, e); if (Math.abs(+m.toFixed(d)) >= 10) { m /= 10; e++; } return fmt(m, d) + '·10' + String(e).split('').map(c => SUP[c]).join(''); };
+const auto = (x, d) => (Math.abs(x) < .01 || Math.abs(x) >= 1e5) && x !== 0 ? sci(x, 2) : fmt(x, d == null ? 1 : d);
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const rnd = (a, b, st) => +(Math.round((a + Math.random() * (b - a)) / st) * st).toFixed(6);
+function parse(v) {
+  v = String(v).trim().replace(/\s/g, '').replace(/,/g, '.').replace(/[−–]/g, '-').replace(/[·*x×]10\^?/i, 'e');
+  if (v === '') return NaN; const n = Number(v); return isFinite(n) ? n : NaN;
+}
+function fit(c) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth; if (!c._h) c._h = +c.getAttribute('height') || 200;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(c._h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(c._h * dpr); c.style.height = c._h + 'px'; }
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, c._h); return [x, w, c._h];
+}
+function rr(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
+function rgb(l) { // Wellenlänge in nm → Farbe; außerhalb des Sichtbaren grau-violett bzw. dunkelrot
+  if (l < 380) return [.55, .45, .85]; if (l > 750) return [.45, .12, .1];
+  let r = 0, g = 0, b = 0;
+  if (l < 440) { r = (440 - l) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = (510 - l) / 20; }
+  else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = (645 - l) / 65; } else { r = 1; }
+  let f = 1; if (l < 420) f = .35 + .65 * (l - 380) / 40; else if (l > 680) f = .35 + .65 * (750 - l) / 70;
+  return [r * f, g * f, b * f];
+}
+const css = (c, i = 1) => { const k = Math.pow(Math.max(0, Math.min(1, i)), .55); return `rgb(${Math.round(255 * c[0] * k)},${Math.round(255 * c[1] * k)},${Math.round(255 * c[2] * k)})`; };
+const farbe = l => l < 380 ? 'ultraviolett' : l < 430 ? 'violett' : l < 490 ? 'blau' : l < 520 ? 'blaugrün' : l < 565 ? 'grün' : l < 590 ? 'gelb' : l < 625 ? 'orange' : l <= 750 ? 'rot' : 'infrarot';
+/* Naturkonstanten */
+const H = 6.626e-34, C = 2.998e8, QE = 1.602e-19, ME = 9.109e-31, HC = H * C / QE * 1e9; // HC in eV·nm ≈ 1240
+
+/* ===================== Stand ===================== */
+let S = { sol: {}, p: {}, bet: null, tr: { n: 0, streak: 0, best: 0 }, quiz: [], x: {} };
+let appLive = false, CFG = null, active = null, cur = null;
+const appChanged = () => { if (window.AppBridge && appLive) AppBridge.changed(); };
+const MAXP = {}, REQ = {};
+function need(id, p, optional) { MAXP[id] = p; if (!optional) (REQ[cur] = REQ[cur] || []).push(id); }
+function solve(id, p) { if (id in S.sol) return; S.sol[id] = 1; S.p[id] = p; refresh(); appChanged(); }
+const points = () => Object.values(S.p).reduce((a, b) => a + b, 0);
+const kind = sid => (CFG.tabs.find(t => t[1] === sid) || [])[2];
+const isDone = sid => kind(sid) === 'bet' ? !!S.bet : kind(sid) === 'train' ? S.tr.n >= 5 : kind(sid) === 'quiz' ? S.quiz.length > 0 : (REQ[sid] || []).length > 0 && REQ[sid].every(id => id in S.sol);
+function renderTabs() {
+  const t = $('#tabs'); t.innerHTML = '';
+  CFG.tabs.forEach(([name, id], i) => {
+    const b = el('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', id === active);
+    b.innerHTML = `<span class="n">${i}</span>${name}${isDone(id) ? ' <span class="done">✓</span>' : ''}`; b.onclick = () => show(id); t.appendChild(b);
+  });
+}
+function refresh() { $('#pts').textContent = points(); $('#ptsMax').textContent = Object.values(MAXP).reduce((a, b) => a + b, 0); renderTabs(); }
+function show(id, keep) {
+  active = id; CFG.tabs.forEach(([, s]) => $('#' + s).hidden = s !== id); renderTabs(); drawActive();
+  if (!keep) { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); appChanged(); }
+}
+function drawActive() { if (kind(active) === 'bet') drawBets(); if (CFG.draw) CFG.draw(active); }
+function nextBtn(host, label) { const i = CFG.tabs.findIndex(t => t[1] === cur), nx = CFG.tabs[i + 1]; if (!nx) return; const d = el('div', 'next'); const b = el('button', 'btn green', label || `Weiter: ${nx[0]} →`); b.type = 'button'; b.onclick = () => show(nx[1]); d.appendChild(b); host.appendChild(d); }
+
+/* ===================== Aufgaben-Bausteine ===================== */
+function mc(host, o) { // {id,q,opts,correct,fb,ok,p}
+  const p = o.p == null ? 1 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'), bs = []; let tries = 0;
+  d.innerHTML = `<p class="q">${o.q}</p>`; const box = el('div', 'opts'), fb = el('div', 'feedback'); fb.hidden = true;
+  const fin = () => { d.classList.add('solved'); bs.forEach((b, i) => { b.disabled = true; if (i === o.correct) b.classList.add('ok'); }); fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Richtig.</b> ' + (o.ok || ''); };
+  o.opts.forEach((t, i) => {
+    const b = el('button', '', t); b.type = 'button'; bs.push(b); box.appendChild(b);
+    b.onclick = () => { tries++; if (i === o.correct) { fin(); solve(o.id, tries === 1 ? p : 0); } else { b.classList.add('no'); b.disabled = true; fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = (o.fb && o.fb[i]) || 'Das passt noch nicht. Überleg noch einmal oder probier es an der Simulation aus.'; } };
+  });
+  d.append(box, fb); host.appendChild(d); if (o.id in S.sol) fin(); return d;
+}
+const NUMS = []; // für den Selbsttest
+function numCore(d, o, onRight, onShown, restored) { // gemeinsame Logik für feste Aufgaben und Training
+  d.innerHTML = `<p class="q">${o.q}</p>${o.given ? `<div class="given">${o.given}</div>` : ''}<div class="ans"><label>${o.label}</label><input type="text" inputmode="decimal" autocomplete="off" aria-label="${o.label.replace(/<[^>]+>/g, '')}"><span class="unit">${o.unit}</span><button class="btn" type="button">Prüfen</button><button class="btn ghost" type="button" hidden>Lösungsweg zeigen</button></div><div class="feedback" hidden></div>`;
+  const inp = d.querySelector('input'), [bt, bs] = d.querySelectorAll('button'), fb = d.querySelector('.feedback'); let tries = 0;
+  const val = () => typeof o.value === 'function' ? o.value() : o.value;
+  const fin = self => { d.classList.add('solved'); inp.disabled = bt.disabled = true; bs.hidden = true; if (!self || !inp.value) inp.value = auto(val(), o.d); inp.className = self ? 'ok' : ''; fb.hidden = false; fb.className = 'feedback ' + (self ? 'ok' : 'info'); fb.innerHTML = (self ? '<b>Richtig.</b>' : '<b>Lösungsweg:</b>') + (o.sol ? `<div class="steps">${o.sol}</div>` : ''); };
+  const check = () => {
+    const x = parse(inp.value), v = val(); if (isNaN(x)) { fb.hidden = false; fb.className = 'feedback warn'; fb.textContent = 'Gib eine Zahl ein, zum Beispiel 6,3 oder 6,3e-19 (für 6,3·10⁻¹⁹).'; return; }
+    tries++;
+    if (Math.abs(x - v) <= (o.abs != null ? o.abs : Math.abs(v) * (o.tol || .03))) { fin(true); onRight(tries); return; }
+    inp.className = 'no'; fb.hidden = false; fb.className = 'feedback no';
+    const q = Math.log10(Math.abs(x / v)), zehner = Math.abs(q - Math.round(q)) < .02 && Math.round(q) !== 0;
+    fb.innerHTML = zehner ? `Die Ziffern stimmen, aber die Zehnerpotenz nicht. Gefragt ist das Ergebnis in <b>${o.unit || 'der angegebenen Einheit'}</b>.` : (x < 0 !== v < 0 && Math.abs(Math.abs(x) - Math.abs(v)) <= Math.abs(v) * .03 ? 'Der Betrag stimmt, das Vorzeichen nicht.' : (o.hint || 'Noch nicht. Prüf Einheiten und Formel, dann noch einmal.'));
+    if (tries >= 2) bs.hidden = false; if (o.onWrong) o.onWrong();
+  };
+  bt.onclick = check; inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+  bs.onclick = () => { fin(false); onShown(); };
+  if (restored != null) fin(restored);
+}
+function num(host, o) { // {id,q,given,label,unit,value,tol,abs,d,sol,p,hint}
+  const p = o.p == null ? 2 : o.p; need(o.id, p, o.optional); NUMS.push(o);
+  const d = el('div', 'task'); host.appendChild(d);
+  numCore(d, o, tries => solve(o.id, tries <= 2 ? p : Math.ceil(p / 2)), () => solve(o.id, 0), o.id in S.sol ? S.p[o.id] > 0 : null); return d;
+}
+function act(host, o) { // Auftrag an der Simulation: {id,q,btn,test:()=>true|'Hinweis',ok,p}
+  const p = o.p == null ? 1 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'); d.innerHTML = `<p class="q">${o.q}</p><button class="btn" type="button">${o.btn || 'Prüfen'}</button><div class="feedback" hidden></div>`;
+  const b = d.querySelector('button'), fb = d.querySelector('.feedback');
+  const fin = () => { d.classList.add('solved'); b.disabled = true; fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Geschafft.</b> ' + (o.ok || ''); };
+  b.onclick = () => { const r = o.test(); if (r === true) { fin(); solve(o.id, p); } else { fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = r; } };
+  host.appendChild(d); if (o.id in S.sol) fin(); return d;
+}
+const merk = (host, h) => host.appendChild(el('div', 'merk', h));
+const h3 = (host, t) => host.appendChild(el('h3', '', t));
+const txt = (host, t) => host.appendChild(el('p', 'lead', t));
+const info = (host, t) => host.appendChild(el('div', 'feedback info', t));
+function begin(sid, title) { cur = sid; const t = $('#t' + sid.slice(1)); t.innerHTML = `<h2>${title || 'Schritt für Schritt'}</h2>`; return t; }
+const bind = (id, fn) => $(id).addEventListener('input', e => fn(+e.target.value));
+const seg = (id, fn) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); fn(b.dataset.m); });
+
+/* ===================== Wette ===================== */
+function drawBets() { if (CFG.bet.draw) document.querySelectorAll('#bets canvas').forEach(c => CFG.bet.draw(c, c._k)); }
+function buildBets() {
+  const B = CFG.bet, box = $('#bets'); box.innerHTML = '';
+  B.opts.forEach((t, k) => {
+    const L = 'ABCD'[k], b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', S.bet === L);
+    if (B.draw) { const c = el('canvas'); c.setAttribute('height', 54); c._k = k; b.appendChild(c); }
+    b.appendChild(el('div', '', `<b>${L}</b> · ${t}`)); b.onclick = () => { S.bet = L; buildBets(); refresh(); appChanged(); }; box.appendChild(b);
+  });
+  const fb = $('#betFb'); fb.hidden = !S.bet;
+  fb.innerHTML = S.bet ? `Gemerkt: <b>${S.bet}</b>. ${B.later} <div class="next"><button class="btn green" type="button" id="betGo">Weiter: ${CFG.tabs[1][0]} →</button></div>` : '';
+  if (S.bet) $('#betGo').onclick = () => show(CFG.tabs[1][1]);
+  if (kind(active) === 'bet') drawBets();
+}
+function betReveal(host) { const B = CFG.bet, L = 'ABCD'[B.correct]; if (S.bet) host.appendChild(el('div', 'feedback ' + (S.bet === L ? 'ok' : 'warn'), `<b>Auflösung deiner Wette (${S.bet}):</b> ${S.bet === L ? 'Volltreffer.' : 'Es ist ' + L + '.'} ${B.reveal}`)); }
+
+/* ===================== Training ===================== */
+let trLast = -1;
+function trNew() {
+  const G = CFG.gen; let i; do { i = Math.floor(Math.random() * G.length); } while (i === trLast && G.length > 1); trLast = i;
+  const o = G[i](), box = $('#trBox'); box.innerHTML = ''; const d = el('div', 'task'); box.appendChild(d);
+  const nx = () => { const n = el('div', 'next'), b = el('button', 'btn green', 'Nächste Aufgabe →'); b.type = 'button'; b.onclick = trNew; n.appendChild(b); d.appendChild(n); trStat(); refresh(); appChanged(); };
+  o.onWrong = () => { S.tr.streak = 0; trStat(); };
+  numCore(d, o, tries => { S.tr.n++; S.tr.streak++; S.tr.best = Math.max(S.tr.best, S.tr.streak); if (tries <= 2) { const k = Object.keys(S.p).filter(k => k.startsWith('tr')).length; if (k < 8) S.p['tr' + k] = 1; } nx(); }, () => { S.tr.streak = 0; nx(); }, null);
+}
+function trStat() { $('#trStat').innerHTML = `Gelöst: <b>${S.tr.n}</b> · Serie: ${S.tr.streak} · beste Serie: ${S.tr.best}${S.tr.n >= 5 ? ' · Station geschafft ✓' : ''}`; }
+
+/* ===================== Exit-Check (richtige Antwort steht in den Daten immer an erster Stelle) ===================== */
+function quizStart() {
+  const box = $('#qzBox'); box.innerHTML = '';
+  if (S.quiz.length) box.appendChild(el('div', 'read', 'Bisherige Runden: ' + S.quiz.map(r => r + '/8').join(', ')));
+  const b = el('button', 'btn green', S.quiz.length ? 'Neue Runde starten' : 'Runde starten'); b.type = 'button'; b.style.marginTop = '12px'; b.onclick = quizRun; box.appendChild(b);
+}
+function quizRun() {
+  const Q = CFG.quiz, order = Q.map((_, i) => i).sort(() => Math.random() - .5).slice(0, 8), box = $('#qzBox'); let n = 0, right = 0;
+  const step = () => {
+    box.innerHTML = '';
+    if (n >= order.length) { S.quiz.push(right); if (S.quiz.length > 12) S.quiz.shift(); box.appendChild(el('div', 'feedback ' + (right >= 6 ? 'ok' : 'warn'), `<b>${right} von 8 richtig.</b> ${right === 8 ? 'Stark, das sitzt.' : right >= 6 ? 'Gut. Schau dir die Stationen zu den falschen Antworten noch einmal an.' : 'Geh die Stationen noch einmal durch, dann klappt es.'}`)); refresh(); appChanged(); const b = el('button', 'btn green', 'Noch eine Runde'); b.type = 'button'; b.style.marginTop = '12px'; b.onclick = quizRun; box.appendChild(b); return; }
+    const qi = order[n], q = Q[qi], idx = q.o.map((_, i) => i).sort(() => Math.random() - .5), d = el('div', 'task');
+    d.innerHTML = `<p class="small" style="margin:0 0 4px">Frage ${n + 1} von 8</p><p class="q">${q.q}</p>`; const ob = el('div', 'opts'), fb = el('div', 'feedback'); fb.hidden = true; const bs = [];
+    idx.forEach(i => { const b = el('button', '', q.o[i]); b.type = 'button'; bs.push([b, i]); ob.appendChild(b);
+      b.onclick = () => { bs.forEach(([x, j]) => { x.disabled = true; if (j === 0) x.classList.add('ok'); }); const ok = i === 0; if (ok) { right++; if (!('qz' + qi in S.p)) S.p['qz' + qi] = 1; } else b.classList.add('no'); fb.hidden = false; fb.className = 'feedback ' + (ok ? 'ok' : 'no'); fb.innerHTML = (ok ? 'Richtig. ' : 'Leider nicht. Die richtige Antwort ist grün markiert. ') + (q.e || ''); const nb = el('button', 'btn', n === 7 ? 'Auswertung' : 'Weiter'); nb.type = 'button'; nb.style.marginTop = '10px'; nb.onclick = () => { n++; step(); }; d.appendChild(nb); refresh(); }; });
+    d.append(ob, fb); box.appendChild(d);
+  };
+  step();
+}
+
+/* ===================== Start und Anbindung an die Klassen-App (ohne Namen) ===================== */
+function buildAll() { Object.keys(REQ).forEach(k => delete REQ[k]); CFG.build(); buildBets(); trStat(); trNew(); quizStart(); refresh(); drawActive(); }
+function start(cfg) {
+  CFG = cfg; active = cfg.tabs[0][1]; for (let i = 0; i < 8; i++) MAXP['tr' + i] = 1; cfg.quiz.forEach((_, i) => MAXP['qz' + i] = 1);
+  if (cfg.x) S.x = JSON.parse(JSON.stringify(cfg.x));
+  let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawActive, 120); });
+  buildAll(); show(active, true);
+  if (!window.AppBridge) return;
+  setTimeout(() => { appLive = true; }, 1500);
+  const cnt = sid => { const r = REQ[sid] || []; return r.filter(id => id in S.sol).length + ' von ' + r.length + ' Aufträgen'; };
+  AppBridge.register({
+    getState() {
+      const details = {}; CFG.tabs.forEach(([name, id, k]) => { details[name] = k === 'bet' ? (S.bet ? S.bet + (S.bet === 'ABCD'[CFG.bet.correct] ? ' (richtig)' : ' (falsch)') : '–') : k === 'train' ? S.tr.n + ' gelöst, beste Serie ' + S.tr.best : k === 'quiz' ? (S.quiz.length ? 'Runden: ' + S.quiz.map(r => r + '/8').join(', ') : 'noch keine Runde') : cnt(id) + (CFG.detail && CFG.detail[id] ? ', ' + CFG.detail[id]() : ''); });
+      details['Ohne Punkte gelöst'] = Object.keys(S.sol).filter(k => !S.p[k]).length + ' (Lösungsweg angesehen oder mehrere Versuche)';
+      return { punkte: points(), stationen: CFG.tabs.map(t => t[0]), erledigt: CFG.tabs.filter(t => isDone(t[1])).map(t => t[0]), details, daten: { v: 1, S, tab: active } };
+    },
+    setState(s) {
+      const d = s && s.daten; if (!d || !d.S) return;
+      S = Object.assign({ sol: {}, p: {}, bet: null, tr: { n: 0, streak: 0, best: 0 }, quiz: [], x: {} }, d.S); S.x = Object.assign(JSON.parse(JSON.stringify(CFG.x || {})), S.x || {});
+      if (CFG.onRestore) CFG.onRestore(); buildAll(); show(CFG.tabs.some(t => t[1] === d.tab) ? d.tab : CFG.tabs[0][1], true); appLive = true;
+    }
+  });
+}
+
+/* ===================== Modul ===================== */
+/* ---------- Treffer-Simulation: einzelne Quantenobjekte hinter dem Doppelspalt ---------- */
+const sinc2 = u => Math.abs(u) < 1e-6 ? 1 : Math.pow(Math.sin(u) / u, 2);
+const ENV = x => sinc2(Math.PI * x * 1.08);
+const PAT = { both: x => ENV(x) * Math.pow(Math.cos(Math.PI * x * 4.5), 2), broad: x => ENV(x) * .5, left: x => ENV(x + .04) * .5, right: x => ENV(x - .04) * .5 };
+function HitSim(cid, nid, col, pat) {
+  const o = { hits: [], bins: new Array(64).fill(0), run: false, curve: false, acc: 0, rate: 2, col, pat,
+    add(k) { const P = PAT[o.pat()]; for (let i = 0; i < k; i++) { let x; do { x = Math.random() * 2 - 1; } while (Math.random() > P(x)); if (o.hits.length < 9000) o.hits.push([x, Math.random()]); o.bins[Math.min(63, Math.floor((x + 1) * 32))]++; } o.n += k; $(nid).textContent = o.n; if (o.onAdd) o.onAdd(); },
+    reset() { o.hits = []; o.bins.fill(0); o.n = 0; $(nid).textContent = 0; o.draw(); },
+    draw() {
+      const c = $(cid); if (!c.clientWidth) return; const [x, w, h] = fit(c), sh = 150, px = u => 10 + (u + 1) / 2 * (w - 20);
+      x.fillStyle = '#060A10'; x.fillRect(0, 0, w, h); x.strokeStyle = '#2A3A4F'; x.strokeRect(10, 10, w - 20, sh);
+      x.fillStyle = o.col; o.hits.forEach(p => x.fillRect(px(p[0]) - 1, 12 + p[1] * (sh - 4), 2.2, 2.2));
+      x.fillStyle = '#9BABBD'; x.font = '12px ' + cv('--f-mono'); x.fillText('Schirm (jeder Punkt = ein Treffer)', 14, sh + 26); x.fillText('Trefferzahl je Abschnitt', 14, sh + 46);
+      const top = sh + 54, B = h - 8, mx = Math.max(6, ...o.bins), bw = (w - 20) / 64; x.fillStyle = o.col; x.globalAlpha = .8;
+      o.bins.forEach((v, i) => x.fillRect(10 + i * bw + 1, B - v / mx * (B - top), bw - 2, v / mx * (B - top))); x.globalAlpha = 1;
+      if (o.curve) { const P = PAT[o.pat()]; let tot = 0; for (let i = 0; i < 640; i++) tot += P(-1 + (i + .5) / 320); const sc = o.n / (tot / 10); x.strokeStyle = '#fff'; x.lineWidth = 1.6; x.beginPath(); for (let i = 0; i <= w - 20; i++) { const u = -1 + 2 * i / (w - 20), y = B - P(u) * sc / mx * (B - top); i ? x.lineTo(10 + i, y) : x.moveTo(10 + i, y); } x.stroke(); }
+    } };
+  o.n = 0; return o;
+}
+const A = HitSim('#c1', '#h1N', '#FF5A3C', () => 'both');
+const E3 = { mode: 'both', det: false };
+const B3 = HitSim('#c3', '#h3N', '#58C9F2', () => E3.mode !== 'both' ? E3.mode : E3.det ? 'broad' : 'both');
+const RATES = [0, 3, 30, 200, 900], RN = ['', 'langsam', 'mittel', 'schnell', 'sehr schnell'];
+A.onAdd = () => { if (A.n > (S.x.a || 0)) { const b = S.x.a || 0; S.x.a = A.n; if ((b < 10 && A.n >= 10) || (b < 1500 && A.n >= 1500)) appChanged(); } };
+B3.onAdd = () => { const k = E3.mode !== 'both' ? 'bs' : E3.det ? 'bd' : 'bb', b = S.x[k] || 0; if (B3.n > b) { S.x[k] = B3.n; if ((b < 1000 && B3.n >= 1000) || (b < 300 && B3.n >= 300)) appChanged(); } };
+
+/* ---------- 2 Elektronenbeugungsröhre ---------- */
+const EB = { U: 5 };
+const lamU = U => H / Math.sqrt(2 * ME * QE * U);            // de-Broglie-Wellenlänge nach Beschleunigung mit U (in V)
+const ring = (U, d) => 135 * Math.tan(2 * Math.asin(lamU(U) / (2 * d)));  // Ringradius in mm (Braggreflexion, Schirmabstand 13,5 cm)
+function ebDraw() {
+  const U = EB.U * 1000, l = lamU(U), r1 = ring(U, 213e-12), r2 = ring(U, 123e-12); $('#ebUO').textContent = fmt(EB.U) + ' kV';
+  $('#ebRead').innerHTML = `Ringradien auf dem Schirm: r₁ = ${fmt(r1)} mm · r₂ = ${fmt(r2)} mm`;
+  if (active !== 's2') return; const [x, w, h] = fit($('#c2')), my = h / 2, R = Math.min(h / 2 - 14, w * .22), sx = w - R - 16, sc = R / 42;
+  x.fillStyle = '#060A10'; x.fillRect(0, 0, w, h); x.font = '12px ' + cv('--f-mono');
+  x.fillStyle = '#9BABBD'; x.fillRect(14, my - 12, 34, 24); x.fillText('Quelle', 10, my + 30); const fx = Math.max(90, (sx - R) * .45);
+  x.strokeStyle = '#58C9F2'; x.lineWidth = 2; x.beginPath(); x.moveTo(48, my); x.lineTo(fx, my); x.stroke();
+  x.fillStyle = '#C9D3DF'; x.fillRect(fx - 2, my - 22, 4, 44); x.fillStyle = '#9BABBD'; x.fillText('Graphit', fx - 22, my + 40);
+  x.strokeStyle = 'rgba(88,201,242,.5)'; x.lineWidth = 1.2; [r1, r2, -r1, -r2, 0].forEach(r => { x.beginPath(); x.moveTo(fx, my); x.lineTo(sx - R * .2, my - r * sc * .9); x.stroke(); });
+  x.fillStyle = '#0C1A14'; x.beginPath(); x.arc(sx, my, R, 0, 7); x.fill(); x.strokeStyle = '#2A3A4F'; x.lineWidth = 2; x.stroke();
+  const g = x.createRadialGradient(sx, my, 0, sx, my, 9); g.addColorStop(0, 'rgba(160,255,190,1)'); g.addColorStop(1, 'rgba(160,255,190,0)'); x.fillStyle = g; x.beginPath(); x.arc(sx, my, 9, 0, 7); x.fill();
+  [[r1, .9, 5], [r2, .6, 4]].forEach(([r, a, lw]) => { if (r * sc < R - 3) { x.strokeStyle = `rgba(120,255,170,${a})`; x.lineWidth = lw; x.shadowColor = '#6CFFA6'; x.shadowBlur = 10; x.beginPath(); x.arc(sx, my, r * sc, 0, 7); x.stroke(); x.shadowBlur = 0; } });
+  x.fillStyle = '#9BABBD'; x.fillText('Leuchtschirm', sx - 40, h - 4);
+}
+
+/* ---------- 4 de-Broglie-Rechner ---------- */
+const OBJ = { e: ['Elektron', ME], n: ['Neutron', 1.675e-27], c60: ['Fulleren C₆₀', 1.2e-24], staub: ['Staubkorn (1 µg)', 1e-9], ball: ['Tennisball (58 g)', .058] };
+const OB = { k: 'e', lv: 6 };
+function obDraw() {
+  const v = Math.pow(10, OB.lv), m = OBJ[OB.k][1], l = H / (m * v), lg = Math.log10(l); $('#obVO').textContent = v < 1000 ? fmt(v, v < 10 ? 1 : 0) + ' m/s' : sci(v, 1) + ' m/s';
+  const vgl = lg > -6.5 ? 'größer als die Wellenlänge von Licht' : lg > -8.5 ? 'im Bereich von UV-Licht bis Röntgenstrahlung' : lg > -11.5 ? 'etwa so groß wie ein Atom oder der Abstand von Atomen im Kristall' : lg > -15.5 ? 'kleiner als ein Atom, größer als ein Atomkern' : 'viel kleiner als ein Atomkern: nicht messbar';
+  $('#obRead').innerHTML = `${OBJ[OB.k][0]}: m = ${sci(m)} kg · p = m · v = ${sci(m * v)} kg·m/s<br>λ = h / p = <b>${sci(l)} m</b><br>${vgl}`;
+  if (active !== 's4') return; const [x, w, h] = fit($('#c4')), mu = cv('--muted'), px = e => 16 + (e + 38) / 34 * (w - 32), y = 78;
+  x.font = '12px ' + cv('--f-mono'); x.strokeStyle = mu; x.fillStyle = mu; x.textAlign = 'center'; x.beginPath(); x.moveTo(16, y); x.lineTo(w - 16, y); x.stroke();
+  for (let e = -38; e <= -4; e += 2) { x.beginPath(); x.moveTo(px(e), y - (e % 6 === -2 || e % 6 === 4 ? 4 : 4)); x.lineTo(px(e), y + 4); x.stroke(); if ((e + 38) % (w > 520 ? 4 : 8) === 0) x.fillText('10' + String(e).split('').map(c => SUP[c]).join(''), px(e), y + 20); }
+  x.fillText('Wellenlänge in m', w / 2, y + 40);
+  [[-6.3, 'Licht'], [-10, 'Atom'], [-15, 'Atomkern']].forEach(([e, t]) => { x.fillStyle = cv('--green'); x.fillRect(px(e) - 1.5, y - 26, 3, 26); x.fillText(t, px(e), y - 32); });
+  const X = px(Math.max(-38, Math.min(-4, lg))); x.fillStyle = cv('--orange'); x.beginPath(); x.moveTo(X, y - 3); x.lineTo(X - 8, y - 18); x.lineTo(X + 8, y - 18); x.fill(); x.fillText('λ', X, y - 58 > 10 ? y - 52 : 12); x.textAlign = 'start';
+}
+
+/* ---------- Aufgaben ---------- */
+const v5 = Math.sqrt(2 * QE * 5000 / ME), l5 = lamU(5000), l50 = lamU(5e4), lc60 = H / (1.2e-24 * 200), lball = H / (.058 * 50);
+function build() {
+  let t = begin('s1'); betReveal(t);
+  txt(t, 'Die Lichtquelle ist so schwach, dass immer nur ein Photon im Aufbau unterwegs ist. Der Schirm registriert jeden einzelnen Treffer.');
+  act(t, { id: 'p_10', q: 'Schieß zuerst nur einzelne Photonen auf den Doppelspalt, bis du mindestens 10 Treffer hast.', test: () => (S.x.a || 0) >= 10 ? true : 'Noch zu wenige Treffer. Tippe auf „1 Photon“.', ok: 'Jedes Photon erzeugt genau einen punktförmigen Treffer.' });
+  mc(t, { id: 'p_punkt', q: 'Was zeigt ein einzelner Treffer?', opts: ['Das Photon kommt als Ganzes an einer Stelle an. Es verschmiert sich nicht über den Schirm.', 'Das Photon verteilt sich als schwache Welle über den ganzen Schirm.', 'Das Photon teilt sich und trifft an zwei Stellen auf.'], correct: 0, ok: 'Beim Nachweis zeigt sich das Photon immer „körnig“: ein Ort, die ganze Energie.' });
+  mc(t, { id: 'p_vorher', q: 'Kannst du vorhersagen, wo das nächste Photon auftrifft?', opts: ['Nein. Der einzelne Treffer ist zufällig.', 'Ja, immer genau hinter einem der Spalte.', 'Ja, abwechselnd links und rechts.'], correct: 0, ok: 'Auch im Prinzip nicht: Alle Photonen werden gleich präpariert und landen trotzdem an verschiedenen Stellen.' });
+  act(t, { id: 'p_1500', q: 'Schalte das Dauerfeuer ein und sammle mindestens 1500 Treffer.', test: () => (S.x.a || 0) >= 1500 ? true : `Bisher höchstens ${S.x.a || 0} Treffer. Stell das Tempo höher.`, ok: 'Aus vielen zufälligen Einzeltreffern entsteht ein regelmäßiges Muster.' });
+  mc(t, { id: 'p_muster', q: 'Welches Muster entsteht aus den vielen Treffern?', opts: ['Dieselben Interferenzstreifen wie beim Doppelspalt mit hellem Laserlicht.', 'Zwei Streifen, je einer hinter jedem Spalt.', 'Eine gleichmäßige Verteilung.'], correct: 0, ok: 'Schalte „mit Wellenrechnung“ ein: Die weiße Kurve ist die Intensität aus der Wellenrechnung.' });
+  mc(t, { id: 'p_wkeit', q: 'Was sagt die Intensität der Welle über das einzelne Photon?', opts: ['Sie gibt die Wahrscheinlichkeit an, das Photon an dieser Stelle nachzuweisen.', 'Sie gibt an, wie viel Energie das einzelne Photon dort hat.', 'Nichts. Welle und Photon haben nichts miteinander zu tun.'], correct: 0, ok: 'An den Minima der Welle ist die Wahrscheinlichkeit null: Dort landet nie ein Photon.' });
+  mc(t, { id: 'p_selbst', q: 'Die Photonen waren einzeln unterwegs. Sie können sich also nicht gegenseitig beeinflusst haben. Was folgt?', opts: ['Jedes einzelne Photon „interferiert mit sich selbst“. Für jedes Photon spielen beide Spalte eine Rolle.', 'Die Streifen entstehen, weil Photonen an den Spalträndern abprallen.', 'Das Muster ist Zufall und sähe beim nächsten Mal ganz anders aus.'], correct: 0, ok: 'Die Vorstellung „kleine Kugel fliegt durch genau einen Spalt“ passt nicht.' });
+  merk(t, '<b>Merke:</b> Der einzelne Treffer ist zufällig. Für sehr viele Treffer ergibt sich eine feste Verteilung. Die Wahrscheinlichkeit für einen Treffer ist proportional zur Intensität der Welle (<b>statistisches Verhalten</b>, <b>Fähigkeit zur Interferenz</b>).'); nextBtn(t);
+
+  t = begin('s2');
+  info(t, '<b>Louis de Broglie 1924:</b> Wenn Lichtwellen Teilcheneigenschaften haben, dann haben vielleicht auch Teilchen Welleneigenschaften. Er ordnete jedem Teilchen mit dem Impuls p = m · v eine Wellenlänge zu: <span class="formel">λ = h / p</span>. Dieselbe Gleichung kennst du vom Photon.');
+  mc(t, { id: 'eb_ringe', q: 'Auf dem Leuchtschirm erscheinen helle Ringe. Was zeigt das?', opts: ['Elektronen interferieren am Kristallgitter des Graphits. Sie zeigen Wellenverhalten.', 'Die Elektronen werden von den Atomen wie Kugeln in feste Richtungen gestoßen.', 'Die Graphitfolie hat ringförmige Löcher.'], correct: 0, ok: 'Die regelmäßig angeordneten Atome wirken wie ein Gitter. Weil die winzigen Kristalle in der Folie beliebig verdreht sind, entstehen Ringe statt Punkte.' });
+  mc(t, { id: 'eb_U', q: 'Erhöhe die Beschleunigungsspannung. Was passiert mit den Ringen?', opts: ['Sie werden kleiner. Schnellere Elektronen haben eine kleinere Wellenlänge.', 'Sie werden größer.', 'Sie bleiben gleich, werden aber heller.'], correct: 0, ok: 'Kleinere Wellenlänge → kleinere Ablenkwinkel, wie beim Gitter. Das passt zu λ = h / p.' });
+  txt(t, 'Jetzt rechnen wir die Wellenlänge aus. Ein Elektron durchläuft die Spannung U und gewinnt die Energie e · U.');
+  mc(t, { id: 'eb_v', q: 'Energieerhaltung: e · U = ½ · m · v². Welche Geschwindigkeit folgt daraus?', opts: ['v = √(2 · e · U / m)', 'v = 2 · e · U / m', 'v = √(e · U / (2 · m))'], correct: 0 });
+  num(t, { id: 'eb_v5', q: 'Berechne die Geschwindigkeit der Elektronen bei U = 5,0 kV.', label: 'v =', unit: 'm/s', value: v5, tol: .02, sol: `v = √(2 · e · U / m)\nv = √(2 · 1,602·10⁻¹⁹ C · 5000 V / 9,109·10⁻³¹ kg) = ${sci(v5)} m/s\n(Das sind etwa 14 % der Lichtgeschwindigkeit.)` });
+  num(t, { id: 'eb_l5', q: 'Berechne die de-Broglie-Wellenlänge dieser Elektronen (1 pm = 10⁻¹² m).', label: 'λ =', unit: 'pm', value: l5 * 1e12, tol: .02, sol: `λ = h / (m · v) = 6,626·10⁻³⁴ Js / (9,109·10⁻³¹ kg · ${sci(v5)} m/s)\nλ = ${sci(l5)} m = ${fmt(l5 * 1e12)} pm\nIn einem Schritt: λ = h / √(2 · m · e · U)` });
+  mc(t, { id: 'eb_gitter', q: 'Warum braucht man als „Gitter“ einen Kristall und kein optisches Gitter?', opts: ['Die Wellenlänge ist nur einige Pikometer groß. Dazu passen nur die Abstände der Atome im Kristall (etwa 100 bis 200 pm).', 'Elektronen kommen nicht durch Glas.', 'Optische Gitter funktionieren nur im Dunkeln.'], correct: 0, ok: 'Für deutliche Interferenz muss die Gitterkonstante in der Größenordnung der Wellenlänge liegen.' });
+  mc(t, { id: 'eb_4', q: 'Die Spannung wird vervierfacht. Wie ändert sich die Wellenlänge?', opts: ['Sie halbiert sich, denn λ ~ 1/√U.', 'Sie wird ein Viertel so groß.', 'Sie verdoppelt sich.'], correct: 0, ok: 'Kontrolle in der Simulation: Von 2,5 kV auf 10 kV halbieren sich die Ringradien (fast genau).' });
+  merk(t, '<b>Materiewellen (de Broglie):</b><br><span class="formel"><i>λ = h / p = h / (m · v)</i><br>nach Beschleunigung mit U: <i>λ = h / √(2 · m · e · U)</i></span>'); nextBtn(t);
+
+  t = begin('s3');
+  info(t, '<b>Claus Jönsson, Tübingen 1961:</b> Er schickte Elektronen durch winzige Spalte in einer Kupferfolie. Später gelang der Versuch auch mit einzelnen Elektronen. Die Simulation zeigt diesen Versuch.');
+  act(t, { id: 'j_beide', q: 'Beide Spalte offen, ohne Spalt-Detektor: Sammle mindestens 1000 Treffer.', test: () => (S.x.bb || 0) >= 1000 ? true : `Bisher höchstens ${S.x.bb || 0} Treffer in dieser Einstellung.`, ok: 'Auch einzelne Elektronen bauen ein Interferenzmuster auf, genau wie Photonen.' });
+  act(t, { id: 'j_einzel', q: 'Setz zurück und öffne nur einen Spalt. Sammle mindestens 300 Treffer.', test: () => (S.x.bs || 0) >= 300 ? true : `Bisher höchstens ${S.x.bs || 0} Treffer mit nur einem Spalt.`, ok: 'Mit nur einem Spalt gibt es eine breite Verteilung ohne Streifen.' });
+  mc(t, { id: 'j_summe', q: 'Erst nur der linke Spalt, dann nur der rechte, und beide Bilder addieren: Ergibt das das Muster für „beide offen“?', opts: ['Nein. Bei „beide offen“ gibt es Stellen, an denen kein Elektron ankommt, obwohl bei jedem Einzelspalt dort welche ankommen.', 'Ja, die Summe ist genau das Streifenmuster.', 'Ja, nur doppelt so hell.'], correct: 0, ok: 'Ein zweiter offener Spalt sorgt dafür, dass an manchen Stellen <i>weniger</i> ankommt. Mit Kugeln ist das unmöglich.' });
+  act(t, { id: 'j_det', q: 'Jetzt wollen wir wissen, durch welchen Spalt jedes Elektron geht. Öffne beide Spalte, schalte den Spalt-Detektor ein, setz zurück und sammle 1000 Treffer.', test: () => (S.x.bd || 0) >= 1000 ? true : `Bisher höchstens ${S.x.bd || 0} Treffer mit Spalt-Detektor.`, ok: 'Die Streifen sind weg.' });
+  mc(t, { id: 'j_kompl', q: 'Was passiert, sobald man den Weg jedes Elektrons kennt?', opts: ['Das Interferenzmuster verschwindet. Es bleibt die breite Verteilung wie bei zwei einzelnen Spalten.', 'Das Interferenzmuster wird schärfer.', 'Es kommen keine Elektronen mehr an.'], correct: 0, ok: '<b>Komplementarität:</b> „Welcher-Weg-Information“ und Interferenzmuster schließen sich aus.' });
+  mc(t, { id: 'j_stoer', q: 'Liegt das nur an einem ungeschickt gebauten Detektor?', opts: ['Nein. Es kommt nicht auf die Bauart an: Sobald die Weg-Information prinzipiell vorliegt, gibt es keine Interferenz.', 'Ja, mit einem besseren Detektor bliebe das Muster.', 'Ja, der Detektor wirft einen Schatten.'], correct: 0 });
+  num(t, { id: 'j_l', q: 'Jönsson beschleunigte die Elektronen mit U = 50 kV. Berechne ihre Wellenlänge (ohne relativistische Korrektur).', label: 'λ =', unit: 'pm', value: l50 * 1e12, tol: .03, d: 2, sol: `λ = h / √(2 · m · e · U)\nλ = 6,626·10⁻³⁴ Js / √(2 · 9,109·10⁻³¹ kg · 1,602·10⁻¹⁹ C · 50 000 V) = ${fmt(l50 * 1e12, 2)} pm\n(relativistisch genau gerechnet: 5,36 pm)` });
+  num(t, { id: 'j_da', q: 'Der Spaltabstand war g = 2,0 µm, der Schirm e = 0,35 m entfernt. Welchen Abstand haben benachbarte Maxima? Rechne mit λ = 5,5 pm.', label: 'Δa =', unit: 'µm', value: 5.5e-12 * .35 / 2e-6 * 1e6, tol: .03, d: 2, sol: `kleine Winkel: Δa = λ · e / g = 5,5·10⁻¹² m · 0,35 m / 2,0·10⁻⁶ m\nΔa = 9,6·10⁻⁷ m ≈ 0,96 µm\nDeshalb musste Jönsson das Muster stark vergrößern.` });
+  nextBtn(t);
+
+  t = begin('s4');
+  txt(t, 'Gilt λ = h / p für alle Objekte? Probier links verschiedene Objekte und Geschwindigkeiten aus.');
+  num(t, { id: 'o_c60', q: 'Fulleren-Moleküle C₆₀ (m = 1,2·10⁻²⁴ kg) fliegen mit v = 200 m/s. Berechne ihre de-Broglie-Wellenlänge.', label: 'λ =', unit: 'pm', value: lc60 * 1e12, tol: .03, d: 2, sol: `λ = h / (m · v) = 6,626·10⁻³⁴ Js / (1,2·10⁻²⁴ kg · 200 m/s)\nλ = ${sci(lc60)} m = ${fmt(lc60 * 1e12, 2)} pm` });
+  info(t, 'Mit solchen Molekülen aus 60 Kohlenstoffatomen wurde 1999 in Wien tatsächlich Interferenz an einem Gitter nachgewiesen. Inzwischen klappt das auch mit Molekülen aus mehreren Tausend Atomen.');
+  num(t, { id: 'o_ball', q: 'Ein Tennisball (m = 58 g) fliegt mit 50 m/s. Welche Wellenlänge hätte er?', label: 'λ =', unit: 'm', value: lball, tol: .03, sol: `λ = h / (m · v) = 6,626·10⁻³⁴ Js / (0,058 kg · 50 m/s) = ${sci(lball)} m` });
+  mc(t, { id: 'o_warum', q: 'Warum sieht man bei Tennisbällen keine Interferenz?', opts: ['Die Wellenlänge ist viel kleiner als ein Atomkern. Es gibt keinen Spalt und keinen Messaufbau, mit dem man so ein Muster auflösen könnte.', 'Weil Tennisbälle keine Ladung haben.', 'Weil λ = h / p nur für Elektronen gilt.'], correct: 0, ok: 'Außerdem steht ein großer Körper ständig mit seiner Umgebung in Kontakt (Luft, Licht). Dadurch liegt immer „Weg-Information“ vor.' });
+  mc(t, { id: 'o_qo', q: 'Photonen, Elektronen, Neutronen, Atome, Moleküle: Was haben diese <b>Quantenobjekte</b> gemeinsam?', opts: ['Sie werden einzeln und punktförmig nachgewiesen, ihre Verteilung zeigt aber Interferenz.', 'Sie sind kleine Kugeln, die auf festen Bahnen fliegen.', 'Sie sind Wellen, die sich beim Nachweis gleichmäßig verteilen.'], correct: 0, ok: 'Weder „Welle“ noch „Teilchen“ beschreibt sie vollständig. Im nächsten Modul geht es um ihre Wesenszüge.' });
+  nextBtn(t, 'Weiter zum Training →');
+}
+
+/* ---------- Training ---------- */
+const GEN = [
+  () => { const v = rnd(1, 9, .5) * pick([1e5, 1e6]), l = H / (ME * v); return { q: 'Berechne die de-Broglie-Wellenlänge eines Elektrons.', given: `v = ${sci(v, 1)} m/s`, label: 'λ =', unit: 'nm', value: l * 1e9, tol: .02, d: 3, sol: `λ = h / (m · v) = 6,626·10⁻³⁴ Js / (9,109·10⁻³¹ kg · ${sci(v, 1)} m/s)\nλ = ${sci(l)} m = ${auto(l * 1e9, 3)} nm` }; },
+  () => { const U = pick([100, 150, 250, 400, 600, 1000, 2000, 4000, 8000]), l = lamU(U); return { q: 'Elektronen werden aus der Ruhe mit der Spannung U beschleunigt. Berechne ihre de-Broglie-Wellenlänge.', given: `U = ${U} V`, label: 'λ =', unit: 'pm', value: l * 1e12, tol: .02, sol: `λ = h / √(2 · m · e · U)\nλ = 6,626·10⁻³⁴ Js / √(2 · 9,109·10⁻³¹ kg · 1,602·10⁻¹⁹ C · ${U} V)\nλ = ${sci(l)} m = ${fmt(l * 1e12)} pm` }; },
+  () => { const lp = pick([5, 8, 10, 15, 20, 40, 50, 100]), U = H * H / (2 * ME * QE * lp * lp * 1e-24); return { q: 'Welche Beschleunigungsspannung brauchen Elektronen für diese Wellenlänge?', given: `λ = ${lp} pm`, label: 'U =', unit: 'V', value: U, tol: .03, d: 0, sol: `λ = h / √(2 · m · e · U)  ⇒  U = h² / (2 · m · e · λ²)\nU = (6,626·10⁻³⁴ Js)² / (2 · 9,109·10⁻³¹ kg · 1,602·10⁻¹⁹ C · (${lp}·10⁻¹² m)²)\nU = ${auto(U, 0)} V` }; },
+  () => { const U = pick([50, 200, 500, 1500, 3000, 6000]), v = Math.sqrt(2 * QE * U / ME); return { q: 'Welche Geschwindigkeit erreichen Elektronen nach dem Durchlaufen der Spannung U?', given: `U = ${U} V`, label: 'v =', unit: 'm/s', value: v, tol: .02, sol: `e · U = ½ · m · v²  ⇒  v = √(2 · e · U / m)\nv = √(2 · 1,602·10⁻¹⁹ C · ${U} V / 9,109·10⁻³¹ kg) = ${sci(v)} m/s` }; },
+  () => { const v = pick([500, 1000, 2200, 4000, 8000]), l = H / (1.675e-27 * v); return { q: 'Berechne die de-Broglie-Wellenlänge eines Neutrons (m = 1,675·10⁻²⁷ kg).', given: `v = ${v} m/s`, label: 'λ =', unit: 'pm', value: l * 1e12, tol: .02, sol: `λ = h / (m · v) = 6,626·10⁻³⁴ Js / (1,675·10⁻²⁷ kg · ${v} m/s)\nλ = ${sci(l)} m = ${fmt(l * 1e12)} pm` }; },
+  () => { const lp = pick([5, 10, 20, 50]), g = pick([1, 2, 5]), e = pick([.2, .35, .5, 1]), v = lp * 1e-12 * e / (g * 1e-6) * 1e6; return { q: 'Elektronen am Doppelspalt: Welchen Abstand haben benachbarte Maxima auf dem Schirm?', given: `λ = ${lp} pm · g = ${fmt(g)} µm · e = ${fmt(e, 2)} m`, label: 'Δa =', unit: 'µm', value: v, tol: .02, d: 2, sol: `kleine Winkel: Δa = λ · e / g\nΔa = ${lp}·10⁻¹² m · ${fmt(e, 2)} m / ${fmt(g)}·10⁻⁶ m = ${sci(v * 1e-6)} m = ${fmt(v, 2)} µm` }; },
+  () => { const lp = pick([10, 25, 50, 100, 200]), v = H / (ME * lp * 1e-12); return { q: 'Wie schnell muss ein Elektron sein, damit es diese de-Broglie-Wellenlänge hat?', given: `λ = ${lp} pm`, label: 'v =', unit: 'm/s', value: v, tol: .02, sol: `λ = h / (m · v)  ⇒  v = h / (m · λ)\nv = 6,626·10⁻³⁴ Js / (9,109·10⁻³¹ kg · ${lp}·10⁻¹² m) = ${sci(v)} m/s` }; },
+  () => { const m = pick([[1.67e-27, 'Proton (m = 1,67·10⁻²⁷ kg)'], [6.64e-27, 'Heliumatom (m = 6,64·10⁻²⁷ kg)'], [1.2e-24, 'C₆₀-Molekül (m = 1,2·10⁻²⁴ kg)']]), v = pick([100, 200, 500, 1000]), l = H / (m[0] * v); return { q: 'Berechne die de-Broglie-Wellenlänge.', given: `${m[1]} · v = ${v} m/s`, label: 'λ =', unit: 'pm', value: l * 1e12, tol: .03, d: 2, sol: `λ = h / (m · v) = 6,626·10⁻³⁴ Js / (${sci(m[0])} kg · ${v} m/s)\nλ = ${sci(l)} m = ${auto(l * 1e12, 2)} pm` }; }
+];
+const QUIZ = [
+  { q: 'Einzelne Photonen treffen nacheinander auf einen Doppelspalt. Was sieht man nach wenigen Photonen?', o: ['Einzelne, scheinbar zufällig verteilte Punkte', 'Ein schwaches, aber vollständiges Streifenmuster', 'Zwei Punkte hinter den Spalten'] },
+  { q: 'Was beschreibt die Intensität der Welle beim Doppelspalt mit einzelnen Quantenobjekten?', o: ['Die Nachweiswahrscheinlichkeit an jeder Stelle des Schirms', 'Die Bahn des einzelnen Quantenobjekts', 'Die Energie eines einzelnen Treffers'] },
+  { q: 'Wie lautet die de-Broglie-Beziehung?', o: ['λ = h / p', 'λ = h · p', 'λ = p / h', 'λ = h · f'] },
+  { q: 'Die Geschwindigkeit eines Elektrons verdoppelt sich. Seine de-Broglie-Wellenlänge …', o: ['halbiert sich', 'verdoppelt sich', 'vervierfacht sich', 'bleibt gleich'] },
+  { q: 'In der Elektronenbeugungsröhre wird die Spannung erhöht. Die Ringe …', o: ['werden kleiner', 'werden größer', 'verschwinden', 'ändern nur ihre Farbe'] },
+  { q: 'Was passiert am Doppelspalt, wenn man misst, durch welchen Spalt jedes Elektron geht?', o: ['Das Interferenzmuster verschwindet.', 'Das Interferenzmuster bleibt unverändert.', 'Die Streifen rücken zusammen.'] },
+  { q: 'Welcher Wesenszug steckt hinter „Der einzelne Treffer ist nicht vorhersagbar, die Verteilung vieler Treffer schon“?', o: ['Statistisches Verhalten', 'Komplementarität', 'Energieerhaltung'] },
+  { q: 'Warum zeigt ein Fußball am Tor keine Interferenz?', o: ['Seine de-Broglie-Wellenlänge ist unmessbar klein.', 'λ = h / p gilt nur für geladene Teilchen.', 'Er ist zu langsam.'] },
+  { q: 'Elektronen und Protonen werden mit derselben Spannung beschleunigt. Wer hat die kleinere Wellenlänge?', o: ['Die Protonen, weil sie bei gleicher Energie den größeren Impuls haben', 'Die Elektronen', 'Beide gleich'] },
+  { q: 'Das Muster bei „beide Spalte offen“ ist …', o: ['nicht die Summe der beiden Einzelspalt-Verteilungen', 'genau die Summe der beiden Einzelspalt-Verteilungen', 'immer gleichmäßig'] }
+];
+
+/* ---------- Regler und Start ---------- */
+function wire(sim, pre, withOne) {
+  if (withOne) $(pre + 'a').onclick = () => { sim.add(1); sim.draw(); };
+  $(pre + 'b').onclick = () => { sim.add(10); sim.draw(); };
+  $(pre + 'run').onclick = e => { sim.run = !sim.run; e.target.textContent = sim.run ? 'Dauerfeuer aus' : 'Dauerfeuer an'; };
+  $(pre + 'reset').onclick = () => sim.reset();
+}
+wire(A, '#h1', true); wire(B3, '#h3', false);
+bind('#h1rate', v => { A.rate = v; $('#h1rateO').textContent = RN[v]; }); $('#h1rateO').textContent = RN[2]; B3.rate = 3;
+seg('#h1curve', m => { A.curve = m === '1'; A.draw(); });
+seg('#h3det', m => { E3.det = m === '1'; B3.reset(); });
+seg('#h3mode', m => { E3.mode = m; B3.reset(); });
+bind('#ebU', v => { EB.U = v; ebDraw(); });
+{ const box = $('#obj'); Object.keys(OBJ).forEach(k => { const b = el('button', '', OBJ[k][0]); b.type = 'button'; b.setAttribute('aria-pressed', k === OB.k); b.onclick = () => { OB.k = k; box.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); obDraw(); }; box.appendChild(b); }); }
+bind('#obV', v => { OB.lv = v; obDraw(); });
+let last = 0;
+function loop(ts) { const dt = Math.min(.05, (ts - last) / 1000 || 0); last = ts;
+  [[A, 's1'], [B3, 's3']].forEach(([s, id]) => { if (active === id && s.run) { s.acc += RATES[s.rate] * dt; const k = Math.floor(s.acc); if (k) { s.acc -= k; s.add(k); s.draw(); } } });
+  requestAnimationFrame(loop); }
+function betDraw(c, k) { // feste Zufallszahlen, damit die Bilder stillstehen
+  const [x, w, h] = fit(c); x.fillStyle = '#060A10'; x.fillRect(0, 0, w, h); if (k === 3) return; let s = 7 + k; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; x.fillStyle = '#FF5A3C';
+  const P = [u => Math.exp(-Math.pow((u - .25) / .09, 2)) + Math.exp(-Math.pow((u + .25) / .09, 2)), () => 1, PAT.both][k];
+  for (let i = 0; i < 420; i++) { let u; do { u = r() * 2 - 1; } while (r() > P(u)); x.fillRect(w / 2 + u * (w / 2 - 6), 5 + r() * (h - 10), 2, 2); }
+}
+start({
+  tabs: [['Wette', 's0', 'bet'], ['Einzelne Photonen', 's1'], ['Elektronenwellen', 's2'], ['Welcher Weg?', 's3'], ['Große Objekte', 's4'], ['Training', 's5', 'train'], ['Exit-Check', 's6', 'quiz']],
+  bet: { opts: ['Zwei Streifen, je einer hinter jedem Spalt', 'Gleichmäßig verteilte Punkte', 'Interferenzstreifen aus vielen einzelnen Punkten', 'Nichts. Einzelne Photonen kommen nicht durch.'], correct: 2, draw: betDraw, later: 'Gleich schießt du selbst Photon für Photon auf den Doppelspalt.', reveal: 'Aus vielen einzelnen Treffern entsteht nach und nach das Interferenzmuster.' },
+  x: { a: 0, bb: 0, bd: 0, bs: 0 }, build, gen: GEN, quiz: QUIZ,
+  draw: a => { if (a === 's1') A.draw(); if (a === 's2') ebDraw(); if (a === 's3') B3.draw(); if (a === 's4') obDraw(); },
+  detail: { s1: () => 'max. ' + (S.x.a || 0) + ' Treffer', s3: () => `Treffer: beide ${S.x.bb || 0}, mit Detektor ${S.x.bd || 0}, Einzelspalt ${S.x.bs || 0}` }
+});
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
