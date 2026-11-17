@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EM-Wellen-Labor TG2</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: Kopf mit Punktestand, Stationen-Tabs (Reihenfolge = Unterrichtsgang), je Station Bühne (Simulation) + Aufträge mit Sofort-Feedback; stapelt im Hochformat */
+:root{
+  --bg:#F2F5F8; --panel:#FFFFFF; --ink:#15253A; --muted:#58697C; --line:#D3DCE6;
+  --navy:#1F3A5F; --green:#3C7A4E; --greenSoft:#E2F0E5; --navySoft:#E3EAF3;
+  --orange:#C2571A; --blue:#2F6FB5; --bad:#B3261E; --badSoft:#FBE6E4; --warnSoft:#FFF3D6;
+  --f-display:"Bricolage Grotesque",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1621; --panel:#162131; --ink:#E5ECF4; --muted:#9BABBD; --line:#2A3A4F;
+  --navy:#93B4DE; --green:#6FC089; --greenSoft:#1B3325; --navySoft:#1B293C;
+  --orange:#F09A5E; --blue:#7FB2EE; --bad:#F2918A; --badSoft:#3B1F1E; --warnSoft:#3A321C; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:18px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,44px);line-height:1.05;margin:0;color:var(--navy);letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--muted);letter-spacing:0;margin-top:6px}
+.score{font-family:var(--f-mono);font-size:15px;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap}
+.score b{color:var(--green);font-size:20px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:thin}
+nav button{flex:0 0 auto;font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer;display:flex;gap:8px;align-items:center}
+nav button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+nav button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+nav button[aria-selected="true"] .n{color:var(--bg);opacity:.75}
+nav button .done{color:var(--green);font-weight:700}
+nav button[aria-selected="true"] .done{color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+section.st{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:start}
+section.st.single{grid-template-columns:minmax(0,1fr);max-width:820px}
+@media (max-width:900px){section.st{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:901px){.stage{position:sticky;top:10px}}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:23px;margin:0 0 6px;color:var(--navy);text-wrap:balance}
+.card h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:22px 0 4px;color:var(--navy)}
+.lead{color:var(--muted);margin:0 0 12px}
+canvas{display:block;width:100%;max-width:100%;border-radius:10px;background:var(--bg)}
+canvas.dark{background:#060A10}
+canvas.tap{cursor:crosshair}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:16px;border-radius:10px;border:1.5px solid var(--navy);background:var(--navy);color:var(--bg);padding:10px 16px;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--navy)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:inline-flex;border:1.5px solid var(--navy);border-radius:10px;overflow:hidden}
+.seg button{font:inherit;font-size:15px;border:0;background:transparent;color:var(--navy);padding:9px 14px;min-height:44px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+.task{border:2px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.task.solved{border-color:var(--green)}
+.task p{margin:0 0 10px}
+.task .q{font-weight:700}
+.given{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin:0 0 10px;line-height:1.7}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-size:16px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer}
+.opts button.ok{border-color:var(--green);background:var(--greenSoft)}
+.opts button.no{border-color:var(--bad);background:var(--badSoft)}
+.opts button:disabled{cursor:default;opacity:1}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.ans label{font-weight:700;font-family:var(--f-mono)}
+.ans input{font:inherit;font-family:var(--f-mono);font-size:18px;width:8em;max-width:100%;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+.ans input.ok{border-color:var(--green);background:var(--greenSoft)}
+.ans input.no{border-color:var(--bad);background:var(--badSoft)}
+.unit{font-family:var(--f-mono);font-size:16px;color:var(--muted)}
+.feedback{border-radius:10px;padding:10px 14px;margin-top:10px}
+.feedback.ok{background:var(--greenSoft);border:1.5px solid var(--green)}
+.feedback.no{background:var(--badSoft);border:1.5px solid var(--bad)}
+.feedback.info{background:var(--navySoft);border:1.5px solid var(--line)}
+.feedback.warn{background:var(--warnSoft);border:1.5px solid var(--line)}
+.steps{font-family:var(--f-mono);font-size:14.5px;line-height:1.8;white-space:pre-wrap;margin:6px 0 0}
+.slider{display:grid;grid-template-columns:auto minmax(0,1fr) 7.2em;gap:10px;align-items:center;margin-top:10px}
+.slider label{font-weight:700}
+.slider output{font-family:var(--f-mono);font-size:15px;text-align:right;white-space:nowrap}
+input[type=range]{width:100%;height:44px;margin:0;accent-color:var(--navy)}
+.read{font-family:var(--f-mono);font-size:15px;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.7;min-height:2.6em}
+.merk{border-left:5px solid var(--green);background:var(--greenSoft);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:14px}
+.merk b{color:var(--green)}
+.formel{font-family:var(--f-mono);font-size:17px}.formel i{font-style:normal;white-space:nowrap;display:inline-block}
+table.ord{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:14.5px;margin-top:10px}
+table.ord th,table.ord td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:right}
+table.ord th{color:var(--muted);font-weight:500}
+.small{font-size:14.5px;color:var(--muted)}
+.bets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.bets{grid-template-columns:minmax(0,1fr)}}
+.bets button{font:inherit;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px;cursor:pointer}
+.bets button[aria-pressed="true"]{border-color:var(--navy);background:var(--navySoft)}
+.bets canvas{height:54px;margin-bottom:8px}
+.meter{height:22px;border-radius:999px;background:var(--bg);border:1.5px solid var(--line);overflow:hidden;margin-top:10px}
+.meter i{display:block;height:100%;background:var(--green);width:0}
+.next{margin-top:16px;display:flex;justify-content:flex-end}
+.cbx{display:inline-flex;align-items:center;gap:6px;font-weight:700;min-height:44px;padding:0 10px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;user-select:none}
+.cbx input{width:20px;height:20px;accent-color:var(--navy)}
+.info{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;background:var(--navySoft);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:15.5px}
+.info b{color:var(--navy)}
+.info .big{font-family:var(--f-display);font-size:22px;font-weight:700;color:var(--navy);grid-column:1/-1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips button{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:44px;cursor:pointer}
+.chips button:hover{border-color:var(--navy)}
+.sort{display:grid;gap:8px;margin-top:6px}
+.sort button{font:inherit;font-size:16px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer;display:flex;gap:10px;align-items:center}
+.sort button .nr{font-family:var(--f-mono);font-weight:700;color:var(--green);min-width:1.4em}
+.sort button.ok{border-color:var(--green);background:var(--greenSoft)}
+.sort button.no{border-color:var(--bad);background:var(--badSoft)}
+.pix{display:grid;grid-template-columns:repeat(7,minmax(0,46px));gap:3px;margin-top:10px}
+.pix button{aspect-ratio:1;min-height:40px;border:1.5px solid var(--line);background:var(--panel);border-radius:6px;cursor:pointer;padding:0}
+.pix button.on{background:var(--ink);border-color:var(--ink)}
+.pix button.ok{outline:3px solid var(--green);outline-offset:-3px}
+.pix button.no{outline:3px solid var(--bad);outline-offset:-3px}
+.bits{font-family:var(--f-mono);font-size:15px;line-height:1.6;background:var(--navySoft);border-radius:8px;padding:8px 12px;margin-top:10px;white-space:pre}
+.tuner{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:10px;font-family:var(--f-mono);font-size:15px}
+.tuner .disp{background:#0d1a12;color:#7CFF9B;border-radius:8px;padding:8px 14px;font-size:20px;letter-spacing:.04em;min-width:9.5em;text-align:center}
+.lampwrap{display:flex;align-items:center;gap:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>EM-Wellen-Labor<small>TG2 · Was der Dipol abstrahlt, das Spektrum, Radio und Bilder per Funk</small></h1>
+  <div class="score" aria-live="polite">Punkte: <b id="pts">0</b> / <span id="ptsMax">0</span></div>
+</header>
+<nav id="tabs" role="tablist"></nav>
+
+<!-- 1 Die Welle -->
+<section class="st" id="s1">
+  <div class="card stage">
+    <h2>Die elektromagnetische Welle</h2>
+    <p class="lead">So sieht die Welle weit weg vom Dipol aus (Fernfeld). Rot ist das E-Feld, blau das B-Feld. Dreh die Welle und schau sie dir von allen Seiten an.</p>
+    <canvas id="c1" height="300"></canvas>
+    <div class="row" style="margin-top:10px">
+      <div class="seg" id="w_view"><button type="button" data-m="schraeg" aria-pressed="true">Schräg</button><button type="button" data-m="seite" aria-pressed="false">Seite</button><button type="button" data-m="oben" aria-pressed="false">Oben</button><button type="button" data-m="vorne" aria-pressed="false">Vorne</button></div>
+      <button class="btn ghost" type="button" id="w_pause">Anhalten</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label class="cbx"><input type="checkbox" id="w_E" checked> E-Feld</label>
+      <label class="cbx"><input type="checkbox" id="w_B" checked> B-Feld</label>
+    </div>
+    <div class="slider"><label for="w_yaw">Drehen</label><input type="range" id="w_yaw" min="-90" max="90" step="1" value="-32"><output id="w_yawO"></output></div>
+    <div class="slider"><label for="w_lam">λ</label><input type="range" id="w_lam" min="0.6" max="1.6" step="0.05" value="1"><output id="w_lamO"></output></div>
+    <h3>Empfang mit dem Lämpchen</h3>
+    <p class="lead" style="margin-bottom:6px">Der Sendedipol steht senkrecht. Dreh den Empfangsdipol und beobachte das Lämpchen.</p>
+    <canvas id="c1b" height="210"></canvas>
+    <div class="row" style="margin-top:10px">
+      <div class="seg" id="r_pos"><button type="button" data-m="neben" aria-pressed="true">Empfänger daneben</button><button type="button" data-m="achse" aria-pressed="false">Empfänger über dem Sender</button></div>
+    </div>
+    <div class="slider"><label for="r_ang">Winkel</label><input type="range" id="r_ang" min="0" max="90" step="1" value="0"><output id="r_angO"></output></div>
+    <div class="meter" aria-hidden="true"><i id="r_meter"></i></div>
+  </div>
+  <div class="card" id="t1"></div>
+</section>
+
+<!-- 2 Spektrum -->
+<section class="st" id="s2" hidden>
+  <div class="card stage">
+    <h2>Eine Familie, viele Namen</h2>
+    <p class="lead">Schieb durch das ganze Spektrum: von Wellen, die länger sind als ein Dorf, bis zu Wellen, die kleiner sind als ein Atom.</p>
+    <canvas id="c2" height="150"></canvas>
+    <div class="slider"><label for="sp_l">λ</label><input type="range" id="sp_l" min="-13" max="4" step="0.02" value="0.48"><output id="sp_lO"></output></div>
+    <div class="chips" id="sp_chips"></div>
+    <div class="info" id="sp_info"></div>
+  </div>
+  <div class="card" id="t2"></div>
+</section>
+
+<!-- 3 Radio -->
+<section class="st" id="s3" hidden>
+  <div class="card stage">
+    <h2>Vom Ton zur Welle</h2>
+    <p class="lead">Ein Ton hat nur ein paar hundert Schwingungen pro Sekunde. Er wird auf eine schnelle Trägerwelle „aufgeladen“. Das heißt Modulation.</p>
+    <canvas id="c3a" height="270"></canvas>
+    <div class="row" style="margin-top:10px">
+      <div class="seg" id="m_mode"><button type="button" data-m="am" aria-pressed="true">AM</button><button type="button" data-m="fm" aria-pressed="false">FM</button></div>
+    </div>
+    <div class="slider"><label for="m_ton">Tonhöhe</label><input type="range" id="m_ton" min="1" max="4" step="0.5" value="2"><output id="m_tonO"></output></div>
+    <div class="slider"><label for="m_vol">Lautstärke</label><input type="range" id="m_vol" min="0" max="1" step="0.05" value="0.6"><output id="m_volO"></output></div>
+    <h3>Der Empfänger: Sender einstellen</h3>
+    <p class="lead" style="margin-bottom:6px">Die Antenne empfängt alle Sender gleichzeitig. Ein Schwingkreis (L = 0,10 µH) mit Drehkondensator sucht sich einen heraus. Dreh am Kondensator.</p>
+    <canvas id="c3b" height="190"></canvas>
+    <div class="slider"><label for="t_C">C</label><input type="range" id="t_C" min="21.5" max="33.5" step="0.02" value="31"><output id="t_CO"></output></div>
+    <div class="tuner"><span class="disp" id="t_disp">--,- MHz</span><span id="t_name">Rauschen</span><button class="btn ghost" type="button" id="t_sound">Ton an</button></div>
+    <canvas id="c3c" height="90" style="margin-top:10px"></canvas>
+  </div>
+  <div class="card" id="t3"></div>
+</section>
+
+<!-- 4 Bild -->
+<section class="st" id="s4" hidden>
+  <div class="card stage">
+    <h2>Ein Bild per Funk</h2>
+    <p class="lead">Ein Bild besteht aus Pixeln. Jedes Pixel ist eine Zahl, jede Zahl besteht aus Bits (0 oder 1). Die Bits reiten auf der Trägerwelle: Träger an = 1, Träger aus = 0.</p>
+    <div class="row"><div class="seg" id="b_mode"><button type="button" data-m="send" aria-pressed="true">Senden</button><button type="button" data-m="recv" aria-pressed="false">Empfangen</button></div></div>
+    <div id="b_send">
+      <p class="small" style="margin:10px 0 0">Tippe Pixel an. Darunter siehst du, was die Antenne sendet.</p>
+      <div class="pix" id="b_grid"></div>
+      <div class="bits" id="b_bits"></div>
+      <canvas id="c4a" height="240" style="margin-top:10px"></canvas>
+    </div>
+    <div id="b_recv" hidden>
+      <p class="small" style="margin:10px 0 0">Hier kommt ein Bild an. Lies Zeile für Zeile ab: Träger da = schwarzes Pixel. Tippe die Pixel an und prüfe.</p>
+      <canvas id="c4b" height="250" style="margin-top:8px"></canvas>
+      <div class="pix" id="r_grid"></div>
+      <div class="row" style="margin-top:10px"><button class="btn" type="button" id="r_check">Prüfen</button><button class="btn ghost" type="button" id="r_next" hidden>Nächstes Bild</button></div>
+      <div class="feedback" id="r_fb" hidden></div>
+    </div>
+  </div>
+  <div class="card" id="t4"></div>
+</section>
+
+<!-- 5 Exit -->
+<section class="st single" id="s5" hidden><div class="card">
+  <h2>Exit-Check</h2>
+  <p class="lead">Acht Fragen quer durch die Stunde. Du kannst so oft spielen, wie du willst.</p>
+  <div id="qzBox"></div>
+</div></section>
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+"use strict";
+/* ===================== Helfer ===================== */
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmt = (x, d = 1) => Number(x).toFixed(d).replace('.', ',').replace('-', '−');
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function parse(v) {
+  v = String(v).trim().replace(/\s/g, '').replace(/,/g, '.').replace(/−/g, '-').replace(/[·*x×]10\^?/i, 'e');
+  if (v === '') return NaN; const n = Number(v); return isFinite(n) ? n : NaN;
+}
+function fit(c) { // Canvas an Breite und Pixeldichte anpassen
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth, h = +c.getAttribute('height') || 200;
+  if (!c._h) c._h = h;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(c._h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(c._h * dpr); c.style.height = c._h + 'px'; }
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, c._h); return [x, w, c._h];
+}
+function rr(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
+/* Wellenlänge (nm) → Farbe */
+function rgb(l) {
+  let r = 0, g = 0, b = 0;
+  if (l < 440) { r = (440 - l) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = (510 - l) / 20; }
+  else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = (645 - l) / 65; } else { r = 1; }
+  let f = 1; if (l < 420) f = .35 + .65 * (l - 380) / 40; else if (l > 680) f = .35 + .65 * (750 - l) / 70;
+  return [r * f, g * f, b * f];
+}
+const css = (c, i = 1) => { const k = Math.pow(Math.max(0, Math.min(1, i)), .55); return `rgb(${Math.round(255 * c[0] * k)},${Math.round(255 * c[1] * k)},${Math.round(255 * c[2] * k)})`; };
+const farbe = l => l < 450 ? 'violett' : l < 490 ? 'blau' : l < 520 ? 'blaugrün' : l < 565 ? 'grün' : l < 590 ? 'gelb' : l < 625 ? 'orange' : 'rot';
+/* Intensität hinter N Spalten (auf 1 normiert), s = sin α */
+/* ===================== Aufgaben-Bausteine ===================== */
+function mc(host, o) { // {id,q,opts,correct,fb,ok,p}
+  const p = o.p == null ? 1 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'), bs = []; let tries = 0;
+  d.innerHTML = `<p class="q">${o.q}</p>`; const box = el('div', 'opts'), fb = el('div', 'feedback'); fb.hidden = true;
+  const fin = () => { d.classList.add('solved'); bs.forEach((b, i) => { b.disabled = true; if (i === o.correct) b.classList.add('ok'); }); fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Richtig.</b> ' + (o.ok || ''); };
+  o.opts.forEach((t, i) => {
+    const b = el('button', '', t); b.type = 'button'; bs.push(b); box.appendChild(b);
+    b.onclick = () => {
+      tries++;
+      if (i === o.correct) { fin(); solve(o.id, tries === 1 ? p : 0); }
+      else { b.classList.add('no'); b.disabled = true; fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = (o.fb && o.fb[i]) || 'Das passt noch nicht. Probier es an der Simulation aus.'; }
+    };
+  });
+  d.append(box, fb); host.appendChild(d); if (o.id in S.sol) fin(); return d;
+}
+function num(host, o) { // {id,q,given,label,unit,value,tol,abs,d,sol,p}
+  const p = o.p == null ? 2 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'); let tries = 0;
+  d.innerHTML = `<p class="q">${o.q}</p>${o.given ? `<div class="given">${o.given}</div>` : ''}<div class="ans"><label>${o.label}</label><input type="text" inputmode="decimal" autocomplete="off" aria-label="${o.label.replace(/<[^>]+>/g, '')}"><span class="unit">${o.unit}</span><button class="btn" type="button">Prüfen</button><button class="btn ghost" type="button" hidden>Lösungsweg zeigen</button></div><div class="feedback" hidden></div>`;
+  const inp = d.querySelector('input'), [bt, bs] = d.querySelectorAll('button'), fb = d.querySelector('.feedback');
+  const val = () => typeof o.value === 'function' ? o.value() : o.value;
+  const fin = (self) => { d.classList.add('solved'); inp.disabled = bt.disabled = true; bs.hidden = true; if (!self || !inp.value) inp.value = fmt(val(), o.d == null ? 1 : o.d); inp.className = 'ok'; fb.hidden = false; fb.className = 'feedback ' + (self ? 'ok' : 'info'); fb.innerHTML = (self ? '<b>Richtig.</b>' : '<b>Lösungsweg:</b>') + (o.sol ? `<div class="steps">${o.sol}</div>` : ''); };
+  const check = () => {
+    const x = parse(inp.value), v = val(); if (isNaN(x)) { fb.hidden = false; fb.className = 'feedback warn'; fb.textContent = 'Gib eine Zahl ein, zum Beispiel 6,3 oder 6,3e-7.'; return; }
+    tries++;
+    if (Math.abs(x - v) <= (o.abs != null ? o.abs : Math.abs(v) * (o.tol || .03))) { fin(true); solve(o.id, tries <= 2 ? p : Math.ceil(p / 2)); return; }
+    inp.className = 'no'; fb.hidden = false; fb.className = 'feedback no';
+    const q = Math.log10(Math.abs(x / v)), zehner = Math.abs(q - Math.round(q)) < .02 && Math.round(q) !== 0;
+    fb.innerHTML = zehner ? `Die Ziffern stimmen, aber die Zehnerpotenz nicht. Gefragt ist das Ergebnis in <b>${o.unit}</b>.` : (o.hint || 'Noch nicht. Prüf Einheiten und Formel, dann noch einmal.');
+    if (tries >= 2) bs.hidden = false;
+  };
+  bt.onclick = check; inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+  bs.onclick = () => { fin(false); solve(o.id, 0); };
+  host.appendChild(d); if (o.id in S.sol) fin(S.p[o.id] > 0); return d;
+}
+function act(host, o) { // Auftrag an der Simulation: {id,q,btn,test:()=>true|'Hinweis',ok,p}
+  const p = o.p == null ? 1 : o.p; need(o.id, p, o.optional);
+  const d = el('div', 'task'); d.innerHTML = `<p class="q">${o.q}</p><button class="btn" type="button">${o.btn || 'Prüfen'}</button><div class="feedback" hidden></div>`;
+  const b = d.querySelector('button'), fb = d.querySelector('.feedback');
+  const fin = () => { d.classList.add('solved'); b.disabled = true; fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Geschafft.</b> ' + (o.ok || ''); };
+  b.onclick = () => { const r = o.test(); if (r === true) { fin(); solve(o.id, p); } else { fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = r; } };
+  host.appendChild(d); if (o.id in S.sol) fin(); return d;
+}
+const merk = (host, h) => host.appendChild(el('div', 'merk', h));
+const h3 = (host, t) => host.appendChild(el('h3', '', t));
+const txt = (host, t) => host.appendChild(el('p', 'lead', t));
+
+/* ===================== Stand ===================== */
+let S = { sol: {}, p: {}, quiz: [], seen: {}, recv: 0 };
+let appLive = false;
+const appChanged = () => { if (window.AppBridge && appLive) AppBridge.changed(); };
+const MAXP = {}, REQ = {};
+let cur = null;
+function need(id, p, optional) { MAXP[id] = p; if (!optional) (REQ[cur] = REQ[cur] || []).push(id); }
+function solve(id, p) { if (id in S.sol) return; S.sol[id] = 1; S.p[id] = p; refresh(); appChanged(); }
+const points = () => Object.values(S.p).reduce((a, b) => a + b, 0);
+const isDone = sid => sid === 's5' ? S.quiz.length > 0 : (REQ[sid] || []).every(id => id in S.sol);
+const TABS = [['Die Welle', 's1'], ['Spektrum', 's2'], ['Radio', 's3'], ['Bild per Funk', 's4'], ['Exit-Check', 's5']];
+let active = 's1';
+function renderTabs() {
+  const t = $('#tabs'); t.innerHTML = '';
+  TABS.forEach(([name, id], i) => {
+    const b = el('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', id === active);
+    b.innerHTML = `<span class="n">${i + 1}</span>${name}${isDone(id) ? ' <span class="done">✓</span>' : ''}`; b.onclick = () => show(id); t.appendChild(b);
+  });
+}
+function refresh() { $('#pts').textContent = points(); $('#ptsMax').textContent = Object.values(MAXP).reduce((a, b) => a + b, 0); renderTabs(); }
+function show(id, keep) {
+  active = id; TABS.forEach(([, s]) => $('#' + s).hidden = s !== id); renderTabs(); drawActive();
+  if (id !== 's3') audioStop();
+  if (!keep) window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+}
+function nextBtn(host, id, label) { const d = el('div', 'next'); const b = el('button', 'btn green', label || 'Weiter zur nächsten Station →'); b.type = 'button'; b.onclick = () => show(id); d.appendChild(b); host.appendChild(d); }
+const seen = k => { if (!S.seen[k]) { S.seen[k] = 1; appChanged(); } };
+
+/* Antworten in fester, aber gemischter Reihenfolge (je Aufgabe gleich, damit der Stand passt) */
+function mcR(host, o) {
+  let h = 0; for (const ch of o.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const idx = o.opts.map((_, i) => i); for (let i = idx.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  return mc(host, Object.assign({}, o, { opts: idx.map(i => o.opts[i]), fb: o.fb ? idx.map(i => o.fb[i]) : null, correct: idx.indexOf(o.correct) }));
+}
+
+/* ===================== 1 Die Welle ===================== */
+const W = { yaw: -38, pitch: 24, view: 'schraeg', run: !reduce, t: 0, E: true, B: true, lam: 1 };
+const VIEWS = { schraeg: [-38, 24], seite: [0, 0], oben: [0, 90], vorne: [90, 0] };
+function proj(x, y, z, cx, cy, s) {
+  const a = rad(W.yaw), b = rad(W.pitch);
+  const x1 = x * Math.cos(a) - y * Math.sin(a), d = x * Math.sin(a) + y * Math.cos(a);
+  return [cx + s * x1, cy - s * (z * Math.cos(b) + d * Math.sin(b)), d];
+}
+function arrow(c, x1, y1, x2, y2, col, w, head) {
+  const L = Math.hypot(x2 - x1, y2 - y1); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = w;
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+  if (L < 4) return; const h = Math.min(head || 7, L * .45), an = Math.atan2(y2 - y1, x2 - x1);
+  c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - h * Math.cos(an - .45), y2 - h * Math.sin(an - .45)); c.lineTo(x2 - h * Math.cos(an + .45), y2 - h * Math.sin(an + .45)); c.closePath(); c.fill();
+}
+function w_draw() {
+  const [c, w, h] = fit($('#c1')); const red = '#C62828', blue = '#1565C0', navy = cv('--navy');
+  const L = 3.4, A = .8, k = 2 * Math.PI / W.lam, s = Math.min(w / (L + 1.6), h / 2.6) * (W.view === 'vorne' ? 1.6 : 1);
+  const cx = w / 2 - (W.view === 'vorne' ? 0 : s * .3), cy = h / 2;
+  const P = (x, y, z) => proj(x - L / 2, y, z, cx, cy, s);
+  if (W.yaw >= 80) { // Blick von vorne: nur das vorderste Pfeilpaar, die Welle kommt auf uns zu
+    const v = A * Math.sin(k * L - W.t * 2.2), S2 = Math.min(w, h) * .42;
+    c.strokeStyle = cv('--line'); c.lineWidth = 1; c.beginPath(); c.moveTo(cx - S2, cy); c.lineTo(cx + S2, cy); c.moveTo(cx, cy - S2); c.lineTo(cx, cy + S2); c.stroke();
+    if (W.E && Math.abs(v) > .02) arrow(c, cx, cy, cx, cy - S2 * v / A, red, 4, 14);
+    if (W.B && Math.abs(v) > .02) arrow(c, cx, cy, cx - S2 * v / A, cy, blue, 4, 14);
+    c.fillStyle = navy; c.beginPath(); c.arc(cx, cy, 9, 0, 7); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(cx, cy, 3.5, 0, 7); c.fill();
+    c.fillStyle = navy; c.font = '700 15px ' + cv('--f-body'); c.fillText('c zeigt aus dem Bild heraus, auf dich zu', 12, h - 12);
+    c.font = '700 16px ' + cv('--f-body'); if (W.E) { c.fillStyle = red; c.fillText('E', 12, 22); } if (W.B) { c.fillStyle = blue; c.fillText('B', 32, 22); }
+    return;
+  }
+  // Achse
+  const a0 = P(0, 0, 0), a1 = P(L, 0, 0); c.strokeStyle = cv('--muted'); c.lineWidth = 1.2; c.beginPath(); c.moveTo(a0[0], a0[1]); c.lineTo(a1[0], a1[1]); c.stroke();
+  const n = Math.round(L / W.lam * 14), items = [];
+  for (let i = 0; i <= n; i++) {
+    const x = L * i / n, v = A * Math.sin(k * x - W.t * 2.2);
+    if (W.B) items.push(['B', x, v]); if (W.E) items.push(['E', x, v]);
+  }
+  // hintere Pfeile zuerst
+  items.sort((p, q) => (P(q[1], q[0] === 'B' ? -q[2] : 0, 0)[2]) - (P(p[1], p[0] === 'B' ? -p[2] : 0, 0)[2]));
+  items.forEach(([f, x, v]) => {
+    const o = P(x, 0, 0), e = f === 'E' ? P(x, 0, v) : P(x, -v, 0);
+    if (Math.hypot(e[0] - o[0], e[1] - o[1]) < 2.5 && Math.abs(v) > .15) { c.fillStyle = f === 'E' ? red : blue; c.beginPath(); c.arc(o[0], o[1], 2.6, 0, 7); c.fill(); return; }
+    arrow(c, o[0], o[1], e[0], e[1], f === 'E' ? red : blue, 1.3, 6);
+  });
+  // Kurven
+  [['E', red], ['B', blue]].forEach(([f, col]) => {
+    if (!W[f]) return; c.strokeStyle = col; c.lineWidth = 2.4; c.beginPath();
+    for (let i = 0; i <= 300; i++) { const x = L * i / 300, v = A * Math.sin(k * x - W.t * 2.2), p = f === 'E' ? P(x, 0, v) : P(x, -v, 0); i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]); }
+    c.stroke();
+  });
+  // Ausbreitungsrichtung
+  const q0 = P(L + .1, 0, 0), q1 = P(L + .9, 0, 0);
+  if (Math.hypot(q1[0] - q0[0], q1[1] - q0[1]) > 8) { arrow(c, q0[0], q0[1], q1[0], q1[1], navy, 3, 12); c.fillStyle = navy; c.font = '700 18px ' + cv('--f-display'); c.fillText('c', q1[0] + 6, q1[1] + 6); }
+  else { c.fillStyle = navy; c.font = '700 15px ' + cv('--f-body'); c.fillText('c zeigt auf dich zu', 12, h - 12); }
+  c.font = '700 16px ' + cv('--f-body');
+  if (W.E) { c.fillStyle = red; c.fillText('E', 12, 22); } if (W.B) { c.fillStyle = blue; c.fillText('B', 32, 22); }
+}
+function r_draw() {
+  const [c, w, h] = fit($('#c1b')); const red = '#C62828', navy = cv('--navy'), green = cv('--green');
+  const achse = W.rpos === 'achse', ang = W.rang;
+  const br = achse ? 0 : Math.pow(Math.cos(rad(ang)), 2);
+  // Sender
+  const sx = w * .2, sy = h * .47, len = 56;
+  c.strokeStyle = navy; c.lineWidth = 7; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(sx, sy - len); c.lineTo(sx, sy - 6); c.moveTo(sx, sy + 6); c.lineTo(sx, sy + len); c.stroke();
+  c.fillStyle = navy; c.font = '600 14px ' + cv('--f-body'); c.textAlign = 'center'; c.fillText('Sender', sx, sy + len + 22);
+  // Empfänger
+  const rx = achse ? sx : w * .78, ry = achse ? 32 : sy, rl = achse ? 24 : 58;
+  // Feldpfeile zwischen Sender und Empfänger (nur seitlich, in Achsrichtung keine Abstrahlung)
+  const ph = Math.sin(W.t * 3);
+  for (let i = 1; i <= 5; i++) {
+    const x = sx + (w * .78 - sx) * i / 6.2, v = 34 * Math.sin(W.t * 3 - i * 1.1);
+    if (Math.abs(v) > 3) arrow(c, x, sy, x, sy - v, red, 1.6, 7);
+  }
+  c.fillStyle = red; c.font = '700 14px ' + cv('--f-body'); c.fillText('E', sx + (w * .78 - sx) * .5, 18);
+  const a = rad(ang), dx = rl * Math.sin(a), dy = rl * Math.cos(a);
+  c.strokeStyle = green; c.lineWidth = 7;
+  c.beginPath(); c.moveTo(rx - dx, ry - dy); c.lineTo(rx + dx, ry + dy); c.stroke();
+  // Lämpchen
+  const glow = br * (.65 + .35 * Math.abs(ph));
+  if (glow > .02) { const g = c.createRadialGradient(rx, ry, 2, rx, ry, 10 + 40 * glow); g.addColorStop(0, `rgba(255,214,64,${.9 * glow})`); g.addColorStop(1, 'rgba(255,214,64,0)'); c.fillStyle = g; c.beginPath(); c.arc(rx, ry, 10 + 40 * glow, 0, 7); c.fill(); }
+  c.fillStyle = glow > .02 ? '#FFD640' : '#EEE'; c.strokeStyle = '#555'; c.lineWidth = 1.5; c.beginPath(); c.arc(rx, ry, 9, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = green; c.font = '600 14px ' + cv('--f-body'); c.fillText('Empfänger', rx + (achse ? 70 : 0), achse ? ry + 5 : ry + len + 22);
+  c.textAlign = 'left'; c.lineCap = 'butt';
+  $('#r_meter').style.width = (br * 100).toFixed(0) + '%';
+}
+function w_loop() { if (active === 's1' && W.run) { W.t += .016; w_draw(); r_draw(); } requestAnimationFrame(w_loop); }
+W.rpos = 'neben'; W.rang = 0;
+function buildS1() {
+  cur = 's1'; const t = $('#t1'); t.innerHTML = '<h2>Aufträge</h2>';
+  txt(t, 'Arbeite mit der Animation links. Bei den Fragen gibt es beim ersten Versuch volle Punkte.');
+  act(t, { id: 'w_vorne', q: 'Schau dir die Welle <b>von vorne</b> an, so dass sie direkt auf dich zukommt. Was siehst du? Klick dann auf „Gesehen“.', btn: 'Gesehen', test: () => S.seen.vorne ? true : 'Wähle oben die Ansicht „Vorne“ oder dreh den Regler ganz nach rechts.', ok: 'E zeigt immer nach oben oder unten, B immer nach links oder rechts. Beide werden gleichzeitig groß und gleichzeitig null.' });
+  mcR(t, { id: 'w_senk', q: 'Wie liegen E-Feld, B-Feld und Ausbreitungsrichtung zueinander?', opts: ['Alle drei stehen senkrecht aufeinander.', 'E und B sind parallel, beide senkrecht zur Ausbreitungsrichtung.', 'E steht senkrecht auf B, B zeigt in Ausbreitungsrichtung.'], correct: 0, fb: [, 'Schalte das B-Feld aus und wieder ein: Liegen die Pfeile wirklich in einer Ebene?', 'Schau von oben: Zeigen die blauen Pfeile nach vorne in Laufrichtung?'], ok: 'Die EM-Welle ist eine Transversalwelle: E und B schwingen quer zur Laufrichtung, und zwar senkrecht zueinander.' });
+  mcR(t, { id: 'w_phase', q: 'Halte die Animation an. Wann ist das B-Feld im Fernfeld am größten?', opts: ['Genau dann, wenn auch E am größten ist.', 'Wenn E gerade null ist.', 'Eine Viertelperiode nach E.'], correct: 0, fb: [, 'Das gilt im Nahfeld direkt am Dipol. Weit weg schwingen beide im Takt.', 'Das gilt im Nahfeld direkt am Dipol. Weit weg schwingen beide im Takt.'], ok: 'Im Fernfeld schwingen E und B gleichphasig. Im Nahfeld am Dipol sind sie um T/4 versetzt.' });
+  mcR(t, { id: 'w_was', q: 'Was schwingt bei einer elektromagnetischen Welle eigentlich?', opts: ['Die Stärke von elektrischem und magnetischem Feld.', 'Luftteilchen, wie beim Schall.', 'Elektronen, die vom Dipol zum Empfänger fliegen.'], correct: 0, fb: [, 'Die Welle läuft auch durchs Vakuum, zum Beispiel von der Sonne zu uns. Da gibt es keine Luft.', 'Die Elektronen im Dipol bewegen sich nur ein winziges Stück hin und her. Sie bleiben im Stab.'], ok: 'Es schwingen nur Felder. Deshalb braucht die Welle kein Medium und läuft im Vakuum mit c = 3,00 · 10⁸ m/s.' });
+  act(t, { id: 'w_45', q: 'Dreh den Empfänger so, dass das Lämpchen <b>halb so hell</b> leuchtet wie am Anfang.', test: () => W.rpos === 'neben' && Math.abs(W.rang - 45) <= 3 ? true : 'Noch nicht. Schau auf den grünen Balken unter dem Bild: Er soll halb voll sein.', ok: 'Bei 45° liegt nur noch ein Teil des E-Felds längs des Stabs. Nur dieser Teil treibt die Elektronen im Empfänger an.' });
+  mcR(t, { id: 'w_90', q: 'Warum bleibt das Lämpchen bei 90° dunkel?', opts: ['Das E-Feld schwingt quer zum Stab und kann die Elektronen nicht längs des Stabs antreiben.', 'Das B-Feld ist zu schwach.', 'Die Welle kommt bei 90° nicht beim Empfänger an.'], correct: 0, fb: [, 'Die Antenne reagiert auf das E-Feld: Es schiebt die Elektronen im Stab hin und her.', 'Die Welle kommt an, nur passt die Richtung nicht.'], ok: 'Die Welle vom Dipol ist linear polarisiert: E schwingt immer parallel zum Sendedipol.' });
+  mcR(t, { id: 'w_achse', q: 'Stell den Empfänger über den Sender. Warum leuchtet das Lämpchen dort gar nicht?', opts: ['In Richtung der Dipolachse strahlt der Dipol nicht ab.', 'Der Empfänger ist zu weit weg.', 'Oben ist das B-Feld zu stark.'], correct: 0, ok: 'Der Dipol strahlt senkrecht zu seiner Achse am stärksten ab, in Achsrichtung gar nicht.' });
+  merk(t, '<b>Merke:</b> Weit weg vom Dipol stehen E-Feld, B-Feld und Ausbreitungsrichtung senkrecht aufeinander. E und B schwingen gleichphasig und erzeugen sich gegenseitig. Die Welle braucht kein Medium und läuft im Vakuum mit c = 3,00 · 10⁸ m/s. E schwingt parallel zum Sendedipol: Die Welle ist linear polarisiert.');
+  nextBtn(t, 's2');
+}
+
+/* ===================== 2 Spektrum ===================== */
+const C0 = 3.00e8;
+const BANDS = [ // [Name, lg λ oben, lg λ unten, Farbe, Anwendungen, Entstehung]
+  ['Radiowellen', 5, 0, '#5B6B7B', 'Radio (UKW, DAB+), Funkuhr, Funkgeräte, früher Fernsehen', 'Elektronen schwingen in Antennen, genau wie im Hertz’schen Dipol'],
+  ['Mikrowellen', 0, -3, '#3C7A4E', 'Handy, WLAN, Bluetooth, Radar, Mikrowellenherd', 'Elektronen schwingen in kleinen Antennen oder Bauteilen (z. B. Magnetron im Herd)'],
+  ['Infrarot', -3, -6.155, '#B03A2E', 'Wärmestrahlung, Fernbedienung, Wärmebildkamera, Glasfaser-Internet', 'Jeder warme Körper strahlt Infrarot ab'],
+  ['sichtbares Licht', -6.155, -6.398, null, 'Sehen, Laser, Fotografie, Photosynthese', 'Elektronen in Atomen wechseln ihre Energie (Quantenphysik, kommt noch)'],
+  ['Ultraviolett (UV)', -6.398, -8, '#6B4FA0', 'Sonnenbrand, Desinfektion, Schwarzlicht, Geldscheinprüfung', 'Sehr heiße Körper wie die Sonne, spezielle Lampen'],
+  ['Röntgenstrahlung', -8, -11, '#1F3A5F', 'Röntgenbild, Gepäckkontrolle am Flughafen, CT', 'Sehr schnelle Elektronen werden abrupt abgebremst'],
+  ['Gammastrahlung', -11, -14, '#222222', 'Strahlentherapie gegen Krebs, Sterilisieren, Radioaktivität', 'Atomkerne geben Energie ab (radioaktiver Zerfall)']
+];
+const SIZES = [[3.3, 'ein Dorf (ein paar km)'], [2, 'ein Fußballfeld (100 m)'], [1, 'ein Haus (10 m)'], [.2, 'ein Mensch (1–2 m)'], [-1, 'ein Handy (10 cm)'], [-2, 'eine Münze (1 cm)'], [-3, 'ein Sandkorn (1 mm)'], [-4, 'die Dicke eines Haars (0,1 mm)'], [-5, 'ein rotes Blutkörperchen (10 µm)'], [-6, 'ein Bakterium (1 µm)'], [-7, 'ein Virus (100 nm)'], [-8, 'ein großes Molekül (10 nm)'], [-9, 'ein kleines Molekül (1 nm)'], [-10, 'ein Atom (0,1 nm)'], [-12, 'kleiner als ein Atom'], [-14, 'ein Atomkern']];
+const PRESETS = [['Funkuhr 77,5 kHz', Math.log10(C0 / 77.5e3)], ['UKW 100 MHz', Math.log10(C0 / 100e6)], ['WLAN 2,4 GHz', Math.log10(C0 / 2.4e9)], ['Fernbedienung 940 nm', Math.log10(940e-9)], ['roter Laser 650 nm', Math.log10(650e-9)], ['UV-B 300 nm', Math.log10(300e-9)], ['Röntgenbild 20 pm', Math.log10(20e-12)], ['Gamma 1 pm', Math.log10(1e-12)]];
+let SP = Math.log10(3);
+const band = lg => BANDS.find(b => lg <= b[1] && lg > b[2]) || BANDS[lg > 0 ? 0 : 6];
+function fmtSI(v, units) { // units: [[Faktor, Name]] absteigend
+  for (const [f, n] of units) if (v >= f * .9995) { const x = v / f; return (x >= 100 ? fmt(x, 0) : x >= 10 ? fmt(x, 1) : fmt(x, 2)) + ' ' + n; }
+  const [f, n] = units[units.length - 1]; return fmt(v / f, 3) + ' ' + n;
+}
+const fmtL = l => fmtSI(l, [[1e3, 'km'], [1, 'm'], [1e-2, 'cm'], [1e-3, 'mm'], [1e-6, 'µm'], [1e-9, 'nm'], [1e-12, 'pm'], [1e-15, 'fm']]);
+const fmtF = f => fmtSI(f, [[1e21, '· 10²¹ Hz'], [1e18, '· 10¹⁸ Hz'], [1e15, '· 10¹⁵ Hz'], [1e12, 'THz'], [1e9, 'GHz'], [1e6, 'MHz'], [1e3, 'kHz'], [1, 'Hz']]);
+function sp_draw() {
+  const [c, w, h] = fit($('#c2')); const x0 = 10, x1 = w - 10, by = 52, bh = 38;
+  const X = lg => x0 + (x1 - x0) * (5 - lg) / 19;
+  BANDS.forEach(b => {
+    if (!b[3]) { const g = c.createLinearGradient(X(b[1]), 0, X(b[2]), 0); [700, 620, 580, 530, 470, 400].forEach((l, i) => g.addColorStop(i / 5, css(rgb(l)))); c.fillStyle = g; }
+    else c.fillStyle = b[3];
+    c.fillRect(X(b[1]), by, X(b[2]) - X(b[1]) + .5, bh);
+  });
+  c.fillStyle = '#fff'; c.font = '700 12px ' + cv('--f-body'); c.textAlign = 'center';
+  [['Radio', 2.5], ['Mikro', -1.5], ['IR', -4.6], ['UV', -7.2], ['Röntgen', -9.5], ['Gamma', -12.5]].forEach(([n, lg]) => { if (X(lg + .8) - X(lg - .8) > c.measureText(n).width) c.fillText(n, X(lg), by + bh / 2 + 4); });
+  c.fillStyle = cv('--muted'); c.font = '12px ' + cv('--f-body');
+  [[3, '1 km'], [0, '1 m'], [-3, '1 mm'], [-6, '1 µm'], [-9, '1 nm'], [-12, '1 pm']].forEach(([lg, t]) => { c.fillRect(X(lg) - .5, by + bh, 1, 6); c.fillText(t, X(lg), by + bh + 20); });
+  c.fillText('λ wird kleiner, f wird größer →', w / 2, h - 8);
+  const mx = X(SP); c.fillStyle = cv('--ink'); c.beginPath(); c.moveTo(mx, by - 4); c.lineTo(mx - 9, by - 20); c.lineTo(mx + 9, by - 20); c.closePath(); c.fill();
+  // kleine Welle über der Leiste: zeigt, ob λ lang oder kurz ist
+  c.strokeStyle = cv('--ink'); c.lineWidth = 1.5; c.beginPath();
+  const per = 10 + 50 * (SP + 13) / 17;
+  for (let x = 0; x <= 120; x++) { const y = 18 - 9 * Math.sin(2 * Math.PI * x / per); x ? c.lineTo(mx - 60 + x, y) : c.moveTo(mx - 60, y); }
+  c.stroke(); c.textAlign = 'left';
+  const l = Math.pow(10, SP), f = C0 / l, b = band(SP), size = SIZES.reduce((a, s) => Math.abs(SP - s[0]) < Math.abs(SP - a[0]) ? s : a);
+  $('#sp_lO').textContent = fmtL(l);
+  $('#sp_info').innerHTML = `<div class="big">${b[0]}</div><b>λ</b><span>${fmtL(l)}</span><b>f = c / λ</b><span>${fmtF(f)}</span><b>so groß wie</b><span>${size ? size[1] : ''}</span><b>Beispiele</b><span>${b[4]}</span><b>Entsteht so</b><span>${b[5]}</span>`;
+}
+function sortTask(host, o) { // {id, q, items (richtige Reihenfolge), p}
+  const p = o.p == null ? 2 : o.p; need(o.id, p);
+  const d = el('div', 'task'); d.innerHTML = `<p class="q">${o.q}</p>`;
+  const box = el('div', 'sort'), fb = el('div', 'feedback'); fb.hidden = true; let pos = 0, errs = 0;
+  const order = o.items.map((_, i) => i).sort(() => Math.random() - .5);
+  const fin = () => { d.classList.add('solved'); box.innerHTML = ''; o.items.forEach((t, i) => { const b = el('button', 'ok', `<span class="nr">${i + 1}</span>${t}`); b.disabled = true; box.appendChild(b); }); fb.hidden = false; fb.className = 'feedback ok'; fb.innerHTML = '<b>Richtig sortiert.</b> ' + (o.ok || ''); };
+  order.forEach(i => {
+    const b = el('button', '', `<span class="nr"></span>${o.items[i]}`); b.type = 'button'; box.appendChild(b);
+    b.onclick = () => {
+      if (i === pos) { b.classList.add('ok'); b.disabled = true; b.querySelector('.nr').textContent = ++pos; fb.hidden = true; if (pos === o.items.length) { fin(); solve(o.id, errs <= 1 ? p : errs <= 3 ? 1 : 0); } }
+      else { errs++; b.classList.add('no'); setTimeout(() => b.classList.remove('no'), 600); fb.hidden = false; fb.className = 'feedback no'; fb.innerHTML = 'Noch nicht. Such den Begriff im Spektrum links und vergleich λ.'; }
+    };
+  });
+  d.append(box, fb); host.appendChild(d); if (o.id in S.sol) fin();
+}
+function buildS2() {
+  cur = 's2'; const t = $('#t2'); t.innerHTML = '<h2>Aufträge</h2>';
+  txt(t, 'Lichtgeschwindigkeit: c = 3,00 · 10⁸ m/s. Es gilt c = λ · f. Zahlen wie 3,0e-7 darfst du so eintippen.');
+  sortTask(t, { id: 'sp_sort', q: 'Tippe die Beispiele der Reihe nach an: mit der <b>größten Wellenlänge</b> zuerst.', items: ['UKW-Radio', 'WLAN', 'Fernbedienung', 'roter Laserpointer', 'Sonnenbrand (UV)', 'Röntgenbild'], ok: 'Von Radio bis Röntgen ist es immer dieselbe Sorte Welle. Nur λ und f sind anders.' });
+  num(t, { id: 'sp_ukw', q: 'Ein UKW-Sender funkt mit f = 100 MHz. <b>Berechne</b> die Wellenlänge.', label: 'λ =', unit: 'm', value: 3.0, tol: .03, d: 1, sol: 'λ = c / f = 3,00 · 10⁸ m/s : (100 · 10⁶ Hz)\n  = 3,0 m' });
+  num(t, { id: 'sp_herd', q: 'Ein Mikrowellenherd arbeitet mit f = 2,45 GHz. <b>Berechne</b> λ in cm.', label: 'λ =', unit: 'cm', value: 12.2, tol: .03, d: 1, sol: 'λ = c / f = 3,00 · 10⁸ m/s : (2,45 · 10⁹ Hz)\n  = 0,122 m = 12,2 cm' });
+  mcR(t, { id: 'sp_wlan', q: 'WLAN funkt bei 2,4 GHz, der Mikrowellenherd bei 2,45 GHz. Was folgt daraus?', opts: ['Es ist dieselbe Art Welle mit fast gleicher Frequenz. Deshalb kann ein laufender Herd das WLAN stören.', 'WLAN-Wellen sind elektrisch, Mikrowellen sind magnetisch.', 'Das ist Zufall, die beiden Wellen haben nichts miteinander zu tun.'], correct: 0, fb: [, 'Jede EM-Welle hat E- und B-Feld.', 'Beide sind Mikrowellen, nur ist der Herd viel stärker (ca. 800 W statt 0,1 W) und abgeschirmt.'], ok: 'Der Herd ist abgeschirmt, ein bisschen kommt aber durch. Probier es zuhause aus: WLAN-Test, während die Mikrowelle läuft.' });
+  mcR(t, { id: 'sp_ant', q: 'Eine gute Antenne ist ungefähr λ/2 lang. Warum passt die Handyantenne in ein Handy?', opts: ['Handys funken mit sehr hoher Frequenz, also mit kleiner Wellenlänge (einige cm).', 'Handys senden mit sehr wenig Leistung.', 'Handys brauchen keine Antenne, sie funken über das Display.'], correct: 0, ok: 'Je höher die Frequenz, desto kleiner λ und desto kürzer die Antenne. Ein Dipol für 1 kHz müsste 150 km lang sein.' });
+  mcR(t, { id: 'sp_gem', q: 'Was haben Radiowellen, Licht und Röntgenstrahlung gemeinsam?', opts: ['Alle bestehen aus schwingendem E- und B-Feld und laufen im Vakuum mit c.', 'Alle kann man sehen, wenn sie hell genug sind.', 'Alle entstehen in Antennen.'], correct: 0, fb: [, 'Sehen können wir nur 400 bis 700 nm.', 'Nur Radio- und Mikrowellen entstehen in Antennen, schau bei „Entsteht so“.'], ok: 'Unterschiede gibt es bei λ, f und dabei, wie sie mit Stoffen wechselwirken: Röntgen geht durch Haut, Licht nicht.' });
+  merk(t, '<b>Merke:</b> Radiowellen, Mikrowellen, Infrarot, Licht, UV, Röntgen- und Gammastrahlung sind alle elektromagnetische Wellen. Sie laufen im Vakuum alle mit c. Sie unterscheiden sich in Wellenlänge und Frequenz: c = λ · f. Je kleiner λ, desto größer f.');
+  nextBtn(t, 's3');
+}
+
+/* ===================== 3 Radio ===================== */
+const M = { mode: 'am', ton: 2, vol: .6 };
+function m_draw() {
+  const [c, w, h] = fit($('#c3a')); const navy = cv('--navy'), grey = cv('--muted'), red = '#C62828', green = cv('--green');
+  const rows = [['Ton', navy], ['Trägerwelle', grey], [M.mode === 'am' ? 'AM: Amplitude folgt dem Ton' : 'FM: Frequenz folgt dem Ton', M.mode === 'am' ? red : green]];
+  const rh = h / 3, x0 = 8, x1 = w - 8, fc = Math.max(24, Math.round(w / 14));
+  rows.forEach(([lab, col], r) => {
+    const cy = rh * r + rh / 2 + 6, A = rh * .34;
+    c.fillStyle = col; c.font = '700 13px ' + cv('--f-body'); c.fillText(lab, x0, rh * r + 14);
+    c.strokeStyle = col; c.lineWidth = 1.4; c.beginPath();
+    const N = 900;
+    for (let i = 0; i <= N; i++) {
+      const u = i / N, s = Math.sin(2 * Math.PI * M.ton * u);
+      let y;
+      if (r === 0) y = M.vol * s;
+      else if (r === 1) y = Math.sin(2 * Math.PI * fc * u);
+      else if (M.mode === 'am') y = (1 + .8 * M.vol * s) / 1.8 * Math.sin(2 * Math.PI * fc * u);
+      else { const df = fc * .45 * M.vol; y = Math.sin(2 * Math.PI * fc * u - df / M.ton * Math.cos(2 * Math.PI * M.ton * u)); }
+      const X = x0 + (x1 - x0) * u, Y = cy - A * y; i ? c.lineTo(X, Y) : c.moveTo(X, Y);
+    }
+    c.stroke();
+    if (r === 2 && M.mode === 'am') { c.setLineDash([4, 4]); c.strokeStyle = navy; c.lineWidth = 1; [1, -1].forEach(sg => { c.beginPath(); for (let i = 0; i <= 300; i++) { const u = i / 300, y = sg * (1 + .8 * M.vol * Math.sin(2 * Math.PI * M.ton * u)) / 1.8, X = x0 + (x1 - x0) * u; i ? c.lineTo(X, cy - A * y) : c.moveTo(X, cy - A * y); } c.stroke(); }); c.setLineDash([]); }
+  });
+  $('#m_tonO').textContent = ['', 'tief', '', 'mittel', '', 'hoch', '', 'sehr hoch'][Math.round(M.ton * 2) - 1] || '';
+  $('#m_volO').textContent = Math.round(M.vol * 100) + ' %';
+}
+const L_T = 0.10e-6;
+const STATIONS = [{ f: 89.4, name: 'Radio Bergstraße', mel: [392, 440, 494, 523, 494, 440] }, { f: 96.2, name: 'Welle Weinheim', mel: [523, 659, 784, 659, 523, 392] }, { f: 104.5, name: 'Klassik Kurpfalz', mel: [330, 392, 349, 294, 262, 294] }];
+const T = { C: 31, sound: false };
+const f0 = () => 1 / (2 * Math.PI * Math.sqrt(L_T * T.C * 1e-12)) / 1e6;
+const resA = (f, fr) => 1 / Math.sqrt(1 + 150 * 150 * Math.pow(f / fr - fr / f, 2));
+const tuned = () => { const fr = f0(); let best = null, bv = 0; STATIONS.forEach(s => { const a = resA(s.f, fr); if (a > bv) { bv = a; best = s; } }); return [best, bv]; };
+function t_draw() {
+  const [c, w, h] = fit($('#c3b')); const navy = cv('--navy'), green = cv('--green'), muted = cv('--muted');
+  const fmin = 87, fmax = 109, X = f => 12 + (w - 24) * (f - fmin) / (fmax - fmin), base = h - 34, top = 26;
+  c.strokeStyle = cv('--line'); c.lineWidth = 1; c.beginPath(); c.moveTo(12, base); c.lineTo(w - 12, base); c.stroke();
+  c.fillStyle = muted; c.font = '12px ' + cv('--f-body'); c.textAlign = 'center';
+  for (let f = 88; f <= 108; f += 4) { c.fillRect(X(f) - .5, base, 1, 5); c.fillText(f + ' MHz', X(f), base + 18); }
+  STATIONS.forEach(s => { c.fillStyle = green; c.fillRect(X(s.f) - 3, top + 30, 6, base - top - 30); c.fillStyle = cv('--ink'); c.font = '600 12px ' + cv('--f-body'); c.fillText(s.name, X(s.f), top + 22); });
+  const fr = f0(); c.strokeStyle = navy; c.lineWidth = 2.2; c.beginPath();
+  for (let i = 0; i <= 400; i++) { const f = fmin + (fmax - fmin) * i / 400, a = resA(f, fr), x = X(f), y = base - (base - top) * a; i ? c.lineTo(x, y) : c.moveTo(x, y); }
+  c.stroke(); c.textAlign = 'left'; c.fillStyle = navy; c.font = '600 12px ' + cv('--f-body'); c.fillText('Resonanzkurve deines Schwingkreises', 12, 14);
+  $('#t_CO').textContent = fmt(T.C, 1) + ' pF'; $('#t_disp').textContent = fmt(fr, 1) + ' MHz';
+  const [s, a] = tuned(); $('#t_name').textContent = a > .7 ? 'Empfang: ' + s.name : a > .3 ? 'verrauscht …' : 'Rauschen';
+  d_draw(); audioUpdate();
+}
+function d_draw() {
+  const [c, w, h] = fit($('#c3c')); const [s, a] = tuned(), navy = cv('--navy');
+  c.fillStyle = cv('--muted'); c.font = '600 12px ' + cv('--f-body'); c.fillText('Nach dem Demodulator: Das kommt am Lautsprecher an', 8, 14);
+  c.strokeStyle = navy; c.lineWidth = 1.6; c.beginPath();
+  const idx = STATIONS.indexOf(s), cy = h / 2 + 8;
+  for (let i = 0; i <= 500; i++) {
+    const u = i / 500, sig = idx === 0 ? Math.sin(2 * Math.PI * 3 * u) : idx === 1 ? (Math.sin(2 * Math.PI * 2 * u) + .4 * Math.sin(2 * Math.PI * 6 * u)) / 1.3 : Math.sin(2 * Math.PI * (1.5 + .6 * u) * u * 2);
+    const noise = (Math.sin(i * 12.9898 + W.t * 40) * 43758.5453) % 1;
+    const y = a * sig + (1 - a) * (noise * 1.2);
+    const X = 8 + (w - 16) * u, Y = cy - (h / 2 - 16) * y; i ? c.lineTo(X, Y) : c.moveTo(X, Y);
+  }
+  c.stroke();
+}
+/* Ton: nur nach Tippen auf „Ton an“ */
+let AC = null, nG = null, mG = null, melT = null, melI = 0;
+function audioStart() {
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    const buf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = AC.createBufferSource(); src.buffer = buf; src.loop = true; nG = AC.createGain(); nG.gain.value = 0; src.connect(nG).connect(AC.destination); src.start(); nG._src = src;
+    mG = AC.createGain(); mG.gain.value = 0; mG.connect(AC.destination);
+    melT = setInterval(() => { const [s, a] = tuned(); if (a < .3 || !AC) return; const o = AC.createOscillator(), g = AC.createGain(); o.type = 'triangle'; o.frequency.value = s.mel[melI++ % s.mel.length]; g.gain.setValueAtTime(.0001, AC.currentTime); g.gain.exponentialRampToValueAtTime(.9, AC.currentTime + .02); g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + .3); o.connect(g).connect(mG); o.start(); o.stop(AC.currentTime + .32); }, 330);
+    T.sound = true; audioUpdate();
+  } catch (e) { T.sound = false; }
+  $('#t_sound').textContent = T.sound ? 'Ton aus' : 'Ton an';
+}
+function audioStop() {
+  if (melT) clearInterval(melT); melT = null;
+  try { if (nG) { nG._src.stop(); nG.disconnect(); } if (mG) mG.disconnect(); } catch (e) { }
+  nG = mG = null; T.sound = false; const b = $('#t_sound'); if (b) b.textContent = 'Ton an';
+}
+function audioUpdate() { if (!T.sound || !nG) return; const [, a] = tuned(); nG.gain.value = .05 * (1 - a); mG.gain.value = .14 * a; }
+function buildS3() {
+  cur = 's3'; const t = $('#t3'); t.innerHTML = '<h2>Aufträge</h2>';
+  h3(t, 'A  Der Sender');
+  mcR(t, { id: 'r_warum', q: 'Warum funkt man einen Ton (z. B. 1 kHz) nicht direkt als elektromagnetische Welle?', opts: ['Die Antenne müsste λ/2 = 150 km lang sein, und alle Sender würden sich überlagern.', 'Elektromagnetische Wellen mit 1 kHz gibt es nicht.', 'Ein Ton ist zu leise für eine Antenne.'], correct: 0, fb: [, 'Die gibt es schon, sie sind nur extrem lang: λ = c / f = 300 km.', 'Lautstärke hat damit nichts zu tun, es geht um die Wellenlänge.'], ok: 'Deshalb nimmt man eine Trägerwelle mit hoher Frequenz (UKW: rund 100 MHz, λ ≈ 3 m) und packt den Ton drauf.' });
+  mcR(t, { id: 'r_am', q: 'Stell AM ein und ändere die Lautstärke. Wo steckt bei AM der Ton?', opts: ['In der Amplitude der Trägerwelle (gestrichelte Hüllkurve).', 'In der Frequenz der Trägerwelle.', 'Gar nicht, er wird extra gesendet.'], correct: 0, ok: 'AM heißt Amplitudenmodulation. Bei FM (Frequenzmodulation) wird die Trägerwelle im Takt des Tons mal dichter, mal weiter. UKW-Radio funkt mit FM, weil das weniger rauscht.' });
+  h3(t, 'B  Der Empfänger');
+  act(t, { id: 'r_tune', q: 'Stell den Sender <b>Welle Weinheim (96,2 MHz)</b> ein. Mit „Ton an“ kannst du ihn auch hören.', test: () => { const [s, a] = tuned(); return s.f === 96.2 && a > .7 ? true : 'Noch nicht. Dreh am Kondensator, bis die Resonanzkurve genau über dem Sender liegt.'; }, ok: 'Der Schwingkreis schwingt nur bei seiner Eigenfrequenz kräftig mit. Das ist Resonanz, genau wie beim Empfangsdipol mit Lämpchen.' });
+  num(t, { id: 'r_C', q: '<b>Berechne</b> die Kapazität, die man für 96,2 MHz braucht.', given: 'L = 0,10 µH · f = 1 / (2π · √(L · C))', label: 'C =', unit: 'pF', value: 1 / (4 * Math.PI * Math.PI * Math.pow(96.2e6, 2) * L_T) * 1e12, tol: .03, d: 1, sol: 'f = 1/(2π·√(L·C))  ⇒  C = 1 / (4π² · f² · L)\nC = 1 / (4π² · (96,2 · 10⁶ Hz)² · 0,10 · 10⁻⁶ H)\n  = 2,74 · 10⁻¹¹ F ≈ 27,4 pF' });
+  mcR(t, { id: 'r_klein', q: 'Du drehst den Kondensator so, dass C kleiner wird. Was passiert?', opts: ['Die Eigenfrequenz steigt, du landest bei einem Sender mit höherer Frequenz.', 'Die Eigenfrequenz sinkt.', 'Nichts, der Empfang wird nur lauter.'], correct: 0, ok: 'T = 2π · √(L · C): kleineres C, kürzere Periode, größere Frequenz.' });
+  mcR(t, { id: 'r_demod', q: 'Was macht der Demodulator?', opts: ['Er holt den Ton aus der modulierten Welle zurück (bei AM: die Hüllkurve).', 'Er verstärkt die Trägerwelle, damit der Lautsprecher sie abspielen kann.', 'Er sucht den richtigen Sender aus.'], correct: 0, fb: [, 'Die Trägerwelle schwingt 100 Millionen Mal pro Sekunde. Das hört kein Mensch und schafft keine Lautsprechermembran.', 'Das macht der Schwingkreis.'], ok: 'Danach verstärkt ein Verstärker den Ton, und der Lautsprecher macht daraus wieder Schall.' });
+  merk(t, '<b>Merke:</b> Der Ton wird auf eine hochfrequente Trägerwelle moduliert (AM: Amplitude, FM: Frequenz). Im Empfänger wählt ein Schwingkreis durch Resonanz einen Sender aus. Der Demodulator holt den Ton zurück, Verstärker und Lautsprecher machen ihn hörbar.');
+  nextBtn(t, 's4');
+}
+
+/* ===================== 4 Bild per Funk ===================== */
+const NR = 6, NC = 7;
+const PICS = [['Blitz', ['0001100', '0011000', '0111110', '0001100', '0011000', '0110000']], ['Musiknote', ['0001110', '0001001', '0001000', '0111000', '1111000', '0110000']], ['Pfeil', ['0001000', '0011100', '0111110', '0001000', '0001000', '0001000']]];
+let B = { mode: 'send', px: Array(NR * NC).fill(0), rx: Array(NR * NC).fill(0), pic: 0 };
+B.px = ['0100010', '0010100', '0001000', '0001000', '0001000', '0011100'].join('').split('').map(Number);
+function gridBuild(host, arr, onTap) {
+  host.innerHTML = '';
+  arr.forEach((v, i) => { const b = el('button', v ? 'on' : ''); b.type = 'button'; b.setAttribute('aria-label', `Pixel Zeile ${Math.floor(i / NC) + 1}, Spalte ${i % NC + 1}`); b.onclick = () => { arr[i] = arr[i] ? 0 : 1; b.classList.toggle('on', !!arr[i]); onTap && onTap(); }; host.appendChild(b); });
+}
+function askDraw(canvas, rows, noise) {
+  const [c, w, h] = fit(canvas); const rh = h / rows.length, x0 = 58, x1 = w - 8, red = '#C62828';
+  rows.forEach((r, j) => {
+    const cy = rh * j + rh / 2; c.fillStyle = cv('--navy'); c.font = '600 12px ' + cv('--f-body'); c.fillText('Zeile ' + (j + 1), 4, cy + 4);
+    c.strokeStyle = cv('--line'); c.lineWidth = 1; c.setLineDash([2, 3]);
+    for (let i = 0; i <= NC; i++) { const x = x0 + (x1 - x0) * i / NC; c.beginPath(); c.moveTo(x, cy - rh * .42); c.lineTo(x, cy + rh * .42); c.stroke(); }
+    c.setLineDash([]); c.strokeStyle = red; c.lineWidth = 1.2; c.beginPath();
+    const N = 700;
+    for (let k = 0; k <= N; k++) { const u = k / N, bit = +r[Math.min(NC - 1, Math.floor(u * NC))], y = bit * Math.sin(2 * Math.PI * NC * 5 * u) + (noise ? .07 * Math.sin(k * 1.7 + j * 3) : 0); const X = x0 + (x1 - x0) * u, Y = cy - rh * .38 * y; k ? c.lineTo(X, Y) : c.moveTo(X, Y); }
+    c.stroke();
+  });
+}
+function b_draw() {
+  if (B.mode === 'send') {
+    const rows = []; for (let j = 0; j < NR; j++) rows.push(B.px.slice(j * NC, j * NC + NC).join(''));
+    $('#b_bits').textContent = rows.map((r, j) => 'Zeile ' + (j + 1) + ':  ' + r.split('').join(' ')).join('\n');
+    askDraw($('#c4a'), rows, false);
+  } else askDraw($('#c4b'), PICS[B.pic][1], true);
+}
+function buildS4() {
+  cur = 's4'; const t = $('#t4'); t.innerHTML = '<h2>Aufträge</h2>';
+  gridBuild($('#b_grid'), B.px, () => { b_draw(); if (B.px.some(v => v)) seen('paint'); });
+  gridBuild($('#r_grid'), B.rx);
+  need('b_recv', 3);
+  const st = el('div', 'task'); st.innerHTML = '<p class="q">Wechsle oben auf „Empfangen“ und entschlüssle ein Bild. Wenn das Bild stimmt, gibt es 3 Punkte.</p>'; t.appendChild(st);
+  if ('b_recv' in S.sol) st.classList.add('solved');
+  act(t, { id: 'b_send', q: 'Male bei „Senden“ dein eigenes Bild (z. B. deine Initiale) und schau dir das Signal an. Zeig es deinem Nachbarn: Kann er es nur aus dem Signal abmalen?', btn: 'Erledigt', test: () => S.seen.paint ? true : 'Tippe erst ein paar Pixel an.', ok: 'Genau so funktioniert digitaler Funk: Bits rein, Welle raus, Welle rein, Bits raus.' });
+  num(t, { id: 'b_hd', q: 'Ein Foto in Full-HD hat 1920 × 1080 Pixel. Jedes Pixel braucht 24 bit (je 8 bit für Rot, Grün und Blau). <b>Berechne</b>, wie viele Bits das Foto hat, in Millionen bit (Mbit).', label: 'N =', unit: 'Mbit', value: 1920 * 1080 * 24 / 1e6, tol: .03, d: 1, sol: 'N = 1920 · 1080 · 24 bit = 49 766 400 bit\n  ≈ 49,8 Mbit (also rund 6 MB)' });
+  mcR(t, { id: 'b_video', q: 'Ein Video hat 30 solche Bilder pro Sekunde. Das wären rund 1,5 Milliarden bit pro Sekunde. Gutes WLAN schafft etwa 100 Mbit/s. Wie klappt Streaming trotzdem?', opts: ['Die Bilder werden komprimiert: Man lässt weg, was sich kaum ändert oder was man kaum sieht.', 'Das WLAN funkt dann einfach schneller als Licht.', 'Beim Streaming werden nur Schwarz-Weiß-Bilder gesendet.'], correct: 0, fb: [, 'Schneller als c geht nichts.', 'Dann wäre Netflix ziemlich langweilig.'], ok: 'Von Bild zu Bild ändert sich meist wenig. Videoformate senden oft nur die Änderungen. So schrumpft die Datenmenge auf ein paar Mbit/s.' });
+  mcR(t, { id: 'b_digi', q: 'Ein paar Bits kommen verrauscht an. Warum ist das beim digitalen Funk oft kein Problem?', opts: ['Der Empfänger muss nur „Träger da“ oder „Träger weg“ unterscheiden. Zusätzlich werden Prüfbits mitgeschickt, mit denen Fehler erkannt und repariert werden.', 'Rauschen gibt es beim digitalen Funk nicht.', 'Weil Bits schneller sind als Wellen.'], correct: 0, ok: 'Deshalb ist ein WLAN-Bild entweder scharf oder es ruckelt. Beim alten Analogfernsehen wurde das Bild bei schlechtem Empfang „schneeig“.' });
+  merk(t, '<b>Merke:</b> Ein Bild wird in Pixel zerlegt, jedes Pixel in Zahlen, jede Zahl in Bits. Die Bits werden auf die Trägerwelle moduliert. Der Empfänger macht aus der Welle wieder Bits und setzt daraus das Bild zusammen.');
+  nextBtn(t, 's5');
+  const fb = $('#r_fb');
+  $('#r_check').onclick = () => {
+    const sol = PICS[B.pic][1].join('').split('').map(Number); let wrong = 0;
+    $('#r_grid').querySelectorAll('button').forEach((b, i) => { const ok = B.rx[i] === sol[i]; b.classList.toggle('no', !ok); b.classList.toggle('ok', ok && sol[i] === 1); if (!ok) wrong++; });
+    fb.hidden = false;
+    if (!wrong) { fb.className = 'feedback ok'; fb.innerHTML = `<b>Empfangen!</b> Das Bild ist ein ${PICS[B.pic][0]}. Du hast gerade ${NR * NC} Bits dekodiert.`; S.recv++; solve('b_recv', 3); st.classList.add('solved'); $('#r_next').hidden = false; appChanged(); }
+    else { fb.className = 'feedback no'; fb.innerHTML = `${wrong} Pixel ${wrong === 1 ? 'stimmt' : 'stimmen'} noch nicht (rot markiert). Tipp: In jedem Kästchen der Zeile ist der Träger entweder da (1) oder nicht (0).`; }
+  };
+  $('#r_next').onclick = () => { B.pic = (B.pic + 1) % PICS.length; B.rx.fill(0); gridBuild($('#r_grid'), B.rx); fb.hidden = true; $('#r_next').hidden = true; b_draw(); };
+}
+
+/* ===================== 5 Exit-Check ===================== */
+const QUIZ = [
+  { q: 'Wie stehen E-Feld, B-Feld und Ausbreitungsrichtung im Fernfeld zueinander?', o: ['alle drei senkrecht zueinander', 'E parallel zu B', 'B in Ausbreitungsrichtung'], c: 0 },
+  { q: 'Im Fernfeld sind E und B …', o: ['gleichphasig', 'um T/4 verschoben', 'gegenphasig'], c: 0 },
+  { q: 'Was braucht eine elektromagnetische Welle, um sich auszubreiten?', o: ['nichts, sie läuft auch im Vakuum', 'Luft', 'einen Draht'], c: 0 },
+  { q: 'Welche Welle hat die größte Wellenlänge?', o: ['UKW-Radio', 'WLAN', 'rotes Licht', 'Röntgen'], c: 0 },
+  { q: 'Ein Sender funkt mit 300 MHz. Wie groß ist λ?', o: ['1 m', '10 m', '0,1 m', '3 m'], c: 0 },
+  { q: 'Wozu braucht ein Radioempfänger einen Schwingkreis?', o: ['um durch Resonanz einen Sender auszuwählen', 'um den Ton lauter zu machen', 'um die Welle abzustrahlen'], c: 0 },
+  { q: 'Bei FM steckt der Ton in …', o: ['der Frequenz der Trägerwelle', 'der Amplitude der Trägerwelle', 'der Ausbreitungsgeschwindigkeit'], c: 0 },
+  { q: 'Warum braucht man beim Radio eine Trägerwelle?', o: ['Der Ton allein hätte eine riesige Wellenlänge, die Antenne wäre viel zu lang.', 'Ohne Träger wäre der Ton zu schnell.', 'Die Trägerwelle macht den Ton lauter.'], c: 0 },
+  { q: 'Wie wird ein Bild digital gefunkt?', o: ['Pixel → Zahlen → Bits → auf die Trägerwelle', 'Das Bild wird als kleines Foto mitgeschickt.', 'Jede Farbe bekommt einen eigenen Sender.'], c: 0 },
+  { q: 'Licht und Radiowellen unterscheiden sich in …', o: ['Wellenlänge und Frequenz', 'der Geschwindigkeit im Vakuum', 'gar nichts'], c: 0 }
+];
+QUIZ.forEach((_, i) => MAXP['qz' + i] = 1);
+function quizStart() {
+  const box = $('#qzBox'); box.innerHTML = '';
+  if (S.quiz.length) box.appendChild(el('div', 'read', 'Bisherige Runden: ' + S.quiz.map(r => r + '/8').join(', ')));
+  const b = el('button', 'btn green', S.quiz.length ? 'Neue Runde starten' : 'Runde starten'); b.type = 'button'; b.style.marginTop = '12px'; b.onclick = quizRun; box.appendChild(b);
+}
+function quizRun() {
+  const order = QUIZ.map((_, i) => i).sort(() => Math.random() - .5).slice(0, 8), box = $('#qzBox'); let n = 0, right = 0;
+  const step = () => {
+    box.innerHTML = '';
+    if (n >= order.length) { S.quiz.push(right); if (S.quiz.length > 12) S.quiz.shift(); box.appendChild(el('div', 'feedback ' + (right >= 6 ? 'ok' : 'warn'), `<b>${right} von 8 richtig.</b> ${right === 8 ? 'Stark, das sitzt.' : right >= 6 ? 'Gut. Schau dir die Stationen zu den falschen Antworten noch einmal an.' : 'Geh die Stationen noch einmal durch, dann klappt es.'}`)); refresh(); appChanged(); const b = el('button', 'btn green', 'Noch eine Runde'); b.type = 'button'; b.style.marginTop = '12px'; b.onclick = quizRun; box.appendChild(b); return; }
+    const qi = order[n], Q = QUIZ[qi], idx = Q.o.map((_, i) => i).sort(() => Math.random() - .5), d = el('div', 'task');
+    d.innerHTML = `<p class="small" style="margin:0 0 4px">Frage ${n + 1} von 8</p><p class="q">${Q.q}</p>`; const ob = el('div', 'opts'), fb = el('div', 'feedback'); fb.hidden = true; const bs = [];
+    idx.forEach(i => { const b = el('button', '', Q.o[i]); b.type = 'button'; bs.push([b, i]); ob.appendChild(b);
+      b.onclick = () => { bs.forEach(([x, j]) => { x.disabled = true; if (j === Q.c) x.classList.add('ok'); }); const ok = i === Q.c; if (ok) { right++; if (!('qz' + qi in S.p)) S.p['qz' + qi] = 1; } else b.classList.add('no'); fb.hidden = false; fb.className = 'feedback ' + (ok ? 'ok' : 'no'); fb.innerHTML = ok ? 'Richtig.' : 'Leider nicht. Die richtige Antwort ist grün markiert.'; const nb = el('button', 'btn', n === 7 ? 'Auswertung' : 'Weiter'); nb.type = 'button'; nb.style.marginTop = '10px'; nb.onclick = () => { n++; step(); }; d.appendChild(nb); refresh(); }; });
+    d.append(ob, fb); box.appendChild(d);
+  };
+  step();
+}
+
+/* ===================== Zeichnen, Regler, Start ===================== */
+function drawActive() {
+  if (active === 's1') { w_draw(); r_draw(); } if (active === 's2') sp_draw();
+  if (active === 's3') { m_draw(); t_draw(); } if (active === 's4') b_draw();
+}
+function buildAll() { Object.keys(REQ).forEach(k => delete REQ[k]); buildS1(); buildS2(); buildS3(); buildS4(); quizStart(); refresh(); drawActive(); }
+const bind = (id, fn) => $(id).addEventListener('input', e => fn(+e.target.value));
+const seg = (id, fn) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); fn(b.dataset.m); });
+const setView = v => { W.view = v; [W.yaw, W.pitch] = VIEWS[v]; $('#w_yaw').value = W.yaw; $('#w_yawO').textContent = W.yaw + '°'; if (v === 'vorne') seen('vorne'); w_draw(); };
+seg('#w_view', setView);
+bind('#w_yaw', v => { W.yaw = v; W.view = 'frei'; $('#w_view').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', false)); $('#w_yawO').textContent = v + '°'; if (v >= 80) seen('vorne'); w_draw(); });
+bind('#w_lam', v => { W.lam = v; $('#w_lamO').textContent = v < .85 ? 'kurz' : v > 1.25 ? 'lang' : 'mittel'; w_draw(); });
+$('#w_E').onchange = e => { W.E = e.target.checked; w_draw(); }; $('#w_B').onchange = e => { W.B = e.target.checked; w_draw(); };
+$('#w_pause').onclick = () => { W.run = !W.run; $('#w_pause').textContent = W.run ? 'Anhalten' : 'Weiter'; };
+seg('#r_pos', m => { W.rpos = m; r_draw(); });
+bind('#r_ang', v => { W.rang = v; $('#r_angO').textContent = v + '°'; r_draw(); });
+bind('#sp_l', v => { SP = v; sp_draw(); });
+PRESETS.forEach(([n, lg]) => { const b = el('button', '', n); b.type = 'button'; b.onclick = () => { SP = lg; $('#sp_l').value = lg; sp_draw(); }; $('#sp_chips').appendChild(b); });
+seg('#m_mode', m => { M.mode = m; m_draw(); });
+bind('#m_ton', v => { M.ton = v; m_draw(); }); bind('#m_vol', v => { M.vol = v; m_draw(); });
+bind('#t_C', v => { T.C = v; t_draw(); });
+$('#t_sound').onclick = () => { if (T.sound) audioStop(); else audioStart(); };
+seg('#b_mode', m => { B.mode = m; $('#b_send').hidden = m !== 'send'; $('#b_recv').hidden = m !== 'recv'; b_draw(); });
+$('#w_yaw').value = W.yaw; $('#w_yawO').textContent = W.yaw + '°'; $('#w_lamO').textContent = 'mittel'; $('#r_angO').textContent = '0°';
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawActive, 120); });
+setInterval(() => { if (active === 's3') d_draw(); }, 120);
+buildAll(); show('s1', true); requestAnimationFrame(w_loop);
+
+/* ===================== Anbindung an die Klassen-App (ohne Namen) ===================== */
+if (window.AppBridge) {
+  setTimeout(() => { appLive = true; }, 1500);
+  const cnt = sid => { const r = REQ[sid] || []; return r.filter(id => id in S.sol).length + ' von ' + r.length + ' Aufträgen'; };
+  AppBridge.register({
+    getState() {
+      return {
+        punkte: points(),
+        stationen: TABS.map(t => t[0]),
+        erledigt: TABS.filter(t => isDone(t[1])).map(t => t[0]),
+        details: {
+          'Die Welle': cnt('s1'),
+          'Spektrum': cnt('s2'),
+          'Radio': cnt('s3'),
+          'Bild per Funk': cnt('s4') + ', Bilder empfangen: ' + S.recv,
+          'Exit-Check': S.quiz.length ? 'Runden: ' + S.quiz.map(r => r + '/8').join(', ') : 'noch keine Runde',
+          'Ohne Punkte gelöst': Object.keys(S.sol).filter(k => !S.p[k]).length + ' (Lösungsweg angesehen oder mehrere Versuche)'
+        },
+        daten: { v: 1, S, tab: active }
+      };
+    },
+    setState(s) {
+      const d = s && s.daten; if (!d || !d.S) return;
+      S = Object.assign({ sol: {}, p: {}, quiz: [], seen: {}, recv: 0 }, d.S);
+      buildAll(); show(TABS.some(t => t[1] === d.tab) ? d.tab : 's1', true); appLive = true;
+    }
+  });
+}
+</script>
+</body>
+</html>

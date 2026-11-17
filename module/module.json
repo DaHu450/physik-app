@@ -53,6 +53,19 @@
    "icon": "dipol"
   },
   {
+   "id": "em-wellen-labor",
+   "titel": "EM-Wellen-Labor",
+   "untertitel": "Die Welle, Spektrum, Radio und Bilder per Funk",
+   "datei": "em-wellen-labor.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#2F6FB5",
+   "icon": "funk",
+   "gesperrt": true
+  },
+  {
    "id": "abi-trainer-schwingkreis",
    "titel": "Abi-Trainer",
    "untertitel": "Abituraufgaben zum Schwingkreis",
