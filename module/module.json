@@ -89,6 +89,18 @@
    "icon": "abi"
   },
   {
+   "id": "spektren-labor",
+   "titel": "Spektren-Labor",
+   "untertitel": "EM-Spektrum, Gitterspektrometer, Emission, Absorption, Sonnenlicht",
+   "datei": "spektren-labor.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": false,
+   "farbe": "#6B4FA0",
+   "icon": "spektrum"
+  },
+  {
    "id": "quanten-photoeffekt",
    "titel": "Quanten 1 · Photoeffekt",
    "untertitel": "Hallwachs, Photozelle, Einstein-Gleichung, Photonen",
