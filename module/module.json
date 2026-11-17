@@ -96,9 +96,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#6B4FA0",
-   "icon": "spektrum"
+   "icon": "spektrum",
+   "gesperrt": true
   },
   {
    "id": "quanten-photoeffekt",

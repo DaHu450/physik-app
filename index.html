@@ -71,6 +71,8 @@ h1,h2{font-family:var(--f-display);color:var(--navy);margin:0;line-height:1.1}
 .tile .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .tile h2{font-size:25px;font-weight:800}
 .tile .sub{color:var(--muted);font-size:15px}
+.tile.gesperrt{filter:grayscale(.85);opacity:.7}
+.tile.gesperrt .badge.lock{background:var(--muted)}
 .tile .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:15px;gap:8px;flex-wrap:wrap}
 .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;background:var(--green)}
@@ -319,7 +321,12 @@ function startHome() {
     b.innerHTML = `<span class="nr">${mods.indexOf(m) + 1}</span><div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div><div class="body">
       <div class="meta">${f ? `<span>${f.k} von ${f.n} Stationen · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
       ${f ? `<div class="bar"><i style="width:${Math.round(f.anteil * 100)}%"></i></div>` : ''}</div>`;
-    b.onclick = () => oeffneModul(m);
+    if (m.gesperrt) {
+      b.classList.add('gesperrt'); b.setAttribute('aria-disabled', 'true');
+      b.querySelector('.meta').innerHTML = '<span class="badge lock">🔒 Noch gesperrt</span>';
+      const bar = b.querySelector('.bar'); if (bar) bar.remove();
+      b.onclick = () => toast(m.gesperrtText || 'Dieses Modul ist noch gesperrt. Es wird später freigeschaltet.');
+    } else b.onclick = () => oeffneModul(m);
     box.appendChild(b);
   });
   pfeileSetzen();
