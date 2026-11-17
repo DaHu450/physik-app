@@ -84,9 +84,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#D2690A",
-   "icon": "abi"
+   "icon": "abi",
+   "gesperrt": true
   },
   {
    "id": "spektren-labor",
@@ -109,9 +110,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#7A4FB5",
-   "icon": "atom"
+   "icon": "atom",
+   "gesperrt": true
   },
   {
    "id": "quanten-doppelspalt",
@@ -121,9 +123,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#0B7F8C",
-   "icon": "atom"
+   "icon": "atom",
+   "gesperrt": true
   },
   {
    "id": "quanten-wesenszuege",
@@ -133,9 +136,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#1F3A5F",
-   "icon": "atom"
+   "icon": "atom",
+   "gesperrt": true
   },
   {
    "id": "quanten-atom",
@@ -145,9 +149,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#3C7A4E",
-   "icon": "atom"
+   "icon": "atom",
+   "gesperrt": true
   },
   {
    "id": "abi-trainer-quanten",
@@ -157,9 +162,10 @@
    "klassen": [
     "21"
    ],
-   "freigegeben": false,
+   "freigegeben": true,
    "farbe": "#D2690A",
-   "icon": "abi"
+   "icon": "abi",
+   "gesperrt": true
   }
  ]
 }
