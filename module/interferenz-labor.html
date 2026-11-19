@@ -92,7 +92,10 @@ table.ord th{color:var(--muted);font-weight:500}
 .small{font-size:14.5px;color:var(--muted)}
 .bets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media (max-width:560px){.bets{grid-template-columns:minmax(0,1fr)}}
-.bets button{font:inherit;text-align:left;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px;cursor:pointer}
+.bets .pic{border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:10px}
+.betpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.betpick button{font:inherit;font-size:18px;font-weight:700;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;min-height:52px;cursor:pointer}
+.betpick button[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:var(--bg)}
 .bets button[aria-pressed="true"]{border-color:var(--navy);background:var(--navySoft)}
 .bets canvas{height:54px;margin-bottom:8px}
 .meter{height:22px;border-radius:999px;background:var(--bg);border:1.5px solid var(--line);overflow:hidden;margin-top:10px}
@@ -103,24 +106,24 @@ table.ord th{color:var(--muted);font-weight:500}
 <body>
 <div class="wrap">
 <header>
-  <h1>Interferenz-Labor<small>TG2 · Doppelspalt, Gitter, weißes Licht, Mikrowellen · Bezeichnungen wie in der IQB-Formelsammlung</small></h1>
+  <h1>Interferenz-Labor<small>TG2 · Teilchen oder Welle, Doppelspalt, Gitter, weißes Licht, Mikrowellen · Formeln wie in der IQB-Formelsammlung</small></h1>
   <div class="score" aria-live="polite">Punkte: <b id="pts">0</b> / <span id="ptsMax">0</span></div>
 </header>
 <nav id="tabs" role="tablist"></nav>
 
-<!-- 0 Wette -->
+<!-- 0 Teilchen oder Welle -->
 <section class="st single" id="s0"><div class="card">
-  <h2>Deine Wette</h2>
-  <p class="lead">Ein roter Laser leuchtet auf eine Blende mit zwei sehr schmalen Spalten. Die Spalte liegen nur 0,25 mm auseinander. Drei Meter dahinter steht ein Schirm. Was siehst du dort?</p>
+  <h2>Teilchen oder Welle?</h2>
+  <p class="lead">Um 1700 stritten zwei Lager. <b>Newton:</b> Licht besteht aus winzigen Teilchen, die geradeaus fliegen. <b>Huygens:</b> Licht ist eine Welle, so wie Wasser- oder Schallwellen. Ein roter Laser leuchtet jetzt auf eine Blende mit zwei sehr schmalen Spalten, nur 0,25 mm auseinander. Drei Meter dahinter steht ein Schirm. Vier mögliche Bilder auf dem Schirm:</p>
   <div class="bets" id="bets"></div>
-  <div class="feedback info" id="betFb" hidden></div>
+  <div id="t0"></div>
 </div></section>
 
 <!-- 1 Zwei Wellen -->
 <section class="st" id="s1" hidden>
   <div class="card stage">
     <h2>Zwei Wellen treffen sich</h2>
-    <p class="lead">Blick von oben in eine Wellenwanne: Durch zwei Öffnungen kommen zwei gleiche Kreiswellen. Tippe irgendwo ins Bild, dann siehst du die beiden Wege bis zu diesem Punkt.</p>
+    <p class="lead">Blick von oben in eine Wellenwanne: Durch zwei Öffnungen kommen zwei gleiche Kreiswellen. Tippe irgendwo ins Bild, dann siehst du die beiden Wege bis zu diesem Punkt. Ganz rechts steht ein <b>Schirm</b>: Er zeigt, wie hell es dort im Mittel ist.</p>
     <canvas id="c1" class="tap" height="300"></canvas>
     <div class="row" style="margin-top:10px">
       <div class="seg" id="w1mode"><button type="button" data-m="wave" aria-pressed="true">Wellenbild</button><button type="button" data-m="amp" aria-pressed="false">Wo ist viel los?</button></div>
@@ -142,8 +145,8 @@ table.ord th{color:var(--muted);font-weight:500}
     <div class="slider"><label for="d_cur">Messmarke</label><input type="range" id="d_cur" min="-40" max="40" step="0.1" value="0"><output id="d_curO"></output></div>
     <div class="slider"><label for="d_lam">λ</label><input type="range" id="d_lam" min="400" max="700" step="1" value="633"><output id="d_lamO"></output></div>
     <div class="slider"><label for="d_g">g</label><input type="range" id="d_g" min="0.10" max="0.50" step="0.01" value="0.25"><output id="d_gO"></output></div>
-    <div class="slider"><label for="d_e">e</label><input type="range" id="d_e" min="1" max="5" step="0.05" value="3"><output id="d_eO"></output></div>
-    <p class="small" style="margin:8px 0 0">g: Abstand der Spaltmitten · e: Abstand Doppelspalt–Schirm · a: Abstand eines Maximums von der Mitte. Die Messmarke kannst du auch direkt im Schirmbild antippen.</p>
+    <div class="slider"><label for="d_e">a</label><input type="range" id="d_e" min="1" max="5" step="0.05" value="3"><output id="d_eO"></output></div>
+    <p class="small" style="margin:8px 0 0">g: Abstand der Spaltmitten · a: Abstand Doppelspalt–Schirm · d<sub>k</sub>: Abstand des k-ten Maximums von der Mitte. Die Messmarke kannst du auch direkt im Schirmbild antippen.</p>
   </div>
   <div class="card" id="t2"></div>
 </section>
@@ -154,7 +157,7 @@ table.ord th{color:var(--muted);font-weight:500}
     <h2>Vom Doppelspalt zum Gitter</h2>
     <div class="seg" id="g_mode"><button type="button" data-m="n" aria-pressed="true">Mehr Spalte</button><button type="button" data-m="real" aria-pressed="false">Echtes Gitter</button></div>
     <div id="g_n">
-      <p class="lead" style="margin-top:10px">Gleicher Aufbau wie in Station 2 (λ = 633 nm, g = 0,25 mm, e = 3 m). Du änderst nur die Zahl der Spalte.</p>
+      <p class="lead" style="margin-top:10px">Gleicher Aufbau wie in Station 2 (λ = 633 nm, g = 0,25 mm, a = 3 m). Du änderst nur die Zahl der Spalte.</p>
       <canvas id="c3a" class="dark" height="190"></canvas>
       <div class="slider"><label for="g_N">Spalte</label><input type="range" id="g_N" min="0" max="7" step="1" value="0"><output id="g_NO"></output></div>
       <div class="read" id="g_Nread"></div>
@@ -164,7 +167,7 @@ table.ord th{color:var(--muted);font-weight:500}
       <canvas id="c3b" height="300"></canvas>
       <div class="slider"><label for="g_n2">Striche</label><input type="range" id="g_n2" min="100" max="1000" step="10" value="300"><output id="g_n2O"></output></div>
       <div class="slider"><label for="g_lam">λ</label><input type="range" id="g_lam" min="400" max="700" step="1" value="633"><output id="g_lamO"></output></div>
-      <div class="slider"><label for="g_e">e</label><input type="range" id="g_e" min="0.3" max="1.5" step="0.05" value="1"><output id="g_eO"></output></div>
+      <div class="slider"><label for="g_e">a</label><input type="range" id="g_e" min="0.3" max="1.5" step="0.05" value="1"><output id="g_eO"></output></div>
       <div id="g_tab"></div>
     </div>
   </div>
@@ -178,7 +181,7 @@ table.ord th{color:var(--muted);font-weight:500}
     <p class="lead">Statt des Lasers steht jetzt eine Glühlampe vor dem Gitter. Sie sendet alle Wellenlängen von etwa 400 nm (violett) bis 700 nm (rot) aus.</p>
     <canvas id="c4" class="dark" height="230"></canvas>
     <div class="slider"><label for="w_n">Striche</label><input type="range" id="w_n" min="100" max="600" step="10" value="200"><output id="w_nO"></output></div>
-    <div class="slider"><label for="w_e">e</label><input type="range" id="w_e" min="0.5" max="2" step="0.05" value="1.5"><output id="w_eO"></output></div>
+    <div class="slider"><label for="w_e">a</label><input type="range" id="w_e" min="0.5" max="2" step="0.05" value="1.5"><output id="w_eO"></output></div>
     <p class="small" style="margin:8px 0 0">Unter dem Schirmbild siehst du, von wo bis wo das Spektrum jeder Ordnung reicht (links violett, rechts rot).</p>
   </div>
   <div class="card" id="t4"></div>
@@ -261,9 +264,9 @@ let cur = null;                     // Station, deren Aufgaben gerade gebaut wer
 function need(id, p, optional) { MAXP[id] = p; if (!optional) (REQ[cur] = REQ[cur] || []).push(id); }
 function solve(id, p) { if (id in S.sol) return; S.sol[id] = 1; S.p[id] = p; refresh(); appChanged(); }
 const points = () => Object.values(S.p).reduce((a, b) => a + b, 0);
-const isDone = sid => sid === 's0' ? !!S.bet : sid === 's6' ? S.tr.n >= 5 : sid === 's7' ? S.quiz.length > 0 : (REQ[sid] || []).every(id => id in S.sol);
+const isDone = sid => sid === 's0' ? !!S.bet && (REQ.s0 || []).every(id => id in S.sol) : sid === 's6' ? S.tr.n >= 5 : sid === 's7' ? S.quiz.length > 0 : (REQ[sid] || []).every(id => id in S.sol);
 
-const TABS = [['Wette', 's0'], ['Zwei Wellen', 's1'], ['Doppelspalt', 's2'], ['Gitter', 's3'], ['Weißes Licht', 's4'], ['Mikrowellen', 's5'], ['Training', 's6'], ['Exit-Check', 's7']];
+const TABS = [['Teilchen oder Welle?', 's0'], ['Zwei Wellen', 's1'], ['Doppelspalt', 's2'], ['Gitter', 's3'], ['Weißes Licht', 's4'], ['Mikrowellen', 's5'], ['Training', 's6'], ['Exit-Check', 's7']];
 let active = 's0';
 function renderTabs() {
   const t = $('#tabs'); t.innerHTML = '';
@@ -327,8 +330,8 @@ const merk = (host, h) => host.appendChild(el('div', 'merk', h));
 const h3 = (host, t) => host.appendChild(el('h3', '', t));
 const txt = (host, t) => host.appendChild(el('p', 'lead', t));
 
-/* ===================== 0 Wette ===================== */
-const BETS = [['A', 'Zwei helle Streifen, einer hinter jedem Spalt'], ['B', 'Einen einzigen breiten hellen Fleck'], ['C', 'Viele helle Punkte in gleichen Abständen'], ['D', 'Der ganze Schirm ist gleichmäßig rot']];
+/* ===================== 0 Teilchen oder Welle ===================== */
+const BETS = [['A', 'Zwei helle Streifen, einer hinter jedem Spalt'], ['B', 'Ein einziger breiter heller Fleck'], ['C', 'Viele helle Punkte in gleichen Abständen'], ['D', 'Der ganze Schirm ist gleichmäßig rot']];
 function drawBet(c, k) {
   const [x, w, h] = fit(c); x.fillStyle = '#060A10'; x.fillRect(0, 0, w, h);
   for (let i = 0; i < w; i++) {
@@ -340,17 +343,31 @@ function drawBet(c, k) {
     x.fillStyle = css([1, .1, .05], I); x.fillRect(i, 8, 1, h - 16);
   }
 }
-function buildBets() {
-  const box = $('#bets'); box.innerHTML = '';
-  BETS.forEach(([L, t], k) => {
-    const b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', S.bet === L);
-    const c = el('canvas'); c.setAttribute('height', 54); b.append(c, el('div', '', `<b>${L}</b> · ${t}`));
-    b.onclick = () => { S.bet = L; buildBets(); refresh(); appChanged(); }; box.appendChild(b); c._k = k;
-  });
-  const fb = $('#betFb'); fb.hidden = !S.bet;
-  fb.innerHTML = S.bet ? `Gemerkt: <b>${S.bet}</b>. Die Auflösung siehst du in Station 2 am Schirm. Vorher schauen wir uns in Station 1 an, was passiert, wenn sich zwei Wellen treffen. <div class="next"><button class="btn green" type="button" id="betGo">Weiter zu Station 1 →</button></div>` : '';
-  if (S.bet) $('#betGo').onclick = () => show('s1');
+function buildBets() { // nur die vier Bilder (Legende)
+  const box = $('#bets');
+  if (!box.children.length) BETS.forEach(([L, t], k) => { const d = el('div', 'pic'), c = el('canvas'); c.setAttribute('height', 54); c._k = k; d.append(c, el('div', '', `<b>Bild ${L}</b> · ${t}`)); box.appendChild(d); });
   if (active === 's0') box.querySelectorAll('canvas').forEach(c => drawBet(c, c._k));
+}
+function renderBet() {
+  const b = $('#betBox'); if (!b) return;
+  b.innerHTML = `<p class="q">Und was passiert wirklich? Gleich entscheidet der Laser im Raum. Dein Tipp:</p>`;
+  const row = el('div', 'betpick');
+  BETS.forEach(([L]) => { const x = el('button', '', L); x.type = 'button'; x.setAttribute('aria-pressed', S.bet === L); x.onclick = () => { S.bet = L; renderBet(); betRes(); refresh(); appChanged(); }; row.appendChild(x); });
+  b.appendChild(row); b.className = 'task' + (S.bet ? ' solved' : '');
+  if (S.bet) { const f = el('div', 'feedback info', `Gemerkt: <b>Bild ${S.bet}</b>. Die Auflösung gibt es gleich am Laser und in Station 2. Danach schauen wir in Station 1 nach, <i>warum</i> das Bild so aussieht.`); b.appendChild(f); nextBtn(b, 's1', 'Weiter zu Station 1 →'); }
+}
+function betRes() {
+  const b = $('#betRes'); if (!b) return; b.className = S.bet ? 'feedback ' + (S.bet === 'C' ? 'ok' : 'warn') : ''; b.hidden = !S.bet;
+  b.innerHTML = S.bet ? `<b>Auflösung deines Tipps (Bild ${S.bet}):</b> ${S.bet === 'C' ? 'Volltreffer.' : 'Schau auf den Schirm, es ist Bild C.'} Hinter dem Doppelspalt entstehen viele helle Punkte in gleichen Abständen. Newtons Teilchen hätten Bild A erzeugt. Licht verhält sich wie die Wellen aus Station 1: <b>Licht ist eine Welle.</b>` : '';
+}
+function buildS0() {
+  cur = 's0'; const t = $('#t0'); t.innerHTML = '';
+  h3(t, '1 · Was sagt Newton voraus?');
+  mc(t, { id: 'm_teil', q: 'Licht besteht aus Teilchen, die geradeaus durch die beiden Spalte fliegen. Welches Bild erwartest du dann?', opts: ['Bild A', 'Bild B', 'Bild C', 'Bild D'], correct: 0, fb: { 1: 'Fast. Aber zwei Spalte lassen zwei Teilchenstrahlen durch, also zwei Flecken.', 2: 'Woher sollen Teilchen, die geradeaus fliegen, an die vielen Stellen dazwischen kommen?', 3: 'Dann müssten die Teilchen in alle Richtungen fliegen. Sie fliegen aber geradeaus.' }, ok: 'Hinter jedem Spalt landet ein Fleck, dazwischen bleibt es dunkel.' });
+  h3(t, '2 · Was sagt Huygens voraus?');
+  mc(t, { id: 'm_welle', q: 'Licht ist eine Welle. Hinter jedem Spalt läuft eine Kreiswelle weiter, so wie in der Wellenwanne. Welches Bild erwartest du dann?', opts: ['Bild A', 'Bild B', 'Bild C', 'Bild D'], correct: 2, fb: { 0: 'Das wäre das Teilchenbild. Denk an die Wellenwanne mit zwei Öffnungen: Was passiert, wenn sich zwei Kreiswellen treffen?', 1: 'Denk an die Wellenwanne mit zwei Öffnungen: Was passiert, wenn sich zwei Kreiswellen treffen?', 3: 'Gleichmäßig wäre es nur, wenn sich die Wellen nirgends verstärken oder auslöschen.' }, ok: 'Die beiden Kreiswellen überlagern sich. Verstärkung und Auslöschung wechseln sich ab, also helle und dunkle Stellen.' });
+  h3(t, '3 · Dein Tipp');
+  const b = el('div', 'task'); b.id = 'betBox'; t.appendChild(b); renderBet();
 }
 
 /* ===================== 1 Zwei Wellen ===================== */
@@ -378,7 +395,13 @@ function w1draw() {
   x.fillStyle = '#C9D3DF'; const wx = sx(0) - 4;
   x.fillRect(wx, 0, 8, sy(-W1.g / 2 - gap / 2)); x.fillRect(wx, sy(-W1.g / 2 + gap / 2), 8, sy(W1.g / 2 - gap / 2) - sy(-W1.g / 2 + gap / 2)); x.fillRect(wx, sy(W1.g / 2 + gap / 2), 8, h);
   x.strokeStyle = 'rgba(255,255,255,.35)'; x.setLineDash([6, 6]); x.beginPath(); x.moveTo(sx(0), sy(0)); x.lineTo(w, sy(0)); x.stroke(); x.setLineDash([]);
-  x.font = '13px ' + cv('--f-mono'); x.fillStyle = '#fff'; x.fillText('Mittelachse', w - 96, sy(0) - 6);
+  x.font = '13px ' + cv('--f-mono'); x.fillStyle = '#fff'; x.fillText('Mittelachse', w - 122, sy(0) - 6);
+  { // Schirm am rechten Rand: zeitlich gemittelte Helligkeit
+    const sw = 22, xr = w - sw, Xs = W1.X - 2; x.fillStyle = '#060A10'; x.fillRect(xr - 3, 0, sw + 3, h);
+    for (let py = 0; py < h; py++) { const Y = (py / h - .5) * W1.Y, ds = Math.hypot(Xs, Y + W1.g / 2) - Math.hypot(Xs, Y - W1.g / 2), I = Math.pow(Math.cos(Math.PI * ds / W1.lam), 2); x.fillStyle = css([.45, 1, .55], I); x.fillRect(xr, py, sw, 1); }
+    x.fillStyle = '#C9D3DF'; x.fillRect(xr - 3, 0, 3, h);
+    x.save(); x.translate(xr - 8, h - 8); x.rotate(-Math.PI / 2); x.font = '13px ' + cv('--f-mono'); x.fillStyle = '#fff'; x.fillText('Schirm', 0, 0); x.restore();
+  }
   if (W1.pt) {
     const [X, Y] = W1.pt; x.lineWidth = 2.5;
     x.strokeStyle = '#FFB454'; x.beginPath(); x.moveTo(sx(0), sy(W1.g / 2)); x.lineTo(sx(X), sy(Y)); x.stroke();
@@ -400,6 +423,7 @@ function buildS1() {
   mc(t, { id: 'w_mitte', q: 'Tippe einen Punkt auf der Mittelachse an. Was gilt dort?', opts: ['Δs = 0, die Wellen verstärken sich', 'Δs = 0, die Wellen löschen sich aus', 'Δs = λ/2, die Wellen löschen sich aus'], correct: 0, ok: 'Beide Wege sind gleich lang. Berg trifft immer auf Berg und Tal auf Tal.' });
   act(t, { id: 'w_max', q: 'Finde einen Punkt <u>neben</u> der Mittelachse, an dem sich die Wellen verstärken. Tippe ihn an, dann „Prüfen“.', test: () => { const r = w1ds(); if (!r) return 'Tippe erst einen Punkt im Bild an.'; if (r.n < .5) return 'Das ist noch die Verstärkung in der Mitte. Geh weiter nach außen.'; const f = Math.abs(r.n - Math.round(r.n)); return f < .1 ? true : `Hier ist Δs = ${fmt(r.n, 2)} · λ. Für Verstärkung muss Δs ein ganzes Vielfaches von λ sein. Tipp: „Wo ist viel los?“ einschalten.`; }, ok: 'Δs ist hier ein ganzes Vielfaches von λ. Die eine Welle ist genau um ganze Wellenlängen „zu spät“, das merkt man nicht.' });
   act(t, { id: 'w_min', q: 'Finde jetzt einen Punkt, an dem sich die Wellen auslöschen.', test: () => { const r = w1ds(); if (!r) return 'Tippe erst einen Punkt im Bild an.'; const f = Math.abs(r.n - Math.floor(r.n) - .5); return f < .1 ? true : `Hier ist Δs = ${fmt(r.n, 2)} · λ. Such einen Punkt in einem dunklen Streifen.`; }, ok: 'Δs ist hier λ/2, 3λ/2, 5λ/2 … Berg trifft auf Tal.' });
+  mc(t, { id: 'w_schirm', q: 'Schau auf den Schirm ganz rechts. Wo ist es dort hell?', opts: ['Genau dort, wo die Streifen der Verstärkung auf den Schirm treffen', 'Nur hinter den beiden Öffnungen', 'Überall gleich hell'], correct: 0, fb: { 1: 'Schalte auf „Wo ist viel los?“ und verfolge die hellen Streifen bis zum Schirm.' }, ok: 'So entsteht das Streifenmuster: Jeder helle Streifen auf dem Schirm ist ein Ort mit Δs = k · λ, jeder dunkle einer mit Δs = (2k − 1) · λ/2.' });
   mc(t, { id: 'w_bed', q: 'Welche Bedingung gilt für Verstärkung (Maximum k-ter Ordnung)?', opts: ['Δs = k · λ &nbsp;(k = 0, 1, 2, …)', 'Δs = (2k − 1) · λ/2', 'Δs = k · λ/4'], correct: 0, fb: { 1: 'Das ist die Bedingung für Auslöschung: ein ungerades Vielfaches von λ/2.' }, ok: 'k heißt Ordnung. In der Mitte liegt das Maximum 0. Ordnung.' });
   mc(t, { id: 'w_lam', q: 'Mach λ größer. Was passiert mit den Streifen der Verstärkung?', opts: ['Sie fächern weiter auseinander.', 'Sie rücken enger zusammen.', 'Es ändert sich nichts.'], correct: 0, ok: 'Für Δs = λ muss man bei größerem λ weiter von der Mitte weg.' });
   mc(t, { id: 'w_g', q: 'Und wenn du den Abstand g der Öffnungen vergrößerst?', opts: ['Die Streifen fächern weiter auseinander.', 'Die Streifen rücken enger zusammen.', 'Es ändert sich nichts.'], correct: 1, ok: 'Bei großem g ist der Gangunterschied schon bei kleinen Winkeln groß. Merk dir beide „je … desto“, die brauchst du gleich wieder.' });
@@ -419,7 +443,7 @@ function drawScreen(c, o) { // o:{lam,g,e,N,R,cur}
   x.fillStyle = '#9BABBD'; x.font = '12px ' + cv('--f-mono'); x.textAlign = 'center';
   const ry = sy + sh + 4; x.strokeStyle = '#9BABBD'; x.lineWidth = 1;
   for (let a = -o.R; a <= o.R; a += 1) { const L = a % 10 === 0 ? 10 : a % 5 === 0 ? 7 : 4; x.beginPath(); x.moveTo(px(a), ry); x.lineTo(px(a), ry + L); x.stroke(); if (a % 10 === 0) x.fillText(a, px(a), ry + 23); }
-  x.fillText('a in mm', w - 34, ry + 37);
+  x.fillText('d in mm', w - 34, ry + 37);
   const da = o.lam * 1e-6 * o.e * 1000 / o.g; // Ordnungen beschriften (Kleinwinkel reicht für die Beschriftung)
   if (da / o.R * (w / 2) > 17) for (let k = 0; k * da <= o.R; k++) [1, -1].forEach(sg => { if (k || sg > 0) x.fillText(k, px(sg * k * da), top - 2); });
   if (o.cur != null) { x.strokeStyle = '#fff'; x.setLineDash([4, 4]); x.beginPath(); x.moveTo(px(o.cur), top); x.lineTo(px(o.cur), ry + 10); x.stroke(); x.setLineDash([]); }
@@ -438,8 +462,8 @@ function drawTop() { // Schemazeichnung, nicht maßstäblich
   x.fillStyle = col; x.beginPath(); x.arc(xe, yc, 5, 0, 7); x.fill();
   x.fillStyle = ink; x.fillText('Doppelspalt', xs - 40, h - 22 + 14); x.fillText('Schirm', xe - 26, h - 8);
   x.fillText('g', xs - 18, my + 5);
-  x.strokeStyle = mu; x.lineWidth = 1; const ey = h - 30; x.beginPath(); x.moveTo(xs + 46, ey); x.lineTo(xe - 34, ey); x.stroke(); x.fillStyle = mu; x.fillText('e = ' + fmt(D.e, 2) + ' m', (xs + xe) / 2 - 38, ey - 5);
-  if (Math.abs(D.cur) > 2) { x.strokeStyle = cv('--orange'); x.lineWidth = 2; x.beginPath(); x.moveTo(xe + 12, my); x.lineTo(xe + 12, yc); x.stroke(); x.fillStyle = cv('--orange'); x.fillText('a', xe + 20, (my + yc) / 2 + 4); x.fillStyle = ink; x.fillText('α', xs + 46, my + (yc < my ? -6 : 16)); }
+  x.strokeStyle = mu; x.lineWidth = 1; const ey = h - 30; x.beginPath(); x.moveTo(xs + 46, ey); x.lineTo(xe - 34, ey); x.stroke(); x.fillStyle = mu; x.fillText('a = ' + fmt(D.e, 2) + ' m', (xs + xe) / 2 - 38, ey - 5);
+  if (Math.abs(D.cur) > 2) { x.strokeStyle = cv('--orange'); x.lineWidth = 2; x.beginPath(); x.moveTo(xe + 12, my); x.lineTo(xe + 12, yc); x.stroke(); x.fillStyle = cv('--orange'); x.fillText('dₖ', xe + 20, (my + yc) / 2 + 4); x.fillStyle = ink; x.fillText('α', xs + 46, my + (yc < my ? -6 : 16)); }
 }
 function d_draw() {
   $('#d_curO').textContent = fmt(D.cur) + ' mm'; $('#d_lamO').innerHTML = D.hidden ? '? nm' : D.lam + ' nm'; $('#d_gO').textContent = fmt(D.g, 2) + ' mm'; $('#d_eO').textContent = fmt(D.e, 2) + ' m';
@@ -447,21 +471,26 @@ function d_draw() {
 }
 function buildS2() {
   cur = 's2'; const t = $('#t2'); t.innerHTML = '<h2>Aufträge</h2>';
-  if (S.bet) t.appendChild(el('div', 'feedback ' + (S.bet === 'C' ? 'ok' : 'warn'), `<b>Auflösung deiner Wette (${S.bet}):</b> ${S.bet === 'C' ? 'Volltreffer.' : 'Schau auf den Schirm, es ist C.'} Hinter dem Doppelspalt entstehen viele helle Punkte in gleichen Abständen. Mit „Licht fliegt geradeaus“ lässt sich das nicht erklären. Licht verhält sich hier wie die Wellen aus Station 1.`));
+  const br = el('div'); br.id = 'betRes'; t.appendChild(br); betRes();
   h3(t, '1 · Beobachten');
   mc(t, { id: 'd_lam', q: 'Du vergrößerst die Wellenlänge λ. Die Abstände der Maxima …', opts: ['werden größer', 'werden kleiner', 'bleiben gleich'], correct: 0, ok: 'Rotes Licht wird stärker „aufgefächert“ als blaues.' });
   mc(t, { id: 'd_g', q: 'Du vergrößerst den Spaltabstand g. Die Abstände der Maxima …', opts: ['werden größer', 'werden kleiner', 'bleiben gleich'], correct: 1, ok: 'Genau wie in der Wellenwanne.' });
-  mc(t, { id: 'd_e', q: 'Du schiebst den Schirm weiter weg (e größer). Die Abstände der Maxima …', opts: ['werden größer', 'werden kleiner', 'bleiben gleich'], correct: 0, ok: 'Die Winkel bleiben gleich, aber die Strahlen laufen weiter auseinander.' });
+  mc(t, { id: 'd_e', q: 'Du schiebst den Schirm weiter weg (a größer). Die Abstände der Maxima …', opts: ['werden größer', 'werden kleiner', 'bleiben gleich'], correct: 0, ok: 'Die Winkel bleiben gleich, aber die Strahlen laufen weiter auseinander.' });
   h3(t, '2 · Die Formel finden');
   const c = el('canvas'); c.id = 'c2z'; c.setAttribute('height', 190); t.appendChild(c);
   txt(t, 'Der Schirm ist sehr weit weg. Deshalb laufen die beiden Wellenstrahlen zu einem Punkt auf dem Schirm praktisch parallel, beide unter dem Winkel α.');
   mc(t, { id: 'f_ds', q: 'Im kleinen Dreieck am Doppelspalt ist g die Hypotenuse und Δs die Gegenkathete von α. Also gilt:', opts: ['Δs = g · sin α', 'Δs = g · cos α', 'Δs = g / sin α'], correct: 0, ok: 'sin α = Gegenkathete / Hypotenuse = Δs / g.' });
   mc(t, { id: 'f_max', q: 'Für das Maximum k-ter Ordnung muss Δs = k · λ sein. Eingesetzt:', opts: ['sin α<sub>k</sub> = k · λ / g', 'sin α<sub>k</sub> = g / (k · λ)', 'sin α<sub>k</sub> = k · g / λ'], correct: 0, ok: 'So steht es auch in der IQB-Formelsammlung.' });
-  mc(t, { id: 'f_tan', q: 'Im großen Dreieck (Doppelspalt, Schirmmitte, Maximum) gilt für denselben Winkel:', opts: ['tan α<sub>k</sub> = a<sub>k</sub> / e', 'sin α<sub>k</sub> = a<sub>k</sub> / e', 'tan α<sub>k</sub> = e / a<sub>k</sub>'], correct: 0, fb: { 1: 'e ist die Ankathete, nicht die Hypotenuse.' }, ok: 'Gegenkathete a<sub>k</sub> durch Ankathete e.' });
-  mc(t, { id: 'f_klein', q: 'Beim Doppelspalt mit Licht sind die Winkel winzig (unter 1°). Dann ist sin α ≈ tan α. Was folgt daraus?', opts: ['a<sub>k</sub> = k · λ · e / g', 'a<sub>k</sub> = k · λ · g / e', 'a<sub>k</sub> = k · g · e / λ'], correct: 0, ok: 'Passt zu Teil 1: λ und e oben (größer → Abstände größer), g unten.' });
-  merk(t, '<b>Doppelspalt und Gitter (IQB):</b><br><span class="formel"><i>sin α<sub>k</sub> = k · λ / g</i> &nbsp;und&nbsp; <i>tan α<sub>k</sub> = a<sub>k</sub> / e</i></span><br><b>Nur für kleine Winkel:</b> <span class="formel">a<sub>k</sub> ≈ k · λ · e / g</span>');
+  mc(t, { id: 'f_tan', q: 'Im großen Dreieck (Doppelspalt, Schirmmitte, Maximum) gilt für denselben Winkel:', opts: ['tan α<sub>k</sub> = d<sub>k</sub> / a', 'sin α<sub>k</sub> = d<sub>k</sub> / a', 'tan α<sub>k</sub> = a / d<sub>k</sub>'], correct: 0, fb: { 1: 'a ist die Ankathete, nicht die Hypotenuse.' }, ok: 'Gegenkathete d<sub>k</sub> durch Ankathete a.' });
+  mc(t, { id: 'f_klein', q: 'Beim Doppelspalt mit Licht sind die Winkel winzig (unter 1°). Dann ist sin α ≈ tan α. Was folgt daraus?', opts: ['d<sub>k</sub> = k · λ · a / g', 'd<sub>k</sub> = k · λ · g / a', 'd<sub>k</sub> = k · g · a / λ'], correct: 0, ok: 'Passt zu Teil 1: λ und e oben (größer → Abstände größer), g unten.' });
+  h3(t, 'Wie klein ist „klein“?');
+  const kw = el('div', 'task'); kw.innerHTML = `<p class="q">Schieb den Winkel und vergleiche sin α und tan α.</p><div class="slider"><label for="kw_a">α</label><input type="range" id="kw_a" min="0.5" max="30" step="0.5" value="1"><output id="kw_aO"></output></div><div class="read" id="kw_r"></div>`; t.appendChild(kw);
+  const kwU = () => { const v = +$('#kw_a').value, s = Math.sin(rad(v)), ta = Math.tan(rad(v)), f = (ta / s - 1) * 100; $('#kw_aO').textContent = fmt(v) + '°'; $('#kw_r').innerHTML = `sin α = ${fmt(s, 4)} · tan α = ${fmt(ta, 4)}<br>Unterschied: <b>${fmt(f, 2)} %</b> ${f < 1 ? '→ Näherung erlaubt' : '→ Näherung zu ungenau'}`; };
+  kw.querySelector('input').addEventListener('input', kwU); kwU();
+  mc(t, { id: 'f_grenze', q: 'Bis zu welchem Winkel liegt der Unterschied zwischen sin α und tan α unter 1 %?', opts: ['bis etwa 1°', 'bis etwa 8°', 'bis etwa 30°'], correct: 1, ok: 'Faustregel: Unter etwa 5° bis 8° darfst du sin α ≈ tan α setzen. Beim Doppelspalt mit Licht sind es meist unter 1°, beim Gitter oft 10° bis 40°.' });
+  merk(t, '<b>Doppelspalt und Gitter (IQB):</b><br><span class="formel"><i>sin α<sub>k</sub> = k · λ / g</i> &nbsp;und&nbsp; <i>tan α<sub>k</sub> = d<sub>k</sub> / a</i></span><br><b>Nur für kleine Winkel:</b> <span class="formel">d<sub>k</sub> ≈ k · λ · a / g</span>');
   h3(t, '3 · Wellenlänge messen');
-  txt(t, 'Jetzt wie im echten Versuch: Die Wellenlänge des Lasers ist unbekannt. Stell die Messmarke auf ein Maximum, lies a<sub>k</sub> ab und rechne λ aus. Tipp: Ein Maximum hoher Ordnung liefert ein genaueres Ergebnis.');
+  txt(t, 'Jetzt wie im echten Versuch: Die Wellenlänge des Lasers ist unbekannt. Stell die Messmarke auf ein Maximum, lies d<sub>k</sub> ab und rechne λ aus. Tipp: Ein Maximum hoher Ordnung liefert ein genaueres Ergebnis.');
   const lb = el('div', 'task'); t.appendChild(lb); LASERS.forEach((_, i) => need('laser' + i, 2, i > 0));
   const laserUI = () => {
     const i = S.laser;
@@ -472,7 +501,7 @@ function buildS2() {
     b2.onclick = () => {
       const v = parse(inp.value); if (isNaN(v)) return; tries++;
       if (Math.abs(v - D.lam) <= D.lam * .03) { solve('laser' + i, tries <= 2 ? 2 : 1); S.laser++; D.hidden = false; $('#d_lam').value = D.lam; d_draw(); laserUI(); appChanged(); const f = el('div', 'feedback ok', `<b>Richtig.</b> Der Laser hat λ = ${LASERS[i]} nm. Deine Messung: ${fmt(v, 0)} nm.`); lb.appendChild(f); }
-      else { fb.hidden = false; fb.className = 'feedback no'; const q = Math.log10(v / D.lam); fb.innerHTML = Math.abs(q - Math.round(q)) < .02 ? 'Die Ziffern stimmen, die Zehnerpotenz nicht. Rechne alles in Metern und wandle am Ende in nm um (1 nm = 10⁻⁹ m).' : `Noch nicht. λ = a<sub>k</sub> · g / (k · e). Achte auf die Einheiten: a<sub>k</sub> und g in m. Steht die Messmarke genau auf einem Maximum? Hast du das richtige k?`; }
+      else { fb.hidden = false; fb.className = 'feedback no'; const q = Math.log10(v / D.lam); fb.innerHTML = Math.abs(q - Math.round(q)) < .02 ? 'Die Ziffern stimmen, die Zehnerpotenz nicht. Rechne alles in Metern und wandle am Ende in nm um (1 nm = 10⁻⁹ m).' : `Noch nicht. λ = d<sub>k</sub> · g / (k · a). Achte auf die Einheiten: d<sub>k</sub> und g in m. Steht die Messmarke genau auf einem Maximum? Hast du das richtige k?`; }
     };
   };
   laserUI(); t._laserUI = laserUI;
@@ -519,7 +548,7 @@ function g_draw() {
     x.globalAlpha = 1;
     if (k >= 0) rows += `<tr><td>${k}</td><td>${fmt(s, 3)}</td><td>${fmt(deg(al), 1)}°</td><td>${Math.abs(s) > .9999 ? '–' : fmt(a * 100, 1) + ' cm'}</td></tr>`;
   }
-  $('#g_tab').innerHTML = `<table class="ord"><tr><th>k</th><th>sin α<sub>k</sub></th><th>α<sub>k</sub></th><th>a<sub>k</sub></th></tr>${rows}</table><p class="small" style="margin:6px 0 0">g = 1 mm / ${G.n} = ${fmt(g / 1000, 2)} µm · höchste Ordnung: ${K}</p>`;
+  $('#g_tab').innerHTML = `<table class="ord"><tr><th>k</th><th>sin α<sub>k</sub></th><th>α<sub>k</sub></th><th>d<sub>k</sub></th></tr>${rows}</table><p class="small" style="margin:6px 0 0">g = 1 mm / ${G.n} = ${fmt(g / 1000, 2)} µm · höchste Ordnung: ${K}</p>`;
 }
 function buildS3() {
   cur = 's3'; const t = $('#t3'); t.innerHTML = '<h2>Aufträge</h2>';
@@ -529,9 +558,9 @@ function buildS3() {
   h3(t, '2 · Echtes Gitter');
   txt(t, 'Schalte links auf „Echtes Gitter“. g heißt jetzt <b>Gitterkonstante</b>: der Abstand zweier benachbarter Spalte.');
   num(t, { id: 'g_g', q: 'Ein Gitter hat 500 Striche pro mm. Wie groß ist g?', label: 'g =', unit: 'µm', value: 2, tol: .01, d: 1, sol: 'g = 1 mm / 500 = 0,002 mm = 2,0 µm = 2,0·10⁻⁶ m' });
-  mc(t, { id: 'g_klein', q: 'Beim Gitter mit 600 Strichen/mm und rotem Licht ist α₁ ≈ 22°. Dort ist sin α = 0,37, aber tan α = 0,40. Darfst du mit a<sub>k</sub> ≈ k · λ · e / g rechnen?', opts: ['Nein. Erst α über sin α<sub>k</sub> = k · λ / g ausrechnen, dann a<sub>k</sub> = e · tan α<sub>k</sub>.', 'Ja, die Näherung gilt immer.', 'Ja, aber nur für k = 1.'], correct: 0, ok: 'Faustregel: Die Näherung taugt bis etwa 5°. Beim Gitter also fast nie, beim Doppelspalt mit Licht fast immer.' });
+  mc(t, { id: 'g_klein', q: 'Beim Gitter mit 600 Strichen/mm und rotem Licht ist α₁ ≈ 22°. Dort ist sin α = 0,37, aber tan α = 0,40. Darfst du mit d<sub>k</sub> ≈ k · λ · a / g rechnen?', opts: ['Nein. Erst α über sin α<sub>k</sub> = k · λ / g ausrechnen, dann d<sub>k</sub> = a · tan α<sub>k</sub>.', 'Ja, die Näherung gilt immer.', 'Ja, aber nur für k = 1.'], correct: 0, ok: 'Faustregel: Die Näherung taugt bis etwa 5°. Beim Gitter also fast nie, beim Doppelspalt mit Licht fast immer.' });
   num(t, { id: 'g_a2', q: 'Gitter mit 300 Strichen/mm, Laser mit λ = 633 nm. Unter welchem Winkel liegt das Maximum 2. Ordnung?', given: 'g = 1 mm / 300 · λ = 633 nm · k = 2', label: 'α₂ =', unit: '°', value: deg(Math.asin(2 * 633e-9 * 3e5)), abs: .4, sol: 'g = 1 mm / 300 = 3,33·10⁻⁶ m\nsin α₂ = 2 · 633·10⁻⁹ m / 3,33·10⁻⁶ m = 0,380\nα₂ = 22,3°' });
-  num(t, { id: 'g_ak', q: 'Der Schirm steht e = 1,00 m hinter diesem Gitter. Wie weit ist das Maximum 2. Ordnung von der Mitte entfernt? Kontrolliere mit der Simulation.', label: 'a₂ =', unit: 'cm', value: 100 * Math.tan(Math.asin(2 * 633e-9 * 3e5)), tol: .025, sol: 'a₂ = e · tan α₂ = 1,00 m · tan 22,3° = 0,411 m = 41,1 cm\n(Mit der Kleinwinkelnäherung kämen 38,0 cm heraus: falsch!)' });
+  num(t, { id: 'g_ak', q: 'Der Schirm steht a = 1,00 m hinter diesem Gitter. Wie weit ist das Maximum 2. Ordnung von der Mitte entfernt? Kontrolliere mit der Simulation.', label: 'd₂ =', unit: 'cm', value: 100 * Math.tan(Math.asin(2 * 633e-9 * 3e5)), tol: .025, sol: 'd₂ = a · tan α₂ = 1,00 m · tan 22,3° = 0,411 m = 41,1 cm\n(Mit der Kleinwinkelnäherung kämen 38,0 cm heraus: falsch!)' });
   h3(t, '3 · Wie viele Maxima gibt es?');
   num(t, { id: 'g_kmax', q: 'sin α kann höchstens 1 sein. Welche Ordnung ist bei 600 Strichen/mm und λ = 532 nm die höchste?', label: 'k<sub>max</sub> =', unit: '', value: 3, abs: 0, d: 0, sol: 'g = 1 mm / 600 = 1,667·10⁻⁶ m\nsin α_k = k · λ / g ≤ 1  ⇒  k ≤ g / λ = 3,13\nAlso k_max = 3 (immer abrunden).\nInsgesamt sieht man 2 · 3 + 1 = 7 Maxima.' });
   act(t, { id: 'g_set', q: 'Stell das echte Gitter so ein, dass es bei λ = 650 nm genau bis zur 2. Ordnung reicht (also keine 3. Ordnung mehr).', test: () => { if (G.mode !== 'real') return 'Schalte links auf „Echtes Gitter“.'; if (Math.abs(G.lam - 650) > 3) return 'Stell erst λ = 650 nm ein.'; const K = kmax(gk(), G.lam); return K === 2 ? true : `Im Moment gibt es Maxima bis zur ${K}. Ordnung. ${K > 2 ? 'Mehr' : 'Weniger'} Striche pro mm probieren.`; }, ok: 'Es muss 2 ≤ g/λ < 3 gelten, also g zwischen 1,30 µm und 1,95 µm. Das sind etwa 520 bis 760 Striche pro mm.' });
@@ -552,7 +581,7 @@ function w_draw() {
   }
   x.font = '12px ' + cv('--f-mono'); x.textAlign = 'center'; x.fillStyle = '#9BABBD'; x.strokeStyle = '#9BABBD';
   for (let a = -60; a <= 60; a += 5) { const X = px(a / 100); x.beginPath(); x.moveTo(X, 86); x.lineTo(X, a % 10 ? 91 : 95); x.stroke(); if (a % 20 === 0) x.fillText(a, X, 108); }
-  x.fillText('a in cm', w - 34, 122);
+  x.fillText('d in cm', w - 34, 122);
   for (let k = 1; k <= 4; k++) { // Klammern je Ordnung
     const sv = k * 400 / g, sr = k * 700 / g; if (sv >= 1) break; const av = WL.e * Math.tan(Math.asin(sv)), ar = sr < 1 ? WL.e * Math.tan(Math.asin(sr)) : 99, y = 128 + k * 22;
     if (av > WL.R) break; const X1 = px(av), X2 = px(Math.min(ar, WL.R)), gr = x.createLinearGradient(X1, 0, px(ar > 50 ? WL.R * 3 : ar), 0);
@@ -565,7 +594,7 @@ function buildS4() {
   cur = 's4'; const t = $('#t4'); t.innerHTML = '<h2>Aufträge</h2>';
   mc(t, { id: 'wl_mitte', q: 'In der Mitte bleibt das Licht weiß. Warum?', opts: ['Für k = 0 ist α = 0, egal welche Wellenlänge. Alle Farben landen an derselben Stelle.', 'Weil das Gitter in der Mitte keine Striche hat.', 'Weil sich dort alle Farben auslöschen.'], correct: 0, ok: 'sin α₀ = 0 · λ / g = 0 für jedes λ.' });
   mc(t, { id: 'wl_rot', q: 'Welche Farbe liegt in jedem Spektrum außen, wird also am stärksten abgelenkt?', opts: ['Rot, weil es die größte Wellenlänge hat', 'Violett, weil es die kleinste Wellenlänge hat', 'Grün'], correct: 0, ok: 'sin α ~ λ. Beim Prisma ist es übrigens genau umgekehrt, dort wird Violett am stärksten gebrochen.' });
-  num(t, { id: 'wl_breite', q: 'Gitter mit 200 Strichen/mm, Schirm in e = 1,50 m. Wie breit ist das Spektrum 1. Ordnung (von 400 nm bis 700 nm) auf dem Schirm? Kontrolliere mit der Simulation.', given: 'g = 5,0 µm · λ<sub>violett</sub> = 400 nm · λ<sub>rot</sub> = 700 nm', label: 'Breite =', unit: 'cm', value: 150 * (Math.tan(Math.asin(.14)) - Math.tan(Math.asin(.08))), tol: .04, sol: 'violett: sin α = 400 nm / 5000 nm = 0,080 → α = 4,59° → a = 1,50 m · tan α = 12,0 cm\nrot:     sin α = 700 nm / 5000 nm = 0,140 → α = 8,05° → a = 21,2 cm\nBreite = 21,2 cm − 12,0 cm = 9,2 cm' });
+  num(t, { id: 'wl_breite', q: 'Gitter mit 200 Strichen/mm, Schirm in a = 1,50 m. Wie breit ist das Spektrum 1. Ordnung (von 400 nm bis 700 nm) auf dem Schirm? Kontrolliere mit der Simulation.', given: 'g = 5,0 µm · λ<sub>violett</sub> = 400 nm · λ<sub>rot</sub> = 700 nm', label: 'Breite =', unit: 'cm', value: 150 * (Math.tan(Math.asin(.14)) - Math.tan(Math.asin(.08))), tol: .04, sol: 'violett: sin α = 400 nm / 5000 nm = 0,080 → α = 4,59° → d = 1,50 m · tan α = 12,0 cm\nrot:     sin α = 700 nm / 5000 nm = 0,140 → α = 8,05° → d = 21,2 cm\nBreite = 21,2 cm − 12,0 cm = 9,2 cm' });
   mc(t, { id: 'wl_12', q: 'Können sich die Spektren 1. und 2. Ordnung überlappen?', opts: ['Nein: Rot der 1. Ordnung (1 · 700 nm) liegt immer vor Violett der 2. Ordnung (2 · 400 nm).', 'Ja, bei jedem Gitter.', 'Das hängt vom Gitter ab.'], correct: 0, ok: 'Verglichen wird k · λ: 700 nm < 800 nm. Die Gitterkonstante kürzt sich heraus.' });
   mc(t, { id: 'wl_23', q: 'Und die Spektren 2. und 3. Ordnung? Schau bei wenigen Strichen pro mm nach.', opts: ['Ja, immer: Rot der 2. Ordnung (1400 nm) liegt weiter außen als Violett der 3. Ordnung (1200 nm).', 'Nein, nie.', 'Nur bei sehr feinen Gittern.'], correct: 0, ok: 'Deshalb benutzt man zum Messen fast immer das Spektrum 1. Ordnung.' });
   merk(t, '<b>Ausblick:</b> Eine Glühlampe liefert ein durchgehendes Farbband. Leuchtende Gase (zum Beispiel eine Natrium- oder Quecksilberlampe) liefern nur einzelne farbige Linien. Mit dem Gitter kann man deren Wellenlängen messen. Darum geht es beim nächsten Thema: Spektren.');
@@ -622,17 +651,17 @@ function buildS5() {
 const rnd = (a, b, st) => Math.round((a + Math.random() * (b - a)) / st) * st;
 const GEN = [
   () => { const lam = pick([405, 450, 532, 589, 633, 650]), g = rnd(.15, .5, .05), e = rnd(2, 5, .5), k = pick([2, 3, 4]), a = +(k * lam * 1e-6 * e * 1000 / g).toFixed(1), v = a * g / (k * e) * 1e3;
-    return { q: 'Doppelspalt: Bestimme die Wellenlänge des Lasers.', given: `g = ${fmt(g, 2)} mm · e = ${fmt(e, 2)} m · a<sub>${k}</sub> = ${fmt(a)} mm (Maximum ${k}. Ordnung)`, label: 'λ =', unit: 'nm', value: v, tol: .02, d: 0, sol: `kleine Winkel: λ = a_k · g / (k · e)\nλ = ${fmt(a)}·10⁻³ m · ${fmt(g, 2)}·10⁻³ m / (${k} · ${fmt(e, 2)} m)\nλ = ${fmt(v * 1e-3, 3)}·10⁻⁶ m ≈ ${fmt(v, 0)} nm` }; },
+    return { q: 'Doppelspalt: Bestimme die Wellenlänge des Lasers.', given: `g = ${fmt(g, 2)} mm · a = ${fmt(e, 2)} m · d<sub>${k}</sub> = ${fmt(a)} mm (Maximum ${k}. Ordnung)`, label: 'λ =', unit: 'nm', value: v, tol: .02, d: 0, sol: `kleine Winkel: λ = d_k · g / (k · a)\nλ = ${fmt(a)}·10⁻³ m · ${fmt(g, 2)}·10⁻³ m / (${k} · ${fmt(e, 2)} m)\nλ = ${fmt(v * 1e-3, 3)}·10⁻⁶ m ≈ ${fmt(v, 0)} nm` }; },
   () => { const lam = pick([450, 532, 633, 650]), g = rnd(.1, .4, .05), e = rnd(1.5, 4, .5), k = pick([1, 2, 3]), v = k * lam * 1e-6 * e * 1000 / g;
-    return { q: `Doppelspalt: Wie weit liegt das Maximum ${k}. Ordnung von der Mitte entfernt?`, given: `λ = ${lam} nm · g = ${fmt(g, 2)} mm · e = ${fmt(e, 2)} m`, label: `a<sub>${k}</sub> =`, unit: 'mm', value: v, tol: .02, sol: `kleine Winkel: a_k = k · λ · e / g\na = ${k} · ${lam}·10⁻⁹ m · ${fmt(e, 2)} m / ${fmt(g, 2)}·10⁻³ m\na = ${fmt(v)}·10⁻³ m = ${fmt(v)} mm` }; },
+    return { q: `Doppelspalt: Wie weit liegt das Maximum ${k}. Ordnung von der Mitte entfernt?`, given: `λ = ${lam} nm · g = ${fmt(g, 2)} mm · a = ${fmt(e, 2)} m`, label: `d<sub>${k}</sub> =`, unit: 'mm', value: v, tol: .02, sol: `kleine Winkel: d_k = k · λ · a / g\nd = ${k} · ${lam}·10⁻⁹ m · ${fmt(e, 2)} m / ${fmt(g, 2)}·10⁻³ m\nd = ${fmt(v)}·10⁻³ m = ${fmt(v)} mm` }; },
   () => { const lam = pick([532, 633, 650]), g = rnd(.1, .5, .02), e = rnd(2, 5, .5), da = +(lam * 1e-6 * e * 1000 / g).toFixed(1), v = lam * 1e-6 * e * 1000 / da;
-    return { q: 'Doppelspalt: Benachbarte Maxima haben den Abstand Δa. Bestimme den Spaltabstand.', given: `λ = ${lam} nm · e = ${fmt(e, 2)} m · Δa = ${fmt(da)} mm`, label: 'g =', unit: 'mm', value: v, tol: .025, d: 2, sol: `Δa = λ · e / g  ⇒  g = λ · e / Δa\ng = ${lam}·10⁻⁹ m · ${fmt(e, 2)} m / ${fmt(da)}·10⁻³ m\ng = ${fmt(v * 1e-3 * 1e4, 2)}·10⁻⁴ m = ${fmt(v, 2)} mm` }; },
+    return { q: 'Doppelspalt: Benachbarte Maxima haben den Abstand Δd. Bestimme den Spaltabstand.', given: `λ = ${lam} nm · a = ${fmt(e, 2)} m · Δd = ${fmt(da)} mm`, label: 'g =', unit: 'mm', value: v, tol: .025, d: 2, sol: `Δd = λ · a / g  ⇒  g = λ · a / Δd\ng = ${lam}·10⁻⁹ m · ${fmt(e, 2)} m / ${fmt(da)}·10⁻³ m\ng = ${fmt(v * 1e-3 * 1e4, 2)}·10⁻⁴ m = ${fmt(v, 2)} mm` }; },
   () => { const n = pick([100, 200, 250, 300, 400, 500]), lam = pick([450, 532, 589, 633]), g = 1e6 / n, k = pick([1, 2].filter(k => k * lam / g < .9)), v = deg(Math.asin(k * lam / g));
     return { q: `Gitter: Unter welchem Winkel erscheint das Maximum ${k}. Ordnung?`, given: `${n} Striche pro mm · λ = ${lam} nm`, label: `α<sub>${k}</sub> =`, unit: '°', value: v, abs: Math.max(.25, v * .02), sol: `g = 1 mm / ${n} = ${fmt(g / 1000, 2)}·10⁻⁶ m\nsin α = ${k} · ${lam}·10⁻⁹ m / ${fmt(g / 1000, 2)}·10⁻⁶ m = ${fmt(k * lam / g, 3)}\nα = ${fmt(v)}°` }; },
   () => { const n = pick([200, 300, 400, 500, 600]), lam = pick([450, 532, 633, 650]), g = 1e6 / n, e = rnd(.5, 1.5, .1), al = Math.asin(lam / g), v = 100 * e * Math.tan(al);
-    return { q: 'Gitter: Wie weit ist das Maximum 1. Ordnung auf dem Schirm von der Mitte entfernt?', given: `${n} Striche pro mm · λ = ${lam} nm · e = ${fmt(e, 2)} m`, label: 'a₁ =', unit: 'cm', value: v, tol: .02, sol: `g = 1 mm / ${n} = ${fmt(g / 1000, 2)}·10⁻⁶ m\nsin α₁ = λ / g = ${fmt(lam / g, 3)}  →  α₁ = ${fmt(deg(al))}°\na₁ = e · tan α₁ = ${fmt(e, 2)} m · ${fmt(Math.tan(al), 3)} = ${fmt(v)} cm` }; },
+    return { q: 'Gitter: Wie weit ist das Maximum 1. Ordnung auf dem Schirm von der Mitte entfernt?', given: `${n} Striche pro mm · λ = ${lam} nm · a = ${fmt(e, 2)} m`, label: 'd₁ =', unit: 'cm', value: v, tol: .02, sol: `g = 1 mm / ${n} = ${fmt(g / 1000, 2)}·10⁻⁶ m\nsin α₁ = λ / g = ${fmt(lam / g, 3)}  →  α₁ = ${fmt(deg(al))}°\nd₁ = a · tan α₁ = ${fmt(e, 2)} m · ${fmt(Math.tan(al), 3)} = ${fmt(v)} cm` }; },
   () => { const n = pick([300, 400, 500, 600]), lam = pick([436, 546, 589, 656]), g = 1e6 / n, e = rnd(.4, 1, .1), a = +(100 * e * Math.tan(Math.asin(lam / g))).toFixed(1), al = Math.atan(a / 100 / e), v = g * Math.sin(al);
-    return { q: 'Gitter: Eine Spektrallinie erscheint in 1. Ordnung im Abstand a₁ von der Mitte. Bestimme ihre Wellenlänge.', given: `${n} Striche pro mm · e = ${fmt(e, 2)} m · a₁ = ${fmt(a)} cm`, label: 'λ =', unit: 'nm', value: v, tol: .015, d: 0, sol: `tan α₁ = a₁ / e = ${fmt(a / 100 / e, 3)}  →  α₁ = ${fmt(deg(al))}°\ng = 1 mm / ${n} = ${fmt(g / 1000, 2)}·10⁻⁶ m\nλ = g · sin α₁ = ${fmt(g / 1000, 2)}·10⁻⁶ m · ${fmt(Math.sin(al), 3)} ≈ ${fmt(v, 0)} nm` }; },
+    return { q: 'Gitter: Eine Spektrallinie erscheint in 1. Ordnung im Abstand d₁ von der Mitte. Bestimme ihre Wellenlänge.', given: `${n} Striche pro mm · a = ${fmt(e, 2)} m · d₁ = ${fmt(a)} cm`, label: 'λ =', unit: 'nm', value: v, tol: .015, d: 0, sol: `tan α₁ = d₁ / a = ${fmt(a / 100 / e, 3)}  →  α₁ = ${fmt(deg(al))}°\ng = 1 mm / ${n} = ${fmt(g / 1000, 2)}·10⁻⁶ m\nλ = g · sin α₁ = ${fmt(g / 1000, 2)}·10⁻⁶ m · ${fmt(Math.sin(al), 3)} ≈ ${fmt(v, 0)} nm` }; },
   () => { let n, lam, r; do { n = pick([250, 300, 400, 500, 600, 800]); lam = pick([405, 450, 532, 633, 650]); r = 1e6 / n / lam; } while (Math.abs(r - Math.round(r)) < .06); const v = Math.floor(r);
     return { q: 'Gitter: Welche Ordnung ist die höchste, die man beobachten kann?', given: `${n} Striche pro mm · λ = ${lam} nm`, label: 'k<sub>max</sub> =', unit: '', value: v, abs: 0, d: 0, sol: `g = 1 mm / ${n} = ${fmt(1e3 / n, 2)}·10⁻⁶ m\nsin α_k ≤ 1  ⇒  k ≤ g / λ = ${fmt(r, 2)}\nk_max = ${v} (abrunden)` }; },
   () => { const g = rnd(6, 12, .5), k = pick([1, 2]), lam = rnd(2.6, 3.4, .1), al = +deg(Math.asin(k * lam / g)).toFixed(1), v = g * Math.sin(rad(al)) / k;
@@ -659,7 +688,7 @@ for (let i = 0; i < 8; i++) MAXP['tr' + i] = 1;
 const QUIZ = [
   { q: 'Wann verstärken sich zwei Wellen an einem Punkt maximal?', o: ['Δs = k · λ', 'Δs = (2k − 1) · λ/2', 'Δs = λ/4'], c: 0 },
   { q: 'Beim Doppelspalt wird der rote Laser gegen einen grünen getauscht. Die Maxima …', o: ['rücken zusammen', 'rücken auseinander', 'bleiben, wo sie sind'], c: 0 },
-  { q: 'Welche Gleichung gilt für Doppelspalt und Gitter immer (auch bei großen Winkeln)?', o: ['sin α<sub>k</sub> = k · λ / g', 'a<sub>k</sub> = k · λ · e / g', 'tan α<sub>k</sub> = k · λ / g'], c: 0 },
+  { q: 'Welche Gleichung gilt für Doppelspalt und Gitter immer (auch bei großen Winkeln)?', o: ['sin α<sub>k</sub> = k · λ / g', 'd<sub>k</sub> = k · λ · a / g', 'tan α<sub>k</sub> = k · λ / g'], c: 0 },
   { q: 'Ein Gitter hat 250 Striche pro mm. Die Gitterkonstante ist …', o: ['4,0 µm', '0,25 µm', '2,5 µm', '250 nm'], c: 0 },
   { q: 'Was ändert sich, wenn man statt 2 Spalten sehr viele mit gleichem Abstand nimmt?', o: ['Die Maxima werden schärfer und heller, bleiben aber am selben Ort.', 'Die Maxima wandern nach außen.', 'Es gibt keine Maxima mehr.'], c: 0 },
   { q: 'Weißes Licht fällt auf ein Gitter. Wie sieht das Maximum 0. Ordnung aus?', o: ['weiß', 'rot', 'violett', 'als Spektrum'], c: 0 },
@@ -693,7 +722,7 @@ function drawActive() {
   if (active === 's0') buildBets(); if (active === 's1') { w1read(); w1draw(); } if (active === 's2') { d_draw(); drawZoom(); }
   if (active === 's3') g_draw(); if (active === 's4') w_draw(); if (active === 's5') m_draw();
 }
-function buildAll() { Object.keys(REQ).forEach(k => delete REQ[k]); buildS1(); buildS2(); buildS3(); buildS4(); buildS5(); trStat(); trNew(); quizStart(); refresh(); drawActive(); }
+function buildAll() { Object.keys(REQ).forEach(k => delete REQ[k]); buildS0(); buildS1(); buildS2(); buildS3(); buildS4(); buildS5(); trStat(); trNew(); quizStart(); refresh(); drawActive(); }
 const bind = (id, fn) => $(id).addEventListener('input', e => fn(+e.target.value));
 const seg = (id, fn) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); fn(b.dataset.m); });
 bind('#w1lam', v => { W1.lam = v; w1read(); w1draw(); }); bind('#w1g', v => { W1.g = v; w1read(); w1draw(); });
@@ -725,7 +754,7 @@ if (window.AppBridge) {
         stationen: TABS.map(t => t[0]),
         erledigt: TABS.filter(t => isDone(t[1])).map(t => t[0]),
         details: {
-          'Wette': S.bet ? S.bet + (S.bet === 'C' ? ' (richtig)' : ' (falsch)') : '–',
+          'Teilchen oder Welle?': cnt('s0') + ', Tipp: ' + (S.bet ? S.bet + (S.bet === 'C' ? ' (richtig)' : ' (falsch)') : '–'),
           'Zwei Wellen': cnt('s1'),
           'Doppelspalt': cnt('s2') + ', Laser vermessen: ' + S.laser + ' von 3',
           'Gitter': cnt('s3'),
