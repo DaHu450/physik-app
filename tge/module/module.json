@@ -41,19 +41,6 @@
       "icon": "uhr"
     },
     {
-      "id": "besch",
-      "titel": "Beschleunigte Bewegung",
-      "untertitel": "Lernpfad zu Weg, Zeit und Geschwindigkeit",
-      "datei": "besch.html",
-      "klassen": [
-        "41"
-      ],
-      "freigegeben": true,
-      "farbe": "#6A3DC4",
-      "icon": "tacho",
-      "gesperrt": true
-    },
-    {
       "id": "ueberholvorgang",
       "titel": "Der Überholvorgang",
       "untertitel": "Simulation: PKW überholt LKW",
@@ -64,6 +51,18 @@
       "freigegeben": true,
       "farbe": "#1F3A5F",
       "icon": "auto"
+    },
+    {
+      "id": "besch",
+      "titel": "Beschleunigte Bewegung",
+      "untertitel": "Lernpfad zu Weg, Zeit und Geschwindigkeit",
+      "datei": "besch.html",
+      "klassen": [
+        "41"
+      ],
+      "freigegeben": true,
+      "farbe": "#6A3DC4",
+      "icon": "tacho"
     }
   ]
 }
