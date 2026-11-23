@@ -108,6 +108,15 @@ dialog::backdrop{background:rgba(15,25,40,.45)}
 .menu button{display:block;width:100%;text-align:left;margin:6px 0}
 #toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none}
 #toast.show{opacity:1}
+
+/* Aktualisieren */
+.fuss{margin-top:40px;padding-top:18px;border-top:2px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:14px}
+#neuBanner{position:fixed;left:50%;bottom:calc(16px + var(--safe-b));transform:translateX(-50%);width:min(560px,calc(100% - 24px));background:var(--navy);color:#fff;border-radius:16px;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:50}
+#neuBanner span{flex:1;min-width:180px}
+#neuBanner .btn{border-color:#fff}
+#neuBanner .btn.green{background:var(--green);border-color:var(--green)}
+#neuBanner .btn.ghost{background:transparent;color:#fff}
+.mbar .btn.neu{background:#FFD66B;color:#15253A;border-color:#FFD66B}
 </style>
 </head>
 <body>
@@ -163,6 +172,10 @@ dialog::backdrop{background:rgba(15,25,40,.45)}
   <div id="installHint2" class="msg warn" hidden style="margin-bottom:16px"><b>Tipp:</b> Leg die App auf den Home-Bildschirm (Safari → Teilen → „Zum Home-Bildschirm"). Dann läuft sie auch ohne Internet.</div>
   <div id="fbList"></div>
   <div class="grid" id="tiles"></div>
+  <div class="fuss">
+    <span id="standInfo"></span>
+    <button class="btn ghost small" id="btnUpdate">🔄 Aktualisieren</button>
+  </div>
 </section>
 
 <!-- MODUL -->
@@ -172,6 +185,7 @@ dialog::backdrop{background:rgba(15,25,40,.45)}
     <h2 id="mTitle"></h2>
     <span class="saved" id="mSaved"></span>
     <button class="btn ghost small" id="mFbBtn" hidden>💬 Rückmeldung</button>
+    <button class="btn small neu" id="mNeu" hidden>🆕 Neue Version</button>
     <button class="btn ghost small" id="mSave">💾 Speichern</button>
     <button class="btn green small" id="mHand">📤 Abgeben</button>
   </div>
@@ -201,6 +215,11 @@ dialog::backdrop{background:rgba(15,25,40,.45)}
 </div></dialog>
 
 <input type="file" id="fileIn" accept=".json,application/json" hidden>
+<div id="neuBanner" role="status" hidden>
+  <span>🆕 <b>Es gibt eine neue Version.</b> Bitte aktualisieren, dein Stand bleibt erhalten.</span>
+  <button class="btn ghost small" id="neuSpaeter">Später</button>
+  <button class="btn green small" id="neuJetzt">Jetzt aktualisieren</button>
+</div>
 <div id="toast"></div>
 
 <script src="gemeinsam.js"></script>
@@ -215,7 +234,7 @@ const istIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platfo
 const istInstalliert = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
 const zeit = (iso) => iso ? new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200); }
-function zeige(id) { ['login', 'home', 'modul'].forEach((s) => $('#' + s).hidden = s !== id); }
+function zeige(id) { ['login', 'home', 'modul'].forEach((s) => $('#' + s).hidden = s !== id); if (typeof neuZeigen === 'function') neuZeigen(); }
 document.querySelectorAll('[data-close]').forEach((b) => b.onclick = () => b.closest('dialog').close());
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -476,12 +495,64 @@ async function rueckmeldungLaden(obj) {
   } catch { alert('Die Rückmeldung konnte nicht geöffnet werden.'); }
 }
 
+/* ---------- Aktualisieren ----------
+   Die App merkt sich beim Start einen Fingerabdruck von index.html, module.json und den Skripten.
+   Alle 10 Minuten und beim Zurückholen der App wird verglichen. Ist etwas anders, kommt der Hinweis.
+   Nichts wird dabei nach außen geschickt, nur die eigenen Dateien werden abgerufen. */
+const PRUEF_DATEIEN = ['index.html', 'module/module.json', 'gemeinsam.js', 'bridge.js'];
+let fingerabdruck = null, neuGemeldet = false, spaeterBis = 0, letztePruefung = 0;
+function hash(t) { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+async function abdruck(modus) {
+  const texte = await Promise.all(PRUEF_DATEIEN.map((f) => fetch(f, { cache: modus }).then((r) => { if (!r.ok) throw 0; return r.text(); })));
+  return hash(texte.join('\u0000'));
+}
+function standInfo() {
+  const el = $('#standInfo'); if (!el) return;
+  el.textContent = letztePruefung ? 'Zuletzt nach Neuem gesucht: ' + new Date(letztePruefung).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '';
+}
+function neuZeigen() {
+  $('#mNeu').hidden = !neuGemeldet;
+  $('#neuBanner').hidden = !neuGemeldet || !$('#modul').hidden || Date.now() < spaeterBis;
+}
+async function aufNeuesPruefen() {
+  if (!navigator.onLine) return;
+  try {
+    if (!fingerabdruck) { fingerabdruck = await abdruck('default'); }
+    else if (await abdruck('no-store') !== fingerabdruck) neuGemeldet = true;
+    letztePruefung = Date.now(); standInfo(); neuZeigen();
+  } catch { /* kein Netz oder Server nicht erreichbar: später nochmal */ }
+}
+async function aktualisieren() {
+  if (!navigator.onLine) { toast('Kein Internet. Aktualisieren geht gerade nicht.'); return; }
+  const btn = $('#btnUpdate'); btn.disabled = true; btn.textContent = '⏳ Lädt …';
+  try {
+    await standHolen(); if (code) schreibe();           // Stand vorher sichern
+    // Dateien frisch vom Server holen (umgeht auch den Zwischenspeicher des Browsers)
+    await Promise.all(['./', 'sw.js', 'fonts/fonts.css', 'manifest.webmanifest', ...PRUEF_DATEIEN]
+      .map((f) => fetch(f, { cache: 'reload' }).catch(() => {})));
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg) await reg.update().catch(() => {});
+    location.reload();
+  } catch {
+    btn.disabled = false; btn.textContent = '🔄 Aktualisieren';
+    toast('Das hat nicht geklappt. Versuch es gleich nochmal.');
+  }
+}
+$('#btnUpdate').onclick = aktualisieren;
+$('#neuJetzt').onclick = aktualisieren;
+$('#mNeu').onclick = aktualisieren;
+$('#neuSpaeter').onclick = () => { spaeterBis = Date.now() + 30 * 60 * 1000; neuZeigen(); };
+setInterval(() => { if (document.visibilityState === 'visible') aufNeuesPruefen(); }, 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - letztePruefung > 60 * 1000) aufNeuesPruefen(); });
+addEventListener('online', () => aufNeuesPruefen());
+
 /* ---------- Start ---------- */
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 (async () => {
   await ladeCfg();
   code = localStorage.getItem('klassenapp:aktiv');
   if (code && KA.codeGueltig(code)) { ladeDaten(); startHome(); } else startLogin();
+  aufNeuesPruefen();
 })();
 })();
 </script>
