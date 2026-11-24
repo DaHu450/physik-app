@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optik · Seite 5 · Wiederholung: Spiegel und Brechung</title>
+<!--
+  Lerneinheit Optik (BFS2) · Seite 5 von 5 · Modul für die Physik-App BFS2
+  Ergänzungen (nicht aus Evis Materialien):
+  - Simulation mit Winkelmesser, Modell-Brechzahlen Wasser 1,33 und Glas 1,5.
+  - Mini-Tresor: Laser waagrecht, drehbarer Spiegel, Ziel schräg oben (Lösung 22,5°).
+  - Fischer mit Laser statt Speer (Umkehrbarkeit des Lichtwegs).
+  - Rückspiegel als Beispiel für Reflexion, Schatten als Distraktor.
+  - Fisch-Skizze.
+  Aus Evis Materialien: Laser-Tresor, Fischfang, Reflexionsgesetz, Brechung zum Lot hin/vom Lot weg, Totalreflexion am Halbzylinder, Periskop, Münze in der Tasse, Stift im Wasserglas.
+-->
+<style>
+:root{
+  --ink:#1D2433;--head:#1A1A1A;--muted:#4F5B6D;--line:#D6DBE3;--main:#3A7CA5;
+  --e-r:#EE9B52;--e-t:#FDEBD9;--e-d:#8A4B14;
+  --b-r:#6FA8CC;--b-t:#DDEBF4;--b-d:#1F5470;
+  --a-r:#A898CF;--a-t:#ECE7F6;--a-d:#4F4176;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#F3F5F8;color:var(--ink);font:17px/1.6 "Segoe UI",-apple-system,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:1.8rem;font-weight:700;color:var(--head);margin:4px 0 10px;line-height:1.25}
+h2{font-size:1.35rem;font-weight:700;color:var(--head);margin:0;line-height:1.3}
+h3{font-size:1.1rem;font-weight:700;color:var(--head);margin:14px 0 6px}
+p{margin:0 0 10px}
+.small{font-size:.85rem;color:var(--muted)}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 18px}
+/* Kopf */
+.kz{font-size:.85rem;color:var(--muted)}
+.pages{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;padding:0;list-style:none}
+.pages li{border:1px solid #B8BEC7;border-radius:999px;padding:3px 12px;font-size:.85rem;background:#fff;color:var(--ink)}
+.pages li.cur{background:var(--main);border-color:var(--main);color:#fff;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.85rem;color:var(--muted);margin:4px 0 12px}
+.legend .tag{margin:0}
+.bar{height:10px;background:#E3E8EF;border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--main);transition:width .3s}
+/* Abschnitte */
+.sec{border-left:6px solid var(--r)}
+.sec.E{--r:var(--e-r);--t:var(--e-t);--d:var(--e-d)}
+.sec.B{--r:var(--b-r);--t:var(--b-t);--d:var(--b-d)}
+.sec.A{--r:var(--a-r);--t:var(--a-t);--d:var(--a-d)}
+.tag{display:inline-block;text-transform:uppercase;font-size:.72rem;font-weight:700;letter-spacing:.06em;background:var(--t);color:var(--d);border:1px solid var(--r);border-radius:4px;padding:1px 7px;margin:0 0 8px}
+.legend .tag.E{--r:var(--e-r);--t:var(--e-t);--d:var(--e-d)}
+.legend .tag.B{--r:var(--b-r);--t:var(--b-t);--d:var(--b-d)}
+.legend .tag.A{--r:var(--a-r);--t:var(--a-t);--d:var(--a-d)}
+.sh{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.circ{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);color:var(--d);font-weight:700;display:flex;align-items:center;justify-content:center}
+.merk{background:var(--t);color:var(--d);font-weight:700;border-left:4px solid var(--r);border-radius:10px;padding:12px 14px;margin:12px 0}
+.info{background:#F4F8FB;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
+.hint-line{background:#F1F4F8;border-radius:8px;padding:6px 10px;font-size:.95rem;margin:8px 0}
+.leit{font-weight:700}
+/* Aufgaben */
+.task{background:#FCFDFF;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+.task.done{border-color:#9FD0AE;background:#F6FBF7}
+.th{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 8px}
+.afb{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;background:#F1F3F5;border:1px solid #5F6670;color:#2F343B;border-radius:6px;padding:1px 7px}
+.afb i{width:8px;height:8px;border-radius:50%;border:1px solid #5F6670;display:inline-block}
+.afb i.f{background:#5F6670}
+.tt{font-weight:700}
+.st{margin-left:auto;font-size:.85rem;color:#6B7684}
+.task.done .st{color:#166534;font-weight:700}
+/* Eingaben */
+select,input[type=text],input[type=number]{font:inherit;color:var(--ink);background:#fff;border:1px solid #9AA6B5;border-radius:8px;padding:6px 8px;min-height:44px;max-width:100%}
+input[type=number]{width:120px}
+select.bad,input.bad{border-color:#A61B1B;background:#FDECEC}
+select.good,input.good{border-color:#3C8C57;background:#E8F5EC}
+.gap{line-height:2.6}
+.gap select{margin:2px 0}
+button{font:inherit;min-height:44px;border-radius:8px;cursor:pointer}
+.btn{background:var(--main);color:#fff;font-weight:700;border:1px solid var(--main);padding:8px 14px}
+.btn:disabled{background:#9AA6B5;border-color:#9AA6B5;cursor:default}
+.btn2{background:#fff;color:var(--main);border:1px solid var(--main);padding:8px 14px}
+.btn2.on{background:var(--main);color:#fff}
+.btnr{background:#fff;color:#A61B1B;border:1px solid #A61B1B;padding:8px 14px}
+.btnh{background:#FDE7A6;border:1px solid #EFC45A;color:#5E4300;padding:8px 14px}
+:focus-visible{outline:3px solid #1F5470;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 0}
+.fb{font-weight:700;border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.fb.ok{background:#E8F5EC;color:#166534}
+.fb.no{background:#FDECEC;color:#A61B1B}
+.fb:empty{display:none}
+.help{background:#FFF6D8;border:1px solid #EFC45A;border-left:4px solid #EFC45A;color:#5E4300;border-radius:8px;padding:8px 12px;margin:8px 0 0}
+.help b{font-weight:700}
+.check{background:#FFF6D8;border:1px solid #EFC45A;border-left:4px solid #EFC45A;color:#5E4300;border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.check ul{margin:4px 0 0;padding-left:20px}
+table.t{border-collapse:collapse;width:100%;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:middle}
+table.t th{background:#EAF3F8}
+table.t select,table.t input{width:100%;min-width:0}
+table.t{table-layout:fixed}
+table.t th,table.t td{overflow-wrap:anywhere}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fig{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0}
+.fig svg{display:block;width:100%;height:auto}
+.bodies{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.bodies .b{text-align:center}
+.bodies .b svg{width:100%;max-width:90px;height:auto;display:block;margin:0 auto 4px}
+.bodies select{width:100%}
+.lbl{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:8px 0}
+.lbl b{width:30px;height:30px;border-radius:50%;background:#EEF3F8;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.lbl input{width:100%}
+/* Simulation */
+.sim{background:#F6F8FB;border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px}
+.sim .pic{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px}
+.sim .pic svg{display:block;width:100%;height:auto}
+.ctrl label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto}
+.ctrl input[type=range]{width:100%;min-height:44px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tile{background:#EEF3F8;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.tile span{display:block;font-size:.75rem;color:var(--muted)}
+.tile b{font-family:Consolas,"Courier New",monospace;font-size:1.05rem;color:#2E6B8A}
+.simnote{font-size:.8rem;color:var(--muted);margin-top:6px}
+.chk{display:flex;gap:8px;align-items:center;min-height:44px;font-size:.95rem;color:var(--ink)}
+.chk input{width:22px;height:22px}
+/* Schreibfeld */
+details.drawbox{border:1px solid var(--line);border-radius:10px;background:#fff;margin:10px 0 0}
+details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-height:44px;display:flex;align-items:center}
+.dtools{display:flex;flex-wrap:wrap;gap:8px;padding:0 12px 8px}
+.dsvg{display:block;width:100%;height:380px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dsvg.finger{touch-action:none}
+.dhint{font-size:.85rem;color:var(--muted);padding:6px 12px}
+/* Fuß */
+.confirm{display:none;margin-top:10px;background:#FDECEC;border-radius:8px;padding:10px 12px;color:#A61B1B}
+.confirm.on{display:block}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lblsel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:8px 0}
+.lblsel label{display:flex;align-items:center;gap:8px}
+.lblsel b{width:30px;height:30px;flex:none;border-radius:50%;background:#EEF3F8;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.lblsel select{flex:1;min-width:0}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.chain .node{background:#EEF3F8;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:700}
+.chain .arr{font-weight:700;color:var(--muted)}
+.seh{margin-top:10px;font-size:.85rem;color:var(--muted)}
+.sehbox{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;overflow:hidden;margin-top:4px}
+#sehText{font-size:2rem;font-weight:700;color:#1D2433;transition:filter .1s}
+#segMode button{font-size:.9rem}
+.afb.verm{background:#fff}
+.zitat{background:#F8F9FB;border-left:4px solid #D6DBE3;color:#4F5B6D;border-radius:6px;padding:10px 14px;margin:14px 0}
+.grid3 .info{margin:0}
+.formel{background:#F4F8FB;border:1px solid var(--line);border-left:5px solid #6FA8CC;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:1.2rem;font-weight:700;color:var(--ink)}
+#mtab td,#mtab th{font-size:.9rem}
+@media (max-width:760px){
+  .grid3{grid-template-columns:1fr}
+  .lblsel{grid-template-columns:1fr}
+  body{font-size:16px}
+  .sim{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .bodies{grid-template-columns:repeat(3,1fr)}
+  .dsvg{height:320px}
+  .wrap{padding:12px 8px 30px}
+  .box{padding:14px 14px}
+  table.t th,table.t td{padding:4px;font-size:.9rem}
+  table.t select{font-size:.85rem;padding:4px}
+}
+@media (max-width:420px){.bodies{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Kopf -->
+<div class="box">
+  <div class="kz">Lerneinheit · Optik · Seite 5 von 5</div>
+  <h1>Wiederholung: Spiegel und Brechung</h1>
+  <ol class="pages">
+    <li>1 · Linsen bündeln Licht</li>
+    <li>2 · Linsenbilder</li>
+    <li>3 · Das Auge</li>
+    <li>4 · Sehfehler und Brillen</li>
+    <li class="cur">5 · Wiederholung: Spiegel und Brechung</li>
+  </ol>
+  <div class="legend">
+    <span class="tag E">Einstieg</span><span class="tag B">Erarbeitung</span><span class="tag A">Anwendung</span>
+    <span class="afb">AFB I <i class="f"></i><i></i><i></i></span> wiedergeben
+    <span class="afb">AFB II <i class="f"></i><i class="f"></i><i></i></span> anwenden
+    <span class="afb">AFB III <i class="f"></i><i class="f"></i><i class="f"></i></span> beurteilen
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="small" id="barText">0 von 8 Aufgaben erledigt</div>
+  <p class="small" style="margin:6px 0 0">Deine Auswahl, deine Ergebnisse und dein Fortschritt werden automatisch in der App gespeichert.</p>
+</div>
+
+<!-- A Einstieg -->
+<section class="box sec E">
+  <span class="tag">Einstieg</span>
+  <div class="sh"><span class="circ">A</span><h2>Laser-Tresor und Fischfang</h2></div>
+  <p>Erinnerst du dich? Beim Laser-Tresor hast du mit dem Geodreieck den Weg des Lichts über die Spiegel gezeichnet. Wer nur geschätzt hat, ist bei der falschen Zahl gelandet.</p>
+  <p>Beim Fischfang war es ähnlich: Wer genau auf den Fisch gezielt hat, hat ihn verfehlt.</p>
+  <p>In beiden Fällen ändert das Licht seine Richtung. Diese Seite hilft dir, alles für die Klassenarbeit zu wiederholen.</p>
+  <p class="leit">Wie kannst du vorhersagen, wohin ein Lichtstrahl an einem Spiegel oder an einer Wasseroberfläche läuft?</p>
+  <p>Am Ende dieser Seite kannst du</p>
+  <ul>
+    <li>das Reflexionsgesetz anwenden,</li>
+    <li>angeben, wie Licht beim Übergang zwischen Luft, Wasser und Glas gebrochen wird,</li>
+    <li>erklären, warum ein Fisch im Wasser an einer anderen Stelle zu sein scheint.</li>
+  </ul>
+</section>
+
+<!-- B Erarbeitung -->
+<section class="box sec B">
+  <span class="tag">Erarbeitung</span>
+  <div class="sh"><span class="circ">B</span><h2>Spiegel und Brechung</h2></div>
+
+  <div class="info">
+    <p>Das <b>Lot</b> ist eine Hilfslinie. Sie steht senkrecht auf dem Spiegel oder auf der Grenzfläche, genau an der Stelle, wo das Licht auftrifft.</p>
+    <p>Alle Winkel misst man zum Lot. Der Winkel des ankommenden Strahls heißt <b>Einfallswinkel α</b>. Beim Spiegel heißt der Winkel des zurückgeworfenen Strahls <b>Reflexionswinkel β</b>. Bei der Brechung heißt der Winkel des Strahls im neuen Stoff <b>Brechungswinkel β</b>.</p>
+  </div>
+
+  <h3>Die Simulation: Licht trifft auf eine Fläche</h3>
+  <div class="hint-line">Stelle den Einfallswinkel mit dem Regler ein. Lies den zweiten Winkel am Winkelmesser ab.</div>
+  <div class="sim" id="sim">
+    <div class="pic"><svg id="simSvg" viewBox="0 0 700 340" role="img" aria-label="Simulation: Lichtstrahl an Spiegel oder Grenzfläche"></svg></div>
+    <div class="ctrl">
+      <label>Fläche</label>
+      <div class="seg" id="segMode"><button type="button" class="btn2" data-v="spiegel">Spiegel</button><button type="button" class="btn2" data-v="lw">Luft → Wasser</button><button type="button" class="btn2" data-v="lg">Luft → Glas</button><button type="button" class="btn2" data-v="gl">Glas → Luft</button></div>
+      <label for="aIn">Einfallswinkel α</label>
+      <input type="range" id="aIn" min="0" max="80" step="1" value="30">
+      <div class="tiles">
+        <div class="tile"><span>Einfallswinkel α</span><b id="mA">–</b></div>
+        <div class="tile"><span>Hinweis</span><b id="mH">–</b></div>
+      </div>
+      <div class="simnote">Den zweiten Winkel liest du am Winkelmesser ab. Alle Werte sind simuliert.</div>
+    </div>
+  </div>
+
+  <div class="task" data-id="t1" data-nr="1" data-afb="1" data-op="Miss">
+    <p>Wähle „Spiegel“ und stelle α = 35° ein. Lies den Reflexionswinkel β ab.</p>
+    <div class="row"><label>β =</label><input type="number" data-key="t1" data-num="m35" data-tol="1.5" step="1" inputmode="decimal" aria-label="Reflexionswinkel"> °</div>
+    <div class="hints" data-h='["Der Winkelmesser hat die 0 am Lot. Lies auf der rechten Seite ab, wo der zurückgeworfene Strahl ihn kreuzt.","Die langen Striche am Winkelmesser stehen für 10°, die kurzen für 5°."]'></div>
+  </div>
+
+  <div class="task" data-id="t2" data-nr="2" data-afb="1" data-op="Vervollständige">
+    <p>Vervollständige das Reflexionsgesetz.</p>
+    <p class="gap">Trifft ein Lichtstrahl auf einen Spiegel, wird er
+      <select data-key="t2a" data-ok="zur"><option value="">– wählen –</option><option value="ver">verschluckt</option><option value="zur">zurückgeworfen</option><option value="geb">gebrochen</option></select>.
+      Die Winkel misst man immer zum
+      <select data-key="t2b" data-ok="lot"><option value="">– wählen –</option><option value="sp">Spiegel</option><option value="lot">Lot</option><option value="bo">Boden</option></select>.
+      Der Einfallswinkel und der Reflexionswinkel sind immer
+      <select data-key="t2c" data-ok="gl"><option value="">– wählen –</option><option value="gl">gleich groß</option><option value="dop">doppelt so groß</option><option value="zus">zusammen 90°</option></select>.</p>
+    <div class="formel">α = β</div>
+    <div class="hints" data-h='["Nutze deinen Messwert aus Aufgabe 1.","Probiere in der Simulation noch zwei andere Winkel aus."]'></div>
+  </div>
+
+  <div class="task" data-id="t3" data-nr="3" data-afb="2" data-op="Untersuche">
+    <p>Wähle „Luft → Glas“. Miss den Brechungswinkel β für drei Einfallswinkel.</p>
+    <table class="t">
+      <tr><th>α</th><th>20°</th><th>40°</th><th>60°</th></tr>
+      <tr><th>β</th>
+        <td><input type="number" data-key="t3a" data-num="g20" data-tol="2" step="1" inputmode="decimal" aria-label="beta bei 20 Grad"></td>
+        <td><input type="number" data-key="t3b" data-num="g40" data-tol="2" step="1" inputmode="decimal" aria-label="beta bei 40 Grad"></td>
+        <td><input type="number" data-key="t3c" data-num="g60" data-tol="2" step="1" inputmode="decimal" aria-label="beta bei 60 Grad"></td></tr>
+    </table>
+    <div class="hints" data-h='["Der Brechungswinkel liegt unten im Glas. Lies ihn am unteren Winkelmesser ab.","Schätze zwischen zwei Strichen. Auf 2° genau reicht."]'></div>
+  </div>
+
+  <div class="task" data-id="t4" data-nr="4" data-afb="2" data-op="Vervollständige">
+    <p>Vergleiche alle Flächen in der Simulation. Vervollständige dann den Merksatz.</p>
+    <p class="gap">Geht Licht schräg von Luft in Wasser oder Glas, macht es einen Knick
+      <select data-key="t4a" data-ok="hin"><option value="">– wählen –</option><option value="weg">vom Lot weg</option><option value="hin">zum Lot hin</option></select>.
+      Geht es von Glas oder Wasser in Luft, knickt es
+      <select data-key="t4b" data-ok="weg"><option value="">– wählen –</option><option value="hin">zum Lot hin</option><option value="weg">vom Lot weg</option></select>.
+      Diesen Knick nennt man
+      <select data-key="t4c" data-ok="br"><option value="">– wählen –</option><option value="ref">Reflexion</option><option value="br">Brechung</option><option value="str">Streuung</option></select>.
+      Trifft das Licht senkrecht auf (α = 0°),
+      <select data-key="t4d" data-ok="ger"><option value="">– wählen –</option><option value="ger">geht es gerade durch</option><option value="knick">knickt es am stärksten</option></select>.
+      Ist der Winkel von Glas in Luft zu groß, kommt kein Licht mehr heraus. Es wird ganz
+      <select data-key="t4e" data-ok="zur"><option value="">– wählen –</option><option value="zur">zurückgeworfen</option><option value="ver">verschluckt</option></select>.</p>
+    <div class="hints" data-h='["Ist β kleiner als α, liegt der Strahl näher am Lot.","Stelle bei „Glas → Luft“ einen großen Winkel ein, zum Beispiel 60°."]'></div>
+  </div>
+
+  <div class="task" data-id="t5" data-nr="5" data-afb="2" data-op="Konstruiere">
+    <p>Der Mini-Tresor: Der Laser schießt waagrecht nach rechts. Dreh den Spiegel so, dass der Strahl das Ziel trifft.</p>
+    <div class="fig"><svg id="tresorSvg" viewBox="0 0 560 280" role="img" aria-label="Laser, drehbarer Spiegel und Ziel"></svg></div>
+    <label for="spIn" class="small">Spiegel drehen</label>
+    <input type="range" id="spIn" min="0" max="177.5" step="2.5" value="90" style="width:100%;min-height:44px">
+    <input type="hidden" data-key="t5" data-num="tresor" data-tol="0.1">
+    <div class="hints" data-h='["Zeichne in Gedanken den Strahl, der vom Spiegel zum Ziel gehen soll.","Der Spiegel muss so stehen, dass das Lot genau in der Mitte zwischen ankommendem und weitergehendem Strahl liegt."]'></div>
+  </div>
+
+  <div class="task" data-id="t6" data-nr="6" data-afb="2" data-op="Erkläre" data-draw="5A">
+    <p>Ein Fisch liegt im Wasser. Erkläre, warum er für einen Beobachter am Ufer höher aussieht, als er wirklich ist. Du kannst auch eine Skizze machen.</p>
+    <div class="fig" aria-hidden="true">
+      <svg viewBox="0 0 520 240">
+        <rect x="0" y="110" width="520" height="130" fill="#DDEFFA"/>
+        <line x1="0" y1="110" x2="520" y2="110" stroke="#6FA8CC" stroke-width="2"/>
+        <text x="10" y="130" font-size="13" fill="#1F5470">Wasser</text><text x="10" y="100" font-size="13" fill="#4F5B6D">Luft</text>
+        <g transform="translate(150 200)"><ellipse cx="0" cy="0" rx="24" ry="10" fill="#E39B1B"/><path d="M22 0 l14 -9 v18z" fill="#E39B1B"/><circle cx="-12" cy="-2" r="2" fill="#1D2433"/></g>
+        <circle cx="440" cy="30" r="12" fill="#fff" stroke="#1D2433" stroke-width="2"/><circle cx="436" cy="30" r="3" fill="#1D2433"/>
+        <text x="410" y="60" font-size="13" fill="#4F5B6D">Auge</text>
+      </svg>
+    </div>
+    <details class="drawbox"><summary>✏️ Frage 5A</summary><div class="js-drawing" data-id="5A"></div></details>
+    <div class="row"><button type="button" class="btn finish">Bearbeitung abschließen</button></div>
+    <div class="fb fmsg"></div>
+    <div class="check selfcheck" hidden><b>Selbstprüfung:</b>
+      <ul>
+        <li>Hast du den Weg des Lichts vom Fisch zum Auge beschrieben, nicht umgekehrt?</li>
+        <li>Hast du gesagt, was an der Wasseroberfläche passiert und in welche Richtung das Licht knickt?</li>
+        <li>Hast du erklärt, aus welcher Richtung das Licht für das Auge zu kommen scheint?</li>
+        <li>Hast du das Wort Brechung verwendet?</li>
+      </ul></div>
+    <div class="hints" data-h='["Das Licht geht vom Fisch aus. Es kommt von Wasser in Luft. Wie knickt es dort?","Das Gehirn denkt, Licht läuft immer gerade. Verlängere den Strahl am Auge in Gedanken gerade nach hinten."]'></div>
+  </div>
+</section>
+
+<!-- C Anwendung -->
+<section class="box sec A">
+  <span class="tag">Anwendung</span>
+  <div class="sh"><span class="circ">C</span><h2>Spiegel oder Knick?</h2></div>
+  <p>Zurück zur Frage vom Anfang: <b>Wie kannst du vorhersagen, wohin ein Lichtstrahl an einem Spiegel oder an einer Wasseroberfläche läuft?</b></p>
+
+  <div class="task" data-id="t7" data-nr="7" data-afb="2" data-op="Ordne zu">
+    <p>Was steckt hinter diesen Beobachtungen? Ordne zu.</p>
+    <table class="t">
+      <tr><th>Beobachtung</th><th>Erklärung</th></tr>
+      <tr><td>Mit einem Periskop schaut man über eine Mauer.</td><td><select data-key="t7a" data-ok="ref"></select></td></tr>
+      <tr><td>Ein Stift im Wasserglas sieht geknickt aus.</td><td><select data-key="t7b" data-ok="br"></select></td></tr>
+      <tr><td>Die Münze in der Tasse taucht auf, wenn Wasser hineinkommt.</td><td><select data-key="t7c" data-ok="br"></select></td></tr>
+      <tr><td>Im Rückspiegel siehst du das Auto hinter dir.</td><td><select data-key="t7d" data-ok="ref"></select></td></tr>
+      <tr><td>Aus dem Halbzylinder kommt bei großem Winkel kein Licht heraus.</td><td><select data-key="t7e" data-ok="total"></select></td></tr>
+    </table>
+    <div class="hints" data-h='["Fragt euch bei jeder Zeile: Kommt das Licht in einen anderen Stoff, oder bleibt es in der Luft?","Spiegel werfen Licht zurück. Beim Übergang zwischen zwei Stoffen knickt es."]'></div>
+  </div>
+
+  <div class="task" data-id="t8" data-nr="8" data-afb="3" data-op="Beurteile">
+    <p>Ein Fischer will einen Fisch mit dem Speer treffen. Er zielt genau auf die Stelle, wo er den Fisch sieht. Beurteile sein Vorgehen.</p>
+    <p class="gap">Der Fischer trifft den Fisch
+      <select data-key="t8a" data-ok="nicht"><option value="">– wählen –</option><option value="nicht">nicht</option><option value="sicher">sicher</option></select>.
+      Das Licht vom Fisch knickt an der Wasseroberfläche
+      <select data-key="t8b" data-ok="weg"><option value="">– wählen –</option><option value="hin">zum Lot hin</option><option value="weg">vom Lot weg</option></select>.
+      Deshalb sieht der Fischer den Fisch
+      <select data-key="t8c" data-ok="hoeher"><option value="">– wählen –</option><option value="tiefer">tiefer</option><option value="hoeher">höher</option></select>
+      als in echt. Er muss mit dem Speer
+      <select data-key="t8d" data-ok="tiefer"><option value="">– wählen –</option><option value="hoeher">etwas höher</option><option value="tiefer">etwas tiefer</option></select>
+      zielen. Mit einem Laserstrahl dagegen müsste er
+      <select data-key="t8e" data-ok="genau"><option value="">– wählen –</option><option value="genau">genau auf den Fisch, den er sieht,</option><option value="tiefer">auch tiefer</option></select>
+      zielen, denn das Laserlicht wird auf demselben Weg gebrochen, nur andersherum.</p>
+    <div class="hints" data-h='["Nutze deine Erklärung aus Aufgabe 6.","Der Speer fliegt gerade, er wird nicht gebrochen. Das Licht wird gebrochen.","Licht nimmt hin und zurück denselben Weg."]'></div>
+  </div>
+</section>
+
+<!-- Fuß -->
+<div class="box">
+  <p class="small"><b>Quellen:</b> Eigene Darstellungen. Alle Werte der Simulation sind Modellwerte.</p>
+  <button type="button" class="btnr" id="resetBtn">Eingaben dieser Seite zurücksetzen</button>
+  <div class="confirm" id="resetConfirm">
+    <p style="margin:0 0 8px">Wirklich alles auf dieser Seite löschen? Auch dein Schreibfeld wird geleert.</p>
+    <div class="row" style="margin:0"><button type="button" class="btnr" id="resetYes">Ja, löschen</button><button type="button" class="btn2" id="resetNo">Abbrechen</button></div>
+  </div>
+</div>
+
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+(function(){
+'use strict';
+const SEITE = 5, VERSION = 1, LS_KEY = 'optik_lerneinheit_v' + VERSION + '_s' + SEITE;
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const SVGNS = 'http://www.w3.org/2000/svg';
+const fmt = (x, d) => x.toFixed(d === undefined ? 1 : d).replace('.', ',');
+
+let S = leer();
+function leer(){ return { v: VERSION, ans: {}, done: {}, hints: {}, draw: {}, sim: { mode: 'spiegel', a: 30, sp: 90, seen: {} } }; }
+
+let appLive = false;
+function changed(){
+  if (window.AppBridge && AppBridge.inApp) { if (appLive) AppBridge.changed(); }
+  else { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+}
+
+/* ---------- Aufgabenköpfe und Hilfen ---------- */
+const TASKS = $$('.task');
+TASKS.forEach(t => {
+  const afb = +t.dataset.afb;
+  const h = document.createElement('div'); h.className = 'th';
+  h.innerHTML = '<span class="afb">AFB ' + ['I','II','III'][afb-1] + ' ' + [1,2,3].map(i => '<i' + (i <= afb ? ' class="f"' : '') + '></i>').join('') + '</span>'
+    + '<span class="tt">Aufgabe ' + t.dataset.nr + ' · ' + t.dataset.op + '</span><span class="st">offen</span>';
+  t.insertBefore(h, t.firstChild);
+  const hw = $('.hints', t);
+  const list = JSON.parse(hw.dataset.h);
+  hw.innerHTML = '';
+  const hl = document.createElement('div');
+  const hb = document.createElement('button'); hb.type = 'button'; hb.className = 'btnh';
+  const upd = () => {
+    const n = S.hints[t.dataset.id] || 0;
+    hl.innerHTML = list.slice(0, n).map((x, i) => '<div class="help"><b>Hilfe ' + (i+1) + ':</b> ' + x + '</div>').join('');
+    hb.textContent = n < list.length ? 'Hilfe ' + (n+1) + ' anzeigen' : 'Keine weiteren Hilfen';
+    hb.disabled = n >= list.length;
+  };
+  hb.addEventListener('click', () => { S.hints[t.dataset.id] = Math.min(list.length, (S.hints[t.dataset.id] || 0) + 1); upd(); changed(); });
+  t._updHints = upd;
+  if (!t.dataset.draw) {
+    const row = document.createElement('div'); row.className = 'row';
+    const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'btn'; cb.textContent = 'Prüfen';
+    cb.addEventListener('click', () => pruefe(t, true));
+    row.appendChild(cb); row.appendChild(hb);
+    const fb = document.createElement('div'); fb.className = 'fb fmsg';
+    hw.appendChild(row); hw.appendChild(fb); hw.appendChild(hl);
+  } else {
+    const row = $('.row', t); row.appendChild(hb); hw.appendChild(hl);
+  }
+  upd();
+});
+
+/* ---------- Eingaben speichern ---------- */
+$$('[data-key]').forEach(el => {
+  const ev = el.tagName === 'SELECT' ? 'change' : 'input';
+  el.addEventListener(ev, () => {
+    S.ans[el.dataset.key] = el.value;
+    el.classList.remove('bad', 'good');
+    changed();
+  });
+});
+
+/* ---------- Prüfen ---------- */
+function norm(s){ return String(s).toLowerCase().replace(/ß/g,'ss').replace(/[^a-zäöü0-9 ]/g,'').replace(/\s+/g,' ').trim(); }
+function lev(a, b){
+  const m = a.length, n = b.length, d = Array.from({length: m+1}, (_, i) => [i]);
+  for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+function wortOk(val, accept){
+  const v = norm(val); if (!v) return false;
+  return accept.split('|').some(a => { a = norm(a); const tol = a.length >= 9 ? 2 : a.length >= 5 ? 1 : 0; return lev(v, a) <= tol; });
+}
+function zahl(s){ s = String(s).replace(',', '.').trim(); if (s === '') return NaN; return Number(s); }
+
+function pruefe(t, zeigen){
+  const fb = $('.fmsg', t);
+  const felder = $$('[data-ok],[data-accept],[data-num],[data-fix]', t);
+  let richtig = 0, msg = '';
+  for (const el of felder) {
+    let ok = false;
+    if (el.dataset.ok !== undefined) ok = el.value === el.dataset.ok;
+    else if (el.dataset.accept) ok = wortOk(el.value, el.dataset.accept);
+    else {
+      const soll = el.dataset.fix !== undefined ? [+el.dataset.fix] : NUM[el.dataset.num]();
+      const tol = +el.dataset.tol, v = zahl(el.value);
+      if (soll === null) { if (zeigen) { fb.className = 'fb fmsg no'; fb.textContent = NUMHINWEIS[el.dataset.num]; } status(); return false; }
+      ok = soll.some(x => Math.abs(v - x) <= Math.max(tol, Math.abs(x) * 0.02));
+      if (!ok && !isNaN(v)) {
+        if (soll.some(x => Math.abs(-v - x) <= tol)) msg = 'Der Betrag stimmt. Überprüfe das Vorzeichen.';
+        else if (!el.dataset.nounit && soll.some(x => Math.abs(v * 100 - x) <= tol * 2)) msg = 'Dein Wert passt in Metern. Gib ihn in Zentimetern an.';
+        else if (!el.dataset.nounit && soll.some(x => Math.abs(v - x * 10) <= tol * 10)) msg = 'Dein Wert passt in Millimetern. Gib ihn in Zentimetern an.';
+      }
+    }
+    if (zeigen) { el.classList.toggle('good', ok); el.classList.toggle('bad', !ok); }
+    if (ok) richtig++;
+  }
+  let alle = richtig === felder.length;
+  const calc = t.dataset.calc;
+  if (calc) {
+    const sc = $('.selfcheck', t); if (sc) sc.hidden = !alle;
+    if (alle && !(S.draw[calc] && S.draw[calc].length)) {
+      if (zeigen) { fb.className = 'fb fmsg no'; fb.textContent = 'Das Ergebnis stimmt. Schreibe jetzt noch deinen Rechenweg in das Schreibfeld und drücke dann wieder „Prüfen“.'; const d = $('details', t); if (d) d.open = true; }
+      if (S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+      status(); return false;
+    }
+  }
+  if (zeigen) {
+    fb.className = 'fb fmsg ' + (alle ? 'ok' : 'no');
+    fb.textContent = alle ? '✓ Alles richtig.' : '✗ ' + richtig + ' von ' + felder.length + ' richtig.' + (msg ? ' ' + msg : '') + ' Überprüfe die rot markierten Felder.';
+  }
+  if (alle && !S.done[t.dataset.id]) { S.done[t.dataset.id] = true; changed(); }
+  if (zeigen && !alle && S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+  status();
+  return alle;
+}
+
+function status(){
+  let n = 0;
+  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d) n++; });
+  $('#barFill').style.width = (100 * n / TASKS.length) + '%';
+  $('#barText').textContent = n + ' von ' + TASKS.length + ' Aufgaben erledigt';
+}
+
+/* ---------- Auswahllisten füllen (gemischte Reihenfolge, fest pro Feld) ---------- */
+const LISTE7 = { ref: 'Reflexion am Spiegel', br: 'Brechung', total: 'Totalreflexion', schatten: 'Schatten' };
+function mische(arr, seed){ let h = 0; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+$$('select[data-ok]').forEach(s => { if (s.options.length) return;
+  s.appendChild(new Option('– wählen –', ''));
+  mische(Object.keys(LISTE7), s.dataset.key).forEach(k => s.appendChild(new Option(LISTE7[k], k)));
+});
+
+/* ---------- Simulation: Spiegel und Brechung ---------- */
+const svg = $('#simSvg');
+const HX = 350, HY = 175, RAD = Math.PI / 180;
+const MODI = {
+  spiegel: { oben: 'Luft', unten: 'Spiegel', n1: 1, n2: 0 },
+  lw: { oben: 'Luft', unten: 'Wasser', n1: 1, n2: 1.33, fu: '#DDEFFA' },
+  lg: { oben: 'Luft', unten: 'Glas', n1: 1, n2: 1.5, fu: '#E3EBF1' },
+  gl: { oben: 'Glas', unten: 'Luft', n1: 1.5, n2: 1, fo: '#E3EBF1' }
+};
+function el(n, a, p){ const e = document.createElementNS(SVGNS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; }
+function txt(x, y, s, a, p){ const t = el('text', Object.assign({x, y, 'font-size': 13, fill: '#4F5B6D'}, a || {}), p); t.textContent = s; return t; }
+function brechung(a, n1, n2){ const s = n1 / n2 * Math.sin(a * RAD); return s > 1 ? null : Math.asin(s) / RAD; }
+function pfeil(x, y, ang, p){ // ang in Grad, SVG-Richtung
+  const c = Math.cos(ang * RAD), s = Math.sin(ang * RAD);
+  const q = (dx, dy) => (x + dx * c - dy * s).toFixed(1) + ' ' + (y + dx * s + dy * c).toFixed(1);
+  el('path', {d: 'M' + q(7, 0) + ' L' + q(-6, -6) + ' L' + q(-6, 6) + 'Z', fill: '#E39B1B'}, p);
+}
+function bogen(r, w1, w2, p){ // Winkel in SVG-Grad
+  const x1 = HX + r * Math.cos(w1 * RAD), y1 = HY + r * Math.sin(w1 * RAD), x2 = HX + r * Math.cos(w2 * RAD), y2 = HY + r * Math.sin(w2 * RAD);
+  el('path', {d: 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + r + ' ' + r + ' 0 0 ' + (w2 > w1 ? 1 : 0) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1), fill: 'none', stroke: '#6B4FA0', 'stroke-width': 2}, p);
+}
+function zeichneSim(){
+  const M = MODI[S.sim.mode], a = S.sim.a;
+  if (S.sim.mode === 'spiegel' && a === 35) S.sim.seen.m35 = true;
+  if (S.sim.mode === 'lg' && [20, 40, 60].includes(a)) S.sim.seen['g' + a] = true;
+  svg.innerHTML = '';
+  // Stoffe
+  if (M.fo) el('rect', {x: 0, y: 0, width: 700, height: HY, fill: M.fo}, svg);
+  if (M.fu) el('rect', {x: 0, y: HY, width: 700, height: 340 - HY, fill: M.fu}, svg);
+  if (S.sim.mode === 'spiegel') {
+    el('rect', {x: 0, y: HY, width: 700, height: 14, fill: '#C9D3DD'}, svg);
+    for (let x = 0; x < 700; x += 14) el('line', {x1: x, y1: HY + 14, x2: x + 10, y2: HY + 26, stroke: '#9AA6B2', 'stroke-width': 1.5}, svg);
+    el('line', {x1: 0, y1: HY, x2: 700, y2: HY, stroke: '#1F5470', 'stroke-width': 4}, svg);
+  } else el('line', {x1: 0, y1: HY, x2: 700, y2: HY, stroke: '#6FA8CC', 'stroke-width': 2}, svg);
+  txt(14, 24, M.oben, {'font-size': 15, 'font-weight': 700}, svg);
+  txt(14, S.sim.mode === 'spiegel' ? HY + 46 : HY + 24, M.unten, {'font-size': 15, 'font-weight': 700}, svg);
+  // Lot
+  el('line', {x1: HX, y1: 12, x2: HX, y2: S.sim.mode === 'spiegel' ? HY : 328, stroke: '#4F5B6D', 'stroke-width': 1.5, 'stroke-dasharray': '6 5'}, svg);
+  txt(HX + 6, 24, 'Lot', {}, svg);
+  // Winkelmesser (0° am Lot, oben und unten)
+  const wm = el('g', {}, svg), unten = S.sim.mode !== 'spiegel';
+  [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(([sx, sy]) => {
+    if (sy === -1 && !unten) return;
+    for (let w = 5; w <= 90; w += 5) {
+      const lang = w % 10 === 0, r1 = lang ? 116 : 124, r2 = 132;
+      const dx = sx * Math.sin(w * RAD), dy = -sy * Math.cos(w * RAD);
+      el('line', {x1: HX + r1 * dx, y1: HY + r1 * dy, x2: HX + r2 * dx, y2: HY + r2 * dy, stroke: '#7D8796', 'stroke-width': lang ? 1.6 : 1}, wm);
+      if (lang && w < 90) txt((HX + 145 * dx).toFixed(1), (HY + 145 * dy + 4).toFixed(1), String(w), {'font-size': 10, 'text-anchor': 'middle', fill: '#7D8796'}, wm);
+    }
+    el('path', {d: 'M' + HX + ' ' + (HY - sy * 132) + ' A132 132 0 0 ' + (sx * sy > 0 ? 1 : 0) + ' ' + (HX + sx * 132) + ' ' + HY, fill: 'none', stroke: '#B6BEC9', 'stroke-width': 1}, wm);
+  });
+  // Strahlen
+  const L = 165, gr = el('g', {stroke: '#E39B1B', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round'}, svg);
+  const xs = HX - L * Math.sin(a * RAD), ys = HY - L * Math.cos(a * RAD);
+  el('line', {x1: xs.toFixed(1), y1: ys.toFixed(1), x2: HX, y2: HY}, gr);
+  pfeil((xs + HX) / 2, (ys + HY) / 2, 90 - a, svg);
+  bogen(46, -90, -90 - a, svg); if (a > 6) txt(HX - 60 * Math.sin(a / 2 * RAD) - 4, HY - 60 * Math.cos(a / 2 * RAD) + 5, 'α', {'font-size': 15, fill: '#6B4FA0', 'font-weight': 700}, svg);
+  let b, hinweis, refl = false;
+  if (S.sim.mode === 'spiegel') { b = a; refl = true; hinweis = 'Reflexion'; }
+  else { b = brechung(a, M.n1, M.n2); if (b === null) { b = a; refl = true; hinweis = 'Totalreflexion'; } else hinweis = a === 0 ? 'kein Knick' : 'Brechung'; }
+  const xe = HX + L * Math.sin(b * RAD), ye = refl ? HY - L * Math.cos(b * RAD) : HY + L * Math.cos(b * RAD);
+  el('line', {x1: HX, y1: HY, x2: xe.toFixed(1), y2: ye.toFixed(1)}, gr);
+  pfeil((HX + xe) / 2, (HY + ye) / 2, refl ? -(90 - b) : 90 - b, svg);
+  if (refl) bogen(56, -90, -90 + b, svg); else bogen(56, 90, 90 - b, svg);
+  if (b > 6) txt(HX + 70 * Math.sin(b / 2 * RAD) - 4, refl ? HY - 70 * Math.cos(b / 2 * RAD) + 5 : HY + 70 * Math.cos(b / 2 * RAD) + 5, 'β', {'font-size': 15, fill: '#6B4FA0', 'font-weight': 700}, svg);
+  el('circle', {cx: HX, cy: HY, r: 4, fill: '#1D2433'}, svg);
+  $('#mA').textContent = a + '°';
+  $('#mH').textContent = hinweis;
+  $('#aIn').value = a;
+  $$('#segMode button').forEach(x => x.classList.toggle('on', x.dataset.v === S.sim.mode));
+}
+$$('#segMode button').forEach(x => x.addEventListener('click', () => { S.sim.mode = x.dataset.v; zeichneSim(); changed(); }));
+$('#aIn').addEventListener('input', e => { S.sim.a = +e.target.value; zeichneSim(); changed(); });
+
+/* ---------- Mini-Tresor ---------- */
+const tsvg = $('#tresorSvg'), MX = 300, MY = 200, TX = 450, TY = 50;
+function tresorTreffer(){
+  const th = S.sim.sp * RAD, ux = Math.cos(th), uy = Math.sin(th); // Spiegelrichtung, y nach oben
+  const dot = ux; // Laser d = (1, 0)
+  const rx = 2 * dot * ux - 1, ry = 2 * dot * uy;
+  const vx = TX - MX, vy = MY - TY; // Ziel, y nach oben
+  const vor = rx * vx + ry * vy, quer = Math.abs(rx * vy - ry * vx);
+  return { rx, ry, hit: vor > 0 && quer < 12 };
+}
+function zeichneTresor(){
+  const { rx, ry, hit } = tresorTreffer(), th = S.sim.sp * RAD;
+  tsvg.innerHTML = '';
+  el('rect', {x: 0, y: 0, width: 560, height: 280, fill: '#FBFCFE'}, tsvg);
+  // Tresor mit Ziel
+  el('rect', {x: TX - 40, y: TY - 38, width: 80, height: 76, rx: 6, fill: hit ? '#E5F4EA' : '#EEF1F5', stroke: '#7D8796', 'stroke-width': 2}, tsvg);
+  [22, 14, 6].forEach((r, i) => el('circle', {cx: TX, cy: TY, r, fill: i % 2 ? '#fff' : (hit ? '#2E8B57' : '#C0392B')}, tsvg));
+  txt(TX, TY + 56, hit ? 'Treffer! Der Tresor ist offen.' : 'Ziel am Tresor', {'text-anchor': 'middle', 'font-weight': 700, fill: hit ? '#2E8B57' : '#4F5B6D'}, tsvg);
+  // Laser
+  el('rect', {x: 16, y: MY - 14, width: 56, height: 28, rx: 5, fill: '#4F5B6D'}, tsvg);
+  txt(44, MY + 44, 'Laser', {'text-anchor': 'middle'}, tsvg);
+  const gr = el('g', {stroke: '#E39B1B', 'stroke-width': 3, 'stroke-linecap': 'round'}, tsvg);
+  el('line', {x1: 72, y1: MY, x2: MX, y2: MY}, gr);
+  pfeil(190, MY, 0, tsvg);
+  // reflektierter Strahl bis zum Rand
+  let len = 600; if (hit) len = Math.hypot(TX - MX, TY - MY);
+  el('line', {x1: MX, y1: MY, x2: (MX + rx * len).toFixed(1), y2: (MY - ry * len).toFixed(1)}, gr);
+  pfeil(MX + rx * 80, MY - ry * 80, Math.atan2(-ry, rx) / RAD, tsvg);
+  // Spiegel mit Lot
+  const ux = Math.cos(th), uy = Math.sin(th);
+  el('line', {x1: (MX - 70 * uy).toFixed(1), y1: (MY - 70 * ux).toFixed(1), x2: (MX + 70 * uy).toFixed(1), y2: (MY + 70 * ux).toFixed(1), stroke: '#4F5B6D', 'stroke-width': 1.5, 'stroke-dasharray': '6 5'}, tsvg);
+  el('line', {x1: (MX - 48 * ux).toFixed(1), y1: (MY + 48 * uy).toFixed(1), x2: (MX + 48 * ux).toFixed(1), y2: (MY - 48 * uy).toFixed(1), stroke: '#1F5470', 'stroke-width': 7, 'stroke-linecap': 'round'}, tsvg);
+  txt(MX + 10, MY + 70, 'Spiegel', {}, tsvg);
+  $('#spIn').value = S.sim.sp;
+  const h = $('[data-key=t5]'); h.value = hit ? '1' : '';
+  if ((S.ans.t5 || '') !== h.value) S.ans.t5 = h.value;
+}
+$('#spIn').addEventListener('input', e => { S.sim.sp = +e.target.value; zeichneTresor(); const fb = $('.task[data-id=t5] .fmsg'); if (fb && !S.done.t5) { fb.textContent = ''; fb.className = 'fb fmsg'; } changed(); });
+
+function simAnwenden(){ zeichneSim(); zeichneTresor(); }
+const NUM = {
+  m35: () => S.sim.seen.m35 ? [35] : null,
+  g20: () => S.sim.seen.g20 ? [brechung(20, 1, 1.5)] : null,
+  g40: () => S.sim.seen.g40 ? [brechung(40, 1, 1.5)] : null,
+  g60: () => S.sim.seen.g60 ? [brechung(60, 1, 1.5)] : null,
+  tresor: () => tresorTreffer().hit ? [1] : null
+};
+const NUMHINWEIS = {
+  m35: 'Stelle zuerst in der Simulation „Spiegel“ und α = 35° ein.',
+  g20: 'Stelle zuerst in der Simulation „Luft → Glas“ und α = 20° ein.',
+  g40: 'Stelle zuerst in der Simulation „Luft → Glas“ und α = 40° ein.',
+  g60: 'Stelle zuerst in der Simulation „Luft → Glas“ und α = 60° ein.',
+  tresor: 'Der Strahl trifft das Ziel noch nicht. Dreh den Spiegel weiter.'
+};
+
+/* ---------- Schreibfelder ---------- */
+const LINIE = 38;
+const drawFelder = {};
+$$('.js-drawing').forEach(box => {
+  const id = box.dataset.id;
+  const tools = document.createElement('div'); tools.className = 'dtools';
+  const bF = document.createElement('button'); bF.type = 'button'; bF.className = 'btn2';
+  const bU = document.createElement('button'); bU.type = 'button'; bU.className = 'btn2'; bU.textContent = 'Rückgängig';
+  const bC = document.createElement('button'); bC.type = 'button'; bC.className = 'btnr'; bC.textContent = 'Alles löschen';
+  tools.append(bF, bU, bC);
+  const hint = document.createElement('div'); hint.className = 'dhint';
+  hint.textContent = 'Mit dem Stift kannst du sofort schreiben. Mit dem Finger erst nach „Mit dem Finger schreiben“.';
+  const s = document.createElementNS(SVGNS, 'svg'); s.setAttribute('class', 'dsvg');
+  const gL = el('g', {'pointer-events': 'none'}, s), gS = el('g', {}, s);
+  box.append(tools, hint, s);
+  let finger = false, cur = null, pts = [];
+  const setF = v => { finger = v; s.classList.toggle('finger', v); bF.classList.toggle('on', v); bF.textContent = v ? 'Fingerschreiben an' : 'Mit dem Finger schreiben'; };
+  setF(false);
+  bF.addEventListener('click', () => setF(!finger));
+  function linien(){
+    gL.innerHTML = '';
+    const w = s.clientWidth || 600, h = s.clientHeight || 380;
+    for (let y = LINIE; y < h; y += LINIE) el('line', {x1: 0, y1: y, x2: w, y2: y, stroke: '#CFD8E3', 'stroke-width': 1, 'shape-rendering': 'crispEdges'}, gL);
+  }
+  function striche(){
+    gS.innerHTML = '';
+    (S.draw[id] || []).forEach(k => el('path', {d: k.d, stroke: k.stroke, 'stroke-width': k.strokeWidth, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, gS));
+  }
+  const pos = e => { const r = s.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * 10) / 10, Math.round((e.clientY - r.top) * 10) / 10]; };
+  s.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch' && !finger) return;
+    e.preventDefault(); s.setPointerCapture(e.pointerId);
+    pts = [pos(e)];
+    cur = el('path', {d: 'M' + pts[0].join(' '), stroke: '#1D2433', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, gS);
+  });
+  s.addEventListener('pointermove', e => {
+    if (!cur) return; e.preventDefault();
+    pts.push(pos(e)); cur.setAttribute('d', 'M' + pts.map(p => p.join(' ')).join(' L'));
+  });
+  const ende = () => {
+    if (!cur) return;
+    const d = pts.length === 1 ? 'M' + pts[0].join(' ') + ' l0.1 0' : cur.getAttribute('d');
+    (S.draw[id] = S.draw[id] || []).push({d: d, stroke: '#1D2433', strokeWidth: 2.5});
+    cur = null; striche(); changed();
+  };
+  s.addEventListener('pointerup', ende); s.addEventListener('pointercancel', ende);
+  bU.addEventListener('click', () => { (S.draw[id] || []).pop(); striche(); changed(); });
+  bC.addEventListener('click', () => { S.draw[id] = []; striche(); changed(); });
+  const det = box.closest('details');
+  if (det) det.addEventListener('toggle', linien);
+  window.addEventListener('resize', linien);
+  drawFelder[id] = { linien, striche };
+  linien(); striche();
+});
+
+$$('.task[data-draw]').forEach(t => {
+  const ids = t.dataset.draw.split(',');
+  const fb = $('.fmsg', t), sc = $('.selfcheck', t);
+  $('.finish', t).addEventListener('click', () => {
+    const leerFeld = ids.some(id => !(S.draw[id] && S.draw[id].length));
+    if (leerFeld) { fb.className = 'fb fmsg no'; fb.textContent = ids.length > 1 ? 'Bitte schreibe zuerst in alle Schreibfelder dieser Aufgabe.' : 'Bitte schreibe zuerst deine Antwort in das Schreibfeld.'; const d = $('details', t); if (d) d.open = true; return; }
+    fb.className = 'fb fmsg ok'; fb.textContent = '✓ Bearbeitung abgeschlossen. Prüfe deine Antwort mit der Liste.';
+    S.done[t.dataset.id] = true; sc.hidden = false; status(); changed();
+  });
+});
+
+/* ---------- Gesamtzustand anwenden ---------- */
+function anwenden(){
+  $$('[data-key]').forEach(el => { el.value = S.ans[el.dataset.key] !== undefined ? S.ans[el.dataset.key] : ''; el.classList.remove('good', 'bad'); });
+  TASKS.forEach(t => {
+    t._updHints();
+    const fb = $('.fmsg', t); if (fb) { fb.textContent = ''; fb.className = 'fb fmsg'; }
+    if ((S.done[t.dataset.id] || t.dataset.calc) && !t.dataset.draw) pruefe(t, !!S.done[t.dataset.id]);
+    const sc = $('.selfcheck', t); if (sc && !t.dataset.calc) sc.hidden = !S.done[t.dataset.id];
+  });
+  Object.values(drawFelder).forEach(f => { f.linien(); f.striche(); });
+  simAnwenden(); status();
+}
+
+/* ---------- Zurücksetzen ---------- */
+$('#resetBtn').addEventListener('click', () => $('#resetConfirm').classList.add('on'));
+$('#resetNo').addEventListener('click', () => $('#resetConfirm').classList.remove('on'));
+$('#resetYes').addEventListener('click', () => { S = leer(); $('#resetConfirm').classList.remove('on'); anwenden(); changed(); });
+
+/* ---------- Start ---------- */
+if (!(window.AppBridge && AppBridge.inApp)) {
+  try { const alt = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (alt && alt.v === VERSION) { S = Object.assign(leer(), alt); S.sim = Object.assign(leer().sim, alt.sim || {}); } } catch (e) {}
+}
+anwenden();
+
+/* ---------- Anbindung an die Physik-App (nur Lernstand, keine Namen) ---------- */
+if (window.AppBridge) {
+  setTimeout(() => { appLive = true; }, 1500);
+  AppBridge.register({
+    getState(){
+      const namen = TASKS.map(t => 'Aufgabe ' + t.dataset.nr);
+      const details = {};
+      TASKS.forEach(t => {
+        let txt = S.done[t.dataset.id] ? 'erledigt' : 'offen';
+        const fid = t.dataset.draw || t.dataset.calc;
+        if (fid) txt += ' · Schreibfeld ' + fid + ': ' + ((S.draw[fid] || []).length ? 'beschrieben' : 'leer');
+        else if (S.hints[t.dataset.id]) txt += ' · ' + S.hints[t.dataset.id] + ' Hilfe(n)';
+        details['Aufgabe ' + t.dataset.nr] = txt;
+      });
+      return { punkte: TASKS.filter(t => S.done[t.dataset.id]).length, stationen: namen,
+        erledigt: TASKS.filter(t => S.done[t.dataset.id]).map(t => 'Aufgabe ' + t.dataset.nr),
+        details, daten: JSON.parse(JSON.stringify(S)) };
+    },
+    setState(st){
+      const d = st && st.daten; appLive = true;
+      if (!d || d.v !== VERSION) return;
+      S = Object.assign(leer(), d); S.sim = Object.assign(leer().sim, d.sim || {});
+      anwenden();
+    }
+  });
+}
+})();
+</script>
+</body>
+</html>

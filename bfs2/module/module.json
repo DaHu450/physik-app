@@ -51,6 +51,18 @@
       "freigegeben": true,
       "farbe": "#3A7CA5",
       "icon": "auge"
+    },
+    {
+      "id": "optik-s05",
+      "titel": "Optik 5 · Wiederholung: Spiegel und Brechung",
+      "untertitel": "Reflexionsgesetz, Brechung, Totalreflexion",
+      "datei": "optik-s05.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "linse"
     }
   ]
 }
