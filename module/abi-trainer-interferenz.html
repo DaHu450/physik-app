@@ -79,12 +79,23 @@ table.aus{border-collapse:collapse;width:100%;font-size:15.5px}
 table.aus th,table.aus td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
 table.aus td.r,table.aus th.r{text-align:right;font-family:var(--f-mono);white-space:nowrap}
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.hinweis{background:var(--warnSoft);border:1.5px solid var(--orange);border-radius:10px;padding:9px 13px;margin:0 0 12px;font-size:16px}
+.bilder{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0}
+.bilder figure{margin:0}
+.bilder img{display:block;width:260px;max-width:100%;border-radius:8px;border:1px solid var(--line)}
+.bilder figcaption{font-size:13.5px;color:var(--muted);margin-top:4px}
+.sim canvas{background:#000}
+.simctl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:10px;font-size:15px}
+.simctl label{display:flex;align-items:center;gap:8px}
+.simctl input[type=range]{width:150px;min-height:44px}
+.simctl .v{font-family:var(--f-mono);min-width:5.5em}
+.simctl .btn{min-width:64px}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>Abi-Trainer Interferenz<small>TG2 · Aufgaben im Abi-Stil zu Doppelspalt und Gitter · Formelzeichen wie in der IQB-Formelsammlung</small></h1>
+  <h1>Abi-Trainer Interferenz<small>TG2 · Übung zum Einstieg und Aufgaben im Abi-Stil zu Doppelspalt und Gitter · Formelzeichen wie in der IQB-Formelsammlung</small></h1>
   <div class="score" aria-live="polite">BE: <b id="scoreNow">0</b> / <span id="scoreMax">0</span></div>
 </header>
 <nav id="tabs" role="tablist"></nav>
@@ -139,9 +150,84 @@ function cdbild(c) {
   x.strokeStyle = mu; x.lineWidth = 1; x.beginPath(); x.moveTo(xc + 10, 150); x.lineTo(xw - 10, 150); x.stroke(); x.fillStyle = mu; x.fillText('e = 30 cm', (xc + xw) / 2 - 36, 145);
 }
 
+/* ===================== Übung: Laser am Doppelspalt (Bilder + Simulation) ===================== */
+const UEB_IMG1 = 'data:image/jpeg;base64,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';
+const UEB_IMG2 = 'data:image/jpeg;base64,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';
+function uebMat(box) {
+  box.innerHTML = `<div class="mh">Material: Interferenzbilder</div>
+  <div class="bilder"><figure><img src="${UEB_IMG1}" alt="Drei rote Interferenzmuster mit verschiedenem Streifenabstand"><figcaption>Abb. 1: gleicher roter Laser, drei verschiedene Spaltabstände</figcaption></figure>
+  <figure><img src="${UEB_IMG2}" alt="Drei schwarz-weiße Interferenzmuster mit verschiedenem Streifenabstand"><figcaption>Abb. 2: gleicher Doppelspalt, roter, grüner und blauer Laser</figcaption></figure></div>
+  <div class="mh" style="margin-top:12px">Simulation: Doppelspalt</div>
+  <div class="sim"><canvas width="600" height="260" style="height:auto"></canvas>
+  <div class="simctl"><label>Spaltabstand g <input type="range" class="sg" min="30" max="110" value="60"><span class="v vg"></span></label>
+  <label>Wellenlänge λ <input type="range" class="sl" min="420" max="700" value="650"><span class="v vl"></span></label>
+  <button type="button" class="btn ghost" data-nm="650">rot</button><button type="button" class="btn ghost" data-nm="532">grün</button><button type="button" class="btn ghost" data-nm="450">blau</button></div></div>`;
+  const c = box.querySelector('canvas'), x = c.getContext('2d'), W = c.width, H = c.height;
+  const gIn = box.querySelector('.sg'), lIn = box.querySelector('.sl'), gO = box.querySelector('.vg'), lO = box.querySelector('.vl');
+  box.querySelectorAll('button[data-nm]').forEach(b => b.onclick = () => { lIn.value = b.dataset.nm; });
+  const xs = 50, FW = 380, xScr = xs + FW, img = x.createImageData(FW, H);
+  const farbe = nm => { let r = 0, g = 0, b = 0;
+    if (nm < 440) { r = (440 - nm) / 60; b = 1; } else if (nm < 490) { g = (nm - 440) / 50; b = 1; } else if (nm < 510) { g = 1; b = (510 - nm) / 20; }
+    else if (nm < 580) { r = (nm - 510) / 70; g = 1; } else if (nm < 645) { r = 1; g = (645 - nm) / 65; } else r = 1; return [r, g, b]; };
+  const rgb = (col, s) => `rgb(${Math.round(col[0] * 255 * s)},${Math.round(col[1] * 255 * s)},${Math.round(col[2] * 255 * s)})`;
+  let t = 0, last = null;
+  function frame(now) {
+    if (!c.isConnected) return; // Tab gewechselt: Animation beenden
+    if (last === null) last = now; t += Math.min((now - last) / 1000, .05); last = now;
+    const g = +gIn.value, nm = +lIn.value, k = 2 * Math.PI / (nm / 60), om = 2 * Math.PI, y1 = H / 2 - g / 2, y2 = H / 2 + g / 2, col = farbe(nm), d = img.data;
+    gO.textContent = fmt(g / 240, 2) + ' mm'; lO.textContent = nm + ' nm';
+    for (let X = 0; X < xs - 6; X++) { x.fillStyle = rgb(col, (Math.cos(k * (X - xs) - om * t) + 1) / 2); x.fillRect(X, 0, 1, H); }
+    for (let y = 0; y < H; y++) { const a1 = y - y1, a2 = y - y2;
+      for (let X = 0; X < FW; X++) { const r1 = Math.sqrt(X * X + a1 * a1), r2 = Math.sqrt(X * X + a2 * a2), s = (Math.cos(k * r1 - om * t) + Math.cos(k * r2 - om * t) + 2) / 4, i = (y * FW + X) * 4;
+        d[i] = col[0] * 255 * s; d[i + 1] = col[1] * 255 * s; d[i + 2] = col[2] * 255 * s; d[i + 3] = 255; } }
+    x.putImageData(img, xs, 0);
+    x.fillStyle = '#555'; x.fillRect(xs - 6, 0, 6, y1 - 2); x.fillRect(xs - 6, y1 + 2, 6, y2 - y1 - 4); x.fillRect(xs - 6, y2 + 2, 6, H - y2 - 2);
+    x.fillStyle = '#222'; x.fillRect(xScr, 0, W - xScr, H);
+    const sx = xScr + 15, gx = xScr + 70; x.strokeStyle = '#fff'; x.lineWidth = 1.5; x.beginPath();
+    for (let y = 0; y < H; y++) { const q1 = Math.sqrt(FW * FW + (y - y1) ** 2), q2 = Math.sqrt(FW * FW + (y - y2) ** 2), I = Math.cos(k * (q2 - q1) / 2) ** 2;
+      x.fillStyle = rgb(col, I); x.fillRect(sx, y, 40, 1); const px = gx + I * (W - gx - 10); y ? x.lineTo(px, y) : x.moveTo(px, y); }
+    x.stroke();
+    x.font = '12px ' + cv('--f-mono'); x.fillStyle = '#fff'; x.fillText('Schirm', sx, 14); x.fillText('Intensität', gx, 14);
+    x.fillStyle = 'rgba(255,255,255,.85)'; x.fillRect(2, H - 20, 92, 18); x.fillStyle = '#000'; x.fillText('Doppelspalt', 6, H - 6);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
 /* ===================== Aufgaben (selbst erstellt, im Stil der Abiturprüfung) ===================== */
 const a2 = Math.asin(2 * 532e-9 / 4e-6), av = Math.asin(.1), ar = Math.asin(.175), acd = Math.asin(650 / 1600), advd = Math.atan(55 / 30);
 const TASKS = [
+{ id: 'A0', tab: 'Übung', title: 'Übung · Laser am Doppelspalt', matBox: uebMat,
+  src: 'Übungsaufgabe zum Einstieg · Hilfsmittel: Taschenrechner, IQB-Formelsammlung',
+  hinweis: '<b>Hinweis:</b> Das ist eine Übung zum Warmwerden, <b>keine Abiaufgabe</b>. Sie ist leichter und anders aufgebaut als die Aufgaben 1 bis 4.',
+  intro: 'Mit einem Laser und einem Doppelspalt entstehen auf dem Schirm helle und dunkle Streifen. Im Material siehst du echte Interferenzbilder. Mit der Simulation kannst du Spaltabstand und Wellenlänge selbst verändern.',
+  parts: [
+    { nr: 'Ü.1', afb: 'II', q: 'Die drei Bilder in Abb. 1 entstanden mit demselben roten Laser, aber mit drei verschiedenen Spaltabständen. <b>Gib an</b>, bei welchem Bild der Spaltabstand am kleinsten und bei welchem er am größten war, und <b>begründe</b>.',
+      comps: [
+        { kind: 'choice', be: 1, fixed: true, q: 'Kleinster Spaltabstand:', opts: ['oberstes Bild', 'mittleres Bild', 'unterstes Bild'], correct: 2 },
+        { kind: 'choice', be: 1, fixed: true, q: 'Größter Spaltabstand:', opts: ['oberstes Bild', 'mittleres Bild', 'unterstes Bild'], correct: 0 },
+        { kind: 'choice', be: 2, q: 'Begründung:', opts: ['Je kleiner der Spaltabstand g, desto weiter liegen die Maxima auseinander (Abstand ~ 1/g).', 'Je kleiner der Spaltabstand g, desto enger liegen die Maxima beieinander (Abstand ~ g).', 'Der Spaltabstand beeinflusst nur die Helligkeit, nicht die Abstände.'], correct: 0 }],
+      help: ['Vergleiche in Abb. 1 die Abstände zwischen den hellen Streifen. Verändere dann in der Simulation nur den Spaltabstand und beobachte den Schirm.', 'Für den Abstand benachbarter Maxima gilt näherungsweise Δa = λ · e / g. λ und e sind bei allen drei Bildern gleich.'],
+      solution: 'Δa = λ · e / g, also Δa ~ 1/g. Je weiter die Streifen auseinanderliegen, desto kleiner ist der Spaltabstand. <b>Unterstes Bild:</b> größte Streifenabstände, also kleinster Spaltabstand. <b>Oberstes Bild:</b> kleinste Streifenabstände, also größter Spaltabstand.' },
+    { nr: 'Ü.2', afb: 'II', q: 'Die Bilder in Abb. 2 entstanden an <b>einem</b> Doppelspalt mit festem Spaltabstand, einmal mit rotem, einmal mit grünem und einmal mit blauem Laser. <b>Ordne</b> die Farben den Bildern <b>zu</b> und <b>begründe</b>.',
+      comps: [
+        { kind: 'choice', be: 1, fixed: true, q: 'Oberstes Bild:', opts: ['rot', 'grün', 'blau'], correct: 2 },
+        { kind: 'choice', be: 1, fixed: true, q: 'Unterstes Bild:', opts: ['rot', 'grün', 'blau'], correct: 0 },
+        { kind: 'choice', be: 2, q: 'Begründung:', opts: ['Bei festem g gilt Δa ~ λ. Rot hat die größte Wellenlänge, also die größten Streifenabstände.', 'Blau hat die größte Wellenlänge, also die größten Streifenabstände.', 'Die Farbe hat keinen Einfluss auf die Streifenabstände.'], correct: 0 }],
+      help: ['Was ist bei den drei Bildern gleich, was verschieden? Durch welche Größe unterscheiden sich rotes, grünes und blaues Licht? Probier die Farbknöpfe in der Simulation aus.', 'Wellenlängen: rot ≈ 650 nm, grün ≈ 530 nm, blau ≈ 450 nm. Jetzt ist g fest: Δa = λ · e / g.'],
+      solution: 'Bei festem g und e gilt Δa ~ λ. <b>Unterstes Bild</b> (größte Abstände): <b>rot</b>, größte Wellenlänge. <b>Mittleres Bild:</b> grün. <b>Oberstes Bild</b> (kleinste Abstände): <b>blau</b>, kleinste Wellenlänge.' },
+    { nr: 'Ü.3', afb: 'I', q: 'Ein roter Laser (λ = 650 nm) beleuchtet einen Doppelspalt mit g = 0,25 mm. Der Schirm steht e = 3,0 m dahinter. <b>Berechne</b> den Abstand Δa benachbarter Maxima für Rot und für Blau (λ = 450 nm).',
+      comps: [{ kind: 'num', be: 2, label: 'Δa_rot =', unit: 'mm', value: 650e-9 * 3 / .25e-3 * 1e3, tol: .02 }, { kind: 'num', be: 1, label: 'Δa_blau =', unit: 'mm', value: 450e-9 * 3 / .25e-3 * 1e3, tol: .02 }],
+      help: ['Für das 1. Maximum gilt sin α₁ = λ / g und tan α₁ = a₁ / e. Die Winkel sind sehr klein, also sin α ≈ tan α.', 'Damit Δa = λ · e / g. Alles in Metern einsetzen: g = 0,25·10⁻³ m, λ = 650·10⁻⁹ m.'],
+      solution: '<div class="mono">kleine Winkel: λ / g = Δa / e  ⇒  Δa = λ · e / g\nrot:  Δa = 650·10⁻⁹ m · 3,0 m / 0,25·10⁻³ m = 7,8·10⁻³ m = 7,8 mm\nblau: Δa = 450·10⁻⁹ m · 3,0 m / 0,25·10⁻³ m = 5,4·10⁻³ m = 5,4 mm</div>Blau liefert die engeren Streifen. Das passt zu Ü.2.' },
+    { nr: 'Ü.4', afb: 'II', q: '<b>Erkläre</b> mit dem Gangunterschied, wie helle und dunkle Streifen entstehen, und warum man dafür einen Laser verwendet.',
+      comps: [
+        { kind: 'choice', be: 1, q: 'Hell (Maximum) ist es, wenn …', opts: ['… der Gangunterschied Δs = k · λ ist: Berg trifft auf Berg.', '… der Gangunterschied Δs = (2k − 1) · λ/2 ist.', '… der Punkt genau hinter einem Spalt liegt.'], correct: 0 },
+        { kind: 'choice', be: 1, q: 'Dunkel (Minimum) ist es, wenn …', opts: ['… Δs = k · λ ist.', '… Δs = (2k − 1) · λ/2 ist: Berg trifft auf Tal, die Wellen löschen sich aus.', '… die Blende das Licht abschattet.'], correct: 1 },
+        { kind: 'choice', be: 1, q: 'Warum ein Laser?', opts: ['Laserlicht ist besonders hell, sonst sieht man nichts.', 'Laserlicht ist kohärent und hat eine Wellenlänge. Nur dann entsteht ein stabiles Interferenzmuster.', 'Ein Laser erzeugt die beiden Spalte selbst.'], correct: 1 }],
+      help: ['Von jedem Spalt geht eine Elementarwelle aus (Huygens). In der Simulation siehst du, wo sich die beiden Wellen verstärken und wo sie sich auslöschen.', 'Entscheidend ist der Gangunterschied Δs, also der Unterschied der Wege von den beiden Spalten zum Schirmpunkt.'],
+      solution: 'Die Wellen aus beiden Spalten überlagern sich. Bei Δs = k · λ verstärken sie sich (hell, konstruktive Interferenz), bei Δs = (2k − 1) · λ/2 löschen sie sich aus (dunkel, destruktive Interferenz). Ein stabiles Muster gibt es nur, wenn beide Wellen eine feste Phasenbeziehung haben (kohärent) und dieselbe Wellenlänge haben. Das liefert ein Laser.' }
+  ] },
 { id: 'A1', tab: 'Laser', title: 'Aufgabe 1 · Roter Laser am Doppelspalt', mat: c => setup(c, { e: 'e = 4,00 m', a: 'a₃', k: 'k = 3' }), matT: 'Versuchsaufbau (nicht maßstäblich)',
   intro: 'Das Licht eines roten Lasers fällt senkrecht auf einen Doppelspalt mit dem Spaltabstand g = 0,25 mm. Auf einem Schirm im Abstand e = 4,00 m beobachtet man helle Punkte in gleichen Abständen. Die beiden Maxima 3. Ordnung (links und rechts der Mitte) sind 6,1 cm voneinander entfernt.',
   parts: [
@@ -271,8 +357,9 @@ function show(i, quiet) {
 }
 let redraw = null;
 function aufgabe(m, t) {
-  const c = el('div', 'card'); c.innerHTML = `<h2>${t.title}</h2><p class="src">Aufgabe im Abi-Stil · Hilfsmittel: Taschenrechner, IQB-Formelsammlung</p><p class="lead">${t.intro}</p>`;
+  const c = el('div', 'card'); c.innerHTML = `<h2>${t.title}</h2><p class="src">${t.src || 'Aufgabe im Abi-Stil · Hilfsmittel: Taschenrechner, IQB-Formelsammlung'}</p>${t.hinweis ? `<div class="hinweis">${t.hinweis}</div>` : ''}<p class="lead">${t.intro}</p>`;
   redraw = null;
+  if (t.matBox) { const mt = el('div', 'mat'); c.appendChild(mt); t.matBox(mt); }
   if (t.mat) { const mt = el('div', 'mat', `<div class="mh">${t.matT}</div>`), cvs = el('canvas'); mt.appendChild(cvs); c.appendChild(mt); redraw = () => t.mat(cvs); }
   m.appendChild(c); if (redraw) redraw();
   t.parts.forEach(p => m.appendChild(teil(p)));
@@ -300,7 +387,7 @@ function teil(p) {
     } else {
       box.innerHTML = `<p class="cq">${c.q}</p>`; const ob = el('div', 'opts'), bs = [];
       const fin = pick => bs.forEach(([b, k]) => { b.disabled = true; if (k === c.correct) b.classList.add('ok'); else if (k === pick) b.classList.add('no'); });
-      c.opts.map((_, k) => k).sort(() => Math.random() - .5).forEach(k => {
+      c.opts.map((_, k) => k).sort(() => c.fixed ? 0 : Math.random() - .5).forEach(k => {
         const b = el('button', '', c.opts[k]); b.type = 'button'; bs.push([b, k]); ob.appendChild(b);
         b.onclick = () => { const ok = k === c.correct; s.comp[i] = { ok: true, be: ok ? c.be : 0, v: k }; fin(k); fb.hidden = false; fb.className = 'fb ' + (ok ? 'good' : 'bad'); fb.innerHTML = ok ? 'Richtig.' : ((c.fb && c.fb[k]) || 'Das war nicht richtig. Die richtige Antwort ist grün markiert.'); upd(); changed(); };
       });
