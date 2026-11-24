@@ -346,7 +346,13 @@ function startHome() {
     b.innerHTML = `<span class="nr">${mods.indexOf(m) + 1}</span><div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div><div class="body">
       <div class="meta">${f ? `<span>${f.k} von ${f.n} Stationen · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
       ${f ? `<div class="bar"><i style="width:${Math.round(f.anteil * 100)}%"></i></div>` : ''}</div>`;
-    if (m.gesperrt && !lehrerFrei) {
+    if (stoppAktiv(m)) {
+      b.classList.add('gesperrt'); b.setAttribute('aria-disabled', 'true');
+      const vor = cfg.module.find((x) => x.id === m.stoppNach);
+      b.querySelector('.meta').innerHTML = '<span class="badge lock">🔒 Erst Stempel holen</span>';
+      const bar = b.querySelector('.bar'); if (bar) bar.remove();
+      b.onclick = () => stoppDialog(m, vor);
+    } else if (m.gesperrt && !lehrerFrei) {
       b.classList.add('gesperrt'); b.setAttribute('aria-disabled', 'true');
       b.querySelector('.meta').innerHTML = '<span class="badge lock">🔒 Noch gesperrt</span>';
       const bar = b.querySelector('.bar'); if (bar) bar.remove();
@@ -355,6 +361,31 @@ function startHome() {
     box.appendChild(b);
   });
   pfeileSetzen();
+}
+/* ---------- Lehrer-Stopp: Modul erst nach dem Stempel im vorigen Modul (oder mit Freigabe-Code) ---------- */
+function stoppAktiv(m) {
+  if (!m.stopp || !m.stoppNach || lehrerFrei) return false;
+  if ((daten.freigaben || {})[m.id]) return false;
+  const s = daten.module[m.stoppNach] && daten.module[m.stoppNach].state;
+  return !(s && s.stempel);
+}
+function stoppDialog(m, vor) {
+  let d = $('#dlgStopp');
+  if (!d) {
+    d = document.createElement('dialog'); d.id = 'dlgStopp';
+    d.innerHTML = '<div class="dlg"><h2 style="margin:0 0 8px">🔒 Noch gesperrt</h2><p id="stoppTxt"></p><form id="stoppForm" class="row" style="gap:8px;flex-wrap:wrap"><input id="stoppIn" inputmode="numeric" maxlength="4" placeholder="Freigabe-Code" aria-label="Freigabe-Code" style="font-size:20px;padding:10px;width:170px;min-height:44px"><button class="btn" type="submit" style="min-height:44px">Freigeben</button></form><div id="stoppMsg"></div><div class="row" style="margin-top:12px"><button class="btn ghost" type="button" id="stoppZu" style="min-height:44px">Schließen</button></div></div>';
+    document.body.appendChild(d);
+    $('#stoppZu').onclick = () => d.close();
+  }
+  $('#stoppTxt').textContent = 'Hol dir zuerst den Stempel im Checkpoint von „' + (vor ? vor.titel : 'vorige Seite') + '“. Dann geht diese Seite auf. Deine Lehrerin kann sie auch mit einem Code freigeben.';
+  $('#stoppIn').value = ''; $('#stoppMsg').innerHTML = '';
+  $('#stoppForm').onsubmit = (e) => {
+    e.preventDefault();
+    if ($('#stoppIn').value.replace(/\D/g, '') === KA.freigabeCode(code, m.id)) {
+      daten.freigaben = daten.freigaben || {}; daten.freigaben[m.id] = true; schreibe(); d.close(); startHome(); toast('Freigegeben ✓');
+    } else $('#stoppMsg').innerHTML = '<div class="msg no">Der Code stimmt nicht.</div>';
+  };
+  d.showModal();
 }
 function pfeileSetzen() {
   const box = $('#tiles'); box.querySelectorAll('.pfeil').forEach((p) => p.remove());

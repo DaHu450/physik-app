@@ -237,7 +237,9 @@ function schuelerDerKlasse(kl) {
 function renderListe() {
   const kl = $('#kKlasse').value; const liste = schuelerDerKlasse(kl);
   if (!liste.length) { $('#kListe').innerHTML = '<p class="muted">Noch keine Schüler in dieser Klasse.</p>'; return; }
-  $('#kListe').innerHTML = `<table><tr><th>Name</th><th>Code</th><th></th></tr>${liste.map(([c, s]) => `<tr><td>${esc(s.name)}</td><td class="code">${KA.codeHuebsch(c)}</td><td><button class="btn ghost small" data-del="${c}">entfernen</button></td></tr>`).join('')}</table>`;
+  const stopps = ((cfg && cfg.module) || []).filter((m) => m.stopp && (m.klassen || []).includes(kl));
+  $('#kListe').innerHTML = (stopps.length ? '<p class="muted">Lehrer-Stopp: Eine gesperrte Seite öffnet sich nach dem Stempel auf der Seite davor. Mit dem Freigabe-Code aus der Tabelle gibst du sie für einen Schüler direkt frei (auf dessen Tablet die gesperrte Kachel antippen).</p>' : '') +
+    `<table><tr><th>Name</th><th>Code</th>${stopps.map((m) => `<th>Freigabe ${esc(m.titel.split(' · ')[0])}</th>`).join('')}<th></th></tr>${liste.map(([c, s]) => `<tr><td>${esc(s.name)}</td><td class="code">${KA.codeHuebsch(c)}</td>${stopps.map((m) => `<td class="code">${KA.freigabeCode(c, m.id)}</td>`).join('')}<td><button class="btn ghost small" data-del="${c}">entfernen</button></td></tr>`).join('')}</table>`;
   $('#kListe').querySelectorAll('[data-del]').forEach((b) => b.onclick = () => {
     if (!confirm('Schüler entfernen? Der Code wird damit ungültig für die Auswertung.')) return;
     delete db.schueler[b.dataset.del]; sichern(); renderListe();
