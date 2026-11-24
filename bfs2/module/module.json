@@ -15,6 +15,18 @@
       "freigegeben": true,
       "farbe": "#3A7CA5",
       "icon": "linse"
+    },
+    {
+      "id": "optik-s02",
+      "titel": "Optik 2 · Linsenbilder",
+      "untertitel": "Groß, klein, auf dem Kopf",
+      "datei": "optik-s02.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "linse"
     }
   ]
 }
