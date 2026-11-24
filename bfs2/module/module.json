@@ -1,5 +1,5 @@
 {
-  "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen. 'stopp': true mit 'stoppNach': Modul-ID = Lehrer-Stopp, die Station öffnet sich erst nach dem Stempel in der genannten Station (oder mit dem Freigabe-Code aus der Klassenliste); 'stopp': false hebt das für alle auf. 'spiele': false (ganz oben, neben 'klassen') schaltet die Belohnungsspiele nach dem Stempel für alle aus.",
+  "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben': true = Kachel taucht auf. 'gesperrt': true = Kachel grau und noch nicht öffenbar; zum Freischalten die Zeile 'gesperrt' löschen. Keine Freigabe-Codes, keine Stempel-Sperre zwischen den Stationen. 'spiele': false (ganz oben, neben 'klassen') schaltet die Belohnungsspiele nach dem Stempel für alle aus.",
   "klassen": {
     "61": "BFS2"
   },
@@ -26,9 +26,7 @@
       ],
       "freigegeben": true,
       "farbe": "#0B7F8C",
-      "icon": "linse",
-      "stopp": true,
-      "stoppNach": "optik-s01"
+      "icon": "linse"
     },
     {
       "id": "optik-s03",
@@ -40,9 +38,7 @@
       ],
       "freigegeben": true,
       "farbe": "#2E8B4E",
-      "icon": "auge",
-      "stopp": true,
-      "stoppNach": "optik-s02"
+      "icon": "auge"
     },
     {
       "id": "optik-s04",
@@ -55,8 +51,7 @@
       "freigegeben": true,
       "farbe": "#D2690A",
       "icon": "auge",
-      "stopp": true,
-      "stoppNach": "optik-s03"
+      "gesperrt": true
     },
     {
       "id": "optik-s05",
@@ -69,8 +64,7 @@
       "freigegeben": true,
       "farbe": "#6A3DC4",
       "icon": "linse",
-      "stopp": true,
-      "stoppNach": "optik-s04"
+      "gesperrt": true
     }
   ]
 }
