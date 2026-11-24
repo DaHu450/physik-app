@@ -354,7 +354,7 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
   </div>
 
   <div class="task" data-id="t5" data-nr="5" data-afb="2" data-op="Konstruiere">
-    <p>Der Mini-Tresor: Der Laser schießt waagrecht nach rechts. Dreh den Spiegel so, dass der Strahl das Ziel trifft.</p>
+    <p>Der Mini-Tresor: Der Laser schießt waagrecht nach rechts. Dreh den Spiegel so, dass der Strahl das Ziel trifft. Der Laser ist noch aus. Er geht erst an, wenn du auf „Prüfen“ drückst.</p>
     <div class="fig"><svg id="tresorSvg" viewBox="0 0 560 280" role="img" aria-label="Laser, drehbarer Spiegel und Ziel"></svg></div>
     <label for="spIn" class="small">Spiegel drehen</label>
     <input type="range" id="spIn" min="0" max="177.5" step="2.5" value="90" style="width:100%;min-height:44px">
@@ -682,6 +682,7 @@ $('#aIn').addEventListener('input', e => { S.sim.a = +e.target.value; zeichneSim
 
 /* ---------- Mini-Tresor ---------- */
 const tsvg = $('#tresorSvg'), MX = 300, MY = 200, TX = 450, TY = 50;
+let laserAn = false; // Laser erst beim Prüfen an, beim Drehen wieder aus
 function tresorTreffer(){
   const th = S.sim.sp * RAD, ux = Math.cos(th), uy = Math.sin(th); // Spiegelrichtung, y nach oben
   const dot = ux; // Laser d = (1, 0)
@@ -691,7 +692,8 @@ function tresorTreffer(){
   return { rx, ry, hit: vor > 0 && quer < 12 };
 }
 function zeichneTresor(){
-  const { rx, ry, hit } = tresorTreffer(), th = S.sim.sp * RAD;
+  const an = laserAn || !!S.done.t5;
+  const { rx, ry } = tresorTreffer(), hit = an && tresorTreffer().hit, th = S.sim.sp * RAD;
   tsvg.innerHTML = '';
   el('rect', {x: 0, y: 0, width: 560, height: 280, fill: '#FBFCFE'}, tsvg);
   // Tresor mit Ziel
@@ -700,25 +702,31 @@ function zeichneTresor(){
   txt(TX, TY + 56, hit ? 'Treffer! Der Tresor ist offen.' : 'Ziel am Tresor', {'text-anchor': 'middle', 'font-weight': 700, fill: hit ? '#2E8B57' : '#4F5B6D'}, tsvg);
   // Laser
   el('rect', {x: 16, y: MY - 14, width: 56, height: 28, rx: 5, fill: '#4F5B6D'}, tsvg);
-  txt(44, MY + 44, 'Laser', {'text-anchor': 'middle'}, tsvg);
-  const gr = el('g', {stroke: '#E39B1B', 'stroke-width': 3, 'stroke-linecap': 'round'}, tsvg);
+  txt(44, MY + 44, an ? 'Laser an' : 'Laser aus', {'text-anchor': 'middle'}, tsvg);
+  el('circle', {cx: 64, cy: MY, r: 4, fill: an ? '#E39B1B' : '#9AA5B4'}, tsvg);
+  const gr = el('g', {stroke: '#E39B1B', 'stroke-width': 3, 'stroke-linecap': 'round', visibility: an ? 'visible' : 'hidden'}, tsvg);
   el('line', {x1: 72, y1: MY, x2: MX, y2: MY}, gr);
-  pfeil(190, MY, 0, tsvg);
+  if (an) pfeil(190, MY, 0, tsvg);
   // reflektierter Strahl bis zum Rand
   let len = 600; if (hit) len = Math.hypot(TX - MX, TY - MY);
   el('line', {x1: MX, y1: MY, x2: (MX + rx * len).toFixed(1), y2: (MY - ry * len).toFixed(1)}, gr);
-  pfeil(MX + rx * 80, MY - ry * 80, Math.atan2(-ry, rx) / RAD, tsvg);
+  if (an) pfeil(MX + rx * 80, MY - ry * 80, Math.atan2(-ry, rx) / RAD, tsvg);
   // Spiegel mit Lot
   const ux = Math.cos(th), uy = Math.sin(th);
   el('line', {x1: (MX - 70 * uy).toFixed(1), y1: (MY - 70 * ux).toFixed(1), x2: (MX + 70 * uy).toFixed(1), y2: (MY + 70 * ux).toFixed(1), stroke: '#4F5B6D', 'stroke-width': 1.5, 'stroke-dasharray': '6 5'}, tsvg);
   el('line', {x1: (MX - 48 * ux).toFixed(1), y1: (MY + 48 * uy).toFixed(1), x2: (MX + 48 * ux).toFixed(1), y2: (MY - 48 * uy).toFixed(1), stroke: '#1F5470', 'stroke-width': 7, 'stroke-linecap': 'round'}, tsvg);
   txt(MX + 10, MY + 70, 'Spiegel', {}, tsvg);
   $('#spIn').value = S.sim.sp;
-  const h = $('[data-key=t5]'); h.value = hit ? '1' : '';
+  const h = $('[data-key=t5]'); h.value = tresorTreffer().hit ? '1' : '';
   if ((S.ans.t5 || '') !== h.value) S.ans.t5 = h.value;
 }
-$('#spIn').addEventListener('input', e => { S.sim.sp = +e.target.value; zeichneTresor(); const fb = $('.task[data-id=t5] .fmsg'); if (fb && !S.done.t5) { fb.textContent = ''; fb.className = 'fb fmsg'; } changed(); });
+$('#spIn').addEventListener('input', e => { S.sim.sp = +e.target.value; if (!S.done.t5) laserAn = false; zeichneTresor(); const fb = $('.task[data-id=t5] .fmsg'); if (fb && !S.done.t5) { fb.textContent = ''; fb.className = 'fb fmsg'; } changed(); });
 
+/* „Prüfen“ bei Aufgabe 5 schaltet den Laser ein (läuft vor der Prüfung) */
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('.task[data-id=t5] .btn');
+  if (b && b.textContent === 'Prüfen') { laserAn = true; zeichneTresor(); }
+}, true);
 function simAnwenden(){ zeichneSim(); zeichneTresor(); }
 const NUM = {
   m35: () => S.sim.seen.m35 ? [35] : null,
@@ -732,7 +740,7 @@ const NUMHINWEIS = {
   g20: 'Stelle zuerst in der Simulation „Luft → Glas“ und α = 20° ein.',
   g40: 'Stelle zuerst in der Simulation „Luft → Glas“ und α = 40° ein.',
   g60: 'Stelle zuerst in der Simulation „Luft → Glas“ und α = 60° ein.',
-  tresor: 'Der Strahl trifft das Ziel noch nicht. Dreh den Spiegel weiter.'
+  tresor: '✗ Daneben. Schau, wohin der Strahl läuft, und überleg, wie du den Spiegel drehen musst.'
 };
 
 /* BK-START */
