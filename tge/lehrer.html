@@ -73,6 +73,34 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 </style>
 </head>
 <body>
+<!-- Zugangssperre: Die Auswertung öffnet erst nach Eingabe des Lehrer-Codes (nur Hash gespeichert, kein Klartext) -->
+<div id="gate" style="position:fixed;inset:0;z-index:99999;background:#1F3A5F;display:flex;align-items:center;justify-content:center;font-family:-apple-system,Segoe UI,Arial,sans-serif">
+  <form id="gateForm" style="background:#fff;border-radius:16px;padding:28px 26px;width:min(92vw,340px);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.35)">
+    <h2 style="margin:0 0 6px;color:#1F3A5F;font-size:22px">Lehrerbereich</h2>
+    <p style="margin:0 0 16px;color:#556;font-size:15px">Bitte Code eingeben.</p>
+    <input id="gateCode" type="password" inputmode="numeric" autocomplete="off" autofocus style="width:100%;box-sizing:border-box;font-size:22px;text-align:center;letter-spacing:6px;padding:10px;border:2px solid #9AA9BA;border-radius:10px">
+    <p id="gateErr" style="min-height:20px;margin:10px 0 0;color:#B3261E;font-size:14px"></p>
+    <button type="submit" style="margin-top:6px;width:100%;font-size:17px;font-weight:700;padding:12px;border:0;border-radius:10px;background:#3C7A4E;color:#fff">Öffnen</button>
+  </form>
+</div>
+<script>
+(function(){
+  var H=8593057088301367;
+  function h(s){var h1=0xdeadbeef,h2=0x41c6ce57;for(var i=0,c;i<s.length;i++){c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0)}
+  var g=document.getElementById('gate'),ok=false;try{ok=sessionStorage.getItem('lehrer-ok')==='1'}catch(e){}
+  function open(){g.remove();document.documentElement.style.overflow=''}
+  if(ok){open();return}
+  document.documentElement.style.overflow='hidden';
+  var fails=0,wait=0;
+  document.getElementById('gateForm').addEventListener('submit',function(e){e.preventDefault();
+    if(Date.now()<wait)return;
+    var v=document.getElementById('gateCode').value.trim();
+    if(h('physik-lehrer:'+v)===H){try{sessionStorage.setItem('lehrer-ok','1')}catch(x){}open()}
+    else{fails++;document.getElementById('gateCode').value='';document.getElementById('gateErr').textContent='Falscher Code.';if(fails>=3){wait=Date.now()+Math.min(30000,fails*3000);document.getElementById('gateErr').textContent='Falscher Code. Bitte kurz warten.'}}});
+  setTimeout(function(){var i=document.getElementById('gateCode');if(i)i.focus()},50);
+})();
+</script>
+
 <div class="wrap">
   <h1>Physik App TGE · Auswertung</h1>
   <div class="muted">Namen und Rückmeldungen bleiben nur in diesem Browser auf deinem Rechner. Mach ab und zu eine Sicherung (Reiter „Sicherung“).</div>
