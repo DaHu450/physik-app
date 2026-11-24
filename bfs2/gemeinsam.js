@@ -54,5 +54,12 @@ const KA = (() => {
     return JSON.parse(dec.decode(plain));
   }
 
-  return { pruefziffer, codeGueltig, neuerCode, codeHuebsch, stempel, dateiname, kennung, verschluesseln, entschluesseln };
+  /* ---- Lehrer-Stopp: 4-stelliger Freigabe-Code pro Schülercode und Modul ---- */
+  function freigabeCode(code, modulId) {
+    let h = 2166136261;
+    for (const ch of 'frei:' + code + ':' + modulId) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    return String(h % 10000).padStart(4, '0');
+  }
+
+  return { pruefziffer, codeGueltig, neuerCode, codeHuebsch, stempel, dateiname, kennung, verschluesseln, entschluesseln, freigabeCode };
 })();
