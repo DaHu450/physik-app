@@ -55,6 +55,14 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 .stn{list-style:none;padding:0;margin:8px 0}
 .stn li{padding:6px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:26px 1fr;gap:6px}
 .stn .ok{color:var(--green);font-weight:700}
+.bars{display:grid;grid-template-columns:minmax(110px,max-content) minmax(120px,1fr) max-content;gap:8px 12px;align-items:center;margin-top:10px}
+.bars .bar{height:18px;background:var(--line);border-radius:9px;overflow:hidden}
+.bars .bar i{display:block;height:100%;background:var(--green);border-radius:9px}
+.bars .bar.schnitt i{background:var(--navy)}
+.bars .val{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;color:var(--muted);white-space:nowrap}
+.bars .nm{font-size:15px}
+.stn .sbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:5px 0 2px;max-width:320px}
+.stn .sbar i{display:block;height:100%;background:var(--green)}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--navy);margin-left:6px;vertical-align:middle}
 #viewer{position:fixed;inset:0;background:rgba(15,25,40,.6);display:flex;flex-direction:column;padding:20px;z-index:20}
 #viewer .vbar{background:var(--navy);color:#fff;padding:10px 14px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -131,6 +139,7 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
       <div class="card" style="min-width:0"><div class="mxhead"><h2>Übersicht</h2><label><input type="checkbox" id="nurAbg" checked> nur Module mit Abgaben</label></div><div id="matrix" style="overflow-x:auto"></div></div>
       <div class="card" id="detail"><h2>Details</h2><p class="muted">Klick links auf ein Feld, um den Stand eines Schülers in einem Modul zu sehen und eine Rückmeldung zu schreiben.</p></div>
     </div>
+    <div class="card"><div class="mxhead"><h2>Klasse im Vergleich</h2><label>Modul <select id="bMod"></select></label></div><div id="bars"></div></div>
   </section>
 
   <!-- KLASSEN -->
@@ -325,13 +334,41 @@ function renderMatrix() {
       const sel = auswahl && auswahl.code === c && auswahl.mid === mid ? ' sel' : '';
       if (!a) { h += `<td class="cell none${sel}" data-c="${c}" data-m="${mid}">–</td>`; return; }
       const st = a.state || {}, n = (st.stationen || []).length, k = (st.erledigt || []).length;
-      h += `<td class="cell${sel}" data-c="${c}" data-m="${mid}"><b>${k}/${n}</b> Stationen · ${st.punkte ?? 0} P<div class="pbar"><i style="width:${n ? k / n * 100 : 0}%"></i></div><span class="muted">${zeit(a.geaendert)}</span>${db.rm[c] && db.rm[c].module && db.rm[c].module[mid] ? '<span class="dot"></span>' : ''}</td>`;
+      h += `<td class="cell${sel}" data-c="${c}" data-m="${mid}">${(() => { const fs = fortschritt(st); return `<b>${Math.round(fs.anteil * 100)} %</b> · ${fs.text}<div class="pbar"><i style="width:${(fs.anteil * 100).toFixed(1)}%"></i></div>`; })()}<span class="muted">${zeit(a.geaendert)}</span>${db.rm[c] && db.rm[c].module && db.rm[c].module[mid] ? '<span class="dot"></span>' : ''}</td>`;
     });
     h += '</tr>';
   });
   $('#matrix').innerHTML = (nurAbg && !mods.length ? '<p class="muted">Für diese Klasse gibt es noch keine Abgaben. Haken bei „nur Module mit Abgaben“ entfernen, um alle Module zu sehen.</p>' : '') + h + '</table>';
+  renderBars();
   $('#matrix').querySelectorAll('td.cell').forEach((td) => td.onclick = () => { auswahl = { code: td.dataset.c, mid: td.dataset.m }; renderMatrix(); renderDetail(); });
 }
+/* Fortschritt: BE aus den Details ("x von y BE"), sonst erledigte Stationen */
+const teilWert = (t) => { const m = /(\d+(?:[.,]\d+)?)\s*(?:von|\/)\s*(\d+(?:[.,]\d+)?)/.exec(t || ''); return m ? [parseFloat(m[1].replace(',', '.')), parseFloat(m[2].replace(',', '.'))] : null; };
+function fortschritt(st) {
+  st = st || {}; const sts = st.stationen || [], erl = st.erledigt || [], det = st.details || {};
+  const tw = sts.map((s) => teilWert(det[s]));
+  if (sts.length && tw.every((w) => w && w[1] > 0)) { const x = tw.reduce((a, w) => a + w[0], 0), y = tw.reduce((a, w) => a + w[1], 0); return { anteil: x / y, text: `${x} / ${y} BE` }; }
+  return { anteil: sts.length ? erl.length / sts.length : 0, text: `${erl.length} / ${sts.length} Stationen · ${st.punkte ?? 0} P` };
+}
+function renderBars() {
+  const kl = $('#aKlasse').value, sel = $('#bMod'), box = $('#bars'); if (!kl) { box.innerHTML = ''; sel.innerHTML = ''; return; }
+  const mods = moduleDerKlasse(kl).filter(([mid]) => Object.entries(db.abgaben).some(([c, ms]) => c.slice(0, 2) === kl && ms[mid]));
+  if (!mods.length) { sel.innerHTML = ''; box.innerHTML = '<p class="muted">Noch keine Abgaben in dieser Klasse.</p>'; return; }
+  const alt = sel.value; sel.innerHTML = mods.map(([id, t]) => `<option value="${id}">${esc(t)}</option>`).join('');
+  sel.value = mods.some(([id]) => id === alt) ? alt : mods[0][0];
+  const mid = sel.value, codes = new Map(schuelerDerKlasse(kl));
+  Object.keys(db.abgaben).filter((c) => c.slice(0, 2) === kl && !codes.has(c)).forEach((c) => codes.set(c, { name: '? ' + KA.codeHuebsch(c) }));
+  let rows = '', summe = 0, n = 0;
+  codes.forEach((s, c) => {
+    const a = db.abgaben[c] && db.abgaben[c][mid];
+    if (!a) { rows += `<span class="nm">${esc(s.name)}</span><div class="bar"></div><span class="val">keine Abgabe</span>`; return; }
+    const f = fortschritt(a.state); summe += f.anteil; n++;
+    rows += `<span class="nm">${esc(s.name)}</span><div class="bar" title="${Math.round(f.anteil * 100)} %"><i style="width:${(f.anteil * 100).toFixed(1)}%"></i></div><span class="val">${Math.round(f.anteil * 100)} % · ${f.text}</span>`;
+  });
+  const sn = n ? summe / n : 0;
+  box.innerHTML = `<div class="bars"><b class="nm">Klassenschnitt</b><div class="bar schnitt"><i style="width:${(sn * 100).toFixed(1)}%"></i></div><span class="val"><b>${Math.round(sn * 100)} %</b> · ${n} Abgaben</span>${rows}</div>`;
+}
+$('#bMod').onchange = renderBars;
 function renderDetail() {
   const box = $('#detail');
   if (!auswahl) { box.innerHTML = '<h2>Details</h2><p class="muted">Klick links auf ein Feld, um den Stand eines Schülers in einem Modul zu sehen und eine Rückmeldung zu schreiben.</p>'; return; }
@@ -352,7 +389,7 @@ function renderDetail() {
   if (a) {
     const st = a.state || {};
     h += `<p class="muted">Stand vom ${zeit(a.geaendert)}, abgegeben ${zeit(a.eingereicht)} · <b>${st.punkte ?? 0} Punkte</b></p><ul class="stn">` +
-      (st.stationen || []).map((s) => `<li><span class="${(st.erledigt || []).includes(s) ? 'ok' : ''}">${(st.erledigt || []).includes(s) ? '✓' : '○'}</span><span><b>${esc(s)}</b>${st.details && st.details[s] ? '<br><span class="muted">' + esc(st.details[s]) + '</span>' : ''}</span></li>`).join('') + '</ul>' +
+      (st.stationen || []).map((s) => `<li><span class="${(st.erledigt || []).includes(s) ? 'ok' : ''}">${(st.erledigt || []).includes(s) ? '✓' : '○'}</span><span><b>${esc(s)}</b>${(() => { const w = teilWert(st.details && st.details[s]); return w && w[1] > 0 ? `<div class="sbar"><i style="width:${Math.min(100, w[0] / w[1] * 100).toFixed(1)}%"></i></div>` : ''; })()}${st.details && st.details[s] ? '<span class="muted">' + esc(st.details[s]) + '</span>' : ''}</span></li>`).join('') + '</ul>' +
       (modCfg ? `<button class="btn ghost" id="dView">Im Modul ansehen</button>` : '');
   } else h += '<p class="muted">Für dieses Modul liegt noch keine Abgabe vor.</p>';
   h += `<h3 style="margin-top:16px">Rückmeldung zu „${esc(titel)}“</h3><textarea id="dRmMod" placeholder="z. B. Simulation super, beim Rechnen nochmal die Vorsilben üben.">${esc(rm.module[mid] || '')}</textarea>
