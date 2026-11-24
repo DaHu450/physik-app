@@ -43,6 +43,10 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 .drop{border:3px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--muted);cursor:pointer}
 .drop.over{border-color:var(--green);background:var(--greenSoft)}
 .matrix td.cell{cursor:pointer;min-width:150px}
+.matrix tr>:first-child{position:sticky;left:0;z-index:1;background:var(--panel);box-shadow:2px 0 0 var(--line);min-width:150px}
+.matrix tr:first-child>:first-child{background:var(--navySoft)}
+.mxhead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.mxhead label{display:flex;align-items:center;gap:6px;font-size:15px;cursor:pointer}
 .matrix td.cell:hover{outline:2px solid var(--navy)}
 .matrix td.sel{outline:3px solid var(--green)}
 .pbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:4px 0}
@@ -124,7 +128,7 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
       <div id="aMsg"></div>
     </div>
     <div class="cols">
-      <div class="card" style="overflow-x:auto"><h2>Übersicht</h2><div id="matrix"></div></div>
+      <div class="card" style="min-width:0"><div class="mxhead"><h2>Übersicht</h2><label><input type="checkbox" id="nurAbg" checked> nur Module mit Abgaben</label></div><div id="matrix" style="overflow-x:auto"></div></div>
       <div class="card" id="detail"><h2>Details</h2><p class="muted">Klick links auf ein Feld, um den Stand eines Schülers in einem Modul zu sehen und eine Rückmeldung zu schreiben.</p></div>
     </div>
   </section>
@@ -296,6 +300,8 @@ function warnungen() {
 }
 function warnHtml() { const w = warnungen(); return w.liste.length ? `<div class="msg warn">⚠️ ${w.liste.join('<br>⚠️ ')}</div>` : ''; }
 $('#aKlasse').onchange = () => { auswahl = null; renderMatrix(); renderDetail(); };
+try { $('#nurAbg').checked = localStorage.getItem(SKEY + ':nurAbg') !== '0'; } catch (e) {}
+$('#nurAbg').onchange = () => { try { localStorage.setItem(SKEY + ':nurAbg', $('#nurAbg').checked ? '1' : '0'); } catch (e) {} renderMatrix(); };
 
 function moduleDerKlasse(kl) {
   const ids = new Map();
@@ -305,7 +311,8 @@ function moduleDerKlasse(kl) {
 }
 function renderMatrix() {
   const kl = $('#aKlasse').value; if (!kl) { $('#matrix').innerHTML = '<p class="muted">Noch keine Klasse angelegt.</p>'; return; }
-  const mods = moduleDerKlasse(kl);
+  const alleMods = moduleDerKlasse(kl), nurAbg = $('#nurAbg').checked;
+  const mods = nurAbg ? alleMods.filter(([mid]) => Object.entries(db.abgaben).some(([c, ms]) => c.slice(0, 2) === kl && ms[mid])) : alleMods;
   const codes = new Map(schuelerDerKlasse(kl));
   Object.keys(db.abgaben).filter((c) => c.slice(0, 2) === kl && !codes.has(c)).forEach((c) => codes.set(c, { name: '? ' + KA.codeHuebsch(c), klasse: kl }));
   if (!codes.size) { $('#matrix').innerHTML = '<p class="muted">Noch keine Schüler oder Abgaben für diese Klasse.</p>'; return; }
@@ -322,7 +329,7 @@ function renderMatrix() {
     });
     h += '</tr>';
   });
-  $('#matrix').innerHTML = h + '</table>';
+  $('#matrix').innerHTML = (nurAbg && !mods.length ? '<p class="muted">Für diese Klasse gibt es noch keine Abgaben. Haken bei „nur Module mit Abgaben“ entfernen, um alle Module zu sehen.</p>' : '') + h + '</table>';
   $('#matrix').querySelectorAll('td.cell').forEach((td) => td.onclick = () => { auswahl = { code: td.dataset.c, mid: td.dataset.m }; renderMatrix(); renderDetail(); });
 }
 function renderDetail() {
