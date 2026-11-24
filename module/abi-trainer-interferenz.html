@@ -90,6 +90,55 @@ table.aus td.r,table.aus th.r{text-align:right;font-family:var(--f-mono);white-s
 .simctl input[type=range]{width:150px;min-height:44px}
 .simctl .v{font-family:var(--f-mono);min-width:5.5em}
 .simctl .btn{min-width:64px}
+/* Reiter Formeln */
+nav button.ftab{font-weight:700}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin:12px 0}
+.fbox{border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.fbox h3{font-size:16px;margin:0 0 8px;color:var(--head,var(--navy))}
+.fbox.extra{border-style:dashed}
+.fbox .tag{display:inline-block;font-size:12.5px;font-weight:400;border-radius:999px;padding:1px 9px;margin-left:6px;background:var(--warnSoft);color:var(--ink);vertical-align:1px}
+.fx{font-family:"Times New Roman",Georgia,serif;font-size:23px;margin:4px 0 6px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.fx i{font-style:italic}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.15}
+.frac>span:last-child{border-top:1.5px solid currentColor;padding-top:1px}
+.fbox .bed{font-size:14.5px;color:var(--muted);margin:0}
+table.sym td:first-child{font-family:"Times New Roman",Georgia,serif;font-style:italic;font-size:19px;white-space:nowrap;width:2.2em}
+table.sym td.u{font-family:var(--f-mono);font-size:14px;color:var(--muted);width:5em}
+table.sym{hyphens:auto;-webkit-hyphens:auto}
+.merk{border-radius:10px;padding:10px 14px;margin:12px 0}
+</style>
+<style id="farben-b">
+/* Farbschema B (Nov 2026): kräftiges Blau für Überschriften, stärkere Kontraste, Merke goldgelb */
+:root{
+  --bg:#E7EDF4; --panel:#FFFFFF; --ink:#0B1626; --muted:#37465A; --line:#A7B7CA;
+  --navy:#13305A; --navySoft:#DCE7F7; --green:#22703C; --greenSoft:#DAF0E0;
+  --bad:#A8201A; --badSoft:#FADFDB;
+  --head:#0B50C4; --accent:#0B50C4; --givenLine:#B7CBEA;
+  --merk:#E0A800; --merkSoft:#FFF6CC; --merkInk:#7A5C00;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B121C; --panel:#152030; --ink:#F0F4F9; --muted:#B3C1D1; --line:#3A4C63;
+  --navy:#9CC0F0; --navySoft:#1A2A40; --green:#74CC90; --greenSoft:#173523;
+  --bad:#F59A93; --badSoft:#3E1E1C;
+  --head:#7DB0FF; --accent:#4D8EF0; --givenLine:#2E4A70;
+  --merk:#E8BE3A; --merkSoft:#3A3214; --merkInk:#F2CF5B;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B121C; --panel:#152030; --ink:#F0F4F9; --muted:#B3C1D1; --line:#3A4C63;
+  --navy:#9CC0F0; --navySoft:#1A2A40; --green:#74CC90; --greenSoft:#173523;
+  --bad:#F59A93; --badSoft:#3E1E1C;
+  --head:#7DB0FF; --accent:#4D8EF0; --givenLine:#2E4A70;
+  --merk:#E8BE3A; --merkSoft:#3A3214; --merkInk:#F2CF5B;
+}
+h1,h2,.card h2,.card h3{color:var(--head)}
+.card h2,.card h3,h2{font-weight:800}
+.card,.score,nav button{border-width:2px}
+nav button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+nav button[aria-selected="true"] .n,nav button[aria-selected="true"] .done{color:#fff}
+.given,.read{border:1.5px solid var(--givenLine)}
+input[type=range]{accent-color:var(--accent)}
+.merk{border-left:6px solid var(--merk);background:var(--merkSoft)}
+.merk b{color:var(--merkInk)}
 </style>
 </head>
 <body>
@@ -347,12 +396,13 @@ function score() {
 /* ===================== Anzeige ===================== */
 function tabs() {
   const n = $('#tabs'); n.innerHTML = '';
+  const f = el('button', 'ftab', '📐 Formeln'); f.type = 'button'; f.setAttribute('role', 'tab'); f.setAttribute('aria-selected', ST.tab === -1); f.onclick = () => show(-1); n.appendChild(f);
   TASKS.forEach((t, i) => { const b = el('button', '', `${t.tab}<span class="n"></span>`); b.type = 'button'; b.dataset.i = i; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', ST.tab === i); b.onclick = () => show(i); n.appendChild(b); });
   const b = el('button', '', 'Auswertung'); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', ST.tab === TASKS.length); b.onclick = () => show(TASKS.length); n.appendChild(b);
 }
 function show(i, quiet) {
   ST.tab = i; tabs(); const m = $('#main'); m.innerHTML = '';
-  if (i >= TASKS.length) auswertung(m); else aufgabe(m, TASKS[i]);
+  if (i === -1) formeln(m); else if (i >= TASKS.length) auswertung(m); else aufgabe(m, TASKS[i]);
   score(); if (!quiet) { window.scrollTo({ top: 0 }); changed(); }
 }
 let redraw = null;
@@ -415,6 +465,99 @@ function auswertung(m) {
   <p class="small" style="margin-top:14px">So wird gezählt: Rechenergebnisse darfst du beliebig oft prüfen. Bei Auswahlfragen zählt nur der erste Versuch. Hilfen kosten keine BE, werden aber im Status vermerkt. Nach „Lösung zeigen“ gibt es für offene Felder keine BE mehr.<br>Im echten Abi zählen außerdem Ansatz, Rechenweg und Einheiten. Schreib deine Lösungen deshalb immer vollständig auf Papier und vergleiche am Ende mit der Musterlösung.</p>`;
   m.appendChild(c);
 }
+/* ===================== Reiter Formeln (wie IQB-Formelsammlung, Stand 14.02.2024) ===================== */
+function skizzeAufbau(c) { // Draufsicht: Laser – Doppelspalt/Gitter – Schirm mit α_k, a_k, e
+  const [x, w] = fit(c, 290), ink = cv('--ink'), mu = cv('--muted'), or = cv('--orange'), red = '#E0331F';
+  const it = s => 'italic ' + s + 'px "Times New Roman",Georgia,serif', sm = '13px ' + cv('--f-body');
+  const xs = Math.max(110, Math.min(200, w * .27)), xe = w - 62, my = 130, da = 44, k = 2, ya = my - k * da;
+  // Laser
+  x.fillStyle = '#13305A'; x.fillRect(6, my - 14, 66, 28); x.fillStyle = '#fff'; x.font = sm; x.fillText('Laser', 18, my + 5);
+  x.strokeStyle = red; x.lineWidth = 2.5; x.beginPath(); x.moveTo(72, my); x.lineTo(xs, my); x.stroke();
+  // Blende mit zwei Spalten
+  x.fillStyle = ink; x.fillRect(xs - 3, 18, 6, my - 8 - 18); x.fillRect(xs - 3, my - 3, 6, 6); x.fillRect(xs - 3, my + 8, 6, 240 - my - 8);
+  // Schirm
+  x.fillRect(xe - 2, 14, 5, 232);
+  // Achse
+  x.strokeStyle = mu; x.lineWidth = 1; x.setLineDash([6, 5]); x.beginPath(); x.moveTo(xs, my); x.lineTo(xe, my); x.stroke(); x.setLineDash([]);
+  // Maxima auf dem Schirm
+  for (let j = -2; j <= 2; j++) { const y = my - j * da; x.fillStyle = red; x.globalAlpha = j ? .85 : 1; x.beginPath(); x.arc(xe, y, j ? 5 : 6.5, 0, 7); x.fill(); x.globalAlpha = 1;
+    x.fillStyle = mu; x.font = it(16); x.fillText('k = ' + Math.abs(j), xe + 12, y + 5); }
+  // Strahl zum Maximum k-ter Ordnung
+  x.strokeStyle = red; x.lineWidth = 2; x.beginPath(); x.moveTo(xs, my); x.lineTo(xe, ya); x.stroke();
+  // Winkel α_k
+  const al = Math.atan2(my - ya, xe - xs), R = 62; x.strokeStyle = ink; x.lineWidth = 1.5; x.beginPath(); x.arc(xs, my, R, -al, 0); x.stroke();
+  x.fillStyle = ink; x.font = it(19); x.fillText('α', xs + R + 6, my - 9); x.font = it(13); x.fillText('k', xs + R + 17, my - 4);
+  // a_k
+  const xa = xe - 18; x.strokeStyle = or; x.lineWidth = 2; x.beginPath(); x.moveTo(xa, my); x.lineTo(xa, ya); x.moveTo(xa - 5, my); x.lineTo(xa + 5, my); x.moveTo(xa - 5, ya); x.lineTo(xa + 5, ya); x.stroke();
+  x.fillStyle = or; x.font = it(19); x.fillText('a', xa - 26, (my + ya) / 2 + 6); x.font = it(13); x.fillText('k', xa - 16, (my + ya) / 2 + 11);
+  // e
+  const ye = 262; x.strokeStyle = mu; x.lineWidth = 1.2; x.beginPath(); x.moveTo(xs, ye); x.lineTo(xe, ye); x.moveTo(xs, ye - 6); x.lineTo(xs, ye + 6); x.moveTo(xe, ye - 6); x.lineTo(xe, ye + 6); x.stroke();
+  x.fillStyle = ink; x.font = it(19); x.fillText('e', (xs + xe) / 2 - 4, ye - 8);
+  // Beschriftung
+  x.font = sm; x.fillStyle = ink; x.textAlign = 'center'; x.fillText('Doppelspalt bzw. Gitter', xs, 284); x.fillText('Schirm', xe, 284); x.textAlign = 'start';
+}
+function skizzeSpalt(c) { // Ausschnitt am Doppelspalt: Spaltmittenabstand g und Gangunterschied
+  const [x, w] = fit(c, 280), ink = cv('--ink'), mu = cv('--muted'), or = cv('--orange'), red = '#E0331F';
+  const it = s => 'italic ' + s + 'px "Times New Roman",Georgia,serif', sm = '13px ' + cv('--f-body');
+  const x0 = Math.max(90, Math.min(170, w * .28)), cy = 165, G = 100, y1 = cy - G / 2, y2 = cy + G / 2, al = rad(28), ux = Math.cos(al), uy = -Math.sin(al), L = Math.min(w - x0 - 20, 220);
+  // Blende
+  x.fillStyle = ink; x.fillRect(x0 - 4, 10, 8, y1 - 6 - 10); x.fillRect(x0 - 4, y1 + 6, 8, y2 - 6 - y1 - 6); x.fillRect(x0 - 4, y2 + 6, 8, 272 - y2 - 6);
+  // einfallendes Licht
+  x.strokeStyle = red; x.globalAlpha = .45; x.lineWidth = 2; [y1, y2].forEach(y => { x.beginPath(); x.moveTo(x0 - 70, y); x.lineTo(x0 - 6, y); x.stroke(); }); x.globalAlpha = 1;
+  // Strahlen unter α_k
+  x.strokeStyle = red; x.lineWidth = 2.2; [y1, y2].forEach(y => { x.beginPath(); x.moveTo(x0, y); x.lineTo(x0 + ux * L, y + uy * L); x.stroke(); });
+  // Lot von S1 auf den unteren Strahl
+  const t = (0) * ux + (y1 - y2) * uy, fx = x0 + t * ux, fy = y2 + t * uy;
+  x.strokeStyle = mu; x.lineWidth = 1.2; x.setLineDash([5, 4]); x.beginPath(); x.moveTo(x0, y1); x.lineTo(fx, fy); x.stroke(); x.setLineDash([]);
+  // rechter Winkel
+  const q = 9, px = -uy, py = ux; x.beginPath(); x.moveTo(fx - ux * q, fy - uy * q); x.lineTo(fx - ux * q - px * q, fy - uy * q - py * q); x.lineTo(fx - px * q, fy - py * q); x.stroke();
+  // Δs
+  x.strokeStyle = or; x.lineWidth = 4; x.beginPath(); x.moveTo(x0, y2); x.lineTo(fx, fy); x.stroke();
+  x.fillStyle = or; x.font = it(19); x.fillText('Δs', (x0 + fx) / 2 + 10, (y2 + fy) / 2 + 22);
+  // g
+  const xg = x0 - 26; x.strokeStyle = ink; x.lineWidth = 1.3; x.beginPath(); x.moveTo(xg, y1); x.lineTo(xg, y2); x.moveTo(xg - 5, y1); x.lineTo(xg + 5, y1); x.moveTo(xg - 5, y2); x.lineTo(xg + 5, y2); x.stroke();
+  x.fillStyle = ink; x.font = it(20); x.fillText('g', xg - 18, cy + 6);
+  // Winkel α_k am unteren Strahl (gegen die Achse)
+  x.strokeStyle = mu; x.lineWidth = 1; x.setLineDash([5, 4]); x.beginPath(); x.moveTo(x0, y2); x.lineTo(x0 + 150, y2); x.stroke(); x.setLineDash([]);
+  x.strokeStyle = ink; x.lineWidth = 1.4; x.beginPath(); x.arc(x0, y2, 110, -al, 0); x.stroke();
+  x.fillStyle = ink; x.font = it(18); x.fillText('α', x0 + 116, y2 - 10); x.font = it(12); x.fillText('k', x0 + 127, y2 - 5);
+  // Winkel α_k im kleinen Dreieck (bei S1, zwischen Blende und Lot)
+  x.beginPath(); x.arc(x0, y1, 26, Math.PI / 2 - al, Math.PI / 2); x.stroke();
+  x.font = it(15); x.fillText('α', x0 + 6, y1 + 42); x.font = it(11); x.fillText('k', x0 + 15, y1 + 46);
+  x.font = sm; x.fillStyle = mu; x.textAlign = 'right'; x.fillText('→ zum Schirm (weit weg)', w - 10, 270); x.textAlign = 'start';
+}
+function formeln(m) {
+  const c = el('div', 'card');
+  c.innerHTML = `<h2>Formeln · Interferenz</h2><p class="src">So stehen sie in der IQB-Formelsammlung (Abschnitt Wellenoptik). Gestrichelte Kästen: brauchst du oft, stehen aber <b>nicht</b> in der Formelsammlung.</p>
+  <div class="mat"><div class="mh">Abb. 1: Versuchsaufbau von oben (nicht maßstäblich)</div><canvas id="skA"></canvas></div>
+  <div class="mat"><div class="mh">Abb. 2: Ausschnitt am Doppelspalt – woher die Formel kommt</div><canvas id="skB"></canvas></div>
+  <div class="fgrid">
+    <div class="fbox"><h3>Doppelspalt · Maxima</h3><div class="fx"><span>sin <i>α</i><sub><i>k</i></sub> =</span><span class="frac"><span><i>k</i> · <i>λ</i></span><span><i>g</i></span></span></div><p class="bed"><i>k</i> = 0, 1, 2, …</p></div>
+    <div class="fbox"><h3>Doppelspalt · Minima</h3><div class="fx"><span>sin <i>α</i><sub><i>k</i></sub> =</span><span class="frac"><span>(2<i>k</i> − 1) · <i>λ</i></span><span>2 · <i>g</i></span></span></div><p class="bed"><i>k</i> = 1, 2, 3, …</p></div>
+    <div class="fbox"><h3>Gitter · Hauptmaxima</h3><div class="fx"><span>sin <i>α</i><sub><i>k</i></sub> =</span><span class="frac"><span><i>k</i> · <i>λ</i></span><span><i>g</i></span></span></div><p class="bed"><i>k</i> = 0, 1, 2, … &nbsp;·&nbsp; gleiche Formel wie beim Doppelspalt, die Maxima sind nur viel schärfer</p></div>
+    <div class="fbox"><h3>Wellen allgemein</h3><div class="fx"><span><i>c</i> = <i>λ</i> · <i>f</i></span></div><p class="bed">für Licht: <i>c</i> ≈ 3,00 · 10⁸ m/s</p></div>
+    <div class="fbox extra"><h3>Winkel aus der Messung am Schirm<span class="tag">nicht in der FS</span></h3><div class="fx"><span>tan <i>α</i><sub><i>k</i></sub> =</span><span class="frac"><span><i>a</i><sub><i>k</i></sub></span><span><i>e</i></span></span></div><p class="bed">rechtwinkliges Dreieck in Abb. 1 – im Abi selbst aufstellen</p></div>
+    <div class="fbox extra"><h3>Gangunterschied<span class="tag">nicht in der FS</span></h3><div class="fx"><span>Δ<i>s</i> = <i>g</i> · sin <i>α</i><sub><i>k</i></sub></span></div><p class="bed">hell (Maximum): Δ<i>s</i> = <i>k</i> · <i>λ</i> &nbsp;·&nbsp; dunkel (Minimum): Δ<i>s</i> = (2<i>k</i> − 1) · <i>λ</i>/2</p></div>
+  </div>
+  <div class="merk"><b>Merke:</b> Rechne immer in zwei Schritten: erst <b>α<sub>k</sub> aus tan α<sub>k</sub> = a<sub>k</sub>/e</b>, dann <b>λ oder g aus sin α<sub>k</sub> = k · λ/g</b>. Die Abkürzung a<sub>k</sub> ≈ k · λ · e/g (Kleinwinkelnäherung, sin α ≈ tan α) darfst du nur bei kleinen Winkeln (wenige Grad) nehmen, also meist beim Doppelspalt mit Licht – beim Gitter fast nie. Wenn du sie benutzt, schreib dazu, dass α klein ist.</div>
+  <h3 style="margin:18px 0 6px">Formelzeichen</h3>
+  <table class="aus sym">
+    <tr><th>Zeichen</th><th>Bedeutung</th><th>Einheit</th></tr>
+    <tr><td>λ</td><td>Wellenlänge</td><td class="u">m, oft nm</td></tr>
+    <tr><td>f</td><td>Frequenz</td><td class="u">Hz</td></tr>
+    <tr><td>c</td><td>Ausbreitungsgeschwindigkeit</td><td class="u">m/s</td></tr>
+    <tr><td>g</td><td>Spaltmittenabstand (Doppelspalt) bzw. Gitterkonstante (Gitter). Bei „N Linien pro mm“ gilt g = 1 mm / N, z. B. 600 Linien/mm → g ≈ 1,67 µm</td><td class="u">m</td></tr>
+    <tr><td>k</td><td>Ordnung des Maximums bzw. Minimums (Mitte: k = 0)</td><td class="u">–</td></tr>
+    <tr><td>α<sub>k</sub></td><td>Winkel, unter dem das Maximum bzw. Minimum k-ter Ordnung erscheint (gemessen gegen die Mittelachse)</td><td class="u">°</td></tr>
+    <tr><td>e</td><td>Abstand Doppelspalt bzw. Gitter – Schirm <span class="small">(nicht in der FS, so in IQB-Aufgaben)</span></td><td class="u">m</td></tr>
+    <tr><td>a<sub>k</sub></td><td>Abstand zwischen dem Maximum 0. Ordnung und dem Maximum k-ter Ordnung auf dem Schirm <span class="small">(nicht in der FS, so in IQB-Aufgaben)</span></td><td class="u">m</td></tr>
+    <tr><td>Δs</td><td>Gangunterschied der beiden Wellen <span class="small">(nicht in der FS)</span></td><td class="u">m</td></tr>
+  </table>
+  <p class="small" style="margin-top:12px">Tipp: Ist der Abstand zwischen den beiden Maxima k-ter Ordnung (links und rechts) gegeben, ist a<sub>k</sub> die Hälfte davon.</p>`;
+  m.appendChild(c);
+  const A = c.querySelector('#skA'), B = c.querySelector('#skB');
+  redraw = () => { skizzeAufbau(A); skizzeSpalt(B); }; redraw();
+}
 let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => redraw && redraw(), 120); });
 show(0, true);
 
@@ -429,7 +572,7 @@ if (window.AppBridge) {
         details[name(t)] = `${e} von ${m} BE · ` + t.parts.map(p => p.nr + ' ' + NAMES[status(p)] + (ST.parts[p.id] && ST.parts[p.id].hints ? ` (${ST.parts[p.id].hints} Hilfen)` : '')).join(', '); });
       return { punkte, stationen: TASKS.map(name), erledigt: TASKS.filter(t => t.parts.every(closed)).map(name), details, daten: { v: 1, ST } };
     },
-    setState(s) { const d = s && s.daten; if (!d || !d.ST) return; ST = Object.assign({ parts: {}, tab: 0 }, d.ST); appLive = true; show(Math.min(ST.tab || 0, TASKS.length), true); }
+    setState(s) { const d = s && s.daten; if (!d || !d.ST) return; ST = Object.assign({ parts: {}, tab: 0 }, d.ST); appLive = true; show(ST.tab === -1 ? -1 : Math.min(ST.tab || 0, TASKS.length), true); }
   });
 }
 </script>
