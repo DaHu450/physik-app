@@ -8,6 +8,7 @@
   Lerneinheit Optik (BFS2) · Seite 3 von 5 · Modul für die Physik-App BFS2
   Ergänzungen (nicht aus Evis Materialien):
   - Einstieg „Daumen-Wette“ mit 30-Sekunden-Challenge.
+  - Gold-Aufgaben (Baum auf der Netzhaut mit Werten pro Person, Fischauge unter Wasser), Pause nach 3 Fehlversuchen, Belohnungsspiel Lichtfänger.
   - Farbige Augenbilder, Augenfarben, Kamera-Memory, Checkpoint-Fragen mit Stempel, Wortspeicher, Vorlese-Knopf.
   - Modell der Simulation: Abstand Linse–Netzhaut 2,0 cm, Brennweite 2,0 cm bis 1,8 cm, Gegenstände 10 cm, 25 cm, 5 m, sehr weit.
   - Vergleich Auge–Handykamera (Aufgabe 7) und Mias Aussage (Aufgabe 8).
@@ -194,6 +195,12 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
 .cpn{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);display:flex;align-items:center;justify-content:center;font-weight:700}
 .cpq p{flex:1;min-width:0}
 .cptipp{width:100%;font-size:.9rem;color:#8E2A20}
+.sec.gold{--r:#D4A017;--t:#FFF6D6;--d:#7A5A00}
+.task.gold{border-color:#E8C55A;background:#FFFDF4}
+.pause{background:#FFF6E6;border:1px solid #E39B1B;border-radius:10px;padding:8px 12px;margin:8px 0;font-weight:700;color:#7A4A00}
+.spiel{width:100%;background:#F2EDFA;border-radius:12px;padding:10px 12px;margin-top:10px}
+#spielSvg{display:block;width:100%;max-width:520px;height:auto;margin-top:8px;border-radius:10px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#spielSvg[hidden]{display:none}
 .stempelbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .stempel{width:170px;height:170px;transform:rotate(-12deg);animation:stempel .5s ease-out}
 @keyframes stempel{0%{transform:rotate(-12deg) scale(2.2);opacity:0}70%{transform:rotate(-12deg) scale(.92);opacity:1}100%{transform:rotate(-12deg) scale(1)}}
@@ -480,6 +487,34 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
   </div>
 </section>
 
+<!-- Gold -->
+<section class="box sec gold">
+  <span class="tag">Gold · freiwillig</span>
+  <div class="sh"><span class="circ">⭐</span><h2>Profi-Aufgaben</h2></div>
+  <p>Du willst mehr? Diese Aufgaben sind schwerer und freiwillig. Für den Checkpoint brauchst du sie nicht.</p>
+
+  <div class="task gold" data-id="g1" data-nr="G1" data-afb="2" data-op="Berechne">
+    <p>Ein Baum ist <b id="g1G">–</b> hoch und steht <b id="g1g">–</b> von dir entfernt. In deinem Auge ist die Netzhaut 2,0 cm hinter der Linse. Wie groß ist das Bild des Baums auf deiner Netzhaut?</p>
+    <div class="formel">B : G = b : g</div>
+    <div class="row"><label>B =</label><input type="number" data-key="g1" data-num="g1" data-tol="0.01" step="0.01" inputmode="decimal" aria-label="Bildgröße in cm"> cm</div>
+    <div class="hints" data-h='["Das ist der Abbildungsmaßstab von Seite 2. b ist der Abstand Linse–Netzhaut.","Rechne alles zuerst in cm um: 1 m = 100 cm.","Stelle um: B = G · b : g"]'></div>
+  </div>
+
+  <div class="task gold" data-id="g2" data-nr="G2" data-afb="3" data-op="Begründe">
+    <p>Ohne Taucherbrille siehst du unter Wasser alles unscharf. Fische dagegen sehen dort scharf. Sie haben eine kugelrunde, sehr dicke Linse. Der Grund: Unter Wasser knickt die Hornhaut das Licht kaum noch. Begründe damit.</p>
+    <p class="gap">Unter Wasser fällt die Brechung an der
+      <select data-key="g2a" data-ok="horn"><option value="">– wählen –</option><option value="netz">Netzhaut</option><option value="horn">Hornhaut</option><option value="pup">Pupille</option></select>
+      fast weg. Die Linse muss das Licht deshalb
+      <select data-key="g2b" data-ok="st"><option value="">– wählen –</option><option value="sw">schwächer</option><option value="st">stärker</option></select>
+      bündeln. Eine dickere Linse hat eine
+      <select data-key="g2c" data-ok="kl"><option value="">– wählen –</option><option value="gr">größere</option><option value="kl">kleinere</option></select>
+      Brennweite. Bei dir unter Wasser liegt das Bild
+      <select data-key="g2d" data-ok="hin"><option value="">– wählen –</option><option value="vor">vor</option><option value="hin">hinter</option></select>
+      der Netzhaut, denn deine Linse kann nicht so dick werden wie die eines Fisches.</p>
+    <div class="hints" data-h='["Wenn ein Teil das Licht nicht mehr knickt, muss ein anderes Teil mehr leisten.","Denk an die Simulation: Liegt das Bild hinter der Netzhaut, muss die Linse dicker werden."]'></div>
+  </div>
+</section>
+
 <!-- Checkpoint -->
 <section class="box sec cp" id="checkpoint">
   <span class="tag">Checkpoint</span>
@@ -510,7 +545,7 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 const fmt = (x, d) => x.toFixed(d === undefined ? 1 : d).replace('.', ',');
 
 let S = leer();
-function leer(){ return { v: VERSION, ans: {}, done: {}, hints: {}, draw: {}, sim: { obj: 'buch', d: 40, wette: '', teil: '', entd: [], hell: 50, farbe: 'gruen', mem: [], seed: 0, cp: { runde: 0, versuche: 0, letzte: null, stempel: false, antw: {} } } }; }
+function leer(){ return { v: VERSION, ans: {}, done: {}, hints: {}, draw: {}, sim: { obj: 'buch', d: 40, wette: '', teil: '', entd: [], hell: 50, farbe: 'gruen', mem: [], seed: 0, spielSek: 0, hs: 0, cp: { runde: 0, versuche: 0, letzte: null, stempel: false, antw: {} } } }; }
 
 let appLive = false;
 function changed(){
@@ -621,9 +656,10 @@ function pruefe(t, zeigen){
 
 function status(){
   let n = 0;
-  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d) n++; });
-  $('#barFill').style.width = (100 * n / TASKS.length) + '%';
-  $('#barText').textContent = n + ' von ' + TASKS.length + ' Aufgaben erledigt';
+  const PF = TASKS.filter(t => !t.classList.contains('gold'));
+  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d && PF.includes(t)) n++; });
+  $('#barFill').style.width = (100 * n / PF.length) + '%';
+  $('#barText').textContent = n + ' von ' + PF.length + ' Aufgaben erledigt' + (TASKS.some(t => t.classList.contains('gold') && S.done[t.dataset.id]) ? ' · ⭐ Gold: ' + TASKS.filter(t => t.classList.contains('gold') && S.done[t.dataset.id]).length : '');
   if (typeof nachStatus === 'function') nachStatus();
 }
 
@@ -904,7 +940,7 @@ function zeichneMemory(){
       memOffen.push(id); zeichneMemory();
       if (memOffen.length === 2) {
         const [a, c] = memOffen.map(x => x.split('-')[1]);
-        if (a === c) { S.sim.mem = S.sim.mem.concat(a); memOffen = []; memFertig(); zeichneMemory(); changed(); }
+        if (a === c) { S.sim.mem = S.sim.mem.concat(a); memOffen = []; memFertig(); if (spielLauf) spielLauf.aktiv = false; zeichneMemory(); changed(); }
         else { memSperre = true; setTimeout(() => { memOffen = []; memSperre = false; zeichneMemory(); }, 1100); }
       }
     });
@@ -949,10 +985,12 @@ const STEMPEL_SVG = '<svg viewBox="0 0 200 200" class="stempel" aria-label="Stem
   '<text x="100" y="58" text-anchor="middle" font-size="15" font-weight="800" fill="#C0392B">AUGEN-PROFI</text><text x="100" y="165" text-anchor="middle" font-size="16" font-weight="700" fill="#C0392B">Seite 3 ✓</text></svg>';
 function cpFragen(){ return mische(CP.map(q => q.id), 'cp' + S.sim.seed + '-' + S.sim.cp.runde).slice(0, 5).map(id => CP.find(q => q.id === id)); }
 function zeichneCheckpoint(){
-  const box = $('#cpBox'), cp = S.sim.cp, offen = TASKS.filter(t => !S.done[t.dataset.id]);
+  const box = $('#cpBox'), cp = S.sim.cp, offen = PFLICHT(TASKS).filter(t => !S.done[t.dataset.id]);
   $('#stempelZeile').innerHTML = cp.stempel ? '✅ Checkpoint: Stempel geholt' : 'Checkpoint: noch kein Stempel';
   $('#stempelZeile').classList.toggle('ok', !!cp.stempel);
-  if (cp.stempel) { box.innerHTML = '<div class="stempelbox">' + STEMPEL_SVG + '<div><p><b>Super, du hast den Stempel!</b></p><p>Du kennst jetzt das Auge. Die nächste Seite „Sehfehler und Brillen“ ist für dich offen.</p></div></div>'; return; }
+  if (cp.stempel) { box.innerHTML = '<div class="stempelbox">' + STEMPEL_SVG + '<div><p><b>Super, du hast den Stempel!</b></p><p>Du kennst jetzt das Auge. Die nächste Seite „Sehfehler und Brillen“ ist für dich offen.</p></div></div>' + spielBox();
+    const sb = $('#spielStart'); if (sb) sb.addEventListener('click', spielStarten);
+    return; }
   if (offen.length) { box.innerHTML = '<p class="cplock">🔒 Der Checkpoint öffnet sich, wenn du alle Aufgaben erledigt hast. Noch offen: ' + offen.map(t => 'Aufgabe ' + t.dataset.nr).join(', ') + '.</p>'; return; }
   const fr = cpFragen();
   box.innerHTML = '<p>Beantworte 5 Fragen. Ab 4 richtigen bekommst du den Stempel. Jeder bekommt andere Fragen.' + (cp.versuche ? ' Das ist dein ' + (cp.versuche + 1) + '. Versuch.' : '') + '</p>' +
@@ -988,8 +1026,75 @@ function nachStatus(){
 }
 function extraAnwenden(){
   if (!S.sim.seed) S.sim.seed = 1 + Math.floor(Math.random() * 1e6);
-  memOffen = []; memFertig();
-  zeichneWette(); zeichneEntdecke(); zeichneVorne(); zeichneMemory(); nachStatus();
+  memOffen = []; memFertig(); if (spielLauf) spielLauf.aktiv = false;
+  zeichneGold(); zeichneWette(); zeichneEntdecke(); zeichneVorne(); zeichneMemory(); nachStatus();
+}
+
+/* ---------- Gold-Aufgaben: Werte pro Person ---------- */
+const PFLICHT = TASKS_ALLE => TASKS_ALLE.filter(t => !t.classList.contains('gold'));
+function goldWerte(){ const s = S.sim.seed || 1; return { G: 2 + (s % 9) * 0.5, g: 10 + (Math.floor(s / 9) % 11) * 2 }; }
+NUM.g1 = () => { const w = goldWerte(); return [2 * w.G / w.g]; };
+function zeichneGold(){ const w = goldWerte(), k = x => String(x).replace('.', ',');
+  $('#g1G').textContent = k(w.G) + ' m'; $('#g1g').textContent = k(w.g) + ' m'; }
+
+/* ---------- Kurze Pause nach 3 falschen Versuchen ---------- */
+const fehl = {};
+document.addEventListener('click', e => {
+  const btn = e.target.closest && e.target.closest('.task .btn');
+  if (!btn || btn.classList.contains('finish')) return;
+  const t = btn.closest('.task'), id = t.dataset.id;
+  setTimeout(() => {
+    const fb = $('.fmsg', t); if (!fb) return;
+    if (fb.classList.contains('ok')) { fehl[id] = 0; return; }
+    if (!fb.classList.contains('no') || !/^✗/.test(fb.textContent)) return;
+    fehl[id] = (fehl[id] || 0) + 1;
+    if (fehl[id] < 3) return;
+    fehl[id] = 0; let n = 20; btn.disabled = true;
+    const p = document.createElement('div'); p.className = 'pause'; fb.after(p);
+    const tick = () => { p.textContent = '⏸️ Dreimal daneben. Mach eine kurze Pause und öffne eine Hilfe. Prüfen geht wieder in ' + n + ' Sekunden.'; };
+    tick(); const iv = setInterval(() => { n--; tick(); if (n <= 0) { clearInterval(iv); btn.disabled = false; p.remove(); } }, 1000);
+    const h = $('.hints', t); if (h) h.scrollIntoView({ block: 'nearest' });
+  }, 0);
+});
+
+/* ---------- Belohnungsspiel „Lichtfänger“ (nach dem Stempel, max. 3 Minuten) ---------- */
+let spieleAn = true;
+try { fetch('module.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.spiele === false) { spieleAn = false; zeichneCheckpoint(); } }).catch(() => {}); } catch (e) {}
+const SPIEL_MAX = 180;
+let spielLauf = null;
+function spielBox(){
+  if (!spieleAn) return '';
+  const rest = Math.max(0, SPIEL_MAX - S.sim.spielSek);
+  return '<div class="spiel"><b>🎮 Belohnung: Lichtfänger</b><p class="small" style="margin:4px 0">Fang die Lichtpunkte mit der Schale. Schieb dafür mit dem Finger oder der Maus nach links und rechts. Eine Runde dauert 30 Sekunden.' +
+    (S.sim.hs ? ' Dein Rekord: ' + S.sim.hs + ' Punkte.' : '') + '</p>' +
+    (rest > 0 ? '<div class="row"><button type="button" class="btn" id="spielStart">Runde starten</button><span class="small">Noch ' + Math.floor(rest / 60) + ':' + String(rest % 60).padStart(2, '0') + ' Min. Spielzeit</span></div><svg id="spielSvg" viewBox="0 0 360 240" hidden></svg>'
+      : '<p class="small">Deine Spielzeit für diese Seite ist aufgebraucht. Weiter geht es mit der nächsten Seite!</p>') + '</div>';
+}
+function spielStarten(){
+  const sv = $('#spielSvg'); sv.removeAttribute('hidden'); $('#spielStart').disabled = true;
+  let x = 180, pkt = 0, t0 = performance.now(), last = t0, punkte = [], naechster = 0;
+  const lauf = { aktiv: true }; spielLauf = lauf;
+  const setzeX = ev => { const r = sv.getBoundingClientRect(); x = Math.max(30, Math.min(330, (ev.clientX - r.left) / r.width * 360)); };
+  sv.onpointermove = setzeX; sv.onpointerdown = setzeX;
+  const frame = now => {
+    if (!lauf.aktiv) return;
+    const dt = Math.min(0.05, (now - last) / 1000), zeit = (now - t0) / 1000; last = now;
+    if (now > naechster) { punkte.push({ x: 20 + Math.random() * 320, y: -10, v: 70 + zeit * 4 + Math.random() * 40, f: ['#FFC83D', '#7FD1FF', '#F48FB1'][Math.floor(Math.random() * 3)] }); naechster = now + 650 - Math.min(350, zeit * 10); }
+    punkte.forEach(q => { q.y += q.v * dt; if (!q.weg && q.y > 205 && q.y < 222 && Math.abs(q.x - x) < 34) { q.weg = true; pkt++; } });
+    punkte = punkte.filter(q => !q.weg && q.y < 250);
+    const rest = Math.max(0, 30 - zeit);
+    sv.innerHTML = '<rect width="360" height="240" fill="#14213D"/>' + punkte.map(q => '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="7" fill="' + q.f + '"/>').join('') +
+      '<path d="M' + (x - 34) + ' 210 Q' + x + ' 240 ' + (x + 34) + ' 210 Z" fill="#E39B1B"/>' +
+      '<text x="10" y="22" fill="#fff" font-size="16" font-weight="700">' + pkt + (pkt === 1 ? ' Punkt' : ' Punkte') + '</text><text x="350" y="22" fill="#fff" font-size="16" text-anchor="end">' + Math.ceil(rest) + ' s</text>';
+    if (rest <= 0) { lauf.aktiv = false; spielEnde(pkt, 30); return; }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+function spielEnde(pkt, sek){
+  S.sim.spielSek += sek; if (pkt > (S.sim.hs || 0)) S.sim.hs = pkt; changed();
+  zeichneCheckpoint();
+  const s = $('.spiel'); if (s) { const d = document.createElement('p'); d.className = 'small'; d.innerHTML = '<b>' + pkt + ' Punkte!</b>' + (pkt === S.sim.hs ? ' Neuer Rekord!' : ''); s.insertBefore(d, s.children[1]); }
 }
 
 /* ---------- Schreibfelder ---------- */
