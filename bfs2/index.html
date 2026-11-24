@@ -165,7 +165,7 @@ dialog::backdrop{background:rgba(15,25,40,.45)}
     <div class="actions">
       <button class="btn" id="btnSave">💾 Speichern</button>
       <button class="btn green" id="btnHand">📤 Abgeben</button>
-      <button class="btn ghost" id="btnMore" hidden>⋯ Mehr</button>
+      <button class="btn ghost" id="btnMore">⋯ Mehr</button>
     </div>
   </div>
   <div class="status" id="status"></div>
@@ -506,8 +506,6 @@ async function dateiRaus(obj, name) {
 }
 
 /* ---------- Mehr: Laden, Sicherung, Abmelden ---------- */
-/* Mehr-Knopf nur in der Vorschau (Lehrerin testet), für Schüler ausgeblendet */
-$('#btnMore').hidden = !vorschau;
 $('#btnMore').onclick = () => { $('#mLogout').hidden = !vorschau; $('#dlgMore').showModal(); };
 $('#mBackup').onclick = async () => {
   const paket = { typ: 'bfs2app-sicherung', version: VERSION, code, erstellt: new Date().toISOString(), daten };
