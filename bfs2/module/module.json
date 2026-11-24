@@ -25,7 +25,7 @@
         "61"
       ],
       "freigegeben": true,
-      "farbe": "#3A7CA5",
+      "farbe": "#0B7F8C",
       "icon": "linse",
       "stopp": true,
       "stoppNach": "optik-s01"
@@ -39,7 +39,7 @@
         "61"
       ],
       "freigegeben": true,
-      "farbe": "#3A7CA5",
+      "farbe": "#2E8B4E",
       "icon": "auge",
       "stopp": true,
       "stoppNach": "optik-s02"
@@ -53,7 +53,7 @@
         "61"
       ],
       "freigegeben": true,
-      "farbe": "#3A7CA5",
+      "farbe": "#D2690A",
       "icon": "auge",
       "stopp": true,
       "stoppNach": "optik-s03"
@@ -67,7 +67,7 @@
         "61"
       ],
       "freigegeben": true,
-      "farbe": "#3A7CA5",
+      "farbe": "#6A3DC4",
       "icon": "linse",
       "stopp": true,
       "stoppNach": "optik-s04"
