@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optik · Station 3 · Das Auge</title>
+<!--
+  Lerneinheit Optik (BFS2) · Station 3 von 5 · Modul für die Physik-App BFS2
+  Ergänzungen (nicht aus Evis Materialien):
+  - Baukasten aller Stationen: Wette im Einstieg, Wortspeicher mit Bildern, Vorlese-Knopf, Satzanfänge, Gold-Aufgaben (freiwillig, Werte pro Person), Pause nach 3 Fehlversuchen, Checkpoint mit zufälligen Fragen und Stempel, Belohnungsspiel (höchstens 3 Minuten).
+  - Einstieg „Daumen-Wette“ mit 30-Sekunden-Challenge.
+  - Gold-Aufgaben (Baum auf der Netzhaut mit Werten pro Person, Fischauge unter Wasser), Pause nach 3 Fehlversuchen, Belohnungsspiel Lichtfänger.
+  - Farbige Augenbilder, Augenfarben, Kamera-Memory, Checkpoint-Fragen mit Stempel, Wortspeicher, Vorlese-Knopf.
+  - Modell der Simulation: Abstand Linse–Netzhaut 2,0 cm, Brennweite 2,0 cm bis 1,8 cm, Gegenstände 10 cm, 25 cm, 5 m, sehr weit.
+  - Vergleich Auge–Handykamera (Aufgabe 7) und Mias Aussage (Aufgabe 8).
+  - Begriff Akkommodation, Glaskörper.
+  Aus Evis Materialien: Aufbau des Auges (Linse, Ziliarmuskel, Pupille), Sehvorgang, blinder Fleck/Sehnerv.
+-->
+<style>
+:root{
+  --ink:#1D2433;--head:#1A1A1A;--muted:#4F5B6D;--line:#D6DBE3;--main:#3A7CA5;
+  --e-r:#EE9B52;--e-t:#FDEBD9;--e-d:#8A4B14;
+  --b-r:#6FA8CC;--b-t:#DDEBF4;--b-d:#1F5470;
+  --a-r:#A898CF;--a-t:#ECE7F6;--a-d:#4F4176;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#F3F5F8;color:var(--ink);font:17px/1.6 "Segoe UI",-apple-system,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:1.8rem;font-weight:700;color:var(--head);margin:4px 0 10px;line-height:1.25}
+h2{font-size:1.35rem;font-weight:700;color:var(--head);margin:0;line-height:1.3}
+h3{font-size:1.1rem;font-weight:700;color:var(--head);margin:14px 0 6px}
+p{margin:0 0 10px}
+.small{font-size:.85rem;color:var(--muted)}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 18px}
+/* Kopf */
+.kz{font-size:.85rem;color:var(--muted)}
+.kacheln{display:flex;align-items:stretch;gap:4px;margin:8px 0 12px}
+.kachel{flex:1 1 0;min-width:0;border:2px solid #D6DBE3;border-radius:12px;background:#fff;padding:8px 6px;text-align:center;font-size:.82rem;line-height:1.25;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink)}
+.kachel .ki{font-size:1.6rem;line-height:1}
+.kachel .kn{font-size:.72rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.kachel.cur{border-color:var(--main);background:var(--main);color:#fff;font-weight:700;box-shadow:0 3px 10px rgba(58,124,165,.35)}
+.kachel.cur .kn{color:#fff}
+.kpfeil{align-self:center;font-weight:800;color:var(--main);font-size:1.2rem;flex:none}
+/*BK-CSS*/
+.stempelzeile{display:inline-block;margin-top:6px;font-size:.85rem;font-weight:700;color:var(--muted);background:#F1F4F8;border-radius:20px;padding:3px 12px}
+.stempelzeile.ok{color:#1E6B3A;background:#E5F4EA}
+.vl{float:right;margin:0 0 4px 8px;min-width:44px;min-height:44px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:1.2rem;cursor:pointer}
+.wette{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.wbtn{flex:1 1 200px;min-height:56px;font-size:1.05rem;font-weight:700;border-radius:14px;border:2px solid #E39B1B;background:#FFF6E6;color:#7A4A00;cursor:pointer}
+.wbtn.on{background:#E39B1B;color:#fff}
+.challenge{background:#FFF6E6;border:2px dashed #E39B1B;border-radius:12px;padding:10px 14px;margin:10px 0}
+.uhr{font-size:1.8rem;font-weight:800;color:#C0392B;min-width:80px}
+.uhr.aus{color:#1E6B3A}
+.wort{background:#F7F4FC;border:1px solid #D9CFEE;border-radius:12px;padding:8px 12px;margin:10px 0}
+.wort summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.wliste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.witem{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:.92rem}
+.witem svg{width:84px;height:auto;flex:none}
+.witem .vl{margin-left:auto;float:none}
+.wicon{font-size:2rem;width:84px;text-align:center;flex:none}
+.satz{background:#F7F4FC;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.95rem}
+.aufloesung{background:#FFF6E6;border-left:4px solid #E39B1B;border-radius:10px;padding:10px 14px;margin:10px 0}
+.sec.cp{--r:#C0392B;--t:#FBECEA;--d:#8E2A20}
+.cplock{background:#F1F4F8;border-radius:10px;padding:10px 14px}
+.cpq{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;background:#fff;flex-wrap:wrap}
+.cpn{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);display:flex;align-items:center;justify-content:center;font-weight:700}
+.cpq p{flex:1;min-width:0}
+.cptipp{width:100%;font-size:.9rem;color:#8E2A20}
+.stempelbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.stempel{width:170px;height:170px;transform:rotate(-12deg);animation:stempel .5s ease-out}
+@keyframes stempel{0%{transform:rotate(-12deg) scale(2.2);opacity:0}70%{transform:rotate(-12deg) scale(.92);opacity:1}100%{transform:rotate(-12deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.stempel{animation:none}}
+.sec.gold{--r:#D4A017;--t:#FFF6D6;--d:#7A5A00}
+.task.gold{border-color:#E8C55A;background:#FFFDF4}
+.pause{background:#FFF6E6;border:1px solid #E39B1B;border-radius:10px;padding:8px 12px;margin:8px 0;font-weight:700;color:#7A4A00}
+.spiel{width:100%;background:#F2EDFA;border-radius:12px;padding:10px 12px;margin-top:10px}
+#spielSvg{display:block;width:100%;max-width:520px;height:auto;margin-top:8px;border-radius:10px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#spielSvg[hidden]{display:none}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.wahl button{flex:1 1 150px;min-height:48px;border-radius:12px;border:2px solid var(--main);background:#fff;color:var(--main);font-weight:700;font-size:1rem;cursor:pointer}
+.wahl button.on{background:var(--main);color:#fff}
+.wahl button.richtig{background:#2E8B57;border-color:#2E8B57;color:#fff}
+.wahl button.falsch{background:#FBECEA;border-color:#C0392B;color:#8E2A20}
+@media (max-width:760px){.wliste{grid-template-columns:1fr}}
+/*BK-CSS-ENDE*/
+@media (max-width:760px){.kacheln{flex-direction:column;gap:2px}.kachel{flex-direction:row;text-align:left;padding:6px 10px;gap:10px}.kachel .ki{font-size:1.3rem}.kpfeil{transform:rotate(90deg);line-height:1}}
+.pages{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;padding:0;list-style:none}
+.pages li{border:1px solid #B8BEC7;border-radius:999px;padding:3px 12px;font-size:.85rem;background:#fff;color:var(--ink)}
+.pages li.cur{background:var(--main);border-color:var(--main);color:#fff;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.85rem;color:var(--muted);margin:4px 0 12px}
+.legend .tag{margin:0}
+.bar{height:10px;background:#E3E8EF;border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--main);transition:width .3s}
+/* Abschnitte */
+.sec{border-left:6px solid var(--r)}
+.sec.E{--r:var(--e-r);--t:var(--e-t);--d:var(--e-d)}
+.sec.B{--r:var(--b-r);--t:var(--b-t);--d:var(--b-d)}
+.sec.A{--r:var(--a-r);--t:var(--a-t);--d:var(--a-d)}
+.tag{display:inline-block;text-transform:uppercase;font-size:.72rem;font-weight:700;letter-spacing:.06em;background:var(--t);color:var(--d);border:1px solid var(--r);border-radius:4px;padding:1px 7px;margin:0 0 8px}
+.legend .tag.E{--r:var(--e-r);--t:var(--e-t);--d:var(--e-d)}
+.legend .tag.B{--r:var(--b-r);--t:var(--b-t);--d:var(--b-d)}
+.legend .tag.A{--r:var(--a-r);--t:var(--a-t);--d:var(--a-d)}
+.sh{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.circ{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);color:var(--d);font-weight:700;display:flex;align-items:center;justify-content:center}
+.merk{background:var(--t);color:var(--d);font-weight:700;border-left:4px solid var(--r);border-radius:10px;padding:12px 14px;margin:12px 0}
+.info{background:#F4F8FB;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
+.hint-line{background:#F1F4F8;border-radius:8px;padding:6px 10px;font-size:.95rem;margin:8px 0}
+.leit{font-weight:700}
+/* Aufgaben */
+.task{background:#FCFDFF;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+.task.done{border-color:#9FD0AE;background:#F6FBF7}
+.th{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 8px}
+.afb{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;background:#F1F3F5;border:1px solid #5F6670;color:#2F343B;border-radius:6px;padding:1px 7px}
+.afb i{width:8px;height:8px;border-radius:50%;border:1px solid #5F6670;display:inline-block}
+.afb i.f{background:#5F6670}
+.tt{font-weight:700}
+.st{margin-left:auto;font-size:.85rem;color:#6B7684}
+.task.done .st{color:#166534;font-weight:700}
+/* Eingaben */
+select,input[type=text],input[type=number]{font:inherit;color:var(--ink);background:#fff;border:1px solid #9AA6B5;border-radius:8px;padding:6px 8px;min-height:44px;max-width:100%}
+input[type=number]{width:120px}
+select.bad,input.bad{border-color:#A61B1B;background:#FDECEC}
+select.good,input.good{border-color:#3C8C57;background:#E8F5EC}
+.gap{line-height:2.6}
+.gap select{margin:2px 0}
+button{font:inherit;min-height:44px;border-radius:8px;cursor:pointer}
+.btn{background:var(--main);color:#fff;font-weight:700;border:1px solid var(--main);padding:8px 14px}
+.btn:disabled{background:#9AA6B5;border-color:#9AA6B5;cursor:default}
+.btn2{background:#fff;color:var(--main);border:1px solid var(--main);padding:8px 14px}
+.btn2.on{background:var(--main);color:#fff}
+.btnr{background:#fff;color:#A61B1B;border:1px solid #A61B1B;padding:8px 14px}
+.btnh{background:#FDE7A6;border:1px solid #EFC45A;color:#5E4300;padding:8px 14px}
+:focus-visible{outline:3px solid #1F5470;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 0}
+.fb{font-weight:700;border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.fb.ok{background:#E8F5EC;color:#166534}
+.fb.no{background:#FDECEC;color:#A61B1B}
+.fb:empty{display:none}
+.help{background:#FFF6D8;border:1px solid #EFC45A;border-left:4px solid #EFC45A;color:#5E4300;border-radius:8px;padding:8px 12px;margin:8px 0 0}
+.help b{font-weight:700}
+.check{background:#FFF6D8;border:1px solid #EFC45A;border-left:4px solid #EFC45A;color:#5E4300;border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.check ul{margin:4px 0 0;padding-left:20px}
+table.t{border-collapse:collapse;width:100%;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:middle}
+table.t th{background:#EAF3F8}
+table.t select,table.t input{width:100%;min-width:0}
+table.t{table-layout:fixed}
+table.t th,table.t td{overflow-wrap:anywhere}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fig{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0}
+.fig svg{display:block;width:100%;height:auto}
+.bodies{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.bodies .b{text-align:center}
+.bodies .b svg{width:100%;max-width:90px;height:auto;display:block;margin:0 auto 4px}
+.bodies select{width:100%}
+.lbl{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:8px 0}
+.lbl b{width:30px;height:30px;border-radius:50%;background:#EEF3F8;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.lbl input{width:100%}
+/* Simulation */
+.sim{background:#F6F8FB;border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px}
+.sim .pic{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px}
+.sim .pic svg{display:block;width:100%;height:auto}
+.ctrl label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto}
+.ctrl input[type=range]{width:100%;min-height:44px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tile{background:#EEF3F8;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.tile span{display:block;font-size:.75rem;color:var(--muted)}
+.tile b{font-family:Consolas,"Courier New",monospace;font-size:1.05rem;color:#2E6B8A}
+.simnote{font-size:.8rem;color:var(--muted);margin-top:6px}
+.chk{display:flex;gap:8px;align-items:center;min-height:44px;font-size:.95rem;color:var(--ink)}
+.chk input{width:22px;height:22px}
+/* Schreibfeld */
+details.drawbox{border:1px solid var(--line);border-radius:10px;background:#fff;margin:10px 0 0}
+details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-height:44px;display:flex;align-items:center}
+.dtools{display:flex;flex-wrap:wrap;gap:8px;padding:0 12px 8px}
+.dsvg{display:block;width:100%;height:380px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dsvg.finger{touch-action:none}
+.dhint{font-size:.85rem;color:var(--muted);padding:6px 12px}
+/* Fuß */
+.confirm{display:none;margin-top:10px;background:#FDECEC;border-radius:8px;padding:10px 12px;color:#A61B1B}
+.confirm.on{display:block}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lblsel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:8px 0}
+.lblsel label{display:flex;align-items:center;gap:8px}
+.lblsel b{width:30px;height:30px;flex:none;border-radius:50%;background:#EEF3F8;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.lblsel select{flex:1;min-width:0}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.chain .node{background:#EEF3F8;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:700}
+.chain .arr{font-weight:700;color:var(--muted)}
+.seh{margin-top:10px;font-size:.85rem;color:var(--muted)}
+.sehbox{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;overflow:hidden;margin-top:4px}
+#sehText{font-size:2rem;font-weight:700;color:#1D2433;transition:filter .1s}
+#segObj button,#segFarbe button{font-size:.9rem}
+.stempelzeile{display:inline-block;margin-top:6px;font-size:.85rem;font-weight:700;color:var(--muted);background:#F1F4F8;border-radius:20px;padding:3px 12px}
+.stempelzeile.ok{color:#1E6B3A;background:#E5F4EA}
+.vl{float:right;margin:0 0 4px 8px;min-width:44px;min-height:44px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:1.2rem;cursor:pointer}
+.wette{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.wbtn{flex:1 1 200px;min-height:56px;font-size:1.1rem;font-weight:700;border-radius:14px;border:2px solid #E39B1B;background:#FFF6E6;color:#7A4A00;cursor:pointer}
+.wbtn.on{background:#E39B1B;color:#fff}
+.challenge{background:#FFF6E6;border:2px dashed #E39B1B;border-radius:12px;padding:10px 14px;margin:10px 0}
+.uhr{font-size:1.8rem;font-weight:800;color:#C0392B;min-width:80px}
+.uhr.aus{color:#1E6B3A}
+.wort{background:#F7F4FC;border:1px solid #D9CFEE;border-radius:12px;padding:8px 12px;margin:10px 0}
+.wort summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.wliste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.witem{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:.92rem}
+.witem svg.mini,.teilkarte svg.mini{width:84px;height:auto;flex:none}
+.witem .vl{margin-left:auto;float:none}
+.wicon{font-size:2rem;width:84px;text-align:center;flex:none}
+.augefig svg [data-t]{cursor:pointer}
+.augefig svg .teil.on{filter:drop-shadow(0 0 6px rgba(107,79,160,.9))}
+.teilkarte{display:flex;gap:12px;align-items:center;border:3px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;min-height:84px}
+.teilkarte .vl{margin-left:auto;float:none}
+.vorne{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:center}
+.lesetext summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;color:var(--main)}
+.zf-slots{margin:8px 0}
+.zf-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.zf-slot{display:flex;align-items:center;gap:8px;min-height:48px;border:2px dashed #AEB8C6;border-radius:10px;padding:4px 10px;background:#FAFBFD;cursor:pointer;font-weight:700}
+.zf-slot b{width:30px;height:30px;flex:none;border-radius:50%;background:#fff;border:2px solid #1D2433;display:flex;align-items:center;justify-content:center}
+.zf-slot span:empty::after{content:"";}
+.zf-slot.voll{border-style:solid;background:#fff}
+.zf-slot.aktiv{border-color:#6B4FA0;background:#F2EDFA;box-shadow:0 0 0 3px rgba(107,79,160,.25)}
+.zf-slot.good{border-color:var(--ok,#2E8B57)!important;background:#EAF6EE}
+.zf-slot.bad{border-color:#C0392B!important;background:#FBECEA}
+.chain .zf-slot{min-width:110px;justify-content:center}
+.zf-pool{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-radius:12px;background:#F1F4F8;min-height:64px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px;border-radius:22px;border:2px solid #C9D0D8;background:#fff;font-weight:700;font-size:1rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.chip i{width:14px;height:14px;border-radius:50%;display:inline-block}
+.chip.on{border-color:#6B4FA0;background:#F2EDFA}
+.chip.geist{position:fixed;z-index:999;pointer-events:none;transform:translate(-50%,-50%) scale(1.08);box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.memory{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0}
+.mkarte{min-height:96px;border-radius:12px;border:2px solid #6B4FA0;background:linear-gradient(135deg,#8E72C8,#6B4FA0);color:#fff;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;font-size:.85rem}
+.mkarte.offen{background:#fff;color:var(--ink);border-color:#C9D0D8}
+.mkarte.gefunden{background:#EAF6EE;border-color:#2E8B57}
+.mkarte svg.mini{width:70px;height:auto}
+.mkarte .mi{font-size:1.8rem}
+.mrueck{font-size:2rem}
+.aufloesung{background:#FFF6E6;border-left:4px solid #E39B1B;border-radius:10px;padding:10px 14px;margin:10px 0}
+.satz{background:#F7F4FC;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.95rem}
+.sec.cp{--r:#C0392B;--t:#FBECEA;--d:#8E2A20}
+.cplock{background:#F1F4F8;border-radius:10px;padding:10px 14px}
+.cpq{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;background:#fff;flex-wrap:wrap}
+.cpn{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);display:flex;align-items:center;justify-content:center;font-weight:700}
+.cpq p{flex:1;min-width:0}
+.cptipp{width:100%;font-size:.9rem;color:#8E2A20}
+.sec.gold{--r:#D4A017;--t:#FFF6D6;--d:#7A5A00}
+.task.gold{border-color:#E8C55A;background:#FFFDF4}
+.pause{background:#FFF6E6;border:1px solid #E39B1B;border-radius:10px;padding:8px 12px;margin:8px 0;font-weight:700;color:#7A4A00}
+.spiel{width:100%;background:#F2EDFA;border-radius:12px;padding:10px 12px;margin-top:10px}
+#spielSvg{display:block;width:100%;max-width:520px;height:auto;margin-top:8px;border-radius:10px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#spielSvg[hidden]{display:none}
+.stempelbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.stempel{width:170px;height:170px;transform:rotate(-12deg);animation:stempel .5s ease-out}
+@keyframes stempel{0%{transform:rotate(-12deg) scale(2.2);opacity:0}70%{transform:rotate(-12deg) scale(.92);opacity:1}100%{transform:rotate(-12deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.stempel{animation:none}}
+.grid3 .info{margin:0}
+.formel{background:#F4F8FB;border:1px solid var(--line);border-left:5px solid #6FA8CC;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:1.2rem;font-weight:700;color:var(--ink)}
+#mtab td,#mtab th{font-size:.9rem}
+@media (max-width:760px){
+  .grid3{grid-template-columns:1fr}
+  .lblsel{grid-template-columns:1fr}
+  .wliste,.vorne{grid-template-columns:1fr}
+  .memory{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chain .zf-slot{min-width:90px}
+  body{font-size:16px}
+  .sim{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .bodies{grid-template-columns:repeat(3,1fr)}
+  .dsvg{height:320px}
+  .wrap{padding:12px 8px 30px}
+  .box{padding:14px 14px}
+  table.t th,table.t td{padding:4px;font-size:.9rem}
+  table.t select{font-size:.85rem;padding:4px}
+}
+@media (max-width:420px){.bodies{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Kopf -->
+<div class="box">
+  <div class="kz">Lerneinheit · Optik · Station 3 von 5</div>
+  <h1>Das Auge: Aufbau und Sehvorgang</h1>
+  <nav class="kacheln" aria-label="Stationen der Lerneinheit"><div class="kachel"><span class="ki" aria-hidden="true">🔍</span><span class="kn">Station 1</span><span>Linsen bündeln Licht</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">🖼️</span><span class="kn">Station 2</span><span>Linsenbilder</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel cur" aria-current="page"><span class="ki" aria-hidden="true">👁️</span><span class="kn">Station 3</span><span>Das Auge</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👓</span><span class="kn">Station 4</span><span>Sehfehler und Brillen</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">🪞</span><span class="kn">Station 5</span><span>Wiederholung: Spiegel und Brechung</span></div></nav>
+  <div class="legend">
+    <span class="tag E">Einstieg</span><span class="tag B">Erarbeitung</span><span class="tag A">Anwendung</span>
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="small" id="barText">0 von 8 Aufgaben erledigt</div>
+  <p class="small" style="margin:6px 0 0">Deine Auswahl, deine Ergebnisse und dein Fortschritt werden automatisch in der App gespeichert. Mit 🔊 lässt du dir Texte vorlesen.</p>
+</div>
+
+<!-- A Einstieg -->
+<section class="box sec E">
+  <span class="tag">Einstieg</span>
+  <div class="sh"><span class="circ">A</span><h2>Die Daumen-Wette</h2></div>
+  <div class="vorlesbar">
+    <p><b>Schließ eine Wette ab, bevor du es ausprobierst:</b> Du hältst deinen Daumen 20 cm vor dein Gesicht. Hinter dem Daumen ist die Tafel.</p>
+  </div>
+  <div id="bkWette"></div>
+  <div class="nachWette" hidden>
+    <div class="challenge">
+      <b>⏱️ 30-Sekunden-Challenge</b>
+      <ol>
+        <li>Schau genau auf deinen Daumennagel.</li>
+        <li>Schau jetzt an deinem Daumen vorbei auf die Tafel.</li>
+        <li>Wechsle so schnell wie möglich hin und her. Wie oft schaffst du es in 30 Sekunden?</li>
+      </ol>
+      <div class="row"><button type="button" class="btn2" id="uhrBtn" data-s="30">Uhr starten</button><span class="uhr" id="uhr">30</span></div>
+    </div>
+    <p>Du siehst immer nur eins scharf: den Daumen <i>oder</i> die Tafel. Trotzdem stellt dein Auge in weniger als einer Sekunde um.</p>
+    <p>Auf Station 2 hast du gesehen: Bei einer Linse hängt die Bildweite davon ab, wie weit der Gegenstand weg ist. Im Auge ist der Abstand von der Linse bis hinten aber immer gleich.</p>
+    <p class="leit">Wie schafft es das Auge, nahe und ferne Dinge scharf zu sehen?</p>
+    <p>Am Ende dieser Station kannst du</p>
+    <ul>
+      <li>die wichtigsten Teile des Auges benennen und ihre Aufgabe angeben,</li>
+      <li>den Weg des Lichts durch das Auge beschreiben,</li>
+      <li>erklären, wie das Auge auf nahe und ferne Dinge scharf stellt.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- B Erarbeitung -->
+<section class="box sec B">
+  <span class="tag">Erarbeitung</span>
+  <div class="sh"><span class="circ">B</span><h2>So ist das Auge gebaut</h2></div>
+
+
+  <h3>Entdecke das Auge</h3>
+  <div class="hint-line">Tippe auf ein Teil im Bild. Dann siehst du, wie es heißt und was es macht.</div>
+  <div class="entdecke">
+    <div class="fig augefig"><svg id="augeEntdecke" viewBox="0 0 600 340" role="img" aria-label="Das Auge im Schnitt, farbig. Tippe auf die Teile."></svg></div>
+    <div class="teilkarte" id="teilKarte"><p class="small" style="margin:0">Noch nichts angetippt. Fang vorne an, links im Bild, wo das Licht hereinkommt.</p></div>
+    <div class="small" id="entdeckt">0 von 8 Teilen entdeckt</div>
+  </div>
+
+  <h3>Iris und Pupille live</h3>
+  <div class="vorne">
+    <div class="fig"><svg id="augeVorne" viewBox="0 0 400 200" role="img" aria-label="Auge von vorne mit Iris und Pupille"></svg></div>
+    <div>
+      <label for="hellIn">Licht: dunkel ← → hell</label>
+      <input type="range" id="hellIn" min="0" max="100" step="1" value="50" style="width:100%">
+      <label>Augenfarbe</label>
+      <div class="seg" id="segFarbe"><button type="button" class="btn2" data-v="blau">blau</button><button type="button" class="btn2" data-v="gruen">grün</button><button type="button" class="btn2" data-v="braun">braun</button></div>
+      <p class="small">Die Iris ist ein Muskel. Bei hellem Licht macht sie die Pupille klein, damit nicht zu viel Licht ins Auge kommt.</p>
+    </div>
+  </div>
+
+  <details class="lesetext"><summary>Alles auf einen Blick als Text</summary>
+  <div class="info">
+    <p>Das Licht kommt von vorne ins Auge. Zuerst trifft es auf die <b>Hornhaut</b>. Sie ist durchsichtig und gewölbt. Sie schützt das Auge und knickt das Licht schon ein wenig.</p>
+    <p>Dahinter liegt die <b>Iris</b>. Sie ist der farbige Ring in deinem Auge. In ihrer Mitte ist ein Loch, die <b>Pupille</b>. Durch die Pupille geht das Licht hinein. Bei hellem Licht macht die Iris die Pupille klein, bei Dunkelheit groß.</p>
+    <p>Direkt hinter der Pupille sitzt die <b>Linse</b>. Sie ist eine Sammellinse. Oben und unten ist sie mit feinen Fasern an einem Ringmuskel befestigt, dem <b>Ziliarmuskel</b>.</p>
+    <p>Das Innere des Auges ist mit einer durchsichtigen Masse gefüllt, dem <b>Glaskörper</b>. Hinten im Auge liegt die <b>Netzhaut</b>. Dort sitzen die Sehzellen. Sie wandeln das Licht in elektrische Signale um. Der <b>Sehnerv</b> leitet diese Signale zum Gehirn.</p>
+  </div>
+  </details>
+
+  <div class="task" data-id="t1" data-nr="1" data-afb="1" data-op="Beschrifte">
+    <p>Beschrifte das Auge: Zieh jeden Namen in das passende Feld. Du kannst auch zuerst ein Feld antippen und dann einen Namen.</p>
+    <div class="fig augefig"><svg id="augeBeschr" viewBox="0 0 600 340" role="img" aria-label="Auge im Schnitt mit Nummern 1 bis 8"></svg></div>
+    <div class="zf" id="zf1">
+      <div class="zf-slots zf-grid">
+        <div class="zf-slot" data-for="t1_1"><b>1</b><span></span></div>
+        <div class="zf-slot" data-for="t1_2"><b>2</b><span></span></div>
+        <div class="zf-slot" data-for="t1_3"><b>3</b><span></span></div>
+        <div class="zf-slot" data-for="t1_4"><b>4</b><span></span></div>
+        <div class="zf-slot" data-for="t1_5"><b>5</b><span></span></div>
+        <div class="zf-slot" data-for="t1_6"><b>6</b><span></span></div>
+        <div class="zf-slot" data-for="t1_7"><b>7</b><span></span></div>
+        <div class="zf-slot" data-for="t1_8"><b>8</b><span></span></div>
+      </div>
+      <div class="zf-pool" data-chips="horn,iris,pup,linse,zil,glas,netz,nerv"></div>
+      <input type="hidden" data-key="t1_1" data-ok="horn"><input type="hidden" data-key="t1_2" data-ok="iris">
+      <input type="hidden" data-key="t1_3" data-ok="pup"><input type="hidden" data-key="t1_4" data-ok="linse">
+      <input type="hidden" data-key="t1_5" data-ok="zil"><input type="hidden" data-key="t1_6" data-ok="glas">
+      <input type="hidden" data-key="t1_7" data-ok="netz"><input type="hidden" data-key="t1_8" data-ok="nerv">
+    </div>
+    <div class="hints" data-h='["Schau oben bei „Entdecke das Auge“ nach. Dort kannst du jedes Teil antippen.","Die Pupille ist kein Teil zum Anfassen. Sie ist die Lücke zwischen den beiden Teilen der Iris.","Der Ziliarmuskel sitzt oben und unten an der Linse. Der Sehnerv führt hinten aus dem Auge heraus."]'></div>
+  </div>
+
+  <div class="task" data-id="t2" data-nr="2" data-afb="1" data-op="Ordne">
+    <p>Lichtweg-Kette: Tippe die Karten in der Reihenfolge an, in der das Licht durch das Auge läuft. Eine Karte passt nicht. Tippe auf ein Feld in der Kette, um eine Karte zurückzulegen.</p>
+    <div class="zf" id="zf2" data-auto="1">
+      <div class="zf-slots chain">
+        <span class="node">☀️ Licht</span><span class="arr">→</span>
+        <div class="zf-slot" data-for="t2a"><span></span></div><span class="arr">→</span>
+        <div class="zf-slot" data-for="t2b"><span></span></div><span class="arr">→</span>
+        <div class="zf-slot" data-for="t2c"><span></span></div><span class="arr">→</span>
+        <div class="zf-slot" data-for="t2d"><span></span></div><span class="arr">→</span>
+        <div class="zf-slot" data-for="t2e"><span></span></div><span class="arr">→</span>
+        <div class="zf-slot" data-for="t2f"><span></span></div><span class="arr">→</span>
+        <span class="node">🧠 Gehirn</span>
+      </div>
+      <div class="zf-pool" data-chips="horn,pup,linse,glas,netz,nerv,iris"></div>
+      <input type="hidden" data-key="t2a" data-ok="horn"><input type="hidden" data-key="t2b" data-ok="pup">
+      <input type="hidden" data-key="t2c" data-ok="linse"><input type="hidden" data-key="t2d" data-ok="glas">
+      <input type="hidden" data-key="t2e" data-ok="netz"><input type="hidden" data-key="t2f" data-ok="nerv">
+    </div>
+    <div class="hints" data-h='["Das Licht geht nur durch durchsichtige Teile oder durch Öffnungen.","Die Iris ist undurchsichtig. Das Licht geht durch das Loch in ihrer Mitte."]'></div>
+  </div>
+
+  <h3>Die Simulation: scharf stellen</h3>
+  <p>Hier siehst du das Auge stark vergrößert. Wähle, wohin die Person schaut. Verändere dann mit dem Regler die Dicke der Linse.</p>
+  <div class="hint-line">Ziel: Das Bild soll genau auf der Netzhaut liegen. Rechts siehst du, wie scharf die Person sieht.</div>
+
+  <div class="sim" id="sim">
+    <div class="pic"><svg id="simSvg" viewBox="0 0 700 300" role="img" aria-label="Simulation: Auge mit veränderlicher Linse"></svg></div>
+    <div class="ctrl">
+      <label>Die Person schaut auf …</label>
+      <div class="seg" id="segObj"><button type="button" class="btn2" data-v="handy">Handy (10 cm)</button><button type="button" class="btn2" data-v="buch">Buch (25 cm)</button><button type="button" class="btn2" data-v="tafel">Tafel (5 m)</button><button type="button" class="btn2" data-v="stern">Stern (sehr weit)</button></div>
+      <label for="dIn">Linse: dünn ← → dick</label>
+      <input type="range" id="dIn" min="0" max="100" step="1" value="40">
+      <div class="tiles">
+        <div class="tile"><span>Ziliarmuskel</span><b id="mZ">–</b></div>
+        <div class="tile"><span>Bild</span><b id="mS">–</b></div>
+      </div>
+      <div class="seh"><span>So sieht die Person:</span><div class="sehbox"><div id="sehText">Physik</div></div></div>
+      <div class="simnote">Modell, nicht maßstäblich. Alle Werte sind simuliert.</div>
+    </div>
+  </div>
+
+  <div class="task" data-id="t3" data-nr="3" data-afb="1" data-op="Gib an">
+    <p>Wähle „Stern“ und schiebe den Regler ganz nach links. Wähle danach „Buch“, ohne den Regler zu bewegen.</p>
+    <p class="gap">Beim Stern ist das Bild mit dünner Linse
+      <select data-key="t3a" data-ok="sch"><option value="">– wählen –</option><option value="un">unscharf</option><option value="sch">scharf</option></select>.
+      Der Ziliarmuskel ist dabei
+      <select data-key="t3b" data-ok="ent"><option value="">– wählen –</option><option value="an">angespannt</option><option value="ent">entspannt</option></select>.
+      Beim Buch ist das Bild mit dünner Linse
+      <select data-key="t3c" data-ok="un"><option value="">– wählen –</option><option value="sch">scharf</option><option value="un">unscharf</option></select>.
+      Es liegt
+      <select data-key="t3d" data-ok="hin"><option value="">– wählen –</option><option value="vor">vor</option><option value="auf">genau auf</option><option value="hin">hinter</option></select>
+      der Netzhaut.</p>
+    <div class="hints" data-h='["Achte auf die Anzeige „Bild“ in der Simulation.","Folge den Lichtstrahlen mit dem Finger. Treffen sie sich vor der Netzhaut, auf ihr oder würden sie sich erst dahinter treffen?"]'></div>
+  </div>
+
+  <div class="task" data-id="t4" data-nr="4" data-afb="2" data-op="Untersuche">
+    <p>Stelle für jeden Gegenstand die Linse so ein, dass das Bild scharf ist. Trage ein, wie dick die Linse dann ist.</p>
+    <table class="t">
+      <tr><th>Die Person schaut auf …</th><th>Die Linse ist dann …</th></tr>
+      <tr><td>Stern (sehr weit)</td><td><select data-key="t4a" data-ok="duenn"></select></td></tr>
+      <tr><td>Tafel (5 m)</td><td><select data-key="t4b" data-ok="duenn"></select></td></tr>
+      <tr><td>Buch (25 cm)</td><td><select data-key="t4c" data-ok="dick"></select></td></tr>
+      <tr><td>Handy (10 cm)</td><td><select data-key="t4d" data-ok="nie"></select></td></tr>
+    </table>
+    <div class="hints" data-h='["Schiebe den Regler langsam, bis bei „Bild“ das Wort „scharf“ steht.","Dünn heißt: Regler im linken Drittel. Dick heißt: Regler im rechten Drittel.","Beim Handy kannst du den Regler ganz nach rechts schieben. Was steht dann bei „Bild“?"]'></div>
+  </div>
+
+  <div class="task" data-id="t5" data-nr="5" data-afb="2" data-op="Vervollständige">
+    <p>Vervollständige den Text.</p>
+    <p class="gap">Schaut man in die Ferne, ist der Ziliarmuskel
+      <select data-key="t5a" data-ok="ent"><option value="">– wählen –</option><option value="an">angespannt</option><option value="ent">entspannt</option></select>
+      und die Linse ist
+      <select data-key="t5b" data-ok="duenn"><option value="">– wählen –</option><option value="dick">dick</option><option value="duenn">dünn</option></select>.
+      Schaut man auf etwas in der Nähe, spannt sich der Ziliarmuskel
+      <select data-key="t5c" data-ok="an"><option value="">– wählen –</option><option value="an">an</option><option value="ab">ab</option></select>.
+      Die Linse wird
+      <select data-key="t5d" data-ok="dicker"><option value="">– wählen –</option><option value="duenner">dünner</option><option value="dicker">dicker</option><option value="groesser">länger</option></select>.
+      Ihre Brennweite wird
+      <select data-key="t5e" data-ok="kl"><option value="">– wählen –</option><option value="gr">größer</option><option value="kl">kleiner</option></select>.
+      So liegt das Bild wieder genau auf der
+      <select data-key="t5f" data-ok="netz"><option value="">– wählen –</option><option value="horn">Hornhaut</option><option value="netz">Netzhaut</option><option value="pup">Pupille</option></select>.
+      Ist der Gegenstand zu nah, schafft das die Linse
+      <select data-key="t5g" data-ok="nicht"><option value="">– wählen –</option><option value="nicht">nicht mehr</option><option value="immer">trotzdem immer</option></select>.</p>
+    <div class="hints" data-h='["Nutze deine Tabelle aus Aufgabe 4 und die Anzeige „Ziliarmuskel“ in der Simulation.","Denk an Station 1: Wie hängen die Dicke einer Linse und ihre Brennweite zusammen?"]'></div>
+  </div>
+
+  <div class="merk">Das Auge stellt scharf, indem es die Dicke der Linse verändert. Diesen Vorgang nennt man <b>Akkommodation</b>.</div>
+
+  <div class="task" data-id="t6" data-nr="6" data-afb="2" data-op="Erkläre" data-draw="3A">
+    <p>Erkläre, wie das Auge ein Buch in 25 cm Abstand scharf sieht, nachdem es vorher auf die Tafel geschaut hat. Verwende die Begriffe <b>Ziliarmuskel</b>, <b>Linse</b>, <b>Brennweite</b> und <b>Netzhaut</b>.</p>
+    <details class="drawbox"><summary>✏️ Frage 3A</summary><div class="js-drawing" data-id="3A"></div></details>
+    <div class="row"><button type="button" class="btn finish">Bearbeitung abschließen</button></div>
+    <div class="fb fmsg"></div>
+    <div class="check selfcheck" hidden><b>Selbstprüfung:</b>
+      <ul>
+        <li>Hast du gesagt, wo das Bild ohne Änderung liegen würde?</li>
+        <li>Hast du beschrieben, was der Ziliarmuskel macht?</li>
+        <li>Hast du gesagt, wie sich die Linse und ihre Brennweite verändern?</li>
+        <li>Hast du gesagt, wo das Bild am Ende liegt?</li>
+        <li>Kommen alle vier Begriffe vor?</li>
+      </ul></div>
+    <div class="hints" data-h='["Mach es in der Simulation nach: zuerst Tafel scharf, dann Buch wählen, dann Regler bewegen.","Schreibe in drei Schritten: vorher, was der Muskel macht, nachher."]'></div>
+  </div>
+</section>
+
+<!-- C Anwendung -->
+<section class="box sec A">
+  <span class="tag">Anwendung</span>
+  <div class="sh"><span class="circ">C</span><h2>Auge, Kamera und müde Augen</h2></div>
+  <p>Jetzt kannst du die Frage vom Anfang beantworten: <b>Wie schafft es das Auge, nahe und ferne Dinge scharf zu sehen?</b></p>
+
+  <div class="task" data-id="t7" data-nr="7" data-afb="2" data-op="Vergleiche">
+    <p>Kamera-Memory: Eine Handykamera und das Auge arbeiten ähnlich. Deck immer zwei Karten auf. Finde die vier Paare aus Kamerateil und Augenteil.</p>
+    <div class="memory" id="memory"></div>
+    <div class="small" id="memInfo">0 von 4 Paaren gefunden</div>
+    <input type="hidden" data-key="t7m" data-ok="ok">
+    <p class="gap">Ein Unterschied: Die Kamera stellt scharf, indem sie das Objektiv
+      <select data-key="t7e" data-ok="schieb"><option value="">– wählen –</option><option value="dick">dicker macht</option><option value="schieb">vor und zurück schiebt</option></select>.
+      Das Auge verändert dagegen
+      <select data-key="t7f" data-ok="form"><option value="">– wählen –</option><option value="abst">den Abstand der Linse zur Netzhaut</option><option value="form">die Form der Linse</option></select>.</p>
+    <div class="hints" data-h='["Überlege bei jedem Kamerateil: Was macht es mit dem Licht?","Im Auge ist der Abstand von der Linse zur Netzhaut immer gleich. Das stand schon im Einstieg."]'></div>
+  </div>
+
+  <div class="task" data-id="t8" data-nr="8" data-afb="3" data-op="Beurteile">
+    <p>Mia sagt: „Wenn ich zwei Stunden am Handy lese, tun mir die Augen weh. Das liegt nur daran, dass das Display so hell ist.“ Beurteile Mias Aussage.</p>
+    <p class="gap">Mia hat
+      <select data-key="t8a" data-ok="teil"><option value="">– wählen –</option><option value="ganz">ganz recht</option><option value="teil">nur teilweise recht</option></select>.
+      Beim Lesen in der Nähe ist der Ziliarmuskel die ganze Zeit
+      <select data-key="t8b" data-ok="an"><option value="">– wählen –</option><option value="ent">entspannt</option><option value="an">angespannt</option></select>.
+      Wie jeder Muskel wird er dabei
+      <select data-key="t8c" data-ok="mued"><option value="">– wählen –</option><option value="mued">müde</option><option value="staerk">immer stärker</option><option value="dick">dicker</option></select>.
+      Es hilft, ab und zu
+      <select data-key="t8d" data-ok="fern"><option value="">– wählen –</option><option value="nah">noch näher auf das Handy</option><option value="fern">in die Ferne</option><option value="zu">mit einem Auge</option></select>
+      zu schauen. Dann kann sich der Ziliarmuskel
+      <select data-key="t8e" data-ok="ent"><option value="">– wählen –</option><option value="an">anspannen</option><option value="ent">entspannen</option></select>.</p>
+    <div class="hints" data-h='["Überlege: Was macht der Ziliarmuskel, wenn man lange auf etwas Nahes schaut?","Das helle Display kann auch eine Rolle spielen. Ist es aber der einzige Grund?"]'></div>
+  </div>
+</section>
+
+<!-- Gold -->
+<section class="box sec gold">
+  <span class="tag">Gold · freiwillig</span>
+  <div class="sh"><span class="circ">⭐</span><h2>Profi-Aufgaben</h2></div>
+  <p>Du willst mehr? Diese Aufgaben sind schwerer und freiwillig. Für den Checkpoint brauchst du sie nicht.</p>
+
+  <div class="task gold" data-id="g1" data-nr="G1" data-afb="2" data-op="Berechne">
+    <p>Ein Baum ist <b id="g1G">–</b> hoch und steht <b id="g1g">–</b> von dir entfernt. In deinem Auge ist die Netzhaut 2,0 cm hinter der Linse. Wie groß ist das Bild des Baums auf deiner Netzhaut?</p>
+    <div class="formel">B : G = b : g</div>
+    <div class="row"><label>B =</label><input type="number" data-key="g1" data-num="g1" data-tol="0.01" step="0.01" inputmode="decimal" aria-label="Bildgröße in cm"> cm</div>
+    <div class="hints" data-h='["Das ist der Abbildungsmaßstab von Station 2. b ist der Abstand Linse–Netzhaut.","Rechne alles zuerst in cm um: 1 m = 100 cm.","Stelle um: B = G · b : g"]'></div>
+  </div>
+
+  <div class="task gold" data-id="g2" data-nr="G2" data-afb="3" data-op="Begründe">
+    <p>Ohne Taucherbrille siehst du unter Wasser alles unscharf. Fische dagegen sehen dort scharf. Sie haben eine kugelrunde, sehr dicke Linse. Der Grund: Unter Wasser knickt die Hornhaut das Licht kaum noch. Begründe damit.</p>
+    <p class="gap">Unter Wasser fällt die Brechung an der
+      <select data-key="g2a" data-ok="horn"><option value="">– wählen –</option><option value="netz">Netzhaut</option><option value="horn">Hornhaut</option><option value="pup">Pupille</option></select>
+      fast weg. Die Linse muss das Licht deshalb
+      <select data-key="g2b" data-ok="st"><option value="">– wählen –</option><option value="sw">schwächer</option><option value="st">stärker</option></select>
+      bündeln. Eine dickere Linse hat eine
+      <select data-key="g2c" data-ok="kl"><option value="">– wählen –</option><option value="gr">größere</option><option value="kl">kleinere</option></select>
+      Brennweite. Bei dir unter Wasser liegt das Bild
+      <select data-key="g2d" data-ok="hin"><option value="">– wählen –</option><option value="vor">vor</option><option value="hin">hinter</option></select>
+      der Netzhaut, denn deine Linse kann nicht so dick werden wie die eines Fisches.</p>
+    <div class="hints" data-h='["Wenn ein Teil das Licht nicht mehr knickt, muss ein anderes Teil mehr leisten.","Denk an die Simulation: Liegt das Bild hinter der Netzhaut, muss die Linse dicker werden."]'></div>
+  </div>
+</section>
+
+
+<!-- Fuß -->
+<div class="box">
+  <p class="small"><b>Quellen:</b> Eigene Darstellungen. Die Simulation ist ein vereinfachtes Modell des Auges.</p>
+  <button type="button" class="btnr" id="resetBtn">Eingaben dieser Station zurücksetzen</button>
+  <div class="confirm" id="resetConfirm">
+    <p style="margin:0 0 8px">Wirklich alles auf dieser Station löschen? Auch dein Schreibfeld und dein Stempel werden gelöscht.</p>
+    <div class="row" style="margin:0"><button type="button" class="btnr" id="resetYes">Ja, löschen</button><button type="button" class="btn2" id="resetNo">Abbrechen</button></div>
+  </div>
+</div>
+
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+(function(){
+'use strict';
+const SEITE = 3, VERSION = 1, LS_KEY = 'optik_lerneinheit_v' + VERSION + '_s' + SEITE;
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const SVGNS = 'http://www.w3.org/2000/svg';
+const fmt = (x, d) => x.toFixed(d === undefined ? 1 : d).replace('.', ',');
+
+let S = leer();
+function leer(){ return { v: VERSION, ans: {}, done: {}, hints: {}, draw: {}, sim: { obj: 'buch', d: 40, teil: '', entd: [], hell: 50, farbe: 'gruen', mem: [] } }; }
+
+let appLive = false;
+function changed(){
+  if (window.AppBridge && AppBridge.inApp) { if (appLive) AppBridge.changed(); }
+  else { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+}
+
+/* ---------- Aufgabenköpfe und Hilfen ---------- */
+const TASKS = $$('.task');
+TASKS.forEach(t => {
+  const afb = +t.dataset.afb;
+  const h = document.createElement('div'); h.className = 'th';
+  h.innerHTML = ''
+    + '<span class="tt">Aufgabe ' + t.dataset.nr + ' · ' + t.dataset.op + '</span><span class="st">offen</span>';
+  t.insertBefore(h, t.firstChild);
+  const hw = $('.hints', t);
+  const list = JSON.parse(hw.dataset.h);
+  hw.innerHTML = '';
+  const hl = document.createElement('div');
+  const hb = document.createElement('button'); hb.type = 'button'; hb.className = 'btnh';
+  const upd = () => {
+    const n = S.hints[t.dataset.id] || 0;
+    hl.innerHTML = list.slice(0, n).map((x, i) => '<div class="help"><b>Hilfe ' + (i+1) + ':</b> ' + x + '</div>').join('');
+    hb.textContent = n < list.length ? 'Hilfe ' + (n+1) + ' anzeigen' : 'Keine weiteren Hilfen';
+    hb.disabled = n >= list.length;
+  };
+  hb.addEventListener('click', () => { S.hints[t.dataset.id] = Math.min(list.length, (S.hints[t.dataset.id] || 0) + 1); upd(); changed(); });
+  t._updHints = upd;
+  if (!t.dataset.draw) {
+    const row = document.createElement('div'); row.className = 'row';
+    const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'btn'; cb.textContent = 'Prüfen';
+    cb.addEventListener('click', () => pruefe(t, true));
+    row.appendChild(cb); row.appendChild(hb);
+    const fb = document.createElement('div'); fb.className = 'fb fmsg';
+    hw.appendChild(row); hw.appendChild(fb); hw.appendChild(hl);
+  } else {
+    const row = $('.row', t); row.appendChild(hb); hw.appendChild(hl);
+  }
+  upd();
+});
+
+/* ---------- Eingaben speichern ---------- */
+$$('[data-key]').forEach(el => {
+  const ev = el.tagName === 'SELECT' ? 'change' : 'input';
+  el.addEventListener(ev, () => {
+    S.ans[el.dataset.key] = el.value;
+    el.classList.remove('bad', 'good');
+    changed();
+  });
+});
+
+/* ---------- Prüfen ---------- */
+function norm(s){ return String(s).toLowerCase().replace(/ß/g,'ss').replace(/[^a-zäöü0-9 ]/g,'').replace(/\s+/g,' ').trim(); }
+function lev(a, b){
+  const m = a.length, n = b.length, d = Array.from({length: m+1}, (_, i) => [i]);
+  for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+function wortOk(val, accept){
+  const v = norm(val); if (!v) return false;
+  return accept.split('|').some(a => { a = norm(a); const tol = a.length >= 9 ? 2 : a.length >= 5 ? 1 : 0; return lev(v, a) <= tol; });
+}
+function zahl(s){ s = String(s).replace(',', '.').trim(); if (s === '') return NaN; return Number(s); }
+
+function pruefe(t, zeigen){
+  const fb = $('.fmsg', t);
+  const felder = $$('[data-ok],[data-accept],[data-num],[data-fix]', t);
+  let richtig = 0, msg = '';
+  for (const el of felder) {
+    let ok = false;
+    if (el.dataset.ok !== undefined) ok = el.value === el.dataset.ok;
+    else if (el.dataset.accept) ok = wortOk(el.value, el.dataset.accept);
+    else {
+      const soll = el.dataset.fix !== undefined ? [+el.dataset.fix] : NUM[el.dataset.num]();
+      const tol = +el.dataset.tol, v = zahl(el.value);
+      if (soll === null) { if (zeigen) { fb.className = 'fb fmsg no'; fb.textContent = NUMHINWEIS[el.dataset.num]; } status(); return false; }
+      ok = soll.some(x => Math.abs(v - x) <= Math.max(tol, Math.abs(x) * 0.02));
+      if (!ok && !isNaN(v)) {
+        if (soll.some(x => Math.abs(-v - x) <= tol)) msg = 'Der Betrag stimmt. Überprüfe das Vorzeichen.';
+        else if (!el.dataset.nounit && soll.some(x => Math.abs(v * 100 - x) <= tol * 2)) msg = 'Dein Wert passt in Metern. Gib ihn in Zentimetern an.';
+        else if (!el.dataset.nounit && soll.some(x => Math.abs(v - x * 10) <= tol * 10)) msg = 'Dein Wert passt in Millimetern. Gib ihn in Zentimetern an.';
+      }
+    }
+    if (zeigen) { el.classList.toggle('good', ok); el.classList.toggle('bad', !ok); }
+    if (ok) richtig++;
+  }
+  let alle = richtig === felder.length;
+  const calc = t.dataset.calc;
+  if (calc) {
+    const sc = $('.selfcheck', t); if (sc) sc.hidden = !alle;
+    if (alle && !(S.draw[calc] && S.draw[calc].length)) {
+      if (zeigen) { fb.className = 'fb fmsg no'; fb.textContent = 'Das Ergebnis stimmt. Schreibe jetzt noch deinen Rechenweg in das Schreibfeld und drücke dann wieder „Prüfen“.'; const d = $('details', t); if (d) d.open = true; }
+      if (S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+      status(); return false;
+    }
+  }
+  if (zeigen) {
+    fb.className = 'fb fmsg ' + (alle ? 'ok' : 'no');
+    fb.textContent = alle ? '✓ Alles richtig.' : '✗ ' + richtig + ' von ' + felder.length + ' richtig.' + (msg ? ' ' + msg : '') + ' Überprüfe die rot markierten Felder.';
+  }
+  if (alle && !S.done[t.dataset.id]) { S.done[t.dataset.id] = true; changed(); }
+  if (zeigen && !alle && S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+  status();
+  return alle;
+}
+
+function status(){
+  let n = 0;
+  const PF = TASKS.filter(t => !t.classList.contains('gold')), GO = TASKS.filter(t => t.classList.contains('gold') && S.done[t.dataset.id]).length;
+  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d && PF.includes(t)) n++; });
+  $('#barFill').style.width = (100 * n / PF.length) + '%';
+  $('#barText').textContent = n + ' von ' + PF.length + ' Aufgaben erledigt' + (GO ? ' · ⭐ Gold: ' + GO : '');
+  if (typeof nachStatus === 'function') nachStatus();
+}
+
+/* ---------- Auswahllisten füllen (gemischte Reihenfolge, fest pro Feld) ---------- */
+const TERMS = { horn: 'Hornhaut', iris: 'Iris', pup: 'Pupille', linse: 'Linse', zil: 'Ziliarmuskel', glas: 'Glaskörper', netz: 'Netzhaut', nerv: 'Sehnerv' };
+const DICKE = { duenn: 'dünn', mittel: 'mittel', dick: 'dick', nie: 'kein scharfes Bild möglich' };
+function mische(arr, seed){ let h = 0; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+$$('select[data-ok]').forEach(s => { if (s.options.length) return;
+  const src = s.dataset.key.startsWith('t4') ? DICKE : TERMS;
+  let keys = Object.keys(src);
+  if (s.dataset.key.startsWith('t7')) keys = ['linse','pup','netz','nerv','horn','zil'];
+  s.appendChild(new Option('– wählen –', ''));
+  mische(keys, s.dataset.key).forEach(k => s.appendChild(new Option(src[k], k)));
+});
+
+/* ---------- Simulation: Akkommodation ---------- */
+const svg = $('#simSvg');
+const AX = 150, LX = 320, PX = 165, BF = 2.0; // Achse, Linse, Pixel pro cm, Abstand Linse–Netzhaut (Modell)
+const OBJ = { handy: 10, buch: 25, tafel: 500, stern: 1e9 };
+const OBJTXT = { handy: 'Licht vom Handy (10 cm)', buch: 'Licht vom Buch (25 cm)', tafel: 'Licht von der Tafel (5 m)', stern: 'Licht vom Stern (sehr weit)' };
+function el(n, a, p){ const e = document.createElementNS(SVGNS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; }
+const fOf = d => BF - d * 0.002;
+function zustand(){ const g = OBJ[S.sim.obj], f = fOf(S.sim.d), b = g * f / (g - f); return { g, f, b }; }
+function zeichneSim(){
+  const { b } = zustand(), d = S.sim.d;
+  svg.innerHTML = '';
+  // Auge
+  el('ellipse', {cx: 470, cy: AX, rx: 190, ry: 135, fill: '#D9E8F7'}, svg);
+  el('ellipse', {cx: 470, cy: AX, rx: 178, ry: 124, fill: '#F4F9FF'}, svg);
+  el('path', {d: 'M301.2 ' + (AX-62) + ' A190 135 0 1 1 301.2 ' + (AX+62), fill: 'none', stroke: '#9AA6B2', 'stroke-width': 3}, svg);
+  el('path', {d: 'M470 15 A190 135 0 0 1 470 285', fill: 'none', stroke: '#B8486A', 'stroke-width': 11}, svg);
+  el('path', {d: 'M470 15 A190 135 0 0 1 470 285', fill: 'none', stroke: '#F48FB1', 'stroke-width': 6}, svg);
+  el('rect', {x: 655, y: AX + 12, width: 50, height: 22, fill: '#F6B042', stroke: '#C9821A'}, svg);
+  el('path', {d: 'M292 62 Q240 150 292 238', fill: '#CDEFFB', stroke: '#4FB0D8', 'stroke-width': 3}, svg);
+  el('rect', {x: 300, y: AX - 100, width: 9, height: 46, rx: 3, fill: '#4E9A63'}, svg);
+  el('rect', {x: 300, y: AX + 54, width: 9, height: 46, rx: 3, fill: '#4E9A63'}, svg);
+  // Strahlen
+  const g = OBJ[S.sim.obj];
+  const gr = el('g', {stroke: '#E39B1B', 'stroke-width': 2.2, fill: 'none'}, svg);
+  const xs = -(LX - 20) / PX, xr = BF;
+  const hits = [], bz = BF + (b - BF) * 6, gz = g / 4; // Darstellung überhöht
+  [-48, 0, 48].forEach(hp => {
+    const h = hp / PX;
+    const y0 = h * (xs + gz) / gz;
+    el('line', {x1: 20, y1: AX - y0 * PX, x2: LX, y2: AX - h * PX}, gr);
+    const yr = h * (1 - xr / bz);
+    el('line', {x1: LX, y1: AX - h * PX, x2: LX + xr * PX, y2: AX - yr * PX}, gr);
+    hits.push(yr);
+  });
+  // Linse und Ziliarmuskel
+  const rx = 6 + d * 0.16;
+  el('ellipse', {cx: LX, cy: AX, rx: rx, ry: 58, fill: 'rgba(247,201,72,.8)', stroke: '#C9900B', 'stroke-width': 2.5}, svg);
+  const zs = 0.35 + 0.6 * d / 100;
+  [-1, 1].forEach(s => { el('ellipse', {cx: LX, cy: AX + s * 78, rx: 11 + d * 0.05, ry: 8, fill: 'rgba(217,83,79,' + zs.toFixed(2) + ')'}, svg);
+    el('line', {x1: LX, y1: AX + s * 58, x2: LX, y2: AX + s * 70, stroke: '#8A6A6A', 'stroke-width': 1.5}, svg); });
+  // Fleck auf der Netzhaut
+  const lo = Math.min(...hits), hi = Math.max(...hits);
+  el('line', {x1: LX + xr * PX + 2, y1: AX - hi * PX - 2, x2: LX + xr * PX + 2, y2: AX - lo * PX + 2, stroke: '#F6C443', 'stroke-width': 6, 'stroke-linecap': 'round'}, svg);
+  const t = el('text', {x: 20, y: 30, 'font-size': 14, fill: '#4F5B6D'}, svg); t.textContent = OBJTXT[S.sim.obj] + ' →';
+  [['Netzhaut', 600, 290], ['Linse', LX - 18, 26]].forEach(([s, x, y]) => { const tt = el('text', {x, y, 'font-size': 12, fill: '#4F5B6D'}, svg); tt.textContent = s; });
+  // Anzeigen
+  const diff = b - BF, scharf = Math.abs(diff) < 0.02;
+  $('#mS').textContent = scharf ? 'scharf' : (diff > 0 ? 'unscharf, hinter der Netzhaut' : 'unscharf, vor der Netzhaut');
+  $('#mZ').textContent = d < 25 ? 'entspannt' : d < 60 ? 'etwas angespannt' : 'stark angespannt';
+  const blur = scharf ? 0 : Math.min(8, 60 * Math.abs(1 - BF / b));
+  $('#sehText').style.filter = 'blur(' + blur.toFixed(1) + 'px)';
+  $('#dIn').value = d;
+  $$('#segObj button').forEach(x => x.classList.toggle('on', x.dataset.v === S.sim.obj));
+}
+$$('#segObj button').forEach(x => x.addEventListener('click', () => { S.sim.obj = x.dataset.v; zeichneSim(); changed(); }));
+$('#dIn').addEventListener('input', e => { S.sim.d = +e.target.value; zeichneSim(); changed(); });
+function simAnwenden(){ zeichneSim(); }
+const NUM = {}, NUMHINWEIS = {};
+
+
+/* BK-START */
+/* ---------- Teile des Auges (Farben, Texte) ---------- */
+const TEILE = {
+  horn:  { name: 'Hornhaut', farbe: '#5BB3D6', text: 'Die durchsichtige, gewölbte Haut ganz vorne. Sie schützt das Auge und knickt das Licht schon ein wenig.' },
+  iris:  { name: 'Iris', farbe: '#4E9A63', text: 'Der farbige Ring im Auge. Sie macht die Pupille groß oder klein.' },
+  pup:   { name: 'Pupille', farbe: '#1D2433', text: 'Das schwarze Loch in der Mitte der Iris. Durch die Pupille kommt das Licht ins Auge.' },
+  linse: { name: 'Linse', farbe: '#E8B219', text: 'Eine Sammellinse aus weichem Gewebe. Sie bündelt das Licht. Sie kann dicker und dünner werden.' },
+  zil:   { name: 'Ziliarmuskel', farbe: '#D9534F', text: 'Ein Ringmuskel um die Linse. Er verändert die Form der Linse.' },
+  glas:  { name: 'Glaskörper', farbe: '#7FA6D6', text: 'Eine durchsichtige, feste Masse. Sie füllt das Auge und hält es rund.' },
+  netz:  { name: 'Netzhaut', farbe: '#E8608A', text: 'Die Schicht hinten im Auge. Hier sitzen die Sehzellen. Sie machen aus Licht elektrische Signale.' },
+  nerv:  { name: 'Sehnerv', farbe: '#F0A030', text: 'Ein dickes Kabel aus Nervenfasern. Er leitet die Signale zum Gehirn.' }
+};
+const TEIL_IDS = Object.keys(TEILE);
+
+/* Farbiges Auge im Schnitt als SVG-Text. opts.hl = hervorgehobenes Teil, opts.mini = andere Teile grau, opts.nummern = Nummern 1–8 */
+let augeNr = 0;
+function augeMarkup(opts){
+  const o = opts || {}, u = 'a' + (++augeNr), grau = t => o.mini && o.hl !== t;
+  const F = (t, f) => grau(t) ? '#E6EAEF' : f, St = (t, f) => grau(t) ? '#C9D0D8' : f;
+  const dim = t => (!o.mini && o.hl && o.hl !== t) ? ' opacity="0.35"' : '';
+  const sel = t => (!o.mini && o.hl === t) ? ' class="teil on"' : ' class="teil"';
+  let s = '<defs><radialGradient id="gkV' + u + '" cx="45%" cy="45%" r="60%"><stop offset="0" stop-color="#FAFDFF"/><stop offset="1" stop-color="#D5E5F6"/></radialGradient>' +
+    '<linearGradient id="lnV' + u + '" x1="0" x2="1"><stop offset="0" stop-color="#FFF4BE"/><stop offset="1" stop-color="#F5C33B"/></linearGradient>' +
+    '<linearGradient id="irV' + u + '" x1="0" x2="1"><stop offset="0" stop-color="#6DB57F"/><stop offset="1" stop-color="#2F6B44"/></linearGradient></defs>';
+  // Sehnerv
+  s += '<g data-t="nerv"' + sel('nerv') + dim('nerv') + '><path d="M500 152 C540 156 570 162 600 162 L600 222 C570 222 540 212 500 206 Z" fill="' + F('nerv', '#F6B042') + '" stroke="' + St('nerv', '#C9821A') + '" stroke-width="3"/>' +
+    (o.mini ? '' : '<path d="M515 170 C550 174 575 178 600 178 M515 190 C550 194 575 200 600 202" stroke="#E0952A" stroke-width="2" fill="none"/>') + '</g>';
+  // Lederhaut und Glaskörper
+  s += '<ellipse cx="340" cy="170" rx="180" ry="150" fill="#FFFFFF" stroke="#9AA6B2" stroke-width="3"/>';
+  s += '<g data-t="glas"' + sel('glas') + dim('glas') + '><ellipse cx="340" cy="170" rx="166" ry="136" fill="' + (grau('glas') ? '#F1F4F7' : (o.mini ? '#C9DCF2' : 'url(#gkV' + u + ')')) + '"/></g>';
+  // Netzhaut (mit Aderhaut)
+  s += '<g data-t="netz"' + sel('netz') + dim('netz') + '><path d="M340 34 A166 136 0 0 1 340 306" fill="none" stroke="' + St('netz', '#B8486A') + '" stroke-width="13"/>' +
+    '<path d="M340 34 A166 136 0 0 1 340 306" fill="none" stroke="' + F('netz', '#F48FB1') + '" stroke-width="7"/>' +
+    (o.mini ? '' : '<path d="M462 80 q-20 30 -6 60 M470 260 q-24 -26 -10 -60" stroke="#D2455F" stroke-width="2" fill="none"/>') +
+    '<path d="M340 34 A166 136 0 0 1 340 306" fill="none" stroke="transparent" stroke-width="28"/></g>';
+  // Lichtstrahlen
+  if (!o.mini && !o.nummern) s += '<g stroke="#FFC83D" stroke-width="3" opacity=".75" fill="none" pointer-events="none"><path d="M0 145 L150 150 L222 152 L505 172"/><path d="M0 170 L505 172"/><path d="M0 195 L150 190 L222 188 L505 172"/></g>';
+  // Hornhaut
+  s += '<g data-t="horn"' + sel('horn') + dim('horn') + '><path d="M178 100 Q96 170 178 240 Q156 170 178 100 Z" fill="' + F('horn', '#CDEFFB') + '" fill-opacity=".9" stroke="' + St('horn', '#4FB0D8') + '" stroke-width="3"/></g>';
+  // Iris
+  s += '<g data-t="iris"' + sel('iris') + dim('iris') + '><rect x="183" y="94" width="13" height="50" rx="5" fill="' + (grau('iris') ? '#E6EAEF' : 'url(#irV' + u + ')') + '" stroke="' + St('iris', '#2F6B44') + '" stroke-width="1.5"/>' +
+    '<rect x="183" y="196" width="13" height="50" rx="5" fill="' + (grau('iris') ? '#E6EAEF' : 'url(#irV' + u + ')') + '" stroke="' + St('iris', '#2F6B44') + '" stroke-width="1.5"/></g>';
+  // Pupille (Öffnung)
+  s += '<g data-t="pup"' + sel('pup') + dim('pup') + '><rect x="180" y="146" width="19" height="48" rx="4" fill="' + (o.mini && o.hl === 'pup' ? '#1D2433' : 'transparent') + '" stroke="' + (o.hl === 'pup' ? '#1D2433' : 'none') + '" stroke-width="2" stroke-dasharray="4 3"/></g>';
+  // Ziliarmuskel mit Fasern
+  s += '<g data-t="zil"' + sel('zil') + dim('zil') + '>' + [100, 240].map(y => '<ellipse cx="224" cy="' + y + '" rx="17" ry="11" fill="' + F('zil', '#E5737D') + '" stroke="' + St('zil', '#B84B57') + '" stroke-width="2"/>').join('') +
+    '<path d="M216 111 L218 122 M224 111 L224 120 M232 111 L230 122 M216 229 L218 218 M224 229 L224 220 M232 229 L230 218" stroke="' + St('zil', '#B07070') + '" stroke-width="1.5"/></g>';
+  // Linse
+  s += '<g data-t="linse"' + sel('linse') + dim('linse') + '><ellipse cx="224" cy="170" rx="22" ry="50" fill="' + (grau('linse') ? '#E6EAEF' : (o.mini ? '#F5C33B' : 'url(#lnV' + u + ')')) + '" stroke="' + St('linse', '#C9900B') + '" stroke-width="2.5"/></g>';
+  if (o.nummern) {
+    const N = [[1, 128, 150, 60, 66], [2, 190, 100, 132, 24], [3, 190, 170, 58, 186], [4, 238, 150, 290, 24], [5, 224, 250, 160, 312], [6, 360, 170, 360, 170], [7, 470, 64, 545, 30], [8, 585, 196, 570, 290]];
+    s += '<g font-size="17" font-weight="700" text-anchor="middle">' + N.map(([n, x1, y1, x2, y2]) =>
+      (n === 6 ? '' : '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#1D2433" stroke-width="1.6"/>') +
+      '<circle cx="' + x2 + '" cy="' + y2 + '" r="15" fill="#fff" stroke="#1D2433" stroke-width="2"/><text x="' + x2 + '" y="' + (y2 + 6) + '" fill="#1D2433">' + n + '</text>').join('') + '</g>';
+  }
+  return s;
+}
+function miniAuge(t){ return '<svg viewBox="70 20 540 300" class="mini" aria-hidden="true">' + augeMarkup({ hl: t, mini: true }) + '</svg>'; }
+
+/* ---------- Entdecke das Auge ---------- */
+function zeichneEntdecke(){
+  const sv = $('#augeEntdecke'); sv.innerHTML = augeMarkup({ hl: S.sim.teil || null });
+  $$('[data-t]', sv).forEach(g => g.addEventListener('click', () => {
+    S.sim.teil = g.dataset.t;
+    if (!S.sim.entd.includes(g.dataset.t)) S.sim.entd = S.sim.entd.concat(g.dataset.t);
+    zeichneEntdecke(); changed();
+  }));
+  const k = $('#teilKarte'), t = S.sim.teil && TEILE[S.sim.teil];
+  if (t) {
+    k.innerHTML = miniAuge(S.sim.teil) + '<div><b style="color:' + t.farbe + '">' + t.name + '</b><p style="margin:4px 0 0">' + t.text + '</p></div>';
+    if (kannSprechen) k.appendChild(vlKnopf(() => t.name + '. ' + t.text));
+    k.style.borderColor = t.farbe;
+  }
+  const n = S.sim.entd.length;
+  $('#entdeckt').textContent = n === 8 ? '⭐ Alle 8 Teile entdeckt!' : n + ' von 8 Teilen entdeckt';
+}
+
+/* ---------- Auge von vorne ---------- */
+const AUGENFARBE = { blau: ['#9CC8EE', '#2F6EA8'], gruen: ['#9ED29A', '#2F7A44'], braun: ['#C9945E', '#6B3F1E'] };
+function zeichneVorne(){
+  const u = 'v' + (++augeNr), h = S.sim.hell, f = AUGENFARBE[S.sim.farbe] || AUGENFARBE.gruen, r = 34 - h * 0.24;
+  const bg = 'hsl(' + (225 - h * 0.25) + ',' + (45 + h * 0.3) + '%,' + (14 + h * 0.76) + '%)';
+  $('#augeVorne').innerHTML = '<defs><radialGradient id="irisV' + u + '"><stop offset="0.3" stop-color="' + f[0] + '"/><stop offset="1" stop-color="' + f[1] + '"/></radialGradient><clipPath id="lidV' + u + '"><path d="M70 100 Q200 10 330 100 Q200 190 70 100Z"/></clipPath></defs>' +
+    '<rect width="400" height="200" fill="' + bg + '"/>' +
+    '<text x="360" y="40" font-size="30" text-anchor="middle">' + (h > 50 ? '☀️' : '🌙') + '</text>' +
+    '<path d="M60 100 Q200 0 340 100 Q200 200 60 100Z" fill="#F2C9A8"/>' +
+    '<g clip-path="url(#lidV' + u + ')"><rect width="400" height="200" fill="#FFFFFF"/><circle cx="200" cy="100" r="56" fill="url(#irisV' + u + ')" stroke="' + f[1] + '" stroke-width="3"/>' +
+    '<circle cx="200" cy="100" r="' + r.toFixed(1) + '" fill="#111"/><circle cx="214" cy="86" r="7" fill="#fff" opacity=".85"/></g>' +
+    '<path d="M70 100 Q200 10 330 100" fill="none" stroke="#7A4E32" stroke-width="4"/>' +
+    [90, 120, 150, 180, 210, 240, 270, 300].map((x, i) => { const y = 100 - 90 * Math.sin(Math.PI * (x - 70) / 260) * 0.5; return '<line x1="' + x + '" y1="' + y.toFixed(1) + '" x2="' + (x + (i - 3.5) * 2) + '" y2="' + (y - 16).toFixed(1) + '" stroke="#3B2A20" stroke-width="2.5" stroke-linecap="round"/>'; }).join('') +
+    '<text x="200" y="192" font-size="13" text-anchor="middle" fill="' + (h > 40 ? '#1D2433' : '#fff') + '">Pupille: ' + (r > 26 ? 'groß' : r > 18 ? 'mittel' : 'klein') + '</text>';
+  $('#hellIn').value = h;
+  $$('#segFarbe button').forEach(x => x.classList.toggle('on', x.dataset.v === S.sim.farbe));
+}
+$('#hellIn').addEventListener('input', e => { S.sim.hell = +e.target.value; zeichneVorne(); changed(); });
+$$('#segFarbe button').forEach(x => x.addEventListener('click', () => { S.sim.farbe = x.dataset.v; zeichneVorne(); changed(); }));
+
+/* ---------- Zieh- und Tippfelder (Aufgaben 1 und 2) ---------- */
+function ziehfeld(zf){
+  const auto = zf.dataset.auto === '1', pool = $('.zf-pool', zf), slots = $$('.zf-slot', zf);
+  const ids = pool.dataset.chips.split(','), reihe = mische(ids, zf.id);
+  const inp = k => $('input[data-key="' + k + '"]', zf);
+  let aktiv = null, gewaehlt = null, gezogen = false;
+  function schreib(slot, v){ const i = inp(slot.dataset.for); i.value = v; S.ans[i.dataset.key] = v; i.classList.remove('good', 'bad'); }
+  function setze(slot, v){ slots.forEach(s => { if (s !== slot && inp(s.dataset.for).value === v) schreib(s, ''); }); schreib(slot, v); }
+  function fertig(){ aktiv = null; gewaehlt = null; render(); changed(); }
+  function render(){
+    const benutzt = slots.map(s => inp(s.dataset.for).value);
+    slots.forEach(s => { const v = inp(s.dataset.for).value, i = inp(s.dataset.for);
+      $('span', s).textContent = v ? TEILE[v].name : (auto ? '' : '…');
+      s.classList.toggle('voll', !!v); s.classList.toggle('aktiv', s === aktiv);
+      s.classList.toggle('good', i.classList.contains('good')); s.classList.toggle('bad', i.classList.contains('bad'));
+      s.style.borderColor = v && !i.classList.contains('bad') && !i.classList.contains('good') ? TEILE[v].farbe : ''; });
+    pool.innerHTML = '';
+    reihe.filter(v => !benutzt.includes(v)).forEach(v => {
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'chip' + (v === gewaehlt ? ' on' : '');
+      c.innerHTML = '<i style="background:' + TEILE[v].farbe + '"></i>' + TEILE[v].name; c.dataset.v = v;
+      c.addEventListener('click', () => {
+        if (gezogen) { gezogen = false; return; }
+        if (aktiv) { setze(aktiv, v); fertig(); return; }
+        if (auto) { const leer = slots.find(s => !inp(s.dataset.for).value); if (leer) { setze(leer, v); fertig(); } return; }
+        gewaehlt = gewaehlt === v ? null : v; render();
+      });
+      c.addEventListener('pointerdown', e => {
+        const st = { x: e.clientX, y: e.clientY }; let geist = null;
+        try { c.setPointerCapture(e.pointerId); } catch (er) {}
+        const mv = ev => {
+          if (!geist && Math.hypot(ev.clientX - st.x, ev.clientY - st.y) > 8) { geist = c.cloneNode(true); geist.classList.add('geist'); document.body.appendChild(geist); }
+          if (geist) { geist.style.left = ev.clientX + 'px'; geist.style.top = ev.clientY + 'px'; }
+        };
+        const up = ev => {
+          c.removeEventListener('pointermove', mv); c.removeEventListener('pointerup', up); c.removeEventListener('pointercancel', up);
+          if (!geist) return;
+          geist.remove(); gezogen = true; setTimeout(() => { gezogen = false; }, 50);
+          const ziel = document.elementFromPoint(ev.clientX, ev.clientY), slot = ziel && ziel.closest('.zf-slot');
+          if (slot && zf.contains(slot)) { setze(slot, v); fertig(); }
+        };
+        c.addEventListener('pointermove', mv); c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+      });
+      pool.appendChild(c);
+    });
+    if (!pool.children.length) pool.innerHTML = '<span class="small">Alle Karten verteilt. Drück auf „Prüfen“.</span>';
+  }
+  slots.forEach(s => s.addEventListener('click', () => {
+    const v = inp(s.dataset.for).value;
+    if (gewaehlt) { setze(s, gewaehlt); fertig(); }
+    else if (v) { schreib(s, ''); fertig(); }
+    else { aktiv = aktiv === s ? null : s; render(); }
+  }));
+  return render;
+}
+const ZF = [ziehfeld($('#zf1')), ziehfeld($('#zf2'))];
+$('#augeBeschr').innerHTML = augeMarkup({ nummern: true });
+
+/* ---------- Kamera-Memory (Aufgabe 7) ---------- */
+const MEM = { obj: ['📷', 'Objektiv', 'linse'], bl: ['⭕', 'Blende: Öffnung, die größer oder kleiner wird', 'pup'], sen: ['🔲', 'Bildsensor: Chip, auf dem das Bild entsteht', 'netz'], dat: ['🔌', 'Datenleitung zum Prozessor', 'nerv'] };
+let memOffen = [], memSperre = false;
+function zeichneMemory(){
+  const box = $('#memory'), karten = mische(Object.keys(MEM).flatMap(k => ['k-' + k, 'a-' + k]), 'mem' + BKS().seed);
+  box.innerHTML = '';
+  karten.forEach(id => {
+    const [art, k] = id.split('-'), m = MEM[k], gefunden = S.sim.mem.includes(k), offen = gefunden || memOffen.includes(id);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'mkarte' + (offen ? ' offen' : '') + (gefunden ? ' gefunden' : '');
+    b.innerHTML = offen ? (art === 'k' ? '<span class="mi">' + m[0] + '</span><span>Kamera: ' + m[1] + '</span>' : miniAuge(m[2]) + '<span>Auge: ' + TEILE[m[2]].name + '</span>') : '<span class="mrueck">?</span>';
+    b.setAttribute('aria-label', offen ? b.textContent : 'Verdeckte Karte');
+    b.addEventListener('click', () => {
+      if (memSperre || offen) return;
+      memOffen.push(id); zeichneMemory();
+      if (memOffen.length === 2) {
+        const [a, c] = memOffen.map(x => x.split('-')[1]);
+        if (a === c) { S.sim.mem = S.sim.mem.concat(a); memOffen = []; memFertig(); if (spielLauf) spielLauf.aktiv = false; zeichneMemory(); changed(); }
+        else { memSperre = true; setTimeout(() => { memOffen = []; memSperre = false; zeichneMemory(); }, 1100); }
+      }
+    });
+    box.appendChild(b);
+  });
+  const n = S.sim.mem.length;
+  $('#memInfo').textContent = n === 4 ? '⭐ Alle 4 Paare gefunden!' : n + ' von 4 Paaren gefunden';
+}
+function memFertig(){ const i = $('input[data-key="t7m"]'), v = S.sim.mem.length === 4 ? 'ok' : ''; if (i.value !== v) { i.value = v; S.ans.t7m = v; i.classList.remove('good', 'bad'); } }
+
+/* ---------- Gold-Aufgaben: Werte pro Person ---------- */
+function goldWerte(){ const s = BKS().seed; return { G: 2 + (s % 9) * 0.5, g: 10 + (Math.floor(s / 9) % 11) * 2 }; }
+NUM.g1 = () => { const w = goldWerte(); return [2 * w.G / w.g]; };
+function zeichneGold(){ const w = goldWerte(), k = x => String(x).replace('.', ',');
+  $('#g1G').textContent = k(w.G) + ' m'; $('#g1g').textContent = k(w.g) + ' m'; }
+
+/* ---------- Haken für den Baukasten ---------- */
+function stationNachStatus(){ ZF.forEach(r => r()); }
+function stationAnwenden(){ memOffen = []; memFertig(); zeichneGold(); zeichneEntdecke(); zeichneVorne(); zeichneMemory(); }
+const BK = {
+  station: 3, stempel: 'AUGEN-PROFI', stempelIcon: '👁️', naechste: 'Sehfehler und Brillen', spiel: 'faenger',
+  worte: TEIL_IDS.map(k => [TEILE[k].name, TEILE[k].text, miniAuge(k)]).concat([
+    ['Akkommodation', 'Das Auge stellt scharf, indem die Linse dicker oder dünner wird.', '<span class="wicon">🔍</span>'],
+    ['Brennweite', 'Der Abstand von der Linse bis zum Brennpunkt. Dicke Linse: kleine Brennweite.', '<span class="wicon">📏</span>'],
+    ['Sammellinse', 'Eine Linse, die in der Mitte dicker ist. Sie bündelt das Licht.', '<span class="wicon">🔆</span>']]),
+  wette: { frage: 'Kannst du deinen Daumennagel und die Tafel gleichzeitig scharf sehen?', optionen: [['ja', '👍 Ja, das schaffe ich'], ['nein', '👎 Nein, das geht nicht']], richtig: 'nein', nach: 't5',
+    aufl: 'Jetzt weißt du, warum es nicht geht: Die Linse kann nur eine Dicke auf einmal haben. Für den Daumen muss sie dick sein, für die Tafel dünn.' },
+  satz: { t6: 'Vorher liegt das Bild … · Dann spannt sich … · Dadurch wird die Linse … · Ihre Brennweite … · Jetzt liegt das Bild …' },
+  cp: [
+  { id: 'q1', a: 'Das Licht geht durch das Loch in der Iris. Dieses Loch heißt', b: '.', ok: 'Pupille', f: ['Linse', 'Netzhaut'], tipp: 'Entdecke das Auge' },
+  { id: 'q2', a: 'Die Sehzellen sitzen in der', b: '.', ok: 'Netzhaut', f: ['Hornhaut', 'Iris'], tipp: 'Entdecke das Auge' },
+  { id: 'q3', a: 'Die Signale zum Gehirn leitet der', b: '.', ok: 'Sehnerv', f: ['Ziliarmuskel', 'Glaskörper'], tipp: 'Entdecke das Auge' },
+  { id: 'q4', a: 'Die Linse im Auge ist eine', b: '.', ok: 'Sammellinse', f: ['Zerstreuungslinse', 'Glasscheibe'], tipp: 'Wortspeicher' },
+  { id: 'q5', a: 'Bei Dunkelheit wird die Pupille', b: '.', ok: 'größer', f: ['kleiner', 'blau'], tipp: 'Iris und Pupille live' },
+  { id: 'q6', a: 'Schaust du in die Ferne, ist der Ziliarmuskel', b: '.', ok: 'entspannt', f: ['angespannt', 'gerissen'], tipp: 'Simulation, Aufgabe 3' },
+  { id: 'q7', a: 'Schaust du auf ein Buch, ist die Linse', b: '.', ok: 'dick', f: ['dünn', 'weg'], tipp: 'Simulation, Aufgabe 4' },
+  { id: 'q8', a: 'Eine dicke Linse hat eine', b: 'Brennweite.', ok: 'kleine', f: ['große', 'gar keine'], tipp: 'Aufgabe 5' },
+  { id: 'q9', a: 'Das Scharfstellen des Auges heißt', b: '.', ok: 'Akkommodation', f: ['Reflexion', 'Brechung'], tipp: 'Merksatz nach Aufgabe 5' },
+  { id: 'q10', a: 'Ganz vorne trifft das Licht zuerst auf die', b: '.', ok: 'Hornhaut', f: ['Netzhaut', 'Linse'], tipp: 'Aufgabe 2' },
+  { id: 'q11', a: 'Das Innere des Auges ist gefüllt mit dem', b: '.', ok: 'Glaskörper', f: ['Sehnerv', 'Ziliarmuskel'], tipp: 'Entdecke das Auge' },
+  { id: 'q12', a: 'Ein Handy in 10 cm Abstand sieht das Auge', b: 'scharf.', ok: 'nicht mehr', f: ['immer', 'besonders'], tipp: 'Simulation, Aufgabe 4' },
+  { id: 'q13', a: 'Die Kamera stellt scharf durch Verschieben. Das Auge verändert', b: '.', ok: 'die Form der Linse', f: ['die Länge des Auges', 'die Farbe der Iris'], tipp: 'Aufgabe 7' },
+  { id: 'q14', a: 'Der Muskel, der die Linse verformt, heißt', b: '.', ok: 'Ziliarmuskel', f: ['Iris', 'Sehnerv'], tipp: 'Entdecke das Auge' }
+]
+};
+
+/* ===== Baukasten für alle Stationen: Vorlesen, Wortspeicher, Wette, Gold, Pause, Checkpoint mit Stempel, Belohnungsspiel =====
+   Erwartet vorher: const BK = { station, stempel, naechste, worte, wette, cp, spiel, satz } */
+function BKS(){
+  if (!S.bk) S.bk = { seed: 1 + Math.floor(Math.random() * 1e6), wette: '', spielSek: 0, hs: 0, cp: { runde: 0, versuche: 0, letzte: null, stempel: false, antw: {} } };
+  return S.bk;
+}
+function bkMische(arr, seed){ let h = 0; for (const c of String(seed)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const istGold = t => t.classList.contains('gold');
+const PFLICHT = liste => liste.filter(t => !istGold(t));
+
+/* ---------- Vorlesen ---------- */
+const kannSprechen = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
+function sprich(text){
+  if (!kannSprechen) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; u.rate = 0.9;
+  const v = speechSynthesis.getVoices().find(x => /^de/i.test(x.lang)); if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function textOhneLuecken(node){
+  const c = node.cloneNode(true);
+  c.querySelectorAll('select').forEach(s => { const o = s.selectedOptions && s.selectedOptions[0]; s.replaceWith(document.createTextNode(o && s.value ? ' ' + o.text + ' ' : ' Lücke ')); });
+  c.querySelectorAll('button,.vl,svg').forEach(b => b.remove());
+  return c.textContent.replace(/\s+/g, ' ').trim();
+}
+function vlKnopf(getText){
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'vl'; b.textContent = '🔊'; b.setAttribute('aria-label', 'Vorlesen');
+  b.addEventListener('click', e => { e.stopPropagation(); sprich(getText()); });
+  return b;
+}
+if (kannSprechen) {
+  $$('.task').forEach(t => { const ps = $$(':scope > p', t); if (!ps.length) return;
+    ps[0].prepend(vlKnopf(() => ps.map(textOhneLuecken).join(' '))); });
+  $$('.vorlesbar, .info').forEach(v => v.prepend(vlKnopf(() => textOhneLuecken(v))));
+}
+
+/* ---------- Wortspeicher (oben in der Erarbeitung) ---------- */
+(function(){
+  if (!BK.worte || !BK.worte.length) return;
+  const sec = $('.sec.B'); if (!sec) return;
+  const d = document.createElement('details'); d.className = 'wort';
+  d.innerHTML = '<summary>📖 Wortspeicher: alle Fachwörter mit Bild</summary><div class="wliste">' +
+    BK.worte.map(([n, t, bild], i) => '<div class="witem" data-i="' + i + '">' + (bild || '') + '<div><b>' + n + '</b><br><span>' + t + '</span></div></div>').join('') + '</div>';
+  const sh = $('.sh', sec); sh.after(d);
+  if (kannSprechen) $$('.witem', d).forEach(w => w.appendChild(vlKnopf(() => BK.worte[+w.dataset.i][0] + '. ' + BK.worte[+w.dataset.i][1])));
+})();
+
+/* ---------- Satzanfänge in Schreibaufgaben ---------- */
+Object.entries(BK.satz || {}).forEach(([id, txt]) => { const t = $('.task[data-id="' + id + '"]'); if (!t || $('.satz', t)) return;
+  const d = document.createElement('div'); d.className = 'satz'; d.innerHTML = '<b>Satzanfänge, wenn du Hilfe brauchst:</b> ' + txt;
+  const db = $('.drawbox', t); if (db) db.before(d); });
+
+/* ---------- Wette im Einstieg ---------- */
+function zeichneWette(){
+  const box = $('#bkWette'); if (!box || !BK.wette) return;
+  if (!box.dataset.fertig) {
+    box.dataset.fertig = '1';
+    box.innerHTML = '<p class="leit" style="margin:6px 0">' + BK.wette.frage + '</p><div class="wette">' +
+      BK.wette.optionen.map(([v, t]) => '<button type="button" class="wbtn" data-v="' + v + '">' + t + '</button>').join('') + '</div>';
+    $$('.wbtn', box).forEach(b => b.addEventListener('click', () => { BKS().wette = b.dataset.v; zeichneWette(); changed(); }));
+  }
+  $$('.wbtn', box).forEach(b => b.classList.toggle('on', b.dataset.v === BKS().wette));
+  $$('.nachWette').forEach(e => { e.hidden = !BKS().wette; });
+}
+let uhrT = null;
+if ($('#uhrBtn')) $('#uhrBtn').addEventListener('click', () => {
+  clearInterval(uhrT); let n = +($('#uhrBtn').dataset.s || 30); $('#uhr').textContent = n; $('#uhr').classList.remove('aus');
+  uhrT = setInterval(() => { n--; $('#uhr').textContent = n; if (n <= 0) { clearInterval(uhrT); $('#uhr').textContent = 'Zeit!'; $('#uhr').classList.add('aus'); } }, 1000);
+});
+function zeichneAufloesung(){
+  const w = BK.wette; if (!w) return;
+  let a = $('#aufloesung');
+  if (!a) { const t = $('.task[data-id="' + w.nach + '"]'); if (!t) return; a = document.createElement('div'); a.id = 'aufloesung'; a.className = 'aufloesung'; t.after(a); }
+  const gew = BKS().wette;
+  if (S.done[w.nach] && gew) {
+    a.hidden = false;
+    const opt = w.optionen.find(o => o[0] === gew);
+    a.innerHTML = '<b>🎲 Deine Wette vom Anfang:</b> „' + (opt ? opt[1].replace(/^\S+\s/, '') : '') + '“ ' + (gew === w.richtig ? 'Du hattest recht! ' : 'Leider verloren. ') + w.aufl;
+  } else a.hidden = true;
+}
+
+/* ---------- Kurze Pause nach 3 falschen Versuchen ---------- */
+const fehl = {};
+document.addEventListener('click', e => {
+  const btn = e.target.closest && e.target.closest('.task .btn');
+  if (!btn || btn.classList.contains('finish')) return;
+  const t = btn.closest('.task'), id = t.dataset.id;
+  setTimeout(() => {
+    const fb = $('.fmsg', t); if (!fb) return;
+    if (fb.classList.contains('ok')) { fehl[id] = 0; return; }
+    if (!fb.classList.contains('no') || !/^✗/.test(fb.textContent)) return;
+    fehl[id] = (fehl[id] || 0) + 1;
+    if (fehl[id] < 3) return;
+    fehl[id] = 0; let n = 20; btn.disabled = true;
+    const p = document.createElement('div'); p.className = 'pause'; fb.after(p);
+    const tick = () => { p.textContent = '⏸️ Dreimal daneben. Mach eine kurze Pause und öffne eine Hilfe. Prüfen geht wieder in ' + n + ' Sekunden.'; };
+    tick(); const iv = setInterval(() => { n--; tick(); if (n <= 0) { clearInterval(iv); btn.disabled = false; p.remove(); } }, 1000);
+  }, 0);
+});
+
+/* ---------- Checkpoint mit Stempel ---------- */
+(function(){
+  const z = document.createElement('div'); z.className = 'stempelzeile'; z.id = 'stempelZeile'; $('#barText').after(z);
+  const fuss = $('#resetBtn').closest('.box');
+  const s = document.createElement('section'); s.className = 'box sec cp'; s.id = 'checkpoint';
+  s.innerHTML = '<span class="tag">Checkpoint</span><div class="sh"><span class="circ">✓</span><h2>Hol dir den Stempel</h2></div><div id="cpBox"></div>';
+  fuss.before(s);
+})();
+function stempelSvg(){
+  return '<svg viewBox="0 0 200 200" class="stempel" aria-label="Stempel: ' + BK.stempel + '"><circle cx="100" cy="100" r="88" fill="#FFF7F0" stroke="#C0392B" stroke-width="8"/><circle cx="100" cy="100" r="74" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-dasharray="6 5"/>' +
+    '<text x="100" y="112" text-anchor="middle" font-size="52">' + BK.stempelIcon + '</text>' +
+    '<text x="100" y="58" text-anchor="middle" font-size="' + (BK.stempel.length > 11 ? 13 : 15) + '" font-weight="800" fill="#C0392B">' + BK.stempel + '</text><text x="100" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#C0392B">Station ' + BK.station + ' ✓</text></svg>';
+}
+function cpFragen(){ const st = BKS(); return bkMische(BK.cp.map(q => q.id), 'cp' + st.seed + '-' + st.cp.runde).slice(0, 5).map(id => BK.cp.find(q => q.id === id)); }
+function zeichneCheckpoint(){
+  const box = $('#cpBox'), cp = BKS().cp, offen = PFLICHT(TASKS).filter(t => !S.done[t.dataset.id]);
+  $('#stempelZeile').innerHTML = cp.stempel ? '✅ Checkpoint: Stempel geholt' : 'Checkpoint: noch kein Stempel';
+  $('#stempelZeile').classList.toggle('ok', !!cp.stempel);
+  if (cp.stempel) {
+    box.innerHTML = '<div class="stempelbox">' + stempelSvg() + '<div><p><b>Super, du hast den Stempel!</b></p><p>' + (BK.naechste ? 'Die nächste Station „' + BK.naechste + '“ ist jetzt für dich offen.' : 'Du hast alle Stationen geschafft!') + '</p></div></div>' + spielBox();
+    const sb = $('#spielStart'); if (sb) sb.addEventListener('click', spielStarten);
+    return;
+  }
+  if (offen.length) { box.innerHTML = '<p class="cplock">🔒 Der Checkpoint öffnet sich, wenn du alle Aufgaben erledigt hast. Noch offen: ' + offen.map(t => 'Aufgabe ' + t.dataset.nr).join(', ') + '.</p>'; return; }
+  const fr = cpFragen(), st = BKS();
+  box.innerHTML = '<p>Beantworte 5 Fragen. Ab 4 richtigen bekommst du den Stempel. Jeder bekommt andere Fragen.' + (cp.versuche ? ' Das ist dein ' + (cp.versuche + 1) + '. Versuch.' : '') + '</p>' +
+    fr.map((q, i) => '<div class="cpq" data-q="' + q.id + '"><span class="cpn">' + (i + 1) + '</span><p class="gap" style="margin:0">' + q.a + ' <select data-cp="' + q.id + '" aria-label="Antwort ' + (i + 1) + '"><option value="">– wählen –</option>' +
+      bkMische([q.ok].concat(q.f), q.id + st.seed).map(v => '<option' + (cp.antw[q.id] === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select> ' + q.b + '</p><div class="cptipp" hidden></div></div>').join('') +
+    '<div class="row"><button type="button" class="btn" id="cpPruefen">Checkpoint prüfen</button></div><div class="fb" id="cpFb"></div>';
+  $$('select[data-cp]', box).forEach(s => s.addEventListener('change', () => { cp.antw = Object.assign({}, cp.antw, { [s.dataset.cp]: s.value }); changed(); }));
+  $('#cpPruefen').addEventListener('click', () => {
+    if (fr.some(q => !cp.antw[q.id])) { $('#cpFb').className = 'fb no'; $('#cpFb').textContent = 'Beantworte zuerst alle 5 Fragen.'; return; }
+    let r = 0;
+    fr.forEach(q => { const ok = cp.antw[q.id] === q.ok, d = $('.cpq[data-q="' + q.id + '"]', box); if (ok) r++;
+      $('select', d).classList.toggle('good', ok); $('select', d).classList.toggle('bad', !ok);
+      const tp = $('.cptipp', d); tp.hidden = ok; tp.textContent = ok ? '' : 'Schau nochmal hier: ' + q.tipp; });
+    cp.versuche++; cp.letzte = r;
+    if (r >= 4) { cp.stempel = true; changed(); zeichneCheckpoint(); $('#checkpoint').scrollIntoView({ block: 'center' }); return; }
+    $('#cpFb').className = 'fb no';
+    $('#cpFb').innerHTML = r + ' von 5 richtig. Du brauchst 4. Schau dir die Stellen bei den roten Fragen nochmal an. Dann bekommst du neue Fragen. <button type="button" class="btn2" id="cpNeu">Neue Fragen</button>';
+    $('#cpNeu').addEventListener('click', () => { cp.runde++; cp.antw = {}; changed(); zeichneCheckpoint(); });
+    changed();
+  });
+}
+
+/* ---------- Belohnungsspiele (nach dem Stempel, insgesamt höchstens 3 Minuten) ---------- */
+let spieleAn = true;
+try { fetch('module.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.spiele === false) { spieleAn = false; zeichneCheckpoint(); } }).catch(() => {}); } catch (e) {}
+const SPIEL_MAX = 180;
+const SPIELE = {
+  faenger: { name: 'Lichtfänger', text: 'Fang die Lichtpunkte mit der Schale. Schieb dafür mit dem Finger oder der Maus nach links und rechts.' },
+  gluehw: { name: 'Glühwürmchen', text: 'Tippe die leuchtenden Glühwürmchen an, bevor sie verlöschen.' },
+  malen: { name: 'Malen mit Licht', text: 'Male mit dem Finger leuchtende Spuren. Sie verblassen langsam. Hier gibt es keine Punkte, nur Farben.' }
+};
+let spielLauf = null;
+function spielBox(){
+  if (!spieleAn || !BK.spiel) return '';
+  const sp = SPIELE[BK.spiel], st = BKS(), rest = Math.max(0, SPIEL_MAX - st.spielSek);
+  return '<div class="spiel"><b>🎮 Belohnung: ' + sp.name + '</b><p class="small" style="margin:4px 0">' + sp.text + ' Eine Runde dauert 30 Sekunden.' +
+    (st.hs && BK.spiel !== 'malen' ? ' Dein Rekord: ' + st.hs + ' Punkte.' : '') + '</p>' +
+    (rest > 0 ? '<div class="row"><button type="button" class="btn" id="spielStart">Runde starten</button><span class="small">Noch ' + Math.floor(rest / 60) + ':' + String(rest % 60).padStart(2, '0') + ' Min. Spielzeit</span></div><svg id="spielSvg" viewBox="0 0 360 240" hidden></svg>'
+      : '<p class="small">Deine Spielzeit für diese Station ist aufgebraucht. Weiter geht es mit der nächsten Station!</p>') + '</div>';
+}
+function spielStarten(){
+  const sv = $('#spielSvg'); sv.removeAttribute('hidden'); $('#spielStart').disabled = true;
+  const lauf = { aktiv: true }; spielLauf = lauf;
+  const pos = ev => { const r = sv.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width * 360, (ev.clientY - r.top) / r.height * 240]; };
+  const t0 = performance.now(); let last = t0, pkt = 0;
+  const kopf = rest => (BK.spiel === 'malen' ? '' : '<text x="10" y="22" fill="#fff" font-size="16" font-weight="700">' + pkt + (pkt === 1 ? ' Punkt' : ' Punkte') + '</text>') +
+    '<text x="350" y="22" fill="#fff" font-size="16" text-anchor="end">' + Math.ceil(rest) + ' s</text>';
+  let x = 180, punkte = [], naechster = 0, spuren = [], zieh = false, farbe = 0;
+  const FARBEN = ['#FFC83D', '#7FD1FF', '#F48FB1', '#9BE89B', '#C9A7FF'];
+  if (BK.spiel === 'faenger') { sv.onpointermove = ev => { x = Math.max(30, Math.min(330, pos(ev)[0])); }; sv.onpointerdown = sv.onpointermove; }
+  if (BK.spiel === 'gluehw') sv.onpointerdown = ev => { const [px, py] = pos(ev); const q = punkte.find(q => !q.weg && Math.hypot(q.x - px, q.y - py) < 26); if (q) { q.weg = true; pkt++; } };
+  if (BK.spiel === 'malen') {
+    sv.onpointerdown = ev => { zieh = true; farbe = (farbe + 1) % FARBEN.length; spuren.push({ f: FARBEN[farbe], p: [pos(ev)], t: performance.now() }); try { sv.setPointerCapture(ev.pointerId); } catch (e) {} };
+    sv.onpointermove = ev => { if (zieh) spuren[spuren.length - 1].p.push(pos(ev)); };
+    sv.onpointerup = sv.onpointercancel = () => { zieh = false; };
+  }
+  const frame = now => {
+    if (!lauf.aktiv) return;
+    const dt = Math.min(0.05, (now - last) / 1000), zeit = (now - t0) / 1000, rest = Math.max(0, 30 - zeit); last = now;
+    let inhalt = '';
+    if (BK.spiel === 'faenger') {
+      if (now > naechster) { punkte.push({ x: 20 + Math.random() * 320, y: -10, v: 70 + zeit * 4 + Math.random() * 40, f: FARBEN[Math.floor(Math.random() * 3)] }); naechster = now + 650 - Math.min(350, zeit * 10); }
+      punkte.forEach(q => { q.y += q.v * dt; if (!q.weg && q.y > 205 && q.y < 222 && Math.abs(q.x - x) < 34) { q.weg = true; pkt++; } });
+      punkte = punkte.filter(q => !q.weg && q.y < 250);
+      inhalt = punkte.map(q => '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="7" fill="' + q.f + '"/>').join('') + '<path d="M' + (x - 34) + ' 210 Q' + x + ' 240 ' + (x + 34) + ' 210 Z" fill="#E39B1B"/>';
+    } else if (BK.spiel === 'gluehw') {
+      if (now > naechster) { punkte.push({ x: 30 + Math.random() * 300, y: 40 + Math.random() * 180, t: now, dauer: 1800 - Math.min(900, zeit * 30), vx: (Math.random() - 0.5) * 40, vy: (Math.random() - 0.5) * 40 }); naechster = now + 700 - Math.min(400, zeit * 12); }
+      punkte.forEach(q => { q.x += q.vx * dt; q.y += q.vy * dt; });
+      punkte = punkte.filter(q => !q.weg && now - q.t < q.dauer);
+      inhalt = punkte.map(q => { const a = 1 - (now - q.t) / q.dauer; return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="16" fill="#F7E463" opacity="' + (0.25 * a).toFixed(2) + '"/><circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="7" fill="#FFF6A8" opacity="' + a.toFixed(2) + '"/>'; }).join('');
+    } else {
+      spuren = spuren.filter(s => zieh && s === spuren[spuren.length - 1] || now - s.t < 6000);
+      inhalt = spuren.map(s => '<polyline points="' + s.p.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ') + '" fill="none" stroke="' + s.f + '" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="' + Math.max(0.15, 1 - (now - s.t) / 6000).toFixed(2) + '"/>').join('');
+    }
+    sv.innerHTML = '<rect width="360" height="240" fill="#14213D"/>' + inhalt + kopf(rest);
+    if (rest <= 0) { lauf.aktiv = false; spielEnde(pkt); return; }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+function spielEnde(pkt){
+  const st = BKS(); st.spielSek += 30; const rekord = BK.spiel !== 'malen' && pkt > (st.hs || 0); if (rekord) st.hs = pkt; changed();
+  zeichneCheckpoint();
+  const s = $('.spiel'); if (s && BK.spiel !== 'malen') { const d = document.createElement('p'); d.className = 'small'; d.innerHTML = '<b>' + pkt + (pkt === 1 ? ' Punkt' : ' Punkte') + '!</b>' + (rekord ? ' Neuer Rekord!' : ''); s.insertBefore(d, s.children[1]); }
+}
+
+/* ---------- Haken in die Seite ---------- */
+function nachStatus(){
+  if (typeof stationNachStatus === 'function') stationNachStatus();
+  zeichneAufloesung(); zeichneCheckpoint();
+}
+function bkAnwenden(){
+  BKS(); if (spielLauf) spielLauf.aktiv = false;
+  zeichneWette();
+  if (typeof stationAnwenden === 'function') stationAnwenden();
+}
+
+/* BK-ENDE */
+/* ---------- Schreibfelder ---------- */
+const LINIE = 38;
+const drawFelder = {};
+$$('.js-drawing').forEach(box => {
+  const id = box.dataset.id;
+  const tools = document.createElement('div'); tools.className = 'dtools';
+  const bF = document.createElement('button'); bF.type = 'button'; bF.className = 'btn2';
+  const bU = document.createElement('button'); bU.type = 'button'; bU.className = 'btn2'; bU.textContent = 'Rückgängig';
+  const bC = document.createElement('button'); bC.type = 'button'; bC.className = 'btnr'; bC.textContent = 'Alles löschen';
+  tools.append(bF, bU, bC);
+  const hint = document.createElement('div'); hint.className = 'dhint';
+  hint.textContent = 'Mit dem Stift kannst du sofort schreiben. Mit dem Finger erst nach „Mit dem Finger schreiben“.';
+  const s = document.createElementNS(SVGNS, 'svg'); s.setAttribute('class', 'dsvg');
+  const gL = el('g', {'pointer-events': 'none'}, s), gS = el('g', {}, s);
+  box.append(tools, hint, s);
+  let finger = false, cur = null, pts = [];
+  const setF = v => { finger = v; s.classList.toggle('finger', v); bF.classList.toggle('on', v); bF.textContent = v ? 'Fingerschreiben an' : 'Mit dem Finger schreiben'; };
+  setF(false);
+  bF.addEventListener('click', () => setF(!finger));
+  function linien(){
+    gL.innerHTML = '';
+    const w = s.clientWidth || 600, h = s.clientHeight || 380;
+    for (let y = LINIE; y < h; y += LINIE) el('line', {x1: 0, y1: y, x2: w, y2: y, stroke: '#CFD8E3', 'stroke-width': 1, 'shape-rendering': 'crispEdges'}, gL);
+  }
+  function striche(){
+    gS.innerHTML = '';
+    (S.draw[id] || []).forEach(k => el('path', {d: k.d, stroke: k.stroke, 'stroke-width': k.strokeWidth, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, gS));
+  }
+  const pos = e => { const r = s.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * 10) / 10, Math.round((e.clientY - r.top) * 10) / 10]; };
+  s.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch' && !finger) return;
+    e.preventDefault(); s.setPointerCapture(e.pointerId);
+    pts = [pos(e)];
+    cur = el('path', {d: 'M' + pts[0].join(' '), stroke: '#1D2433', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, gS);
+  });
+  s.addEventListener('pointermove', e => {
+    if (!cur) return; e.preventDefault();
+    pts.push(pos(e)); cur.setAttribute('d', 'M' + pts.map(p => p.join(' ')).join(' L'));
+  });
+  const ende = () => {
+    if (!cur) return;
+    const d = pts.length === 1 ? 'M' + pts[0].join(' ') + ' l0.1 0' : cur.getAttribute('d');
+    (S.draw[id] = S.draw[id] || []).push({d: d, stroke: '#1D2433', strokeWidth: 2.5});
+    cur = null; striche(); changed();
+  };
+  s.addEventListener('pointerup', ende); s.addEventListener('pointercancel', ende);
+  bU.addEventListener('click', () => { (S.draw[id] || []).pop(); striche(); changed(); });
+  bC.addEventListener('click', () => { S.draw[id] = []; striche(); changed(); });
+  const det = box.closest('details');
+  if (det) det.addEventListener('toggle', linien);
+  window.addEventListener('resize', linien);
+  drawFelder[id] = { linien, striche };
+  linien(); striche();
+});
+
+$$('.task[data-draw]').forEach(t => {
+  const ids = t.dataset.draw.split(',');
+  const fb = $('.fmsg', t), sc = $('.selfcheck', t);
+  $('.finish', t).addEventListener('click', () => {
+    const leerFeld = ids.some(id => !(S.draw[id] && S.draw[id].length));
+    if (leerFeld) { fb.className = 'fb fmsg no'; fb.textContent = ids.length > 1 ? 'Bitte schreibe zuerst in alle Schreibfelder dieser Aufgabe.' : 'Bitte schreibe zuerst deine Antwort in das Schreibfeld.'; const d = $('details', t); if (d) d.open = true; return; }
+    fb.className = 'fb fmsg ok'; fb.textContent = '✓ Bearbeitung abgeschlossen. Prüfe deine Antwort mit der Liste.';
+    S.done[t.dataset.id] = true; sc.hidden = false; status(); changed();
+  });
+});
+
+/* ---------- Gesamtzustand anwenden ---------- */
+function anwenden(){
+  $$('[data-key]').forEach(el => { el.value = S.ans[el.dataset.key] !== undefined ? S.ans[el.dataset.key] : ''; el.classList.remove('good', 'bad'); });
+  TASKS.forEach(t => {
+    t._updHints();
+    const fb = $('.fmsg', t); if (fb) { fb.textContent = ''; fb.className = 'fb fmsg'; }
+    if ((S.done[t.dataset.id] || t.dataset.calc) && !t.dataset.draw) pruefe(t, !!S.done[t.dataset.id]);
+    const sc = $('.selfcheck', t); if (sc && !t.dataset.calc) sc.hidden = !S.done[t.dataset.id];
+  });
+  Object.values(drawFelder).forEach(f => { f.linien(); f.striche(); });
+  simAnwenden(); bkAnwenden(); status();
+}
+
+/* ---------- Zurücksetzen ---------- */
+$('#resetBtn').addEventListener('click', () => $('#resetConfirm').classList.add('on'));
+$('#resetNo').addEventListener('click', () => $('#resetConfirm').classList.remove('on'));
+$('#resetYes').addEventListener('click', () => { S = leer(); $('#resetConfirm').classList.remove('on'); anwenden(); changed(); });
+
+/* ---------- Start ---------- */
+if (!(window.AppBridge && AppBridge.inApp)) {
+  try { const alt = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (alt && alt.v === VERSION) { S = Object.assign(leer(), alt); S.sim = Object.assign(leer().sim, alt.sim || {}); } } catch (e) {}
+}
+anwenden();
+
+/* ---------- Anbindung an die Physik-App (nur Lernstand, keine Namen) ---------- */
+if (window.AppBridge) {
+  setTimeout(() => { appLive = true; }, 1500);
+  AppBridge.register({
+    getState(){
+      const namen = PFLICHT(TASKS).map(t => 'Aufgabe ' + t.dataset.nr); namen.push('Checkpoint');
+      const details = {};
+      TASKS.forEach(t => {
+        let txt = S.done[t.dataset.id] ? 'erledigt' : 'offen';
+        const fid = t.dataset.draw || t.dataset.calc;
+        if (fid) txt += ' · Schreibfeld ' + fid + ': ' + ((S.draw[fid] || []).length ? 'beschrieben' : 'leer');
+        else if (S.hints[t.dataset.id]) txt += ' · ' + S.hints[t.dataset.id] + ' Hilfe(n)';
+        details['Aufgabe ' + t.dataset.nr] = txt;
+      });
+      const cp = BKS().cp; details['Checkpoint'] = cp.stempel ? 'Stempel geholt (' + cp.versuche + '. Versuch)' : (cp.versuche ? 'kein Stempel · ' + cp.versuche + ' Versuch(e), zuletzt ' + cp.letzte + ' von 5' : 'offen');
+      return { stempel: !!cp.stempel, punkte: TASKS.filter(t => S.done[t.dataset.id]).length, stationen: namen,
+        erledigt: PFLICHT(TASKS).filter(t => S.done[t.dataset.id]).map(t => 'Aufgabe ' + t.dataset.nr).concat(BKS().cp.stempel ? ['Checkpoint'] : []),
+        details, daten: JSON.parse(JSON.stringify(S)) };
+    },
+    setState(st){
+      const d = st && st.daten; appLive = true;
+      if (!d || d.v !== VERSION) return;
+      S = Object.assign(leer(), d); S.sim = Object.assign(leer().sim, d.sim || {});
+      anwenden();
+    }
+  });
+}
+})();
+</script>
+</body>
+</html>

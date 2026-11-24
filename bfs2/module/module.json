@@ -1,0 +1,76 @@
+{
+  "hinweis": "Hier steuerst du, was die Schüler sehen. 'klassen': Kennziffer (erste 2 Stellen des Schülercodes) und Name. Bei jedem Modul: 'freigegeben' auf true setzen = taucht bei den Schülern auf. 'klassen' = für welche Klassen. 'stopp': true mit 'stoppNach': Modul-ID = Lehrer-Stopp, die Station öffnet sich erst nach dem Stempel in der genannten Station (oder mit dem Freigabe-Code aus der Klassenliste); 'stopp': false hebt das für alle auf. 'spiele': false (ganz oben, neben 'klassen') schaltet die Belohnungsspiele nach dem Stempel für alle aus.",
+  "klassen": {
+    "61": "BFS2"
+  },
+  "module": [
+    {
+      "id": "optik-s01",
+      "titel": "Station 1 · Linsen bündeln Licht",
+      "untertitel": "Optik: Sammellinse, Brennpunkt und Brennweite",
+      "datei": "optik-s01.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "linse"
+    },
+    {
+      "id": "optik-s02",
+      "titel": "Station 2 · Linsenbilder",
+      "untertitel": "Optik: Groß, klein, auf dem Kopf",
+      "datei": "optik-s02.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "linse",
+      "stopp": true,
+      "stoppNach": "optik-s01"
+    },
+    {
+      "id": "optik-s03",
+      "titel": "Station 3 · Das Auge",
+      "untertitel": "Optik: Aufbau und Scharfstellen",
+      "datei": "optik-s03.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "auge",
+      "stopp": true,
+      "stoppNach": "optik-s02"
+    },
+    {
+      "id": "optik-s04",
+      "titel": "Station 4 · Sehfehler und Brillen",
+      "untertitel": "Optik: Kurzsichtig, weitsichtig, Lesebrille",
+      "datei": "optik-s04.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "auge",
+      "stopp": true,
+      "stoppNach": "optik-s03"
+    },
+    {
+      "id": "optik-s05",
+      "titel": "Station 5 · Wiederholung: Spiegel und Brechung",
+      "untertitel": "Optik: Reflexionsgesetz, Brechung, Totalreflexion",
+      "datei": "optik-s05.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "linse",
+      "stopp": true,
+      "stoppNach": "optik-s04"
+    }
+  ]
+}
