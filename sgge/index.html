@@ -250,7 +250,7 @@ async function ladeCfg() {
   }
 }
 const klassenId = () => code.slice(0, 2);
-const meineModule = () => cfg.module.filter((m) => m.freigegeben && (m.klassen || []).includes(klassenId()));
+const meineModule = () => cfg.module.filter((m) => (lehrerFrei || m.freigegeben) && (m.klassen || []).includes(klassenId()));
 
 /* ---------- Speicher ---------- */
 const KEY = (c) => 'sggeapp:daten:' + c;
@@ -266,7 +266,13 @@ if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
 
 /* ---------- Anmeldung: nur in der installierten App, nur einmal ---------- */
 /* ?vorschau=1 erlaubt dir das Testen im normalen Browser (wird in der Abgabe markiert) */
-const vorschau = new URLSearchParams(location.search).has('vorschau') || localStorage.getItem('sggeapp:vorschau') === '1';
+/* Lehrer-Testansicht (?lehrer=1): nur wenn die Lehrerseite das nach Code-Eingabe in diesem Browser freigegeben hat. Alles ist offen, nichts gesperrt. */
+let lehrerFrei = false;
+try {
+  lehrerFrei = (new URLSearchParams(location.search).has('lehrer') && Date.now() - Number(localStorage.getItem('sggeapp:lehrerfrei') || 0) < 12 * 3600 * 1000) || sessionStorage.getItem('sggeapp:lf') === '1';
+  if (lehrerFrei) sessionStorage.setItem('sggeapp:lf', '1');
+} catch (e) {}
+const vorschau = lehrerFrei || new URLSearchParams(location.search).has('vorschau') || localStorage.getItem('sggeapp:vorschau') === '1';
 if (vorschau) localStorage.setItem('sggeapp:vorschau', '1');
 let kandidat = null;
 function startLogin() {
@@ -340,7 +346,7 @@ function startHome() {
     b.innerHTML = `<span class="nr">${mods.indexOf(m) + 1}</span><div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div><div class="body">
       <div class="meta">${f ? `<span>${f.k} von ${f.n} Stationen · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
       ${f ? `<div class="bar"><i style="width:${Math.round(f.anteil * 100)}%"></i></div>` : ''}</div>`;
-    if (m.gesperrt) {
+    if (m.gesperrt && !lehrerFrei) {
       b.classList.add('gesperrt'); b.setAttribute('aria-disabled', 'true');
       b.querySelector('.meta').innerHTML = '<span class="badge lock">🔒 Noch gesperrt</span>';
       const bar = b.querySelector('.bar'); if (bar) bar.remove();
@@ -551,6 +557,12 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 (async () => {
   await ladeCfg();
   code = localStorage.getItem('sggeapp:aktiv');
+  if (lehrerFrei && !code) {
+    const kl = Object.keys(cfg.klassen || {})[0] || '00';
+    code = kl + '99999' + KA.pruefziffer(kl + '99999');
+    localStorage.setItem('sggeapp:aktiv', code); localStorage.setItem('sggeapp:seit', new Date().toISOString());
+  }
+  if (lehrerFrei) { const b = document.createElement('div'); b.textContent = 'Lehrer-Testansicht: alles freigeschaltet, nichts gesperrt. Abgaben sind als Vorschau markiert.'; b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1F3A5F;color:#fff;text-align:center;font:600 13px -apple-system,Segoe UI,Arial,sans-serif;padding:6px 10px;pointer-events:none;opacity:.92'; document.body.appendChild(b); }
   if (code && KA.codeGueltig(code)) { ladeDaten(); startHome(); } else startLogin();
   aufNeuesPruefen();
 })();
