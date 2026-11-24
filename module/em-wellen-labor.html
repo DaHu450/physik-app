@@ -121,6 +121,39 @@ table.ord th{color:var(--muted);font-weight:500}
 .tuner .disp{background:#0d1a12;color:#7CFF9B;border-radius:8px;padding:8px 14px;font-size:20px;letter-spacing:.04em;min-width:9.5em;text-align:center}
 .lampwrap{display:flex;align-items:center;gap:12px;margin-top:8px}
 </style>
+<style id="farben-b">
+/* Farbschema B (Nov 2026): kräftiges Blau für Überschriften, stärkere Kontraste, Merke goldgelb */
+:root{
+  --bg:#E7EDF4; --panel:#FFFFFF; --ink:#0B1626; --muted:#37465A; --line:#A7B7CA;
+  --navy:#13305A; --navySoft:#DCE7F7; --green:#22703C; --greenSoft:#DAF0E0;
+  --bad:#A8201A; --badSoft:#FADFDB;
+  --head:#0B50C4; --accent:#0B50C4; --givenLine:#B7CBEA;
+  --merk:#E0A800; --merkSoft:#FFF6CC; --merkInk:#7A5C00;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B121C; --panel:#152030; --ink:#F0F4F9; --muted:#B3C1D1; --line:#3A4C63;
+  --navy:#9CC0F0; --navySoft:#1A2A40; --green:#74CC90; --greenSoft:#173523;
+  --bad:#F59A93; --badSoft:#3E1E1C;
+  --head:#7DB0FF; --accent:#4D8EF0; --givenLine:#2E4A70;
+  --merk:#E8BE3A; --merkSoft:#3A3214; --merkInk:#F2CF5B;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B121C; --panel:#152030; --ink:#F0F4F9; --muted:#B3C1D1; --line:#3A4C63;
+  --navy:#9CC0F0; --navySoft:#1A2A40; --green:#74CC90; --greenSoft:#173523;
+  --bad:#F59A93; --badSoft:#3E1E1C;
+  --head:#7DB0FF; --accent:#4D8EF0; --givenLine:#2E4A70;
+  --merk:#E8BE3A; --merkSoft:#3A3214; --merkInk:#F2CF5B;
+}
+h1,h2,.card h2,.card h3{color:var(--head)}
+.card h2,.card h3,h2{font-weight:800}
+.card,.score,nav button{border-width:2px}
+nav button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+nav button[aria-selected="true"] .n,nav button[aria-selected="true"] .done{color:#fff}
+.given,.read{border:1.5px solid var(--givenLine)}
+input[type=range]{accent-color:var(--accent)}
+.merk{border-left:6px solid var(--merk);background:var(--merkSoft)}
+.merk b{color:var(--merkInk)}
+</style>
 </head>
 <body>
 <div class="wrap">
