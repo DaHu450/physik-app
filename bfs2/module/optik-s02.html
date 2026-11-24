@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Optik · Seite 2 · Linsenbilder</title>
+<title>Optik · Station 2 · Linsenbilder</title>
 <!--
-  Lerneinheit Optik (BFS2) · Seite 2 von 5 · Modul für die Physik-App BFS2
+  Lerneinheit Optik (BFS2) · Station 2 von 5 · Modul für die Physik-App BFS2
   Ergänzungen (nicht aus Evis Materialien):
+  - Baukasten aller Stationen: Wette im Einstieg, Wortspeicher mit Bildern, Vorlese-Knopf, Satzanfänge, Gold-Aufgaben (freiwillig, Werte pro Person), Pause nach 3 Fehlversuchen, Checkpoint mit zufälligen Fragen und Stempel, Belohnungsspiel (höchstens 3 Minuten).
+  - Wette „Bild an der Wand: aufrecht oder auf dem Kopf?“, Fehlersuche in einer Konstruktion (Aufgabe 8), Gold: Beamer-Rechnung mit Werten pro Person, Handykamera. Spiel: Malen mit Licht.
   - Modellwerte der Simulation: Brennweite f = 5 cm, Gegenstandsgröße G = 3 cm.
   - Einstieg mit Handykamera (Haus auf dem Chip) als drittes Gerät.
   - Kopierer (Abbildung 1:1) in Aufgabe 8.
@@ -39,6 +41,51 @@ p{margin:0 0 10px}
 .kachel.cur{border-color:var(--main);background:var(--main);color:#fff;font-weight:700;box-shadow:0 3px 10px rgba(58,124,165,.35)}
 .kachel.cur .kn{color:#fff}
 .kpfeil{align-self:center;font-weight:800;color:var(--main);font-size:1.2rem;flex:none}
+/*BK-CSS*/
+.stempelzeile{display:inline-block;margin-top:6px;font-size:.85rem;font-weight:700;color:var(--muted);background:#F1F4F8;border-radius:20px;padding:3px 12px}
+.stempelzeile.ok{color:#1E6B3A;background:#E5F4EA}
+.vl{float:right;margin:0 0 4px 8px;min-width:44px;min-height:44px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:1.2rem;cursor:pointer}
+.wette{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.wbtn{flex:1 1 200px;min-height:56px;font-size:1.05rem;font-weight:700;border-radius:14px;border:2px solid #E39B1B;background:#FFF6E6;color:#7A4A00;cursor:pointer}
+.wbtn.on{background:#E39B1B;color:#fff}
+.challenge{background:#FFF6E6;border:2px dashed #E39B1B;border-radius:12px;padding:10px 14px;margin:10px 0}
+.uhr{font-size:1.8rem;font-weight:800;color:#C0392B;min-width:80px}
+.uhr.aus{color:#1E6B3A}
+.wort{background:#F7F4FC;border:1px solid #D9CFEE;border-radius:12px;padding:8px 12px;margin:10px 0}
+.wort summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.wliste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.witem{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:.92rem}
+.witem svg{width:84px;height:auto;flex:none}
+.witem .vl{margin-left:auto;float:none}
+.wicon{font-size:2rem;width:84px;text-align:center;flex:none}
+.satz{background:#F7F4FC;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.95rem}
+.aufloesung{background:#FFF6E6;border-left:4px solid #E39B1B;border-radius:10px;padding:10px 14px;margin:10px 0}
+.sec.cp{--r:#C0392B;--t:#FBECEA;--d:#8E2A20}
+.cplock{background:#F1F4F8;border-radius:10px;padding:10px 14px}
+.cpq{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;background:#fff;flex-wrap:wrap}
+.cpn{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);display:flex;align-items:center;justify-content:center;font-weight:700}
+.cpq p{flex:1;min-width:0}
+.cptipp{width:100%;font-size:.9rem;color:#8E2A20}
+.stempelbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.stempel{width:170px;height:170px;transform:rotate(-12deg);animation:stempel .5s ease-out}
+@keyframes stempel{0%{transform:rotate(-12deg) scale(2.2);opacity:0}70%{transform:rotate(-12deg) scale(.92);opacity:1}100%{transform:rotate(-12deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.stempel{animation:none}}
+.sec.gold{--r:#D4A017;--t:#FFF6D6;--d:#7A5A00}
+.task.gold{border-color:#E8C55A;background:#FFFDF4}
+.pause{background:#FFF6E6;border:1px solid #E39B1B;border-radius:10px;padding:8px 12px;margin:8px 0;font-weight:700;color:#7A4A00}
+.spiel{width:100%;background:#F2EDFA;border-radius:12px;padding:10px 12px;margin-top:10px}
+#spielSvg{display:block;width:100%;max-width:520px;height:auto;margin-top:8px;border-radius:10px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#spielSvg[hidden]{display:none}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.wahl button{flex:1 1 150px;min-height:48px;border-radius:12px;border:2px solid var(--main);background:#fff;color:var(--main);font-weight:700;font-size:1rem;cursor:pointer}
+.wahl button.on{background:var(--main);color:#fff}
+.wahl button.richtig{background:#2E8B57;border-color:#2E8B57;color:#fff}
+.wahl button.falsch{background:#FBECEA;border-color:#C0392B;color:#8E2A20}
+@media (max-width:760px){.wliste{grid-template-columns:1fr}}
+.fehlerfig svg{width:100%;max-width:640px;height:auto;cursor:crosshair;border-radius:10px}
+.fehlerliste{margin:6px 0;padding-left:20px}
+.fehlerliste li{margin:4px 0;color:#8E2A20}
+/*BK-CSS-ENDE*/
 @media (max-width:760px){.kacheln{flex-direction:column;gap:2px}.kachel{flex-direction:row;text-align:left;padding:6px 10px;gap:10px}.kachel .ki{font-size:1.3rem}.kpfeil{transform:rotate(90deg);line-height:1}}
 .pages{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;padding:0;list-style:none}
 .pages li{border:1px solid #B8BEC7;border-radius:999px;padding:3px 12px;font-size:.85rem;background:#fff;color:var(--ink)}
@@ -161,15 +208,15 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
 
 <!-- Kopf -->
 <div class="box">
-  <div class="kz">Lerneinheit · Optik · Seite 2 von 5</div>
+  <div class="kz">Lerneinheit · Optik · Station 2 von 5</div>
   <h1>Linsenbilder: groß, klein, auf dem Kopf</h1>
-  <nav class="kacheln" aria-label="Seiten der Lerneinheit"><div class="kachel"><span class="ki" aria-hidden="true">🔍</span><span class="kn">Seite 1</span><span>Linsen bündeln Licht</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel cur" aria-current="page"><span class="ki" aria-hidden="true">🖼️</span><span class="kn">Seite 2</span><span>Linsenbilder</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👁️</span><span class="kn">Seite 3</span><span>Das Auge</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👓</span><span class="kn">Seite 4</span><span>Sehfehler und Brillen</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">🪞</span><span class="kn">Seite 5</span><span>Wiederholung: Spiegel und Brechung</span></div></nav>
+  <nav class="kacheln" aria-label="Stationen der Lerneinheit"><div class="kachel"><span class="ki" aria-hidden="true">🔍</span><span class="kn">Station 1</span><span>Linsen bündeln Licht</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel cur" aria-current="page"><span class="ki" aria-hidden="true">🖼️</span><span class="kn">Station 2</span><span>Linsenbilder</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👁️</span><span class="kn">Station 3</span><span>Das Auge</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👓</span><span class="kn">Station 4</span><span>Sehfehler und Brillen</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">🪞</span><span class="kn">Station 5</span><span>Wiederholung: Spiegel und Brechung</span></div></nav>
   <div class="legend">
     <span class="tag E">Einstieg</span><span class="tag B">Erarbeitung</span><span class="tag A">Anwendung</span>
   </div>
   <div class="bar"><i id="barFill"></i></div>
   <div class="small" id="barText">0 von 9 Aufgaben erledigt</div>
-  <p class="small" style="margin:6px 0 0">Deine Auswahl, deine Ergebnisse und dein Fortschritt werden automatisch in der App gespeichert.</p>
+  <p class="small" style="margin:6px 0 0">Deine Auswahl, deine Ergebnisse und dein Fortschritt werden automatisch in der App gespeichert. Mit 🔊 lässt du dir Texte vorlesen.</p>
 </div>
 
 <!-- A Einstieg -->
@@ -182,13 +229,37 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
     <div class="info"><b>Lupe</b><br>Du schaust durch eine Lupe auf kleine Schrift. Die Buchstaben sehen groß aus.</div>
   </div>
   <p>In allen drei Geräten steckt eine Sammellinse. Trotzdem macht sie einmal ein großes Bild, einmal ein kleines.</p>
-  <p class="leit">Wovon hängt es ab, ob eine Sammellinse ein Bild groß oder klein, aufrecht oder auf dem Kopf macht?</p>
-  <p>Am Ende dieser Seite kannst du</p>
-  <ul>
-    <li>mit drei besonderen Strahlen zeigen, wo das Bild entsteht,</li>
-    <li>angeben, wie das Bild aussieht, wenn der Gegenstand näher oder weiter weg steht,</li>
-    <li>den Abbildungsmaßstab berechnen.</li>
-  </ul>
+  <div class="grid2">
+    <div class="vorlesbar">
+      <p><b>Schließ eine Wette ab:</b> Vor einer Lupe steht eine brennende Kerze. Hinter der Lupe hältst du ein weißes Blatt. Wenn der Abstand stimmt, siehst du auf dem Blatt ein scharfes Bild der Kerze.</p>
+    </div>
+    <div class="fig" aria-hidden="true">
+      <svg viewBox="0 0 320 150">
+        <line x1="10" y1="110" x2="310" y2="110" stroke="#4F5B6D" stroke-dasharray="6 4"/>
+        <rect x="50" y="80" width="16" height="30" rx="2" fill="#F4E2C4" stroke="#A97C50" stroke-width="2"/>
+        <path d="M58 78 q-7 -10 0 -22 q7 12 0 22z" fill="#F6B042"/>
+        <path d="M160 40 Q176 110 160 140 Q144 110 160 40Z" fill="#DDEBF4" stroke="#1F5470" stroke-width="2"/>
+        <rect x="262" y="30" width="10" height="110" fill="#fff" stroke="#4F5B6D" stroke-width="2"/>
+        <text x="240" y="98" font-size="40" font-weight="800" fill="#E39B1B">?</text>
+        <text x="40" y="135" font-size="12" fill="#4F5B6D">Kerze</text><text x="146" y="30" font-size="12" fill="#4F5B6D">Lupe</text><text x="250" y="22" font-size="12" fill="#4F5B6D">Blatt</text>
+      </svg>
+    </div>
+  </div>
+  <div id="bkWette"></div>
+  <div class="nachWette" hidden>
+    <div class="challenge">
+      <b>⏱️ 60-Sekunden-Challenge</b>
+      <p style="margin:6px 0">Wie viele Geräte mit einer Linse fallen dir in 60 Sekunden ein? Schreib sie auf einen Zettel. Wer hat die meisten?</p>
+      <div class="row"><button type="button" class="btn2" id="uhrBtn" data-s="60">Uhr starten</button><span class="uhr" id="uhr">60</span></div>
+    </div>
+    <p class="leit">Wovon hängt es ab, ob eine Sammellinse ein Bild groß oder klein, aufrecht oder auf dem Kopf macht?</p>
+    <p>Am Ende dieser Station kannst du</p>
+    <ul>
+      <li>mit drei besonderen Strahlen zeigen, wo das Bild entsteht,</li>
+      <li>angeben, wie das Bild aussieht, wenn der Gegenstand näher oder weiter weg steht,</li>
+      <li>den Abbildungsmaßstab berechnen.</li>
+    </ul>
+  </div>
 </section>
 
 <!-- B Erarbeitung -->
@@ -327,7 +398,16 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
   <div class="sh"><span class="circ">C</span><h2>Beamer, Kamera, Lupe</h2></div>
   <p>Zurück zur Frage vom Anfang: <b>Wovon hängt es ab, ob eine Sammellinse ein Bild groß oder klein, aufrecht oder auf dem Kopf macht?</b></p>
 
-  <div class="task" data-id="t8" data-nr="8" data-afb="2" data-op="Ordne zu">
+  <div class="task" data-id="t10" data-nr="8" data-afb="2" data-op="Finde die Fehler">
+    <p>Ben hat das Bild einer Sammellinse konstruiert. In seiner Zeichnung stecken <b>3 Fehler</b>. Tippe auf die Stellen, die falsch sind.</p>
+    <div class="fig fehlerfig"><svg id="fehlerSvg" viewBox="0 0 600 300" role="img" aria-label="Bens Konstruktion mit drei Fehlern. Tippe auf die Fehler."></svg></div>
+    <div class="small" id="fehlerInfo">0 von 3 Fehlern gefunden</div>
+    <ul class="fehlerliste" id="fehlerListe"></ul>
+    <input type="hidden" data-key="t10m" data-ok="ok">
+    <div class="hints" data-h='["Prüfe jeden Strahl einzeln mit deinem Wissen aus der Simulation.","Ein Fehler steckt im roten Parallelstrahl, einer im grünen Mittelpunktstrahl.","Der dritte Fehler ist das Bild selbst. Wie steht ein Bild hinter einer Sammellinse?"]'></div>
+  </div>
+
+  <div class="task" data-id="t8" data-nr="9" data-afb="2" data-op="Ordne zu">
     <p>Wo steht der Gegenstand in diesen Geräten? Ordne zu.</p>
     <table class="t">
       <tr><th>Gerät</th><th>Der Gegenstand steht …</th></tr>
@@ -343,7 +423,7 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
     <div class="hints" data-h='["Nutze deine Tabelle aus Aufgabe 4.","Überlege bei jedem Gerät zuerst: Ist das Bild größer, kleiner oder gleich groß? Steht es aufrecht?"]'></div>
   </div>
 
-  <div class="task" data-id="t9" data-nr="9" data-afb="3" data-op="Beurteile" data-draw="2B">
+  <div class="task" data-id="t9" data-nr="10" data-afb="3" data-op="Beurteile" data-draw="2B">
     <p>Lena sagt: „Eine Lupe muss man möglichst weit weg vom Text halten. Dann wird die Schrift am größten.“ Beurteile Lenas Aussage. Nutze die Simulation.</p>
     <details class="drawbox"><summary>✏️ Frage 2B</summary><div class="js-drawing" data-id="2B"></div></details>
     <div class="row"><button type="button" class="btn finish">Bearbeitung abschließen</button></div>
@@ -359,12 +439,39 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
   </div>
 </section>
 
+<section class="box sec gold">
+  <span class="tag">Gold · freiwillig</span>
+  <div class="sh"><span class="circ">⭐</span><h2>Profi-Aufgaben</h2></div>
+  <p>Du willst mehr? Diese Aufgaben sind schwerer und freiwillig. Für den Checkpoint brauchst du sie nicht.</p>
+
+  <div class="task gold" data-id="g1" data-nr="G1" data-afb="2" data-op="Berechne">
+    <p>Dein Beamer hat ein Bild auf dem Chip mit G = <b id="g1G">–</b>. Der Chip ist g = <b id="g1g">–</b> von der Linse entfernt. An der Wand soll das Bild B = <b id="g1B">–</b> hoch sein. Wie weit muss die Wand von der Linse weg sein?</p>
+    <div class="formel">b : g = B : G</div>
+    <div class="row"><label>b =</label><input type="number" data-key="g1" data-num="g1" data-tol="1" step="0.1" inputmode="decimal" aria-label="Bildweite b in cm"> cm</div>
+    <div class="hints" data-h='["Rechne zuerst den Abbildungsmaßstab A = B : G aus.","Es gilt auch A = b : g. Stelle nach b um: b = A · g.","Gib b in Zentimetern an."]'></div>
+  </div>
+
+  <div class="task gold" data-id="g2" data-nr="G2" data-afb="3" data-op="Begründe">
+    <p>Eine Fotografin steht weit weg von einer Blume. Dann geht sie mit der Kamera näher heran. Was muss das Objektiv tun, damit das Foto scharf bleibt?</p>
+    <p class="gap">Die Blume steht dann
+      <select data-key="g2a" data-ok="na"><option value="">– wählen –</option><option value="we">weiter weg von</option><option value="na">näher an</option></select>
+      der Linse. Das Bild wird
+      <select data-key="g2b" data-ok="gr"><option value="">– wählen –</option><option value="kl">kleiner</option><option value="gr">größer</option></select>.
+      Die Bildweite b wird
+      <select data-key="g2c" data-ok="gr"><option value="">– wählen –</option><option value="kl">kleiner</option><option value="gr">größer</option></select>.
+      Deshalb muss das Objektiv
+      <select data-key="g2d" data-ok="weg"><option value="">– wählen –</option><option value="hin">näher an den Chip</option><option value="weg">weiter weg vom Chip</option></select>
+      fahren.</p>
+    <div class="hints" data-h='["Schiebe in der Simulation den Gegenstand von 20 cm auf 12 cm. Beobachte b.","Der Chip bleibt an seinem Platz. Nur das Objektiv kann sich bewegen."]'></div>
+  </div>
+</section>
+
 <!-- Fuß -->
 <div class="box">
   <p class="small"><b>Quellen:</b> Eigene Darstellungen. Alle Werte der Simulation sind Modellwerte.</p>
-  <button type="button" class="btnr" id="resetBtn">Eingaben dieser Seite zurücksetzen</button>
+  <button type="button" class="btnr" id="resetBtn">Eingaben dieser Station zurücksetzen</button>
   <div class="confirm" id="resetConfirm">
-    <p style="margin:0 0 8px">Wirklich alles auf dieser Seite löschen? Auch deine Schreibfelder werden geleert.</p>
+    <p style="margin:0 0 8px">Wirklich alles auf dieser Station löschen? Auch deine Schreibfelder und dein Stempel werden gelöscht.</p>
     <div class="row" style="margin:0"><button type="button" class="btnr" id="resetYes">Ja, löschen</button><button type="button" class="btn2" id="resetNo">Abbrechen</button></div>
   </div>
 </div>
@@ -493,9 +600,11 @@ function pruefe(t, zeigen){
 
 function status(){
   let n = 0;
-  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d) n++; });
-  $('#barFill').style.width = (100 * n / TASKS.length) + '%';
-  $('#barText').textContent = n + ' von ' + TASKS.length + ' Aufgaben erledigt';
+  const PF = TASKS.filter(t => !t.classList.contains('gold')), GO = TASKS.filter(t => t.classList.contains('gold') && S.done[t.dataset.id]).length;
+  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d && PF.includes(t)) n++; });
+  $('#barFill').style.width = (100 * n / PF.length) + '%';
+  $('#barText').textContent = n + ' von ' + PF.length + ' Aufgaben erledigt' + (GO ? ' · ⭐ Gold: ' + GO : '');
+  if (typeof nachStatus === 'function') nachStatus();
 }
 
 /* ---------- Simulation: optische Bank ---------- */
@@ -571,6 +680,306 @@ const NUMHINWEIS = {
   'A-eigen': 'Übernimm zuerst einen Messwert mit g zwischen 5 cm und 10 cm in die Tabelle.'
 };
 
+/* BK-START */
+/* ---------- Station 2: Fehlersuche, Gold mit Werten pro Person ---------- */
+const FEHLER = [
+  { id: 'par', x: 420, y: 150, r: 34, text: 'Der rote Parallelstrahl muss hinter der Linse durch den Brennpunkt F gehen. Bei Ben geht er durch 2F.' },
+  { id: 'mit', x: 345, y: 210, r: 34, text: 'Der grüne Mittelpunktstrahl geht ohne Knick durch die Mitte der Linse. Bei Ben hat er einen Knick.' },
+  { id: 'bild', x: 500, y: 132, r: 34, text: 'Das Bild hinter einer Sammellinse steht auf dem Kopf. Bens Bild steht aufrecht.' }
+];
+let fehlerDaneben = null;
+function fehlerGefunden(){ return (S.ans.t10f || '').split(',').filter(Boolean); }
+function zeichneFehler(){
+  const sv = $('#fehlerSvg'), gef = fehlerGefunden();
+  sv.innerHTML = '<rect width="600" height="300" fill="#FBFCFE"/>' +
+    '<line x1="10" y1="150" x2="590" y2="150" stroke="#4F5B6D" stroke-width="1.5" stroke-dasharray="7 5"/>' +
+    '<ellipse cx="300" cy="150" rx="14" ry="112" fill="#DDEBF4" stroke="#1F5470" stroke-width="2"/>' +
+    [[180, '2F'], [240, 'F'], [360, 'F'], [420, '2F']].map(([x, t]) => '<line x1="' + x + '" y1="143" x2="' + x + '" y2="157" stroke="#1D2433" stroke-width="2"/><text x="' + x + '" y="176" font-size="14" text-anchor="middle" fill="#1D2433">' + t + '</text>').join('') +
+    '<line x1="130" y1="150" x2="130" y2="92" stroke="#1D2433" stroke-width="4"/><path d="M130 82 L121 98 H139 Z" fill="#1D2433"/><text x="112" y="80" font-size="15" font-weight="700">G</text>' +
+    '<polyline points="130,90 300,90 420,150 520,200" fill="none" stroke="#D9534F" stroke-width="3"/>' +
+    '<polyline points="130,90 300,150 380,262" fill="none" stroke="#2E8B57" stroke-width="3"/>' +
+    '<line x1="500" y1="150" x2="500" y2="122" stroke="#3A7CA5" stroke-width="4"/><path d="M500 112 L491 128 H509 Z" fill="#3A7CA5"/><text x="512" y="122" font-size="15" font-weight="700" fill="#3A7CA5">B</text>' +
+    FEHLER.filter(f => gef.includes(f.id)).map(f => '<circle cx="' + f.x + '" cy="' + f.y + '" r="' + f.r + '" fill="none" stroke="#C0392B" stroke-width="4"/>').join('') +
+    (fehlerDaneben ? '<text x="' + fehlerDaneben[0] + '" y="' + fehlerDaneben[1] + '" font-size="22" text-anchor="middle">👍</text>' : '');
+  $('#fehlerInfo').textContent = gef.length === 3 ? '⭐ Alle 3 Fehler gefunden!' : gef.length + ' von 3 Fehlern gefunden' + (fehlerDaneben ? '. Wo du zuletzt getippt hast, ist alles richtig.' : '');
+  $('#fehlerListe').innerHTML = FEHLER.filter(f => gef.includes(f.id)).map(f => '<li>' + f.text + '</li>').join('');
+  const i = $('input[data-key="t10m"]'), v = gef.length === 3 ? 'ok' : '';
+  if (i.value !== v) { i.value = v; S.ans.t10m = v; i.classList.remove('good', 'bad'); }
+}
+$('#fehlerSvg').addEventListener('click', ev => {
+  const sv = $('#fehlerSvg'), r = sv.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * 600, y = (ev.clientY - r.top) / r.height * 300;
+  const f = FEHLER.find(f => Math.hypot(f.x - x, f.y - y) <= f.r), gef = fehlerGefunden();
+  if (f) { fehlerDaneben = null; if (!gef.includes(f.id)) S.ans.t10f = gef.concat(f.id).join(','); changed(); }
+  else fehlerDaneben = [x, y];
+  zeichneFehler();
+});
+
+function goldWerte(){ const s = BKS().seed; return { G: 1 + (s % 5) * 0.5, g: 2 + (Math.floor(s / 5) % 5) * 0.5, B: 60 + (Math.floor(s / 25) % 7) * 20 }; }
+NUM.g1 = () => { const w = goldWerte(); return [Math.round(w.B * w.g / w.G * 10) / 10]; };
+function zeichneGold(){ const w = goldWerte(), k = x => String(x).replace('.', ',');
+  $('#g1G').textContent = k(w.G.toFixed(1)) + ' cm'; $('#g1g').textContent = k(w.g.toFixed(1)) + ' cm'; $('#g1B').textContent = w.B + ' cm'; }
+
+const ico2 = inner => '<svg viewBox="0 0 120 70" aria-hidden="true"><line x1="2" y1="45" x2="118" y2="45" stroke="#4F5B6D" stroke-dasharray="4 3"/><path d="M60 6 Q70 40 60 66 Q50 40 60 6Z" fill="#DDEBF4" stroke="#1F5470" stroke-width="2"/>' + inner + '</svg>';
+const PFEIL_G = '<line x1="22" y1="45" x2="22" y2="20" stroke="#1D2433" stroke-width="3"/><path d="M22 14 L17 23 H27Z" fill="#1D2433"/>';
+const PFEIL_B = '<line x1="98" y1="45" x2="98" y2="62" stroke="#3A7CA5" stroke-width="3"/><path d="M98 68 L93 59 H103Z" fill="#3A7CA5"/>';
+function stationAnwenden(){ fehlerDaneben = null; zeichneFehler(); zeichneGold(); }
+const BK = {
+  station: 2, stempel: 'BILDER-PROFI', stempelIcon: '🖼️', naechste: 'Das Auge', spiel: 'malen',
+  worte: [
+    ['Gegenstand G', 'Das Ding vor der Linse, zum Beispiel eine Kerze. Wir zeichnen es als Pfeil.', ico2(PFEIL_G)],
+    ['Bild B', 'Das, was die Linse aus dem Gegenstand macht. Auf einem Schirm steht es auf dem Kopf.', ico2(PFEIL_G + PFEIL_B)],
+    ['Gegenstandsweite g', 'Der Abstand vom Gegenstand bis zur Linse.', ico2(PFEIL_G + '<path d="M22 56 H60" stroke="#1D2433" stroke-width="2"/><text x="36" y="68" font-size="12" font-weight="700">g</text>')],
+    ['Bildweite b', 'Der Abstand von der Linse bis zum Bild.', ico2(PFEIL_B + '<path d="M60 30 H98" stroke="#3A7CA5" stroke-width="2"/><text x="76" y="26" font-size="12" font-weight="700" fill="#3A7CA5">b</text>')],
+    ['Parallelstrahl', 'Kommt parallel zur Achse. Hinter der Linse geht er durch den Brennpunkt F.', ico2('<polyline points="4,20 60,20 116,62" fill="none" stroke="#D9534F" stroke-width="2.5"/>')],
+    ['Mittelpunktstrahl', 'Geht durch die Mitte der Linse. Er läuft ohne Knick geradeaus weiter.', ico2('<line x1="4" y1="22" x2="116" y2="66" stroke="#2E8B57" stroke-width="2.5"/>')],
+    ['Brennpunktstrahl', 'Geht vor der Linse durch F. Hinter der Linse läuft er parallel zur Achse.', ico2('<polyline points="4,18 60,58 116,58" fill="none" stroke="#7B4FB0" stroke-width="2.5"/>')],
+    ['Abbildungsmaßstab A', 'Sagt, wie oft das Bild größer ist als der Gegenstand: A = B : G.', '<span class="wicon">✖️</span>'],
+    ['2F', 'Der doppelte Abstand des Brennpunkts von der Linse. Steht der Gegenstand dort, ist das Bild gleich groß.', '<span class="wicon">📏</span>']
+  ],
+  wette: { frage: 'Was meinst du: Wie steht die Kerze auf dem Blatt?', optionen: [['auf', '⬆️ Aufrecht, die Flamme ist oben'], ['kopf', '🙃 Auf dem Kopf, die Flamme ist unten']], richtig: 'kopf', nach: 't4',
+    aufl: 'Das Bild einer Sammellinse auf einem Schirm steht immer auf dem Kopf. Deshalb steckt das kleine Bild im Beamer verkehrt herum. An der Wand steht es dann richtig.' },
+  satz: {
+    t6: 'Ich nehme aus der Tabelle: g = … und B = … · G ist … · Formel: A = B : G · Rechnung: A = … : … = … · Das Bild ist … mal so groß wie der Gegenstand.',
+    t9: 'Lena hat (nicht / teilweise) recht. · In der Simulation sehe ich: … · Ist der Text weiter weg als F, dann … · Bei einer Lupe muss der Text …'
+  },
+  cp: [
+  { id: 'q1', a: 'Ein Bild auf einem Schirm hinter einer Sammellinse steht immer', b: '.', ok: 'auf dem Kopf', f: ['aufrecht', 'schief'], tipp: 'Aufgabe 4' },
+  { id: 'q2', a: 'Steht der Gegenstand weiter weg als 2F, ist das Bild', b: '.', ok: 'kleiner', f: ['größer', 'gleich groß'], tipp: 'Aufgabe 4' },
+  { id: 'q3', a: 'Steht der Gegenstand genau auf 2F, ist das Bild', b: '.', ok: 'gleich groß', f: ['kleiner', 'größer'], tipp: 'Aufgabe 4' },
+  { id: 'q4', a: 'Steht der Gegenstand zwischen 2F und F, ist das Bild', b: '.', ok: 'größer', f: ['kleiner', 'gleich groß'], tipp: 'Aufgabe 4' },
+  { id: 'q5', a: 'Steht der Gegenstand genau im Brennpunkt, entsteht', b: '.', ok: 'kein Bild', f: ['ein riesiges Bild', 'ein kleines Bild'], tipp: 'Aufgabe 3' },
+  { id: 'q6', a: 'Bei einer Lupe steht der Gegenstand', b: '.', ok: 'zwischen F und Linse', f: ['weiter weg als 2F', 'genau auf 2F'], tipp: 'Aufgabe 9' },
+  { id: 'q7', a: 'Der Mittelpunktstrahl läuft durch die Linse', b: '.', ok: 'ohne Knick', f: ['durch den Brennpunkt', 'zurück'], tipp: 'Aufgabe 8' },
+  { id: 'q8', a: 'Der Parallelstrahl geht hinter der Linse durch den', b: '.', ok: 'Brennpunkt', f: ['Gegenstand', 'Punkt 2F'], tipp: 'Aufgabe 8' },
+  { id: 'q9', a: 'Um ein Bild zu finden, brauchst du mindestens', b: '.', ok: 'zwei Strahlen', f: ['einen Strahl', 'vier Strahlen'], tipp: 'Aufgabe 2' },
+  { id: 'q10', a: 'Der Abbildungsmaßstab ist A =', b: '.', ok: 'B : G', f: ['G : B', 'B · G'], tipp: 'Kasten vor Aufgabe 6' },
+  { id: 'q11', a: 'Der Abstand von der Linse bis zum Bild heißt', b: '.', ok: 'Bildweite', f: ['Brennweite', 'Gegenstandsweite'], tipp: 'Kasten am Anfang der Erarbeitung' },
+  { id: 'q12', a: 'Ein Beamer macht aus einem kleinen Bild ein', b: 'Bild.', ok: 'großes', f: ['kleineres', 'gleich großes'], tipp: 'Aufgabe 9' }
+]
+};
+
+/* ===== Baukasten für alle Stationen: Vorlesen, Wortspeicher, Wette, Gold, Pause, Checkpoint mit Stempel, Belohnungsspiel =====
+   Erwartet vorher: const BK = { station, stempel, naechste, worte, wette, cp, spiel, satz } */
+function BKS(){
+  if (!S.bk) S.bk = { seed: 1 + Math.floor(Math.random() * 1e6), wette: '', spielSek: 0, hs: 0, cp: { runde: 0, versuche: 0, letzte: null, stempel: false, antw: {} } };
+  return S.bk;
+}
+function bkMische(arr, seed){ let h = 0; for (const c of String(seed)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const istGold = t => t.classList.contains('gold');
+const PFLICHT = liste => liste.filter(t => !istGold(t));
+
+/* ---------- Vorlesen ---------- */
+const kannSprechen = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
+function sprich(text){
+  if (!kannSprechen) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; u.rate = 0.9;
+  const v = speechSynthesis.getVoices().find(x => /^de/i.test(x.lang)); if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function textOhneLuecken(node){
+  const c = node.cloneNode(true);
+  c.querySelectorAll('select').forEach(s => { const o = s.selectedOptions && s.selectedOptions[0]; s.replaceWith(document.createTextNode(o && s.value ? ' ' + o.text + ' ' : ' Lücke ')); });
+  c.querySelectorAll('button,.vl,svg').forEach(b => b.remove());
+  return c.textContent.replace(/\s+/g, ' ').trim();
+}
+function vlKnopf(getText){
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'vl'; b.textContent = '🔊'; b.setAttribute('aria-label', 'Vorlesen');
+  b.addEventListener('click', e => { e.stopPropagation(); sprich(getText()); });
+  return b;
+}
+if (kannSprechen) {
+  $$('.task').forEach(t => { const ps = $$(':scope > p', t); if (!ps.length) return;
+    ps[0].prepend(vlKnopf(() => ps.map(textOhneLuecken).join(' '))); });
+  $$('.vorlesbar, .info').forEach(v => v.prepend(vlKnopf(() => textOhneLuecken(v))));
+}
+
+/* ---------- Wortspeicher (oben in der Erarbeitung) ---------- */
+(function(){
+  if (!BK.worte || !BK.worte.length) return;
+  const sec = $('.sec.B'); if (!sec) return;
+  const d = document.createElement('details'); d.className = 'wort';
+  d.innerHTML = '<summary>📖 Wortspeicher: alle Fachwörter mit Bild</summary><div class="wliste">' +
+    BK.worte.map(([n, t, bild], i) => '<div class="witem" data-i="' + i + '">' + (bild || '') + '<div><b>' + n + '</b><br><span>' + t + '</span></div></div>').join('') + '</div>';
+  const sh = $('.sh', sec); sh.after(d);
+  if (kannSprechen) $$('.witem', d).forEach(w => w.appendChild(vlKnopf(() => BK.worte[+w.dataset.i][0] + '. ' + BK.worte[+w.dataset.i][1])));
+})();
+
+/* ---------- Satzanfänge in Schreibaufgaben ---------- */
+Object.entries(BK.satz || {}).forEach(([id, txt]) => { const t = $('.task[data-id="' + id + '"]'); if (!t || $('.satz', t)) return;
+  const d = document.createElement('div'); d.className = 'satz'; d.innerHTML = '<b>Satzanfänge, wenn du Hilfe brauchst:</b> ' + txt;
+  const db = $('.drawbox', t); if (db) db.before(d); });
+
+/* ---------- Wette im Einstieg ---------- */
+function zeichneWette(){
+  const box = $('#bkWette'); if (!box || !BK.wette) return;
+  if (!box.dataset.fertig) {
+    box.dataset.fertig = '1';
+    box.innerHTML = '<p class="leit" style="margin:6px 0">' + BK.wette.frage + '</p><div class="wette">' +
+      BK.wette.optionen.map(([v, t]) => '<button type="button" class="wbtn" data-v="' + v + '">' + t + '</button>').join('') + '</div>';
+    $$('.wbtn', box).forEach(b => b.addEventListener('click', () => { BKS().wette = b.dataset.v; zeichneWette(); changed(); }));
+  }
+  $$('.wbtn', box).forEach(b => b.classList.toggle('on', b.dataset.v === BKS().wette));
+  $$('.nachWette').forEach(e => { e.hidden = !BKS().wette; });
+}
+let uhrT = null;
+if ($('#uhrBtn')) $('#uhrBtn').addEventListener('click', () => {
+  clearInterval(uhrT); let n = +($('#uhrBtn').dataset.s || 30); $('#uhr').textContent = n; $('#uhr').classList.remove('aus');
+  uhrT = setInterval(() => { n--; $('#uhr').textContent = n; if (n <= 0) { clearInterval(uhrT); $('#uhr').textContent = 'Zeit!'; $('#uhr').classList.add('aus'); } }, 1000);
+});
+function zeichneAufloesung(){
+  const w = BK.wette; if (!w) return;
+  let a = $('#aufloesung');
+  if (!a) { const t = $('.task[data-id="' + w.nach + '"]'); if (!t) return; a = document.createElement('div'); a.id = 'aufloesung'; a.className = 'aufloesung'; t.after(a); }
+  const gew = BKS().wette;
+  if (S.done[w.nach] && gew) {
+    a.hidden = false;
+    const opt = w.optionen.find(o => o[0] === gew);
+    a.innerHTML = '<b>🎲 Deine Wette vom Anfang:</b> „' + (opt ? opt[1].replace(/^\S+\s/, '') : '') + '“ ' + (gew === w.richtig ? 'Du hattest recht! ' : 'Leider verloren. ') + w.aufl;
+  } else a.hidden = true;
+}
+
+/* ---------- Kurze Pause nach 3 falschen Versuchen ---------- */
+const fehl = {};
+document.addEventListener('click', e => {
+  const btn = e.target.closest && e.target.closest('.task .btn');
+  if (!btn || btn.classList.contains('finish')) return;
+  const t = btn.closest('.task'), id = t.dataset.id;
+  setTimeout(() => {
+    const fb = $('.fmsg', t); if (!fb) return;
+    if (fb.classList.contains('ok')) { fehl[id] = 0; return; }
+    if (!fb.classList.contains('no') || !/^✗/.test(fb.textContent)) return;
+    fehl[id] = (fehl[id] || 0) + 1;
+    if (fehl[id] < 3) return;
+    fehl[id] = 0; let n = 20; btn.disabled = true;
+    const p = document.createElement('div'); p.className = 'pause'; fb.after(p);
+    const tick = () => { p.textContent = '⏸️ Dreimal daneben. Mach eine kurze Pause und öffne eine Hilfe. Prüfen geht wieder in ' + n + ' Sekunden.'; };
+    tick(); const iv = setInterval(() => { n--; tick(); if (n <= 0) { clearInterval(iv); btn.disabled = false; p.remove(); } }, 1000);
+  }, 0);
+});
+
+/* ---------- Checkpoint mit Stempel ---------- */
+(function(){
+  const z = document.createElement('div'); z.className = 'stempelzeile'; z.id = 'stempelZeile'; $('#barText').after(z);
+  const fuss = $('#resetBtn').closest('.box');
+  const s = document.createElement('section'); s.className = 'box sec cp'; s.id = 'checkpoint';
+  s.innerHTML = '<span class="tag">Checkpoint</span><div class="sh"><span class="circ">✓</span><h2>Hol dir den Stempel</h2></div><div id="cpBox"></div>';
+  fuss.before(s);
+})();
+function stempelSvg(){
+  return '<svg viewBox="0 0 200 200" class="stempel" aria-label="Stempel: ' + BK.stempel + '"><circle cx="100" cy="100" r="88" fill="#FFF7F0" stroke="#C0392B" stroke-width="8"/><circle cx="100" cy="100" r="74" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-dasharray="6 5"/>' +
+    '<text x="100" y="112" text-anchor="middle" font-size="52">' + BK.stempelIcon + '</text>' +
+    '<text x="100" y="58" text-anchor="middle" font-size="' + (BK.stempel.length > 11 ? 13 : 15) + '" font-weight="800" fill="#C0392B">' + BK.stempel + '</text><text x="100" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#C0392B">Station ' + BK.station + ' ✓</text></svg>';
+}
+function cpFragen(){ const st = BKS(); return bkMische(BK.cp.map(q => q.id), 'cp' + st.seed + '-' + st.cp.runde).slice(0, 5).map(id => BK.cp.find(q => q.id === id)); }
+function zeichneCheckpoint(){
+  const box = $('#cpBox'), cp = BKS().cp, offen = PFLICHT(TASKS).filter(t => !S.done[t.dataset.id]);
+  $('#stempelZeile').innerHTML = cp.stempel ? '✅ Checkpoint: Stempel geholt' : 'Checkpoint: noch kein Stempel';
+  $('#stempelZeile').classList.toggle('ok', !!cp.stempel);
+  if (cp.stempel) {
+    box.innerHTML = '<div class="stempelbox">' + stempelSvg() + '<div><p><b>Super, du hast den Stempel!</b></p><p>' + (BK.naechste ? 'Die nächste Station „' + BK.naechste + '“ ist jetzt für dich offen.' : 'Du hast alle Stationen geschafft!') + '</p></div></div>' + spielBox();
+    const sb = $('#spielStart'); if (sb) sb.addEventListener('click', spielStarten);
+    return;
+  }
+  if (offen.length) { box.innerHTML = '<p class="cplock">🔒 Der Checkpoint öffnet sich, wenn du alle Aufgaben erledigt hast. Noch offen: ' + offen.map(t => 'Aufgabe ' + t.dataset.nr).join(', ') + '.</p>'; return; }
+  const fr = cpFragen(), st = BKS();
+  box.innerHTML = '<p>Beantworte 5 Fragen. Ab 4 richtigen bekommst du den Stempel. Jeder bekommt andere Fragen.' + (cp.versuche ? ' Das ist dein ' + (cp.versuche + 1) + '. Versuch.' : '') + '</p>' +
+    fr.map((q, i) => '<div class="cpq" data-q="' + q.id + '"><span class="cpn">' + (i + 1) + '</span><p class="gap" style="margin:0">' + q.a + ' <select data-cp="' + q.id + '" aria-label="Antwort ' + (i + 1) + '"><option value="">– wählen –</option>' +
+      bkMische([q.ok].concat(q.f), q.id + st.seed).map(v => '<option' + (cp.antw[q.id] === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select> ' + q.b + '</p><div class="cptipp" hidden></div></div>').join('') +
+    '<div class="row"><button type="button" class="btn" id="cpPruefen">Checkpoint prüfen</button></div><div class="fb" id="cpFb"></div>';
+  $$('select[data-cp]', box).forEach(s => s.addEventListener('change', () => { cp.antw = Object.assign({}, cp.antw, { [s.dataset.cp]: s.value }); changed(); }));
+  $('#cpPruefen').addEventListener('click', () => {
+    if (fr.some(q => !cp.antw[q.id])) { $('#cpFb').className = 'fb no'; $('#cpFb').textContent = 'Beantworte zuerst alle 5 Fragen.'; return; }
+    let r = 0;
+    fr.forEach(q => { const ok = cp.antw[q.id] === q.ok, d = $('.cpq[data-q="' + q.id + '"]', box); if (ok) r++;
+      $('select', d).classList.toggle('good', ok); $('select', d).classList.toggle('bad', !ok);
+      const tp = $('.cptipp', d); tp.hidden = ok; tp.textContent = ok ? '' : 'Schau nochmal hier: ' + q.tipp; });
+    cp.versuche++; cp.letzte = r;
+    if (r >= 4) { cp.stempel = true; changed(); zeichneCheckpoint(); $('#checkpoint').scrollIntoView({ block: 'center' }); return; }
+    $('#cpFb').className = 'fb no';
+    $('#cpFb').innerHTML = r + ' von 5 richtig. Du brauchst 4. Schau dir die Stellen bei den roten Fragen nochmal an. Dann bekommst du neue Fragen. <button type="button" class="btn2" id="cpNeu">Neue Fragen</button>';
+    $('#cpNeu').addEventListener('click', () => { cp.runde++; cp.antw = {}; changed(); zeichneCheckpoint(); });
+    changed();
+  });
+}
+
+/* ---------- Belohnungsspiele (nach dem Stempel, insgesamt höchstens 3 Minuten) ---------- */
+let spieleAn = true;
+try { fetch('module.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.spiele === false) { spieleAn = false; zeichneCheckpoint(); } }).catch(() => {}); } catch (e) {}
+const SPIEL_MAX = 180;
+const SPIELE = {
+  faenger: { name: 'Lichtfänger', text: 'Fang die Lichtpunkte mit der Schale. Schieb dafür mit dem Finger oder der Maus nach links und rechts.' },
+  gluehw: { name: 'Glühwürmchen', text: 'Tippe die leuchtenden Glühwürmchen an, bevor sie verlöschen.' },
+  malen: { name: 'Malen mit Licht', text: 'Male mit dem Finger leuchtende Spuren. Sie verblassen langsam. Hier gibt es keine Punkte, nur Farben.' }
+};
+let spielLauf = null;
+function spielBox(){
+  if (!spieleAn || !BK.spiel) return '';
+  const sp = SPIELE[BK.spiel], st = BKS(), rest = Math.max(0, SPIEL_MAX - st.spielSek);
+  return '<div class="spiel"><b>🎮 Belohnung: ' + sp.name + '</b><p class="small" style="margin:4px 0">' + sp.text + ' Eine Runde dauert 30 Sekunden.' +
+    (st.hs && BK.spiel !== 'malen' ? ' Dein Rekord: ' + st.hs + ' Punkte.' : '') + '</p>' +
+    (rest > 0 ? '<div class="row"><button type="button" class="btn" id="spielStart">Runde starten</button><span class="small">Noch ' + Math.floor(rest / 60) + ':' + String(rest % 60).padStart(2, '0') + ' Min. Spielzeit</span></div><svg id="spielSvg" viewBox="0 0 360 240" hidden></svg>'
+      : '<p class="small">Deine Spielzeit für diese Station ist aufgebraucht. Weiter geht es mit der nächsten Station!</p>') + '</div>';
+}
+function spielStarten(){
+  const sv = $('#spielSvg'); sv.removeAttribute('hidden'); $('#spielStart').disabled = true;
+  const lauf = { aktiv: true }; spielLauf = lauf;
+  const pos = ev => { const r = sv.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width * 360, (ev.clientY - r.top) / r.height * 240]; };
+  const t0 = performance.now(); let last = t0, pkt = 0;
+  const kopf = rest => (BK.spiel === 'malen' ? '' : '<text x="10" y="22" fill="#fff" font-size="16" font-weight="700">' + pkt + (pkt === 1 ? ' Punkt' : ' Punkte') + '</text>') +
+    '<text x="350" y="22" fill="#fff" font-size="16" text-anchor="end">' + Math.ceil(rest) + ' s</text>';
+  let x = 180, punkte = [], naechster = 0, spuren = [], zieh = false, farbe = 0;
+  const FARBEN = ['#FFC83D', '#7FD1FF', '#F48FB1', '#9BE89B', '#C9A7FF'];
+  if (BK.spiel === 'faenger') { sv.onpointermove = ev => { x = Math.max(30, Math.min(330, pos(ev)[0])); }; sv.onpointerdown = sv.onpointermove; }
+  if (BK.spiel === 'gluehw') sv.onpointerdown = ev => { const [px, py] = pos(ev); const q = punkte.find(q => !q.weg && Math.hypot(q.x - px, q.y - py) < 26); if (q) { q.weg = true; pkt++; } };
+  if (BK.spiel === 'malen') {
+    sv.onpointerdown = ev => { zieh = true; farbe = (farbe + 1) % FARBEN.length; spuren.push({ f: FARBEN[farbe], p: [pos(ev)], t: performance.now() }); try { sv.setPointerCapture(ev.pointerId); } catch (e) {} };
+    sv.onpointermove = ev => { if (zieh) spuren[spuren.length - 1].p.push(pos(ev)); };
+    sv.onpointerup = sv.onpointercancel = () => { zieh = false; };
+  }
+  const frame = now => {
+    if (!lauf.aktiv) return;
+    const dt = Math.min(0.05, (now - last) / 1000), zeit = (now - t0) / 1000, rest = Math.max(0, 30 - zeit); last = now;
+    let inhalt = '';
+    if (BK.spiel === 'faenger') {
+      if (now > naechster) { punkte.push({ x: 20 + Math.random() * 320, y: -10, v: 70 + zeit * 4 + Math.random() * 40, f: FARBEN[Math.floor(Math.random() * 3)] }); naechster = now + 650 - Math.min(350, zeit * 10); }
+      punkte.forEach(q => { q.y += q.v * dt; if (!q.weg && q.y > 205 && q.y < 222 && Math.abs(q.x - x) < 34) { q.weg = true; pkt++; } });
+      punkte = punkte.filter(q => !q.weg && q.y < 250);
+      inhalt = punkte.map(q => '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="7" fill="' + q.f + '"/>').join('') + '<path d="M' + (x - 34) + ' 210 Q' + x + ' 240 ' + (x + 34) + ' 210 Z" fill="#E39B1B"/>';
+    } else if (BK.spiel === 'gluehw') {
+      if (now > naechster) { punkte.push({ x: 30 + Math.random() * 300, y: 40 + Math.random() * 180, t: now, dauer: 1800 - Math.min(900, zeit * 30), vx: (Math.random() - 0.5) * 40, vy: (Math.random() - 0.5) * 40 }); naechster = now + 700 - Math.min(400, zeit * 12); }
+      punkte.forEach(q => { q.x += q.vx * dt; q.y += q.vy * dt; });
+      punkte = punkte.filter(q => !q.weg && now - q.t < q.dauer);
+      inhalt = punkte.map(q => { const a = 1 - (now - q.t) / q.dauer; return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="16" fill="#F7E463" opacity="' + (0.25 * a).toFixed(2) + '"/><circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="7" fill="#FFF6A8" opacity="' + a.toFixed(2) + '"/>'; }).join('');
+    } else {
+      spuren = spuren.filter(s => zieh && s === spuren[spuren.length - 1] || now - s.t < 6000);
+      inhalt = spuren.map(s => '<polyline points="' + s.p.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ') + '" fill="none" stroke="' + s.f + '" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="' + Math.max(0.15, 1 - (now - s.t) / 6000).toFixed(2) + '"/>').join('');
+    }
+    sv.innerHTML = '<rect width="360" height="240" fill="#14213D"/>' + inhalt + kopf(rest);
+    if (rest <= 0) { lauf.aktiv = false; spielEnde(pkt); return; }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+function spielEnde(pkt){
+  const st = BKS(); st.spielSek += 30; const rekord = BK.spiel !== 'malen' && pkt > (st.hs || 0); if (rekord) st.hs = pkt; changed();
+  zeichneCheckpoint();
+  const s = $('.spiel'); if (s && BK.spiel !== 'malen') { const d = document.createElement('p'); d.className = 'small'; d.innerHTML = '<b>' + pkt + (pkt === 1 ? ' Punkt' : ' Punkte') + '!</b>' + (rekord ? ' Neuer Rekord!' : ''); s.insertBefore(d, s.children[1]); }
+}
+
+/* ---------- Haken in die Seite ---------- */
+function nachStatus(){
+  if (typeof stationNachStatus === 'function') stationNachStatus();
+  zeichneAufloesung(); zeichneCheckpoint();
+}
+function bkAnwenden(){
+  BKS(); if (spielLauf) spielLauf.aktiv = false;
+  zeichneWette();
+  if (typeof stationAnwenden === 'function') stationAnwenden();
+}
+
+/* BK-ENDE */
 /* ---------- Schreibfelder ---------- */
 const LINIE = 38;
 const drawFelder = {};
@@ -647,7 +1056,7 @@ function anwenden(){
     const sc = $('.selfcheck', t); if (sc && !t.dataset.calc) sc.hidden = !S.done[t.dataset.id];
   });
   Object.values(drawFelder).forEach(f => { f.linien(); f.striche(); });
-  simAnwenden(); status();
+  simAnwenden(); bkAnwenden(); status();
 }
 
 /* ---------- Zurücksetzen ---------- */
@@ -666,7 +1075,7 @@ if (window.AppBridge) {
   setTimeout(() => { appLive = true; }, 1500);
   AppBridge.register({
     getState(){
-      const namen = TASKS.map(t => 'Aufgabe ' + t.dataset.nr);
+      const namen = PFLICHT(TASKS).map(t => 'Aufgabe ' + t.dataset.nr); namen.push('Checkpoint');
       const details = {};
       TASKS.forEach(t => {
         let txt = S.done[t.dataset.id] ? 'erledigt' : 'offen';
@@ -675,8 +1084,9 @@ if (window.AppBridge) {
         else if (S.hints[t.dataset.id]) txt += ' · ' + S.hints[t.dataset.id] + ' Hilfe(n)';
         details['Aufgabe ' + t.dataset.nr] = txt;
       });
-      return { punkte: TASKS.filter(t => S.done[t.dataset.id]).length, stationen: namen,
-        erledigt: TASKS.filter(t => S.done[t.dataset.id]).map(t => 'Aufgabe ' + t.dataset.nr),
+      const cp = BKS().cp; details['Checkpoint'] = cp.stempel ? 'Stempel geholt (' + cp.versuche + '. Versuch)' : (cp.versuche ? 'kein Stempel · ' + cp.versuche + ' Versuch(e), zuletzt ' + cp.letzte + ' von 5' : 'offen');
+      return { stempel: !!cp.stempel, punkte: TASKS.filter(t => S.done[t.dataset.id]).length, stationen: namen,
+        erledigt: PFLICHT(TASKS).filter(t => S.done[t.dataset.id]).map(t => 'Aufgabe ' + t.dataset.nr).concat(BKS().cp.stempel ? ['Checkpoint'] : []),
         details, daten: JSON.parse(JSON.stringify(S)) };
     },
     setState(st){

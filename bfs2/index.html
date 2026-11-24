@@ -344,7 +344,7 @@ function startHome() {
     const b = document.createElement('button');
     b.className = 'tile'; b.style.setProperty('--c', m.farbe || 'var(--navy)');
     b.innerHTML = `<span class="nr">${mods.indexOf(m) + 1}</span><div class="kopf">${ico ? `<span class="ico">${ico}</span>` : ''}<div><h2>${esc(m.titel)}</h2><div class="sub">${esc(m.untertitel || '')}</div></div></div><div class="body">
-      <div class="meta">${f ? `<span>${f.k} von ${f.n} Stationen · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
+      <div class="meta">${f ? `<span>${f.k} von ${f.n} Aufgaben · ${f.punkte} Punkte</span>` : '<span class="badge">Neu</span>'}${hatFb ? '<span class="badge fb">💬 Rückmeldung</span>' : ''}</div>
       ${f ? `<div class="bar"><i style="width:${Math.round(f.anteil * 100)}%"></i></div>` : ''}</div>`;
     if (stoppAktiv(m)) {
       b.classList.add('gesperrt'); b.setAttribute('aria-disabled', 'true');
@@ -377,7 +377,7 @@ function stoppDialog(m, vor) {
     document.body.appendChild(d);
     $('#stoppZu').onclick = () => d.close();
   }
-  $('#stoppTxt').textContent = 'Hol dir zuerst den Stempel im Checkpoint von „' + (vor ? vor.titel : 'vorige Seite') + '“. Dann geht diese Seite auf. Deine Lehrerin kann sie auch mit einem Code freigeben.';
+  $('#stoppTxt').textContent = 'Hol dir zuerst den Stempel im Checkpoint von „' + (vor ? vor.titel : 'vorige Station') + '“. Dann geht diese Station auf. Deine Lehrerin kann sie auch mit einem Code freigeben.';
   $('#stoppIn').value = ''; $('#stoppMsg').innerHTML = '';
   $('#stoppForm').onsubmit = (e) => {
     e.preventDefault();
