@@ -33,6 +33,14 @@ p{margin:0 0 10px}
 .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 18px}
 /* Kopf */
 .kz{font-size:.85rem;color:var(--muted)}
+.kacheln{display:flex;align-items:stretch;gap:4px;margin:8px 0 12px}
+.kachel{flex:1 1 0;min-width:0;border:2px solid #D6DBE3;border-radius:12px;background:#fff;padding:8px 6px;text-align:center;font-size:.82rem;line-height:1.25;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink)}
+.kachel .ki{font-size:1.6rem;line-height:1}
+.kachel .kn{font-size:.72rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.kachel.cur{border-color:var(--main);background:var(--main);color:#fff;font-weight:700;box-shadow:0 3px 10px rgba(58,124,165,.35)}
+.kachel.cur .kn{color:#fff}
+.kpfeil{align-self:center;font-weight:800;color:var(--main);font-size:1.2rem;flex:none}
+@media (max-width:760px){.kacheln{flex-direction:column;gap:2px}.kachel{flex-direction:row;text-align:left;padding:6px 10px;gap:10px}.kachel .ki{font-size:1.3rem}.kpfeil{transform:rotate(90deg);line-height:1}}
 .pages{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;padding:0;list-style:none}
 .pages li{border:1px solid #B8BEC7;border-radius:999px;padding:3px 12px;font-size:.85rem;background:#fff;color:var(--ink)}
 .pages li.cur{background:var(--main);border-color:var(--main);color:#fff;font-weight:700}
@@ -170,18 +178,9 @@ details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-hei
 <div class="box">
   <div class="kz">Lerneinheit · Optik · Seite 5 von 5</div>
   <h1>Wiederholung: Spiegel und Brechung</h1>
-  <ol class="pages">
-    <li>1 · Linsen bündeln Licht</li>
-    <li>2 · Linsenbilder</li>
-    <li>3 · Das Auge</li>
-    <li>4 · Sehfehler und Brillen</li>
-    <li class="cur">5 · Wiederholung: Spiegel und Brechung</li>
-  </ol>
+  <nav class="kacheln" aria-label="Seiten der Lerneinheit"><div class="kachel"><span class="ki" aria-hidden="true">🔍</span><span class="kn">Seite 1</span><span>Linsen bündeln Licht</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">🖼️</span><span class="kn">Seite 2</span><span>Linsenbilder</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👁️</span><span class="kn">Seite 3</span><span>Das Auge</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel"><span class="ki" aria-hidden="true">👓</span><span class="kn">Seite 4</span><span>Sehfehler und Brillen</span></div><span class="kpfeil" aria-hidden="true">➜</span><div class="kachel cur" aria-current="page"><span class="ki" aria-hidden="true">🪞</span><span class="kn">Seite 5</span><span>Wiederholung: Spiegel und Brechung</span></div></nav>
   <div class="legend">
     <span class="tag E">Einstieg</span><span class="tag B">Erarbeitung</span><span class="tag A">Anwendung</span>
-    <span class="afb">AFB I <i class="f"></i><i></i><i></i></span> wiedergeben
-    <span class="afb">AFB II <i class="f"></i><i class="f"></i><i></i></span> anwenden
-    <span class="afb">AFB III <i class="f"></i><i class="f"></i><i class="f"></i></span> beurteilen
   </div>
   <div class="bar"><i id="barFill"></i></div>
   <div class="small" id="barText">0 von 8 Aufgaben erledigt</div>
@@ -383,7 +382,7 @@ const TASKS = $$('.task');
 TASKS.forEach(t => {
   const afb = +t.dataset.afb;
   const h = document.createElement('div'); h.className = 'th';
-  h.innerHTML = '<span class="afb">AFB ' + ['I','II','III'][afb-1] + ' ' + [1,2,3].map(i => '<i' + (i <= afb ? ' class="f"' : '') + '></i>').join('') + '</span>'
+  h.innerHTML = ''
     + '<span class="tt">Aufgabe ' + t.dataset.nr + ' · ' + t.dataset.op + '</span><span class="st">offen</span>';
   t.insertBefore(h, t.firstChild);
   const hw = $('.hints', t);
