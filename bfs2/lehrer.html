@@ -238,7 +238,7 @@ function renderListe() {
   const kl = $('#kKlasse').value; const liste = schuelerDerKlasse(kl);
   if (!liste.length) { $('#kListe').innerHTML = '<p class="muted">Noch keine Schüler in dieser Klasse.</p>'; return; }
   const stopps = ((cfg && cfg.module) || []).filter((m) => m.stopp && (m.klassen || []).includes(kl));
-  $('#kListe').innerHTML = (stopps.length ? '<p class="muted">Lehrer-Stopp: Eine gesperrte Seite öffnet sich nach dem Stempel auf der Seite davor. Mit dem Freigabe-Code aus der Tabelle gibst du sie für einen Schüler direkt frei (auf dessen Tablet die gesperrte Kachel antippen).</p>' : '') +
+  $('#kListe').innerHTML = (stopps.length ? '<p class="muted">Lehrer-Stopp: Eine gesperrte Station öffnet sich nach dem Stempel in der Station davor. Mit dem Freigabe-Code aus der Tabelle gibst du sie für einen Schüler direkt frei (auf dessen Tablet die gesperrte Kachel antippen).</p>' : '') +
     `<table><tr><th>Name</th><th>Code</th>${stopps.map((m) => `<th>Freigabe ${esc(m.titel.split(' · ')[0])}</th>`).join('')}<th></th></tr>${liste.map(([c, s]) => `<tr><td>${esc(s.name)}</td><td class="code">${KA.codeHuebsch(c)}</td>${stopps.map((m) => `<td class="code">${KA.freigabeCode(c, m.id)}</td>`).join('')}<td><button class="btn ghost small" data-del="${c}">entfernen</button></td></tr>`).join('')}</table>`;
   $('#kListe').querySelectorAll('[data-del]').forEach((b) => b.onclick = () => {
     if (!confirm('Schüler entfernen? Der Code wird damit ungültig für die Auswertung.')) return;
@@ -350,7 +350,7 @@ function fortschritt(st) {
   st = st || {}; const sts = st.stationen || [], erl = st.erledigt || [], det = st.details || {};
   const tw = sts.map((s) => teilWert(det[s]));
   if (sts.length && tw.every((w) => w && w[1] > 0)) { const x = tw.reduce((a, w) => a + w[0], 0), y = tw.reduce((a, w) => a + w[1], 0); return { anteil: x / y, text: `${x} / ${y} BE` }; }
-  return { anteil: sts.length ? erl.length / sts.length : 0, text: `${erl.length} / ${sts.length} Stationen · ${st.punkte ?? 0} P` };
+  return { anteil: sts.length ? erl.length / sts.length : 0, text: `${erl.length} / ${sts.length} Aufgaben · ${st.punkte ?? 0} P` };
 }
 function renderBars() {
   const kl = $('#aKlasse').value, sel = $('#bMod'), box = $('#bars'); if (!kl) { box.innerHTML = ''; sel.innerHTML = ''; return; }
