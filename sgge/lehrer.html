@@ -108,6 +108,7 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
     <button data-tab="tAbg" aria-selected="true">Abgaben</button>
     <button data-tab="tKl" aria-selected="false">Klassen &amp; Codes</button>
     <button data-tab="tSich" aria-selected="false">Sicherung</button>
+    <button data-tab="tSch" aria-selected="false">Schüleransicht</button>
   </nav>
 
   <!-- ABGABEN -->
@@ -148,6 +149,15 @@ td.code{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
   </section>
 
   <!-- SICHERUNG -->
+  <!-- SCHÜLERANSICHT -->
+  <section id="tSch" hidden>
+    <div class="card" style="padding:14px 16px">
+      <p style="margin:0 0 10px"><b>Die App so, wie die Schüler sie sehen, aber mit allem offen.</b> Gesperrte und ausgeblendete Module kannst du hier öffnen und ausprobieren. Es wird ein Test-Code benutzt. Abgaben daraus sind als Vorschau markiert und haben nichts mit echten Schülercodes zu tun.</p>
+      <div class="row"><button class="btn" id="schStart">Schüleransicht hier öffnen</button><button class="btn ghost" id="schTab">In neuem Tab öffnen</button></div>
+    </div>
+    <iframe id="schFrame" title="Schüleransicht" hidden style="width:100%;max-width:820px;height:78vh;border:2px solid #9AA9BA;border-radius:14px;margin-top:12px;background:#fff"></iframe>
+  </section>
+
   <section id="tSich" hidden>
     <div class="card">
       <h2>Sicherung</h2>
@@ -184,7 +194,7 @@ let auswahl = null; // {code, mid}
 /* Tabs */
 document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
   document.querySelectorAll('nav button').forEach((o) => o.setAttribute('aria-selected', o === b));
-  ['tAbg', 'tKl', 'tSich'].forEach((t) => $('#' + t).hidden = t !== b.dataset.tab);
+  ['tAbg', 'tKl', 'tSich', 'tSch'].forEach((t) => $('#' + t).hidden = t !== b.dataset.tab);
   if (b.dataset.tab === 'tKl') renderListe(); else if (b.dataset.tab === 'tAbg') renderMatrix();
 });
 
@@ -436,6 +446,15 @@ async function init() {
 }
 init();
 })();
+
+/* Schüleransicht für Tests: Freigabe für diesen Browser setzen (gilt nach Code-Eingabe auf dieser Seite) */
+function schOeffnen(neuerTab) {
+  try { localStorage.setItem('sggeapp:lehrerfrei', String(Date.now())); sessionStorage.removeItem('sggeapp:lf'); } catch (e) {}
+  if (neuerTab) { window.open('index.html?lehrer=1', '_blank'); return; }
+  const f = document.getElementById('schFrame'); f.hidden = false; f.src = 'index.html?lehrer=1&t=' + Date.now();
+}
+document.getElementById('schStart').onclick = () => schOeffnen(false);
+document.getElementById('schTab').onclick = () => schOeffnen(true);
 </script>
 </body>
 </html>
