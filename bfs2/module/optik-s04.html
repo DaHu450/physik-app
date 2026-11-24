@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optik · Seite 4 · Sehfehler und Brillen</title>
+<!--
+  Lerneinheit Optik (BFS2) · Seite 4 von 4 · Modul für die Physik-App BFS2
+  Ergänzungen (nicht aus Evis Materialien):
+  - Personen Tim (kurzsichtig), Opa (altersweitsichtig), Lena, Ali, Frau Berg mit Brillenpass-Werten.
+  - Modell der Simulation: Augapfel 1,9 / 2,0 / 2,1 cm, Linsen-Brennweite 1,78 bis 2,0 cm (mit 65 Jahren 1,92 bis 2,0 cm), Brille +/-0,025 1/cm.
+  - Dioptrien (Plus = Sammellinse, Minus = Zerstreuungslinse).
+  - Info: Linse wird im Alter härter.
+  Aus Evis Materialien: Kurzsichtigkeit, Weitsichtigkeit, Altersweitsichtigkeit, Farbenblindheit als Distraktor (Klassenarbeit), Korrektur mit Brille.
+-->
+<style>
+:root{
+  --ink:#1D2433;--head:#1A1A1A;--muted:#4F5B6D;--line:#D6DBE3;--main:#3A7CA5;
+  --e-r:#EE9B52;--e-t:#FDEBD9;--e-d:#8A4B14;
+  --b-r:#6FA8CC;--b-t:#DDEBF4;--b-d:#1F5470;
+  --a-r:#A898CF;--a-t:#ECE7F6;--a-d:#4F4176;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#F3F5F8;color:var(--ink);font:17px/1.6 "Segoe UI",-apple-system,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:1.8rem;font-weight:700;color:var(--head);margin:4px 0 10px;line-height:1.25}
+h2{font-size:1.35rem;font-weight:700;color:var(--head);margin:0;line-height:1.3}
+h3{font-size:1.1rem;font-weight:700;color:var(--head);margin:14px 0 6px}
+p{margin:0 0 10px}
+.small{font-size:.85rem;color:var(--muted)}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 18px}
+/* Kopf */
+.kz{font-size:.85rem;color:var(--muted)}
+.pages{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;padding:0;list-style:none}
+.pages li{border:1px solid #B8BEC7;border-radius:999px;padding:3px 12px;font-size:.85rem;background:#fff;color:var(--ink)}
+.pages li.cur{background:var(--main);border-color:var(--main);color:#fff;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.85rem;color:var(--muted);margin:4px 0 12px}
+.legend .tag{margin:0}
+.bar{height:10px;background:#E3E8EF;border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--main);transition:width .3s}
+/* Abschnitte */
+.sec{border-left:6px solid var(--r)}
+.sec.E{--r:var(--e-r);--t:var(--e-t);--d:var(--e-d)}
+.sec.B{--r:var(--b-r);--t:var(--b-t);--d:var(--b-d)}
+.sec.A{--r:var(--a-r);--t:var(--a-t);--d:var(--a-d)}
+.tag{display:inline-block;text-transform:uppercase;font-size:.72rem;font-weight:700;letter-spacing:.06em;background:var(--t);color:var(--d);border:1px solid var(--r);border-radius:4px;padding:1px 7px;margin:0 0 8px}
+.legend .tag.E{--r:var(--e-r);--t:var(--e-t);--d:var(--e-d)}
+.legend .tag.B{--r:var(--b-r);--t:var(--b-t);--d:var(--b-d)}
+.legend .tag.A{--r:var(--a-r);--t:var(--a-t);--d:var(--a-d)}
+.sh{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.circ{width:30px;height:30px;flex:none;border-radius:50%;background:var(--t);border:2px solid var(--r);color:var(--d);font-weight:700;display:flex;align-items:center;justify-content:center}
+.merk{background:var(--t);color:var(--d);font-weight:700;border-left:4px solid var(--r);border-radius:10px;padding:12px 14px;margin:12px 0}
+.info{background:#F4F8FB;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
+.hint-line{background:#F1F4F8;border-radius:8px;padding:6px 10px;font-size:.95rem;margin:8px 0}
+.leit{font-weight:700}
+/* Aufgaben */
+.task{background:#FCFDFF;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+.task.done{border-color:#9FD0AE;background:#F6FBF7}
+.th{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 8px}
+.afb{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;background:#F1F3F5;border:1px solid #5F6670;color:#2F343B;border-radius:6px;padding:1px 7px}
+.afb i{width:8px;height:8px;border-radius:50%;border:1px solid #5F6670;display:inline-block}
+.afb i.f{background:#5F6670}
+.tt{font-weight:700}
+.st{margin-left:auto;font-size:.85rem;color:#6B7684}
+.task.done .st{color:#166534;font-weight:700}
+/* Eingaben */
+select,input[type=text],input[type=number]{font:inherit;color:var(--ink);background:#fff;border:1px solid #9AA6B5;border-radius:8px;padding:6px 8px;min-height:44px;max-width:100%}
+input[type=number]{width:120px}
+select.bad,input.bad{border-color:#A61B1B;background:#FDECEC}
+select.good,input.good{border-color:#3C8C57;background:#E8F5EC}
+.gap{line-height:2.6}
+.gap select{margin:2px 0}
+button{font:inherit;min-height:44px;border-radius:8px;cursor:pointer}
+.btn{background:var(--main);color:#fff;font-weight:700;border:1px solid var(--main);padding:8px 14px}
+.btn:disabled{background:#9AA6B5;border-color:#9AA6B5;cursor:default}
+.btn2{background:#fff;color:var(--main);border:1px solid var(--main);padding:8px 14px}
+.btn2.on{background:var(--main);color:#fff}
+.btnr{background:#fff;color:#A61B1B;border:1px solid #A61B1B;padding:8px 14px}
+.btnh{background:#FDE7A6;border:1px solid #EFC45A;color:#5E4300;padding:8px 14px}
+:focus-visible{outline:3px solid #1F5470;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 0}
+.fb{font-weight:700;border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.fb.ok{background:#E8F5EC;color:#166534}
+.fb.no{background:#FDECEC;color:#A61B1B}
+.fb:empty{display:none}
+.help{background:#FFF6D8;border:1px solid #EFC45A;border-left:4px solid #EFC45A;color:#5E4300;border-radius:8px;padding:8px 12px;margin:8px 0 0}
+.help b{font-weight:700}
+.check{background:#FFF6D8;border:1px solid #EFC45A;border-left:4px solid #EFC45A;color:#5E4300;border-radius:8px;padding:8px 12px;margin:10px 0 0}
+.check ul{margin:4px 0 0;padding-left:20px}
+table.t{border-collapse:collapse;width:100%;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:middle}
+table.t th{background:#EAF3F8}
+table.t select,table.t input{width:100%;min-width:0}
+table.t{table-layout:fixed}
+table.t th,table.t td{overflow-wrap:anywhere}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fig{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0}
+.fig svg{display:block;width:100%;height:auto}
+.bodies{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.bodies .b{text-align:center}
+.bodies .b svg{width:100%;max-width:90px;height:auto;display:block;margin:0 auto 4px}
+.bodies select{width:100%}
+.lbl{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:8px 0}
+.lbl b{width:30px;height:30px;border-radius:50%;background:#EEF3F8;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.lbl input{width:100%}
+/* Simulation */
+.sim{background:#F6F8FB;border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px}
+.sim .pic{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px}
+.sim .pic svg{display:block;width:100%;height:auto}
+.ctrl label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto}
+.ctrl input[type=range]{width:100%;min-height:44px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tile{background:#EEF3F8;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.tile span{display:block;font-size:.75rem;color:var(--muted)}
+.tile b{font-family:Consolas,"Courier New",monospace;font-size:1.05rem;color:#2E6B8A}
+.simnote{font-size:.8rem;color:var(--muted);margin-top:6px}
+.chk{display:flex;gap:8px;align-items:center;min-height:44px;font-size:.95rem;color:var(--ink)}
+.chk input{width:22px;height:22px}
+/* Schreibfeld */
+details.drawbox{border:1px solid var(--line);border-radius:10px;background:#fff;margin:10px 0 0}
+details.drawbox>summary{cursor:pointer;padding:10px 12px;font-weight:700;min-height:44px;display:flex;align-items:center}
+.dtools{display:flex;flex-wrap:wrap;gap:8px;padding:0 12px 8px}
+.dsvg{display:block;width:100%;height:380px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dsvg.finger{touch-action:none}
+.dhint{font-size:.85rem;color:var(--muted);padding:6px 12px}
+/* Fuß */
+.confirm{display:none;margin-top:10px;background:#FDECEC;border-radius:8px;padding:10px 12px;color:#A61B1B}
+.confirm.on{display:block}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lblsel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:8px 0}
+.lblsel label{display:flex;align-items:center;gap:8px}
+.lblsel b{width:30px;height:30px;flex:none;border-radius:50%;background:#EEF3F8;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.lblsel select{flex:1;min-width:0}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.chain .node{background:#EEF3F8;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-weight:700}
+.chain .arr{font-weight:700;color:var(--muted)}
+.seh{margin-top:10px;font-size:.85rem;color:var(--muted)}
+.sehbox{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;overflow:hidden;margin-top:4px}
+#sehText{font-size:2rem;font-weight:700;color:#1D2433;transition:filter .1s}
+#segObj button,#segAuge button,#segBrille button{font-size:.9rem}
+.afb.verm{background:#fff}
+.zitat{background:#F8F9FB;border-left:4px solid #D6DBE3;color:#4F5B6D;border-radius:6px;padding:10px 14px;margin:14px 0}
+.grid3 .info{margin:0}
+.formel{background:#F4F8FB;border:1px solid var(--line);border-left:5px solid #6FA8CC;border-radius:10px;padding:10px 14px;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:1.2rem;font-weight:700;color:var(--ink)}
+#mtab td,#mtab th{font-size:.9rem}
+@media (max-width:760px){
+  .grid3{grid-template-columns:1fr}
+  .lblsel{grid-template-columns:1fr}
+  body{font-size:16px}
+  .sim{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .bodies{grid-template-columns:repeat(3,1fr)}
+  .dsvg{height:320px}
+  .wrap{padding:12px 8px 30px}
+  .box{padding:14px 14px}
+  table.t th,table.t td{padding:4px;font-size:.9rem}
+  table.t select{font-size:.85rem;padding:4px}
+}
+@media (max-width:420px){.bodies{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Kopf -->
+<div class="box">
+  <div class="kz">Lerneinheit · Optik · Seite 4 von 4</div>
+  <h1>Sehfehler und Brillen</h1>
+  <ol class="pages">
+    <li>1 · Linsen bündeln Licht</li>
+    <li>2 · Linsenbilder</li>
+    <li>3 · Das Auge</li>
+    <li class="cur">4 · Sehfehler und Brillen</li>
+  </ol>
+  <div class="legend">
+    <span class="tag E">Einstieg</span><span class="tag B">Erarbeitung</span><span class="tag A">Anwendung</span>
+    <span class="afb">AFB I <i class="f"></i><i></i><i></i></span> wiedergeben
+    <span class="afb">AFB II <i class="f"></i><i class="f"></i><i></i></span> anwenden
+    <span class="afb">AFB III <i class="f"></i><i class="f"></i><i class="f"></i></span> beurteilen
+    <span class="afb verm">Vermutung</span> ohne Bewertung
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="small" id="barText">0 von 8 Aufgaben erledigt</div>
+  <p class="small" style="margin:6px 0 0">Deine Auswahl, deine Ergebnisse und dein Fortschritt werden automatisch in der App gespeichert.</p>
+</div>
+
+<!-- A Einstieg -->
+<section class="box sec E">
+  <span class="tag">Einstieg</span>
+  <div class="sh"><span class="circ">A</span><h2>Tim und Opa</h2></div>
+  <div class="grid2">
+    <div class="info"><b>Tim, 17 Jahre</b><br>Tim sitzt in der letzten Reihe. Die Tafel sieht er verschwommen. Sein Handy kann er aber gut lesen. Der Augenarzt sagt: Tim ist <b>kurzsichtig</b>.</div>
+    <div class="info"><b>Opa, 65 Jahre</b><br>Opa sieht beim Autofahren alles scharf. Die Zeitung kann er aber nur mit ausgestrecktem Arm lesen. Der Augenarzt sagt: Opa ist <b>altersweitsichtig</b>.</div>
+  </div>
+  <p>Beide bekommen eine Brille. Die Brillengläser sind aber ganz verschieden.</p>
+  <p class="leit">Warum sehen manche Menschen unscharf, und wie hilft ihnen eine Brille?</p>
+  <p>Am Ende dieser Seite kannst du</p>
+  <ul>
+    <li>erklären, wo bei Kurzsichtigkeit und Weitsichtigkeit das Bild im Auge liegt,</li>
+    <li>für jeden Sehfehler das passende Brillenglas auswählen,</li>
+    <li>erklären, warum ältere Menschen eine Lesebrille brauchen.</li>
+  </ul>
+
+  <div class="task" data-id="t1" data-nr="1" data-verm="1" data-op="Vermute">
+    <p>Was glaubst du? Vervollständige den Satz. Hier gibt es kein Richtig oder Falsch.</p>
+    <p class="gap" id="vermSatz">Ich vermute: Tim hilft eine Brille mit einer
+      <select data-key="t1a" data-v="1"><option value="">– wählen –</option><option value="Sammellinse">Sammellinse</option><option value="Zerstreuungslinse">Zerstreuungslinse</option><option value="Glasscheibe ohne Wölbung">Glasscheibe ohne Wölbung</option></select>,
+      weil sie das Licht
+      <select data-key="t1b" data-v="1"><option value="">– wählen –</option><option value="stärker bündelt">stärker bündelt</option><option value="etwas auseinanderlaufen lässt">etwas auseinanderlaufen lässt</option><option value="nicht verändert">nicht verändert</option></select>.</p>
+    <div class="hints" data-h='["Denk an Seite 1: Was macht eine Sammellinse mit parallelem Licht, was eine Zerstreuungslinse?"]'></div>
+  </div>
+</section>
+
+<!-- B Erarbeitung -->
+<section class="box sec B">
+  <span class="tag">Erarbeitung</span>
+  <div class="sh"><span class="circ">B</span><h2>Wenn das Bild danebenliegt</h2></div>
+
+  <div class="info">
+    <p>Bei einem gesunden Auge liegt das Bild immer genau auf der Netzhaut. Bei manchen Menschen ist der Augapfel aber etwas <b>zu lang</b> oder <b>zu kurz</b>. Schon ein Millimeter macht viel aus.</p>
+    <p><b>Kurzsichtig</b> heißt: Man sieht in der Nähe scharf, in der Ferne unscharf. <b>Weitsichtig</b> heißt: Man sieht in der Ferne scharf, in der Nähe unscharf.</p>
+  </div>
+
+  <h3>Die Simulation: Augen und Brillen</h3>
+  <p>Das Auge in der Simulation stellt selbst scharf, so gut es kann. Du wählst das Auge, wohin es schaut, und die Brille.</p>
+  <div class="sim" id="sim">
+    <div class="pic"><svg id="simSvg" viewBox="0 0 800 300" role="img" aria-label="Simulation: Auge mit Sehfehler und Brille"></svg></div>
+    <div class="ctrl">
+      <label>Auge</label>
+      <div class="seg" id="segAuge"><button type="button" class="btn2" data-v="normal">normal</button><button type="button" class="btn2" data-v="lang">Augapfel zu lang</button><button type="button" class="btn2" data-v="kurz">Augapfel zu kurz</button><button type="button" class="btn2" data-v="alt">Auge mit 65 Jahren</button></div>
+      <label>Die Person schaut …</label>
+      <div class="seg" id="segObj"><button type="button" class="btn2" data-v="fern">in die Ferne</button><button type="button" class="btn2" data-v="nah">in die Nähe (25 cm)</button></div>
+      <label>Brille</label>
+      <div class="seg" id="segBrille"><button type="button" class="btn2" data-v="keine">keine</button><button type="button" class="btn2" data-v="s">Sammellinse</button><button type="button" class="btn2" data-v="z">Zerstreuungslinse</button></div>
+      <div class="tiles">
+        <div class="tile" style="grid-column:1/-1"><span>Bild</span><b id="mS">–</b></div>
+      </div>
+      <div class="seh"><span>So sieht die Person:</span><div class="sehbox"><div id="sehText">Physik</div></div></div>
+      <div class="simnote">Modell, nicht maßstäblich. Alle Werte sind simuliert.</div>
+    </div>
+  </div>
+
+  <div class="task" data-id="t2" data-nr="2" data-afb="1" data-op="Gib an">
+    <p>Wähle das normale Auge ohne Brille. Schau in die Ferne und in die Nähe.</p>
+    <p class="gap">Das normale Auge sieht in der Ferne
+      <select data-key="t2a" data-ok="sch"><option value="">– wählen –</option><option value="un">unscharf</option><option value="sch">scharf</option></select>
+      und in der Nähe
+      <select data-key="t2b" data-ok="sch"><option value="">– wählen –</option><option value="sch">scharf</option><option value="un">unscharf</option></select>.
+      Das schafft es, weil der Ziliarmuskel die Linse
+      <select data-key="t2c" data-ok="form"><option value="">– wählen –</option><option value="schieb">nach vorne und hinten schiebt</option><option value="form">dicker oder dünner macht</option><option value="farbe">heller oder dunkler macht</option></select>.</p>
+    <div class="hints" data-h='["Das hast du auf Seite 3 untersucht.","Achte auf die Anzeige „Bild“ in der Simulation."]'></div>
+  </div>
+
+  <div class="task" data-id="t3" data-nr="3" data-afb="2" data-op="Untersuche">
+    <p>Untersuche die beiden Augen ohne Brille. Wo liegt das Bild?</p>
+    <table class="t">
+      <tr><th>Auge</th><th>Blick in die Ferne</th><th>Blick in die Nähe</th></tr>
+      <tr><td>Augapfel zu lang</td><td><select data-key="t3a" data-ok="vor"></select></td><td><select data-key="t3b" data-ok="auf"></select></td></tr>
+      <tr><td>Augapfel zu kurz</td><td><select data-key="t3c" data-ok="auf"></select></td><td><select data-key="t3d" data-ok="hin"></select></td></tr>
+    </table>
+    <p class="gap">Ein zu langer Augapfel führt also zu
+      <select data-key="t3e" data-ok="kurz"><option value="">– wählen –</option><option value="weit">Weitsichtigkeit</option><option value="kurz">Kurzsichtigkeit</option></select>,
+      ein zu kurzer Augapfel zu
+      <select data-key="t3f" data-ok="weit"><option value="">– wählen –</option><option value="kurz">Kurzsichtigkeit</option><option value="weit">Weitsichtigkeit</option></select>.</p>
+    <div class="hints" data-h='["Wähle oben „Brille: keine“. Wechsle dann zwischen Ferne und Nähe.","Vergleiche mit den Erklärungen von kurzsichtig und weitsichtig im Kasten über der Simulation."]'></div>
+  </div>
+
+  <div class="task" data-id="t4" data-nr="4" data-afb="2" data-op="Untersuche">
+    <p>Finde für jedes Auge die Brille, mit der es <b>in der Ferne und in der Nähe</b> scharf sieht. Beim Auge mit 65 Jahren reicht es, wenn es mit Brille in der Nähe scharf sieht.</p>
+    <table class="t">
+      <tr><th>Auge</th><th>passende Brille</th></tr>
+      <tr><td>Augapfel zu lang (kurzsichtig)</td><td><select data-key="t4a" data-ok="z"></select></td></tr>
+      <tr><td>Augapfel zu kurz (weitsichtig)</td><td><select data-key="t4b" data-ok="s"></select></td></tr>
+      <tr><td>Auge mit 65 Jahren (beim Lesen)</td><td><select data-key="t4c" data-ok="s"></select></td></tr>
+      <tr><td>normales Auge</td><td><select data-key="t4d" data-ok="keine"></select></td></tr>
+    </table>
+    <div class="hints" data-h='["Probiere bei jedem Auge alle drei Möglichkeiten aus. Prüfe jedes Mal Ferne und Nähe.","Liegt das Bild vor der Netzhaut, muss das Licht später zusammenkommen. Liegt es dahinter, muss es früher zusammenkommen."]'></div>
+  </div>
+
+  <div class="zitat" id="zitat"></div>
+
+  <div class="task" data-id="t5" data-nr="5" data-afb="2" data-op="Vervollständige">
+    <p>Vergleiche mit deiner Vermutung aus Aufgabe 1. Vervollständige dann den Text.</p>
+    <p class="gap">Beim kurzsichtigen Auge treffen sich die Lichtstrahlen aus der Ferne schon
+      <select data-key="t5a" data-ok="vor"><option value="">– wählen –</option><option value="hin">hinter</option><option value="vor">vor</option></select>
+      der Netzhaut. Eine
+      <select data-key="t5b" data-ok="z"><option value="">– wählen –</option><option value="s">Sammellinse</option><option value="z">Zerstreuungslinse</option></select>
+      lässt das Licht etwas auseinanderlaufen, bevor es ins Auge kommt. Dadurch treffen sich die Strahlen
+      <select data-key="t5c" data-ok="spaet"><option value="">– wählen –</option><option value="frueh">früher</option><option value="spaet">später</option></select>,
+      genau auf der Netzhaut. Beim weitsichtigen Auge ist es umgekehrt: Eine
+      <select data-key="t5d" data-ok="s"><option value="">– wählen –</option><option value="z">Zerstreuungslinse</option><option value="s">Sammellinse</option></select>
+      bündelt das Licht schon vor dem Auge ein wenig.</p>
+    <div class="hints" data-h='["Nutze deine Ergebnisse aus Aufgabe 3 und 4.","Schau in der Simulation genau hin, wo sich die Strahlen mit und ohne Brille treffen."]'></div>
+  </div>
+
+  <div class="task" data-id="t6" data-nr="6" data-afb="2" data-op="Erkläre" data-draw="4A">
+    <p>Opas Augapfel hat die richtige Länge. Trotzdem braucht er zum Lesen eine Brille. Erkläre, woran das liegt. Nutze die Simulation „Auge mit 65 Jahren“.</p>
+    <div class="info" style="margin-top:0">Gut zu wissen: Die Linse im Auge wird mit dem Alter härter und weniger elastisch.</div>
+    <details class="drawbox"><summary>✏️ Frage 4A</summary><div class="js-drawing" data-id="4A"></div></details>
+    <div class="row"><button type="button" class="btn finish">Bearbeitung abschließen</button></div>
+    <div class="fb fmsg"></div>
+    <div class="check selfcheck" hidden><b>Selbstprüfung:</b>
+      <ul>
+        <li>Hast du gesagt, was mit der Linse im Alter passiert?</li>
+        <li>Hast du gesagt, was die Linse beim Blick in die Nähe eigentlich tun müsste?</li>
+        <li>Hast du gesagt, wo das Bild beim Lesen ohne Brille liegt?</li>
+        <li>Hast du gesagt, welches Brillenglas hilft und warum?</li>
+      </ul></div>
+    <div class="hints" data-h='["Erinnere dich an Seite 3: Was macht die Linse, wenn man in die Nähe schaut?","Vergleiche in der Simulation das normale Auge und das Auge mit 65 Jahren beim Blick in die Nähe."]'></div>
+  </div>
+</section>
+
+<!-- C Anwendung -->
+<section class="box sec A">
+  <span class="tag">Anwendung</span>
+  <div class="sh"><span class="circ">C</span><h2>Beim Optiker</h2></div>
+  <p>Zurück zur Frage vom Anfang: <b>Warum sehen manche Menschen unscharf, und wie hilft ihnen eine Brille?</b></p>
+  <div class="info">Auf einem Brillenpass steht die Stärke der Gläser in <b>Dioptrien</b> (dpt). Ein <b>Minus</b> bedeutet eine Zerstreuungslinse, ein <b>Plus</b> eine Sammellinse. Je größer die Zahl, desto stärker ist das Glas.</div>
+
+  <div class="task" data-id="t7" data-nr="7" data-afb="2" data-op="Ordne zu">
+    <p>Drei Kunden kommen mit ihrem Brillenpass. Ordne jedem Kunden den passenden Sehfehler zu.</p>
+    <table class="t">
+      <tr><th>Kunde und Brillenpass</th><th>Sehfehler</th></tr>
+      <tr><td>Lena, 16 Jahre: −2,0 dpt</td><td><select data-key="t7a" data-ok="kurz"></select></td></tr>
+      <tr><td>Ali, 19 Jahre: +1,5 dpt, Probleme beim Lesen</td><td><select data-key="t7b" data-ok="weit"></select></td></tr>
+      <tr><td>Frau Berg, 62 Jahre: Lesebrille +2,5 dpt, Augapfel normal</td><td><select data-key="t7c" data-ok="alt"></select></td></tr>
+    </table>
+    <div class="hints" data-h='["Minus heißt Zerstreuungslinse, Plus heißt Sammellinse. Welcher Sehfehler braucht welche Linse? Schau in deine Tabelle aus Aufgabe 4.","Ali und Frau Berg haben beide ein Plus. Achte auf das Alter und auf den Augapfel."]'></div>
+  </div>
+
+  <div class="task" data-id="t8" data-nr="8" data-afb="3" data-op="Beurteile" data-draw="4B">
+    <p>Opa findet seine neue Lesebrille so gut, dass er sie den ganzen Tag tragen will, auch beim Autofahren. Beurteile Opas Idee. Teste sie vorher in der Simulation.</p>
+    <details class="drawbox"><summary>✏️ Frage 4B</summary><div class="js-drawing" data-id="4B"></div></details>
+    <div class="row"><button type="button" class="btn finish">Bearbeitung abschließen</button></div>
+    <div class="fb fmsg"></div>
+    <div class="check selfcheck" hidden><b>Selbstprüfung:</b>
+      <ul>
+        <li>Hast du ein klares Urteil formuliert?</li>
+        <li>Hast du beschrieben, was Opa mit Lesebrille in der Ferne sieht?</li>
+        <li>Hast du erklärt, wo das Bild dann liegt und warum?</li>
+        <li>Hast du gesagt, was Opa stattdessen tun kann?</li>
+      </ul></div>
+    <div class="hints" data-h='["Wähle „Auge mit 65 Jahren“, „Sammellinse“ und „in die Ferne“.","Beim Autofahren muss man vor allem in die Ferne scharf sehen.","Überlege, welche Lösung Opa beim Optiker bekommen könnte, damit er beides kann."]'></div>
+  </div>
+</section>
+
+<!-- Fuß -->
+<div class="box">
+  <p class="small"><b>Quellen:</b> Eigene Darstellungen. Die Simulation ist ein vereinfachtes Modell des Auges.</p>
+  <button type="button" class="btnr" id="resetBtn">Eingaben dieser Seite zurücksetzen</button>
+  <div class="confirm" id="resetConfirm">
+    <p style="margin:0 0 8px">Wirklich alles auf dieser Seite löschen? Auch deine Schreibfelder werden geleert.</p>
+    <div class="row" style="margin:0"><button type="button" class="btnr" id="resetYes">Ja, löschen</button><button type="button" class="btn2" id="resetNo">Abbrechen</button></div>
+  </div>
+</div>
+
+</div>
+
+<script src="../bridge.js"></script>
+<script>
+(function(){
+'use strict';
+const SEITE = 4, VERSION = 1, LS_KEY = 'optik_lerneinheit_v' + VERSION + '_s' + SEITE;
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const SVGNS = 'http://www.w3.org/2000/svg';
+const fmt = (x, d) => x.toFixed(d === undefined ? 1 : d).replace('.', ',');
+
+let S = leer();
+function leer(){ return { v: VERSION, ans: {}, done: {}, hints: {}, draw: {}, sim: { auge: 'normal', obj: 'fern', brille: 'keine' } }; }
+
+let appLive = false;
+function changed(){
+  if (window.AppBridge && AppBridge.inApp) { if (appLive) AppBridge.changed(); }
+  else { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+}
+
+/* ---------- Aufgabenköpfe und Hilfen ---------- */
+const TASKS = $$('.task');
+TASKS.forEach(t => {
+  const afb = +t.dataset.afb;
+  const h = document.createElement('div'); h.className = 'th';
+  h.innerHTML = t.dataset.verm ? '<span class="afb verm">Vermutung</span><span class="tt">Aufgabe ' + t.dataset.nr + ' · ' + t.dataset.op + '</span><span class="st">offen</span>' : '<span class="afb">AFB ' + ['I','II','III'][afb-1] + ' ' + [1,2,3].map(i => '<i' + (i <= afb ? ' class="f"' : '') + '></i>').join('') + '</span>'
+    + '<span class="tt">Aufgabe ' + t.dataset.nr + ' · ' + t.dataset.op + '</span><span class="st">offen</span>';
+  t.insertBefore(h, t.firstChild);
+  const hw = $('.hints', t);
+  const list = JSON.parse(hw.dataset.h);
+  hw.innerHTML = '';
+  const hl = document.createElement('div');
+  const hb = document.createElement('button'); hb.type = 'button'; hb.className = 'btnh';
+  const upd = () => {
+    const n = S.hints[t.dataset.id] || 0;
+    hl.innerHTML = list.slice(0, n).map((x, i) => '<div class="help"><b>Hilfe ' + (i+1) + ':</b> ' + x + '</div>').join('');
+    hb.textContent = n < list.length ? 'Hilfe ' + (n+1) + ' anzeigen' : 'Keine weiteren Hilfen';
+    hb.disabled = n >= list.length;
+  };
+  hb.addEventListener('click', () => { S.hints[t.dataset.id] = Math.min(list.length, (S.hints[t.dataset.id] || 0) + 1); upd(); changed(); });
+  t._updHints = upd;
+  if (!t.dataset.draw) {
+    const row = document.createElement('div'); row.className = 'row';
+    const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'btn'; cb.textContent = t.dataset.verm ? 'Vermutung festhalten' : 'Prüfen';
+    cb.addEventListener('click', () => pruefe(t, true));
+    row.appendChild(cb); row.appendChild(hb);
+    const fb = document.createElement('div'); fb.className = 'fb fmsg';
+    hw.appendChild(row); hw.appendChild(fb); hw.appendChild(hl);
+  } else {
+    const row = $('.row', t); row.appendChild(hb); hw.appendChild(hl);
+  }
+  upd();
+});
+
+/* ---------- Eingaben speichern ---------- */
+$$('[data-key]').forEach(el => {
+  const ev = el.tagName === 'SELECT' ? 'change' : 'input';
+  el.addEventListener(ev, () => {
+    S.ans[el.dataset.key] = el.value;
+    el.classList.remove('bad', 'good');
+    changed();
+  });
+});
+
+/* ---------- Prüfen ---------- */
+function norm(s){ return String(s).toLowerCase().replace(/ß/g,'ss').replace(/[^a-zäöü0-9 ]/g,'').replace(/\s+/g,' ').trim(); }
+function lev(a, b){
+  const m = a.length, n = b.length, d = Array.from({length: m+1}, (_, i) => [i]);
+  for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+function wortOk(val, accept){
+  const v = norm(val); if (!v) return false;
+  return accept.split('|').some(a => { a = norm(a); const tol = a.length >= 9 ? 2 : a.length >= 5 ? 1 : 0; return lev(v, a) <= tol; });
+}
+function zahl(s){ s = String(s).replace(',', '.').trim(); if (s === '') return NaN; return Number(s); }
+
+function pruefe(t, zeigen){
+  const fb = $('.fmsg', t);
+  if (t.dataset.verm) {
+    const voll = $$('select', t).every(x => x.value);
+    if (zeigen) { fb.className = 'fb fmsg ' + (voll ? 'ok' : 'no'); fb.textContent = voll ? '✓ Deine Vermutung ist festgehalten. Du prüfst sie später auf dieser Seite.' : 'Wähle zuerst in beiden Lücken etwas aus.'; }
+    if (voll && !S.done[t.dataset.id]) { S.done[t.dataset.id] = true; changed(); }
+    if (!voll && S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+    status(); return voll;
+  }
+  const felder = $$('[data-ok],[data-accept],[data-num],[data-fix]', t);
+  let richtig = 0, msg = '';
+  for (const el of felder) {
+    let ok = false;
+    if (el.dataset.ok !== undefined) ok = el.value === el.dataset.ok;
+    else if (el.dataset.accept) ok = wortOk(el.value, el.dataset.accept);
+    else {
+      const soll = el.dataset.fix !== undefined ? [+el.dataset.fix] : NUM[el.dataset.num]();
+      const tol = +el.dataset.tol, v = zahl(el.value);
+      if (soll === null) { if (zeigen) { fb.className = 'fb fmsg no'; fb.textContent = NUMHINWEIS[el.dataset.num]; } status(); return false; }
+      ok = soll.some(x => Math.abs(v - x) <= Math.max(tol, Math.abs(x) * 0.02));
+      if (!ok && !isNaN(v)) {
+        if (soll.some(x => Math.abs(-v - x) <= tol)) msg = 'Der Betrag stimmt. Überprüfe das Vorzeichen.';
+        else if (!el.dataset.nounit && soll.some(x => Math.abs(v * 100 - x) <= tol * 2)) msg = 'Dein Wert passt in Metern. Gib ihn in Zentimetern an.';
+        else if (!el.dataset.nounit && soll.some(x => Math.abs(v - x * 10) <= tol * 10)) msg = 'Dein Wert passt in Millimetern. Gib ihn in Zentimetern an.';
+      }
+    }
+    if (zeigen) { el.classList.toggle('good', ok); el.classList.toggle('bad', !ok); }
+    if (ok) richtig++;
+  }
+  let alle = richtig === felder.length;
+  const calc = t.dataset.calc;
+  if (calc) {
+    const sc = $('.selfcheck', t); if (sc) sc.hidden = !alle;
+    if (alle && !(S.draw[calc] && S.draw[calc].length)) {
+      if (zeigen) { fb.className = 'fb fmsg no'; fb.textContent = 'Das Ergebnis stimmt. Schreibe jetzt noch deinen Rechenweg in das Schreibfeld und drücke dann wieder „Prüfen“.'; const d = $('details', t); if (d) d.open = true; }
+      if (S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+      status(); return false;
+    }
+  }
+  if (zeigen) {
+    fb.className = 'fb fmsg ' + (alle ? 'ok' : 'no');
+    fb.textContent = alle ? '✓ Alles richtig.' : '✗ ' + richtig + ' von ' + felder.length + ' richtig.' + (msg ? ' ' + msg : '') + ' Überprüfe die rot markierten Felder.';
+  }
+  if (alle && !S.done[t.dataset.id]) { S.done[t.dataset.id] = true; changed(); }
+  if (zeigen && !alle && S.done[t.dataset.id]) { delete S.done[t.dataset.id]; changed(); }
+  status();
+  return alle;
+}
+
+function status(){
+  let n = 0;
+  TASKS.forEach(t => { const d = !!S.done[t.dataset.id]; t.classList.toggle('done', d); $('.st', t).textContent = d ? '✓ erledigt' : 'offen'; if (d) n++; });
+  $('#barFill').style.width = (100 * n / TASKS.length) + '%';
+  $('#barText').textContent = n + ' von ' + TASKS.length + ' Aufgaben erledigt';
+  if (typeof nachStatus === 'function') nachStatus();
+}
+
+/* ---------- Auswahllisten füllen (gemischte Reihenfolge, fest pro Feld) ---------- */
+const LISTEN = {
+  t3: { vor: 'unscharf, Bild vor der Netzhaut', auf: 'scharf, Bild auf der Netzhaut', hin: 'unscharf, Bild hinter der Netzhaut' },
+  t4: { keine: 'keine Brille nötig', s: 'Sammellinse', z: 'Zerstreuungslinse' },
+  t7: { kurz: 'Kurzsichtigkeit', weit: 'Weitsichtigkeit', alt: 'Altersweitsichtigkeit', farbe: 'Farbenblindheit' }
+};
+function mische(arr, seed){ let h = 0; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+$$('select[data-ok]').forEach(s => { if (s.options.length) return;
+  const src = LISTEN[s.dataset.key.slice(0, 2)];
+  s.appendChild(new Option('– wählen –', ''));
+  mische(Object.keys(src), s.dataset.key).forEach(k => s.appendChild(new Option(src[k], k)));
+});
+
+/* ---------- Vermutung aufgreifen ---------- */
+function nachStatus(){
+  const z = $('#zitat'); if (!z) return;
+  const a = S.ans.t1a, b = S.ans.t1b;
+  if (S.done.t1 && a && b) { z.style.display = ''; z.innerHTML = 'Deine Vermutung aus Aufgabe 1: „Ich vermute: Tim hilft eine Brille mit einer ' + a + ', weil sie das Licht ' + b + '.“'; }
+  else { z.style.display = 'none'; z.textContent = ''; }
+}
+
+/* ---------- Simulation: Sehfehler und Brillen ---------- */
+const svg = $('#simSvg');
+const AX = 150, LX = 300, PX = 150;
+const AUGE = { normal: { L: 2.0, fmin: 1.78, fmax: 2.0 }, lang: { L: 2.1, fmin: 1.78, fmax: 2.0 }, kurz: { L: 1.9, fmin: 1.78, fmax: 2.0 }, alt: { L: 2.0, fmin: 1.92, fmax: 2.0 } };
+const OBJ = { fern: 1e9, nah: 25 }, BRILLE = { keine: 0, s: 0.025, z: -0.025 };
+function el(n, a, p){ const e = document.createElementNS(SVGNS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; }
+function rechne(){
+  const A = AUGE[S.sim.auge], g = OBJ[S.sim.obj], P = BRILLE[S.sim.brille];
+  const pReq = 1 / A.L + 1 / g - P;
+  const pEye = Math.min(1 / A.fmin, Math.max(1 / A.fmax, pReq));
+  const b = 1 / (pEye + P - 1 / g);
+  return { A, g, P, b, pEye };
+}
+function zeichneSim(){
+  const { A, g, b, pEye } = rechne();
+  const Ld = 2.0 + (A.L - 2.0) * 5, bz = Ld + (b - A.L) * 8;
+  const front = 280, back = LX + Ld * PX + 10, cx = (front + back) / 2, rx = (back - front) / 2, ry = 125;
+  svg.innerHTML = '';
+  el('ellipse', {cx, cy: AX, rx, ry, fill: '#F7FBFF'}, svg);
+  const xo = cx - rx * Math.sqrt(1 - (62 / ry) * (62 / ry));
+  el('path', {d: 'M' + xo.toFixed(1) + ' ' + (AX - 62) + ' A' + rx + ' ' + ry + ' 0 1 1 ' + xo.toFixed(1) + ' ' + (AX + 62), fill: 'none', stroke: '#4F5B6D', 'stroke-width': 3}, svg);
+  el('path', {d: 'M' + cx + ' ' + (AX - ry) + ' A' + rx + ' ' + ry + ' 0 0 1 ' + cx + ' ' + (AX + ry), fill: 'none', stroke: '#E07A7A', 'stroke-width': 5}, svg);
+  el('rect', {x: back - 4, y: AX + 12, width: 800 - back, height: 22, fill: '#F2D27A', stroke: '#B8902C'}, svg);
+  el('path', {d: 'M272 72 Q228 150 272 228', fill: '#DDEFFA', stroke: '#6FA8CC', 'stroke-width': 3}, svg);
+  el('rect', {x: 280, y: AX - 96, width: 8, height: 42, rx: 3, fill: '#5E86B5'}, svg);
+  el('rect', {x: 280, y: AX + 54, width: 8, height: 42, rx: 3, fill: '#5E86B5'}, svg);
+  // Brille
+  if (S.sim.brille !== 'keine') {
+    const d = S.sim.brille === 's' ? 'M150 70 Q172 150 150 230 Q128 150 150 70Z' : 'M138 70 H162 Q148 150 162 230 H138 Q152 150 138 70Z';
+    el('path', {d, fill: 'rgba(200,225,245,.8)', stroke: '#1F5470', 'stroke-width': 2}, svg);
+    const t = el('text', {x: 150, y: 250, 'font-size': 12, 'text-anchor': 'middle', fill: '#4F5B6D'}, svg); t.textContent = 'Brille';
+  }
+  // Strahlen
+  const gr = el('g', {stroke: '#E39B1B', 'stroke-width': 2.2, fill: 'none'}, svg);
+  const xs = -(LX - 20) / PX, gz = g / 4, hits = [];
+  const XG = (150 - LX) / PX, Pd = BRILLE[S.sim.brille] * 8; // Lage der Brille (cm), Darstellung überhöht
+  [-40, 0, 40].forEach(hp => {
+    const hg = hp / PX;                                  // Höhe an der Brille
+    const m0 = hg / (gz + XG);                           // Steigung vom Gegenstandspunkt (-gz, 0)
+    const y0 = hg + m0 * (xs - XG);
+    const m1 = m0 - hg * Pd;                             // Knick an der Brille
+    const hl = hg + m1 * (0 - XG);                       // Höhe an der Augenlinse
+    el('line', {x1: 20, y1: AX - y0 * PX, x2: LX + XG * PX, y2: AX - hg * PX}, gr);
+    el('line', {x1: LX + XG * PX, y1: AX - hg * PX, x2: LX, y2: AX - hl * PX}, gr);
+    const yr = hl * (1 - Ld / bz);
+    el('line', {x1: LX, y1: AX - hl * PX, x2: LX + Ld * PX, y2: AX - yr * PX}, gr);
+    hits.push(yr);
+  });
+  // Linse
+  const dicke = (pEye - 0.5) / (1 / 1.78 - 0.5);
+  el('ellipse', {cx: LX, cy: AX, rx: 6 + dicke * 16, ry: 56, fill: 'rgba(190,220,240,.8)', stroke: '#1F5470', 'stroke-width': 2.5}, svg);
+  const lo = Math.min(...hits), hi = Math.max(...hits);
+  el('line', {x1: LX + Ld * PX + 2, y1: AX - hi * PX - 2, x2: LX + Ld * PX + 2, y2: AX - lo * PX + 2, stroke: '#F6C443', 'stroke-width': 6, 'stroke-linecap': 'round'}, svg);
+  const t1 = el('text', {x: 20, y: 30, 'font-size': 14, fill: '#4F5B6D'}, svg); t1.textContent = (S.sim.obj === 'fern' ? 'Licht aus der Ferne' : 'Licht aus 25 cm') + ' →';
+  const t2 = el('text', {x: LX + Ld * PX - 40, y: 292, 'font-size': 12, fill: '#4F5B6D'}, svg); t2.textContent = 'Netzhaut';
+  const diff = b - A.L, scharf = Math.abs(diff) < 0.005;
+  $('#mS').textContent = scharf ? 'scharf, Bild auf der Netzhaut' : (diff > 0 ? 'unscharf, Bild hinter der Netzhaut' : 'unscharf, Bild vor der Netzhaut');
+  const blur = scharf ? 0 : Math.min(8, 200 * Math.abs(1 - A.L / b));
+  $('#sehText').style.filter = 'blur(' + blur.toFixed(1) + 'px)';
+  [['#segAuge', 'auge'], ['#segObj', 'obj'], ['#segBrille', 'brille']].forEach(([id, k]) => $$(id + ' button').forEach(x => x.classList.toggle('on', x.dataset.v === S.sim[k])));
+}
+[['#segAuge', 'auge'], ['#segObj', 'obj'], ['#segBrille', 'brille']].forEach(([id, k]) => $$(id + ' button').forEach(x => x.addEventListener('click', () => { S.sim[k] = x.dataset.v; zeichneSim(); changed(); })));
+function simAnwenden(){ zeichneSim(); }
+const NUM = {}, NUMHINWEIS = {};
+
+/* ---------- Schreibfelder ---------- */
+const LINIE = 38;
+const drawFelder = {};
+$$('.js-drawing').forEach(box => {
+  const id = box.dataset.id;
+  const tools = document.createElement('div'); tools.className = 'dtools';
+  const bF = document.createElement('button'); bF.type = 'button'; bF.className = 'btn2';
+  const bU = document.createElement('button'); bU.type = 'button'; bU.className = 'btn2'; bU.textContent = 'Rückgängig';
+  const bC = document.createElement('button'); bC.type = 'button'; bC.className = 'btnr'; bC.textContent = 'Alles löschen';
+  tools.append(bF, bU, bC);
+  const hint = document.createElement('div'); hint.className = 'dhint';
+  hint.textContent = 'Mit dem Stift kannst du sofort schreiben. Mit dem Finger erst nach „Mit dem Finger schreiben“.';
+  const s = document.createElementNS(SVGNS, 'svg'); s.setAttribute('class', 'dsvg');
+  const gL = el('g', {'pointer-events': 'none'}, s), gS = el('g', {}, s);
+  box.append(tools, hint, s);
+  let finger = false, cur = null, pts = [];
+  const setF = v => { finger = v; s.classList.toggle('finger', v); bF.classList.toggle('on', v); bF.textContent = v ? 'Fingerschreiben an' : 'Mit dem Finger schreiben'; };
+  setF(false);
+  bF.addEventListener('click', () => setF(!finger));
+  function linien(){
+    gL.innerHTML = '';
+    const w = s.clientWidth || 600, h = s.clientHeight || 380;
+    for (let y = LINIE; y < h; y += LINIE) el('line', {x1: 0, y1: y, x2: w, y2: y, stroke: '#CFD8E3', 'stroke-width': 1, 'shape-rendering': 'crispEdges'}, gL);
+  }
+  function striche(){
+    gS.innerHTML = '';
+    (S.draw[id] || []).forEach(k => el('path', {d: k.d, stroke: k.stroke, 'stroke-width': k.strokeWidth, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, gS));
+  }
+  const pos = e => { const r = s.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * 10) / 10, Math.round((e.clientY - r.top) * 10) / 10]; };
+  s.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch' && !finger) return;
+    e.preventDefault(); s.setPointerCapture(e.pointerId);
+    pts = [pos(e)];
+    cur = el('path', {d: 'M' + pts[0].join(' '), stroke: '#1D2433', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}, gS);
+  });
+  s.addEventListener('pointermove', e => {
+    if (!cur) return; e.preventDefault();
+    pts.push(pos(e)); cur.setAttribute('d', 'M' + pts.map(p => p.join(' ')).join(' L'));
+  });
+  const ende = () => {
+    if (!cur) return;
+    const d = pts.length === 1 ? 'M' + pts[0].join(' ') + ' l0.1 0' : cur.getAttribute('d');
+    (S.draw[id] = S.draw[id] || []).push({d: d, stroke: '#1D2433', strokeWidth: 2.5});
+    cur = null; striche(); changed();
+  };
+  s.addEventListener('pointerup', ende); s.addEventListener('pointercancel', ende);
+  bU.addEventListener('click', () => { (S.draw[id] || []).pop(); striche(); changed(); });
+  bC.addEventListener('click', () => { S.draw[id] = []; striche(); changed(); });
+  const det = box.closest('details');
+  if (det) det.addEventListener('toggle', linien);
+  window.addEventListener('resize', linien);
+  drawFelder[id] = { linien, striche };
+  linien(); striche();
+});
+
+$$('.task[data-draw]').forEach(t => {
+  const ids = t.dataset.draw.split(',');
+  const fb = $('.fmsg', t), sc = $('.selfcheck', t);
+  $('.finish', t).addEventListener('click', () => {
+    const leerFeld = ids.some(id => !(S.draw[id] && S.draw[id].length));
+    if (leerFeld) { fb.className = 'fb fmsg no'; fb.textContent = ids.length > 1 ? 'Bitte schreibe zuerst in alle Schreibfelder dieser Aufgabe.' : 'Bitte schreibe zuerst deine Antwort in das Schreibfeld.'; const d = $('details', t); if (d) d.open = true; return; }
+    fb.className = 'fb fmsg ok'; fb.textContent = '✓ Bearbeitung abgeschlossen. Prüfe deine Antwort mit der Liste.';
+    S.done[t.dataset.id] = true; sc.hidden = false; status(); changed();
+  });
+});
+
+/* ---------- Gesamtzustand anwenden ---------- */
+function anwenden(){
+  $$('[data-key]').forEach(el => { el.value = S.ans[el.dataset.key] !== undefined ? S.ans[el.dataset.key] : ''; el.classList.remove('good', 'bad'); });
+  TASKS.forEach(t => {
+    t._updHints();
+    const fb = $('.fmsg', t); if (fb) { fb.textContent = ''; fb.className = 'fb fmsg'; }
+    if ((S.done[t.dataset.id] || t.dataset.calc) && !t.dataset.draw) pruefe(t, !!S.done[t.dataset.id]);
+    const sc = $('.selfcheck', t); if (sc && !t.dataset.calc) sc.hidden = !S.done[t.dataset.id];
+  });
+  Object.values(drawFelder).forEach(f => { f.linien(); f.striche(); });
+  simAnwenden(); status();
+}
+
+/* ---------- Zurücksetzen ---------- */
+$('#resetBtn').addEventListener('click', () => $('#resetConfirm').classList.add('on'));
+$('#resetNo').addEventListener('click', () => $('#resetConfirm').classList.remove('on'));
+$('#resetYes').addEventListener('click', () => { S = leer(); $('#resetConfirm').classList.remove('on'); anwenden(); changed(); });
+
+/* ---------- Start ---------- */
+if (!(window.AppBridge && AppBridge.inApp)) {
+  try { const alt = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (alt && alt.v === VERSION) { S = Object.assign(leer(), alt); S.sim = Object.assign(leer().sim, alt.sim || {}); } } catch (e) {}
+}
+anwenden();
+
+/* ---------- Anbindung an die Physik-App (nur Lernstand, keine Namen) ---------- */
+if (window.AppBridge) {
+  setTimeout(() => { appLive = true; }, 1500);
+  AppBridge.register({
+    getState(){
+      const namen = TASKS.map(t => 'Aufgabe ' + t.dataset.nr);
+      const details = {};
+      TASKS.forEach(t => {
+        let txt = S.done[t.dataset.id] ? 'erledigt' : 'offen';
+        const fid = t.dataset.draw || t.dataset.calc;
+        if (fid) txt += ' · Schreibfeld ' + fid + ': ' + ((S.draw[fid] || []).length ? 'beschrieben' : 'leer');
+        else if (S.hints[t.dataset.id]) txt += ' · ' + S.hints[t.dataset.id] + ' Hilfe(n)';
+        details['Aufgabe ' + t.dataset.nr] = txt;
+      });
+      return { punkte: TASKS.filter(t => S.done[t.dataset.id]).length, stationen: namen,
+        erledigt: TASKS.filter(t => S.done[t.dataset.id]).map(t => 'Aufgabe ' + t.dataset.nr),
+        details, daten: JSON.parse(JSON.stringify(S)) };
+    },
+    setState(st){
+      const d = st && st.daten; appLive = true;
+      if (!d || d.v !== VERSION) return;
+      S = Object.assign(leer(), d); S.sim = Object.assign(leer().sim, d.sim || {});
+      anwenden();
+    }
+  });
+}
+})();
+</script>
+</body>
+</html>
