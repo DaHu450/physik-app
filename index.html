@@ -555,6 +555,10 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
   aufNeuesPruefen();
 })();
 })();
+
+/* Verstecktes Lehrer-Tor: 7 schnelle Taps auf den Titel öffnen die Auswertung (kein sichtbarer Link) */
+(function(){const h=document.querySelector('#home .top h1');if(!h)return;let n=0,t=0;
+  h.addEventListener('click',()=>{const now=Date.now();n=(now-t<1500)?n+1:1;t=now;if(n>=7){n=0;location.href='lehrer.html'}});})();
 </script>
 </body>
 </html>
