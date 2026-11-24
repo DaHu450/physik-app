@@ -272,12 +272,24 @@ if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
 
 /* ---------- Anmeldung: nur in der installierten App, nur einmal ---------- */
 /* ?vorschau=1 erlaubt dir das Testen im normalen Browser (wird in der Abgabe markiert) */
-/* Lehrer-Testansicht (?lehrer=1): nur wenn die Lehrerseite das nach Code-Eingabe in diesem Browser freigegeben hat. Alles ist offen, nichts gesperrt. */
+/* Lehrer-Testansicht (?lehrer=1): fragt einmal pro Sitzung nach dem Lehrer-Code (nur Hash im Code, kein Klartext). Dann ist alles offen, nichts gesperrt. */
 let lehrerFrei = false;
-try {
-  lehrerFrei = (new URLSearchParams(location.search).has('lehrer') && Date.now() - Number(localStorage.getItem('klassenapp:lehrerfrei') || 0) < 12 * 3600 * 1000) || sessionStorage.getItem('klassenapp:lf') === '1';
-  if (lehrerFrei) sessionStorage.setItem('klassenapp:lf', '1');
-} catch (e) {}
+const lehrerWunsch = new URLSearchParams(location.search).has('lehrer');
+try { lehrerFrei = lehrerWunsch && sessionStorage.getItem('klassenapp:lf') === '1'; } catch (e) {}
+if (lehrerWunsch && !lehrerFrei) {
+  const hx = (s) => { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0, c; i < s.length; i++) { c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909); return 4294967296 * (2097151 & h2) + (h1 >>> 0); };
+  const tor = document.createElement('div');
+  tor.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#1F3A5F;display:flex;align-items:center;justify-content:center;font-family:-apple-system,Segoe UI,Arial,sans-serif';
+  tor.innerHTML = '<form style="background:#fff;border-radius:16px;padding:28px 26px;width:min(92vw,340px);text-align:center"><h2 style="margin:0 0 6px;color:#1F3A5F;font-size:22px">Lehrer-Testansicht</h2><p style="margin:0 0 16px;color:#556;font-size:15px">Bitte Lehrer-Code eingeben.</p><input type="password" inputmode="numeric" autocomplete="off" style="width:100%;box-sizing:border-box;font-size:22px;text-align:center;letter-spacing:6px;padding:10px;border:2px solid #9AA9BA;border-radius:10px"><p class="err" style="min-height:20px;margin:10px 0 0;color:#B3261E;font-size:14px"></p><button style="margin-top:6px;width:100%;font-size:17px;font-weight:700;padding:12px;border:0;border-radius:10px;background:#3C7A4E;color:#fff">Öffnen</button></form>';
+  document.body.appendChild(tor);
+  let fehl = 0, warte = 0;
+  tor.querySelector('form').onsubmit = (e) => {
+    e.preventDefault(); if (Date.now() < warte) return;
+    const inp = tor.querySelector('input');
+    if (hx('physik-lehrer:' + inp.value.trim()) === 8593057088301367) { try { sessionStorage.setItem('klassenapp:lf', '1'); } catch (x) {} location.reload(); }
+    else { fehl++; inp.value = ''; tor.querySelector('.err').textContent = 'Falscher Code.'; if (fehl >= 3) warte = Date.now() + Math.min(30000, fehl * 3000); }
+  };
+}
 const vorschau = lehrerFrei || new URLSearchParams(location.search).has('vorschau') || localStorage.getItem('klassenapp:vorschau') === '1';
 if (vorschau) localStorage.setItem('klassenapp:vorschau', '1');
 let kandidat = null;
@@ -574,9 +586,6 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 })();
 })();
 
-/* Verstecktes Lehrer-Tor: 7 schnelle Taps auf den Titel öffnen die Auswertung (kein sichtbarer Link) */
-(function(){const h=document.querySelector('#home .top h1');if(!h)return;let n=0,t=0;
-  h.addEventListener('click',()=>{const now=Date.now();n=(now-t<1500)?n+1:1;t=now;if(n>=7){n=0;location.href='lehrer.html'}});})();
 </script>
 </body>
 </html>
