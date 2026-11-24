@@ -3,5 +3,18 @@
   "klassen": {
     "61": "BFS2"
   },
-  "module": []
+  "module": [
+    {
+      "id": "optik-s01",
+      "titel": "Optik 1 · Linsen bündeln Licht",
+      "untertitel": "Sammellinse, Brennpunkt und Brennweite",
+      "datei": "optik-s01.html",
+      "klassen": [
+        "61"
+      ],
+      "freigegeben": true,
+      "farbe": "#3A7CA5",
+      "icon": "linse"
+    }
+  ]
 }
