@@ -98,7 +98,7 @@ select{min-height:44px;font:inherit;border:2px solid #b9c4cf;border-radius:8px;p
 <div class="tabs" id="tabs"></div>
 <details class="formeln"><summary>📐 Formelkasten (wie in der Arbeit)</summary>
 <p>n<sub>1</sub> · sin α = n<sub>2</sub> · sin β &nbsp;(Luft: n = 1,00) &nbsp;&nbsp; T = 2π · √(L · C)<br>
-W<sub>el</sub> = ½ · C · U² &nbsp;&nbsp; W<sub>mag</sub> = ½ · L · I² &nbsp;&nbsp; λ = g · e / l<br>
+λ = g · e / l<br>
 <span class="note">g: Gitterkonstante, e: Abstand Mitte – Streifen, l: Abstand Gitter – Schirm. Taschenrechner erlaubt.</span></p></details>
 <div id="view"></div>
 </div>
@@ -481,9 +481,6 @@ function topicS(seed){var P=parS(seed),r=mulberry(seed*13+6);var CS=[100,220,470
     lc.appendChild(el('div','tip','<b>Messung 2:</b> Bestimme T auch für die anderen Kondensatoren (Abstand zweier Maxima).'));
     mtable(lc,{key:'s_c',rowh:'C',rows:CS.map(function(x){return{id:''+x,label:x+' µF'}}),cols:[{id:'T',h:'T in ms'}],
       truth:function(rid){return skModel(P,+rid).T},tol:function(rid,cid,t){return t*.03},onok:renderTasks});
-    lc.appendChild(el('div','tip','<b>Messung 3:</b> Stell C = 47 µF und „Stromstärke I“ ein. Lies das erste Strommaximum ab.'));
-    mtable(lc,{key:'s_i',rows:[{id:'i',label:'1. Strommaximum'}],cols:[{id:'I',h:'Î<sub>1</sub> in A'}],
-      truth:function(){return skModel(P,47).Imax()},tol:function(rid,cid,t){return t*.04},onok:renderTasks});
     c.appendChild(lc)};
   T.tasks=[
   {id:'s1',stufe:1,title:'Was passiert im Schwingkreis?',be:2,intro:'Tippe die Schritte für eine halbe Schwingung in der richtigen Reihenfolge an.',parts:function(r){return[
@@ -502,15 +499,13 @@ function topicS(seed){var P=parS(seed),r=mulberry(seed*13+6);var CS=[100,220,470
     MC('Ist T proportional zu C?',['Nein: Die Punkte liegen auf einer Kurve, die immer flacher wird.','Ja: Die Punkte liegen auf einer Ursprungsgeraden.'],0,1,'Die Kurve wird flacher: T wächst langsamer als C.',r),
     NUM('C wächst von 47 µF auf 470 µF (Faktor 10). Um welchen Faktor wächst T? Rechne mit deinen Werten.','',q,{tol:.03},1,'T(470) / T(47) = '+f(MV('s_c','470','T'))+' / '+f(T47())+' ≈ '+f(q)),
     MC('Welche Regel passt dazu?',['C · 10 → T · √10 ≈ 3,2','C · 10 → T · 10','C · 10 → T · 100'],0,1,'T ~ √C, also Faktor √10 ≈ 3,16.',r)]}},
-  {id:'s6',stufe:2,title:'Linear oder exponentiell?',be:3,needs:['s_t'],intro:function(){var u=uu();return 'Deine Spannungsmaxima: '+u.map(function(x,i){return 'Û'+(i+1)+' = '+f(x)+' V'}).join(' · ')},parts:function(r){var u=uu();return[
-    NUM('Berechne Û₂ / Û₁.','',u[1]/u[0],{tol:.02},1,f(u[1])+' / '+f(u[0])+' ≈ '+f(u[1]/u[0],3)),
-    NUM('Berechne Û₄ / Û₃.','',u[3]/u[2],{tol:.03},1,f(u[3])+' / '+f(u[2])+' ≈ '+f(u[3]/u[2],3)),
-    MC('Was folgt daraus?',['Die Quotienten sind (fast) gleich → exponentielle Abnahme.','Die Quotienten sind gleich → lineare Abnahme.','Die Differenzen sind gleich → lineare Abnahme.'],0,1,'Gleicher Faktor pro Periode = exponentiell. Die Differenzen ('+f(u[0]-u[1])+' V, '+f(u[1]-u[2])+' V, '+f(u[2]-u[3])+' V) werden kleiner.',r)]}},
-  {id:'s7',stufe:3,title:'Energiebilanz',be:4,needs:['s_t','s_i'],intro:function(){return 'C = 47 µF, L = 27 mH. Dein Û₁ = '+f(uu()[0])+' V, dein Î₁ = '+f(MV('s_i','i','I'),3)+' A.'},parts:function(r){var u=uu(),W=0.5*47e-6*u[0]*u[0],Im=Math.sqrt(2*W/0.027),loss=(1-Math.pow(u[1]/u[0],2))*100;return[
-    NUM('Schritt 1: Energie im Kondensator zu Beginn.','mJ',W*1000,{tol:.02,wrong:[{val:2*W*1000,msg:'Der Faktor ½ fehlt.'},{val:0.5*47e-6*u[0]*1000,msg:'U muss quadriert werden.'}]},1,'W = ½ · 47·10⁻⁶ F · ('+f(u[0])+' V)² ≈ '+f(W*1000,3)+' mJ'),
-    NUM('Schritt 2: Welches I<sub>max</sub> erwartet man ohne Dämpfung?','A',Im,{tol:.025,wrong:[{val:function(sib){var w=parse(sib&&sib[0]?sib[0].get():'');return isNaN(w)?null:Math.sqrt(2*w/1000/0.027)},msg:'Folgefehler aus Schritt 1, der Rechenweg stimmt.',pts:1,tol:.025}]},1,'½ · L · I² = W → I = √(2W / L) ≈ '+f(Im,3)+' A'),
-    MC('Schritt 3: Dein gemessenes Î₁ ist kleiner. Warum?',['Bis zum ersten Strommaximum wird schon Energie im Draht in Wärme umgewandelt.','Die Spule speichert keine Energie.','Der Kondensator gibt nur die Hälfte seiner Energie ab.'],0,1,'Gedämpfte Schwingung: ohmscher Widerstand → Wärme.',r),
-    NUM('Schritt 4: Wie viel Prozent der Energie gehen während der ersten Periode verloren? (Tipp: W ~ Û²)','%',loss,{abs:1,tol:2,wrong:[{val:(1-u[1]/u[0])*100,msg:'Die Energie hängt von Û² ab, nicht von Û.',tol:.05}]},1,'W₂ / W₁ = (Û₂ / Û₁)² = ('+f(u[1]/u[0],3)+')² ≈ '+f(Math.pow(u[1]/u[0],2),3)+' → Verlust ≈ '+f(loss,0)+' %')]}},
+  {id:'s6',stufe:2,title:'Spannung und Strom im Vergleich',be:3,needs:['s_t'],intro:'Schalte am Oszi zwischen „Spannung U“ und „Stromstärke I“ um (C = 47 µF) und vergleiche die beiden Kurven.',parts:function(r){return[
+    MC('Im Moment, in dem die Spannung maximal ist, ist die Stromstärke …',['null.','ebenfalls maximal.','halb so groß wie maximal.'],0,1,'U und I sind gegeneinander verschoben: U maximal ↔ I null.',r),
+    NUM('Wie viele ms nach dem Beginn der Schwingung erwartest du das erste Strommaximum? Rechne mit deinem T.','ms',T47()/4,{tol:.06,wrong:[{val:T47()/2,msg:'Das ist eine halbe Periode. Der Strom ist schon nach einer Viertelperiode maximal.'}]},1,'Eine Viertelperiode: T / 4 = '+f(T47())+' ms / 4 ≈ '+f(T47()/4)+' ms. Prüf es am Oszi nach.'),
+    MC('Warum ist das so?',['Wenn der Kondensator leer ist, steckt die ganze Energie im Magnetfeld der Spule, der Strom ist maximal.','Die Spule erzeugt neue Energie, sobald die Spannung null ist.','Strom und Spannung sind immer gleichzeitig maximal, das Oszi zeigt das nur falsch an.'],0,1,'Die Energie pendelt zwischen elektrischem Feld (U maximal) und Magnetfeld (I maximal) hin und her.',r)]}},
+  {id:'s7',stufe:3,title:'Schwingkreis und Federpendel',be:3,intro:'Beim Federpendel pendelt die Energie zwischen Spannenergie der Feder und Bewegungsenergie der Masse. Ordne zu, was beim Schwingkreis jeweils dazu passt.',parts:function(r){var o=['elektrische Energie im Kondensator','magnetische Energie der Spule','Stromstärke','Ladung auf dem Kondensator','Spule (Induktivität L)','Widerstand des Drahts'];return[
+    GAPS('Spannenergie der Feder ↔ {0}. Bewegungsenergie der Masse ↔ {1}. Auslenkung ↔ {2}. Geschwindigkeit ↔ {3}. Die träge Masse ↔ {4}. Reibung ↔ {5}.',
+      [{o:o,c:o[0]},{o:o,c:o[1]},{o:o,c:o[3]},{o:o,c:o[2]},{o:o,c:o[4]},{o:o,c:o[5]}],3,function(n){return n===6?3:(n===5?2:(n>=3?1:0))},'Die Spule wirkt „träge“ wie die Masse: Sie hält den Strom aufrecht, so wie die Masse in Bewegung bleibt.',r)]}},
   {id:'s8',stufe:3,title:'Schwingkreis planen',be:3,intro:function(){return 'Du sollst einen Schwingkreis mit <b>T = '+T._T+' ms</b> bauen. Spule: L = 27 mH. Im Kasten gibt es 47 µF, 100 µF, 220 µF und 470 µF.'},
     parts:function(r){var Tt=T._T/1000,C=Tt*Tt/(4*Math.PI*Math.PI*0.027)*1e6,ks=[47,100,220,470],best=ks.reduce(function(a,b){return Math.abs(b-C)<Math.abs(a-C)?b:a}),Tb=2*Math.PI*Math.sqrt(0.027*best*1e-6)*1000;return[
     NUM('Schritt 1: Stell die Thomson-Gleichung nach C um und berechne C.','µF',C,{tol:.03,wrong:[{val:Tt/(2*Math.PI*0.027)*1e6,msg:'Beim Umstellen musst du quadrieren: C = T² / (4π² · L).'}]},1,'C = T² / (4π² · L) = ('+f(Tt,3)+' s)² / (4π² · 0,027 H) ≈ '+f(C,0)+' µF'),
@@ -602,18 +597,16 @@ function pdefB(r){
     TF([{t:'Am gebogenen Rand des Halbzylinders wird das Licht nicht gebrochen, wenn es aufs Zentrum zielt.',v:true,w:'es trifft senkrecht auf'},{t:'Bei Totalreflexion geht ein kleiner Teil des Lichts trotzdem durch.',v:false},{t:'Je größer n, desto kleiner der Grenzwinkel.',v:true},{t:'Der Grenzwinkel hängt davon ab, wie hell die Lampe ist.',v:false}],2,'',r)]});
   return t}
 function pdefS(r){
-  var t=[],C=pick(r,[100,220]),Tm=pick(r,[C===100?10.6:15.6,C===100?10.0:15.0]),Ls=Tm*Tm*1e-6/(4*Math.PI*Math.PI*C*1e-6);
-  t.push({id:'ps1',title:'Wie groß ist L wirklich?',be:2,intro:'Mit C = '+C+' µF misst eine Gruppe T = <b>'+f(Tm,1)+' ms</b>. Die Herstellerangabe für die Spule ist 27 mH.',parts:[
-    NUM('Stell die Thomson-Gleichung nach L um und berechne L aus der Messung.','mH',Ls*1000,{tol:.03,wrong:[{val:Tm/1000/(2*Math.PI)/(C*1e-6)*1000,msg:'Beim Umstellen musst du quadrieren: L = T² / (4π² · C).'}]},1,'L = T² / (4π² · C) = ('+f(Tm/1000,4)+' s)² / (4π² · '+C+'·10⁻⁶ F) ≈ '+f(Ls*1000,1)+' mH'),
-    MC('Was folgt daraus?',['Die Herstellerangabe ist nur ungefähr, das echte L weicht etwas ab.','Die Thomson-Gleichung gilt nicht.','Der Kondensator ist kaputt.'],0,1,'Abweichung '+f(Math.abs(Ls*1000-27)/27*100,0)+' %: Typisch, L hängt z. B. davon ab, wie der Kern sitzt.',r)]});
+  var t=[],C=pick(r,[100,220,470]),Tm=2*Math.PI*Math.sqrt(0.027*C*1e-6)*1000,Cb=Tm*Tm*1e-6/(4*Math.PI*Math.PI*0.027)*1e6,KS=[47,100,220,470];
+  t.push({id:'ps1',title:'Welcher Kondensator ist das?',be:2,intro:'Bei einem Kondensator ist die Beschriftung abgerieben. Mit der Spule (L = 27 mH) misst eine Gruppe T = <b>'+f(Tm,1)+' ms</b>.',parts:[
+    NUM('Stell die Thomson-Gleichung nach C um und berechne C.','µF',Cb,{tol:.04,wrong:[{val:Tm/1000/(2*Math.PI*0.027)*1e6,msg:'Beim Umstellen musst du quadrieren: C = T² / (4π² · L).'}]},1,'C = T² / (4π² · L) = ('+f(Tm/1000,4)+' s)² / (4π² · 0,027 H) ≈ '+f(Cb,0)+' µF'),
+    MC('Welcher Kondensator aus dem Kasten ist es?',KS.map(function(x){return x+' µF'}),KS.indexOf(C),1,f(Cb,0)+' µF → '+C+' µF.',r)]});
   t.push({id:'ps2',title:'Was ändert sich an T?',be:2,intro:'Ausgangslage: C = 47 µF, Spule mit U-Kern, T ≈ 7 ms.',parts:[
     MC('Der Eisenkern wird aus der Spule genommen. L wird dadurch viel kleiner. Was passiert mit T?',['T wird kleiner.','T wird größer.','T bleibt gleich.'],0,1,'T = 2π√(LC): kleineres L → kleineres T.',r),
     MC('Statt 47 µF nimmt man zwei 47-µF-Kondensatoren parallel (C verdoppelt sich). T wird …',['etwa 1,4-mal so groß (√2).','doppelt so groß.','halb so groß.'],0,1,'T ~ √C → Faktor √2 ≈ 1,41.',r)]});
-  var U0=pick(r,[5.0,6.0]),q=pick(r,[.7,.75,.8]),U2=rd(U0*q,1),W1=.5*100e-6*U0*U0,W2=.5*100e-6*U2*U2;
-  t.push({id:'ps3',title:'Wohin geht die Energie?',be:3,intro:'C = 100 µF wird auf '+f(U0,1)+' V geladen. Nach einer Periode ist das Spannungsmaximum nur noch '+f(U2,1)+' V.',parts:[
-    NUM('Energie zu Beginn.','mJ',W1*1000,{tol:.02,wrong:[{val:2*W1*1000,msg:'Der Faktor ½ fehlt.'}]},1,'W = ½ · 100·10⁻⁶ F · ('+f(U0,1)+' V)² = '+f(W1*1000,2)+' mJ'),
-    NUM('Energie nach einer Periode.','mJ',W2*1000,{tol:.02},1,'W = ½ · 100·10⁻⁶ F · ('+f(U2,1)+' V)² ≈ '+f(W2*1000,3)+' mJ'),
-    NUM('Wie viel Prozent der Energie wurden in der ersten Periode in Wärme umgewandelt?','%',(1-W2/W1)*100,{abs:1,tol:1.5,wrong:[{val:(1-U2/U0)*100,msg:'Das ist der Spannungsverlust. Die Energie hängt von U² ab.',tol:.05}]},1,'(W₁ − W₂) / W₁ ≈ '+f((1-W2/W1)*100,0)+' %')]});
+  t.push({id:'ps3',title:'Warum hört die Schwingung auf?',be:3,intro:'Am Oszi werden die Maxima von Periode zu Periode kleiner.',parts:[
+    MC('Was ist die Ursache?',['Der Spulendraht hat einen ohmschen Widerstand, dort wird Energie in Wärme umgewandelt.','Der Kondensator verliert seine Kapazität.','Die Spule wird mit jeder Periode kleiner.'],0,1,'Gedämpfte Schwingung: Energie geht als Wärme im Draht verloren.',r),
+    TF([{t:'Ohne Widerstand würde die Schwingung immer weiterlaufen.',v:true},{t:'Durch die Dämpfung wird die Periodendauer deutlich länger.',v:false,w:'T bleibt (fast) gleich'},{t:'Bei einem dickeren Draht (kleinerer Widerstand) klingt die Schwingung langsamer ab.',v:true},{t:'Die Energie verschwindet einfach.',v:false,w:'sie wird in Wärme umgewandelt'}],2,'',r)]});
   t.push({id:'ps4',title:'Momentaufnahmen',be:2,intro:'Der Kondensator ist zu Beginn (t = 0) voll geladen.',parts:[
     GAPS('Nach einer Viertelperiode (T/4) ist der Kondensator {0}, der Strom ist {1} und die Energie steckt {2}. Nach einer halben Periode ist der Kondensator {3} geladen.',
       [{o:['leer','voll','halb'],c:'leer'},{o:['maximal','null','halb so groß'],c:'maximal'},{o:['im Magnetfeld der Spule','im elektrischen Feld','im Netzgerät'],c:'im Magnetfeld der Spule'},{o:['umgekehrt voll','gar nicht','halb'],c:'umgekehrt voll'}],2,function(n){return n===4?2:(n===3?1:0)},'',r)]});
