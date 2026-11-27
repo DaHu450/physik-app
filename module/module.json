@@ -101,6 +101,18 @@
    "icon": "abi"
   },
   {
+   "id": "ka-labor-tg2",
+   "titel": "Fit für die Klassenarbeit",
+   "untertitel": "Laborübungen: messen, auswerten, Probearbeit",
+   "datei": "uebung_klassenarbeit_labor.html",
+   "klassen": [
+    "21"
+   ],
+   "freigegeben": true,
+   "farbe": "#13305A",
+   "icon": "pruefung"
+  },
+  {
    "id": "spektren-labor",
    "titel": "Spektren-Labor",
    "untertitel": "EM-Spektrum, Gitterspektrometer, Emission, Absorption, Sonnenlicht",
